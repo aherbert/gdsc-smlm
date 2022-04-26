@@ -66,29 +66,31 @@ import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
 public class TiffSeriesViewer implements PlugIn {
   private static final String TITLE = "Tiff Series Viewer";
 
+  /** The 1st label in the dialog. */
   private Label label;
+  /** The 2nd label in the dialog. */
   private Label label2;
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    private static final String[] MODE = {"Directory", "File"};
-    private static final String[] OUTPUT_MODE = {"Image", "Files"};
+    static final String[] MODE = {"Directory", "File"};
+    static final String[] OUTPUT_MODE = {"Image", "Files"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
+    static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    private int inputMode;
-    private String inputDirectory;
-    private String inputFile;
-    private boolean logProgress;
-    private int outputMode;
-    private int imageCount;
-    private String outputDirectory;
+    int inputMode;
+    String inputDirectory;
+    String inputFile;
+    boolean logProgress;
+    int outputMode;
+    int imageCount;
+    String outputDirectory;
 
     Settings() {
       // Set defaults
@@ -369,7 +371,10 @@ public class TiffSeriesViewer implements PlugIn {
     }
   }
 
-  private void updateLabel() {
+  /**
+   * Update the 1st label in the dialog.
+   */
+  void updateLabel() {
     if (settings.inputMode == 0) {
       label.setText(settings.inputDirectory);
     } else {
@@ -377,7 +382,10 @@ public class TiffSeriesViewer implements PlugIn {
     }
   }
 
-  private void updateLabel2() {
+  /**
+   * Update the 2nd label in the dialog.
+   */
+  void updateLabel2() {
     if (settings.outputMode == 0) {
       label2.setText("");
     } else {
@@ -475,7 +483,7 @@ public class TiffSeriesViewer implements PlugIn {
     @Override
     public ImageProcessor getProcessor(int n) {
       final Object pixels = source.getRaw(n);
-      ImageProcessor ip = null;
+      ImageProcessor ip;
       int depthThisImage = 0;
       if (pixels != null) {
         ip = ImageJUtils.createProcessor(getWidth(), getHeight(), pixels);
