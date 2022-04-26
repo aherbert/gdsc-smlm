@@ -81,7 +81,7 @@ public class SpotInspector implements PlugIn {
   private TextPanel textPanel;
   private List<PeakResultRank> rankedResults;
 
-  private AtomicInteger currentId = new AtomicInteger();
+  private final AtomicInteger currentId = new AtomicInteger();
   private int id;
 
   /** The plugin settings. */
@@ -91,8 +91,8 @@ public class SpotInspector implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    static final String[] SORT_ORDER = new String[] {"SNR", "Precision", "Amplitude", "Signal",
-        "Error", "Original Value", "X SD", "Y SD", "Width factor", "Shift"};
+    static final String[] SORT_ORDER = {"SNR", "Precision", "Amplitude", "Signal", "Error",
+        "Original Value", "X SD", "Y SD", "Width factor", "Shift"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
@@ -150,13 +150,16 @@ public class SpotInspector implements PlugIn {
     }
   }
 
+  /**
+   * The peak result and score to be used for ranking.
+   */
   private static class PeakResultRank {
     int rank;
     PeakResult peakResult;
     float score;
     float originalScore;
 
-    public PeakResultRank(PeakResult result, float score, float original) {
+    PeakResultRank(PeakResult result, float score, float original) {
       peakResult = result;
       this.score = score;
       originalScore = original;
@@ -297,14 +300,12 @@ public class SpotInspector implements PlugIn {
 
     if (settings.plotScore || settings.plotHistogram) {
       // Get values for the plots
-      float[] xValues = null;
-      float[] yValues = null;
       double yMin;
       double yMax;
 
       int spotNumber = 0;
-      xValues = new float[rankedResults.size()];
-      yValues = new float[xValues.length];
+      final float[] xValues = new float[rankedResults.size()];
+      final float[] yValues = new float[xValues.length];
       for (final PeakResultRank rank : rankedResults) {
         xValues[spotNumber] = spotNumber + 1;
         yValues[spotNumber++] = recoverScore(rank.score);
@@ -486,6 +487,7 @@ public class SpotInspector implements PlugIn {
         break;
       default: // SNR
         score = result.getIntensity() / result.getNoise();
+        break;
     }
     return new float[] {(negative) ? -score : score, score};
   }
@@ -573,7 +575,12 @@ public class SpotInspector implements PlugIn {
     return true;
   }
 
-  private void mouseClicked(MouseEvent event) {
+  /**
+   * Handle the mouse clicked event from the text panel of the result table.
+   *
+   * @param event the event
+   */
+  void mouseClicked(MouseEvent event) {
     if (id != currentId.get()) {
       return;
     }
