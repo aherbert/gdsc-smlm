@@ -164,6 +164,9 @@ public class ResequenceResults implements PlugIn {
     return true;
   }
 
+  /**
+   * Procedure to resequence the results.
+   */
   private static class ResequencePeakResultProcedure implements PeakResultProcedure {
     final int start;
     final TrackProgress tracker;
