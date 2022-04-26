@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,19 +41,30 @@ import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
  * @param <S> the generic type
  * @param <R> the generic type
  */
-public class Workflow<S, R> {
+class Workflow<S, R> {
 
   /** Default delay (in milliseconds) to use for dialog previews. */
-  public static final long DELAY = 500;
+  static final long DELAY = 500;
 
+  private final WorkStack inputStack = new WorkStack();
+  private List<Thread> threads;
+  private final List<RunnableWorker> workers = new ArrayList<>();
+  private long delay;
+
+  /** The debug flag. Set to true to allow print statements during operation. */
+  private boolean debug;
+
+  /**
+   * Represent the work data with an associated timeout.
+   */
   private class Work {
     final long timeout;
-    final Pair<S, R> work;
+    final Pair<S, R> data;
 
-    Work(long time, Pair<S, R> work) {
-      Objects.requireNonNull(work.getKey(), "Settings cannot be null");
+    Work(long time, Pair<S, R> data) {
+      Objects.requireNonNull(data.getKey(), "Settings cannot be null");
       this.timeout = time;
-      this.work = work;
+      this.data = data;
     }
 
     Work(Pair<S, R> work) {
@@ -60,11 +72,11 @@ public class Workflow<S, R> {
     }
 
     S getSettings() {
-      return work.getKey();
+      return data.getKey();
     }
 
     R getResults() {
-      return work.getValue();
+      return data.getValue();
     }
   }
 
@@ -72,8 +84,10 @@ public class Workflow<S, R> {
    * Allow work to be added to a FIFO stack in a synchronised manner.
    */
   private class WorkStack {
-    // We only support a stack size of 1
-    private Work work;
+    /**
+     * The work. We only support a stack size of 1.
+     */
+    Work work;
 
     synchronized void setWork(Work work) {
       this.work = work;
@@ -112,12 +126,17 @@ public class Workflow<S, R> {
    */
   private class RunnableWorker implements Runnable {
     private final WorkflowWorker<S, R> worker;
-    private boolean running = true;
+    /** The running flag. */
+    boolean running = true;
     private Work lastWork;
     private Work result;
-    private WorkStack inbox;
-    /** Cannot create an array of WorkStack[] due to generic type erasure of S and R. */
-    private Object[] outbox;
+    /** The inbox representing the work to be done. */
+    WorkStack inbox;
+    /**
+     * The output representing the completed work. Cannot create an array of WorkStack[] due to
+     * generic type erasure of S and R.
+     */
+    Object[] outbox;
 
     /**
      * Instantiates a new runnable worker.
@@ -134,7 +153,7 @@ public class Workflow<S, R> {
       // Note: We check the condition for loop termination within the loop
       while (running) {
         try {
-          Work work = null;
+          Work work;
           synchronized (inbox) {
             if (inbox.isEmpty()) {
               debug("Inbox empty, waiting ...");
@@ -176,7 +195,7 @@ public class Workflow<S, R> {
           if (!equals(work, lastWork)) {
             // Create a new result
             debug(" Creating new result");
-            final Pair<S, R> results = worker.doWork(work.work);
+            final Pair<S, R> results = worker.doWork(work.data);
             result = new Work(results);
           } else {
             // Pass through the new settings with the existing results.
@@ -237,14 +256,6 @@ public class Workflow<S, R> {
     }
   }
 
-  private final WorkStack inputStack = new WorkStack();
-  private ArrayList<Thread> threads;
-  private final ArrayList<RunnableWorker> workers = new ArrayList<>();
-  private long delay;
-
-  /** The debug flag. Set to true to allow print statements during operation. */
-  private boolean debug;
-
   /**
    * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input if the
    * previous is null.
@@ -252,7 +263,7 @@ public class Workflow<S, R> {
    * @param worker the worker
    * @return the worker id
    */
-  public int add(WorkflowWorker<S, R> worker) {
+  int add(WorkflowWorker<S, R> worker) {
     return add(worker, -1);
   }
 
@@ -267,7 +278,7 @@ public class Workflow<S, R> {
    * @param previous the previous worker id
    * @return the worker id
    */
-  public int add(WorkflowWorker<S, R> worker, int previous) {
+  int add(WorkflowWorker<S, R> worker, int previous) {
     if (previous <= 0 || previous > workers.size()) {
       return addToChain(worker);
     }
@@ -321,7 +332,7 @@ public class Workflow<S, R> {
   /**
    * Start.
    */
-  public synchronized void start() {
+  synchronized void start() {
     shutdown(true);
     threads = startWorkers(workers);
   }
@@ -329,9 +340,9 @@ public class Workflow<S, R> {
   /**
    * Shutdown.
    *
-   * @param now the now
+   * @param now true to shutdown without waiting for workers to finish
    */
-  public synchronized void shutdown(boolean now) {
+  synchronized void shutdown(boolean now) {
     if (threads != null) {
       finishWorkers(workers, threads, now);
       threads = null;
@@ -343,12 +354,12 @@ public class Workflow<S, R> {
    *
    * @return true, if is running
    */
-  public boolean isRunning() {
+  boolean isRunning() {
     return threads != null;
   }
 
   @SuppressWarnings("static-method")
-  private ArrayList<Thread> startWorkers(ArrayList<RunnableWorker> workers) {
+  private List<Thread> startWorkers(List<RunnableWorker> workers) {
     final ArrayList<Thread> newThreads = new ArrayList<>();
     for (final RunnableWorker w : workers) {
       final Thread t = new Thread(w);
@@ -361,8 +372,7 @@ public class Workflow<S, R> {
   }
 
   @SuppressWarnings("static-method")
-  private void finishWorkers(ArrayList<RunnableWorker> workers, ArrayList<Thread> threads,
-      boolean now) {
+  private void finishWorkers(List<RunnableWorker> workers, List<Thread> threads, boolean now) {
 
     // Finish work
     for (final RunnableWorker w : workers) {
@@ -407,7 +417,7 @@ public class Workflow<S, R> {
    *
    * @param settings the settings
    */
-  public void run(S settings) {
+  void run(S settings) {
     run(settings, null);
   }
 
@@ -417,7 +427,7 @@ public class Workflow<S, R> {
    * @param settings the settings
    * @param results the results
    */
-  public void run(S settings, R results) {
+  void run(S settings, R results) {
     inputStack.addWork(new Work(getTimeout(), Pair.of(settings, results)));
   }
 
@@ -426,7 +436,7 @@ public class Workflow<S, R> {
    *
    * @param settings the settings
    */
-  public void stage(S settings) {
+  void stage(S settings) {
     stage(settings, null);
   }
 
@@ -436,7 +446,7 @@ public class Workflow<S, R> {
    * @param settings the settings
    * @param results the results
    */
-  public void stage(S settings, R results) {
+  void stage(S settings, R results) {
     inputStack.setWork(new Work(getTimeout(), Pair.of(settings, results)));
   }
 
@@ -445,14 +455,14 @@ public class Workflow<S, R> {
    *
    * @return true, if is staged
    */
-  public boolean isStaged() {
+  boolean isStaged() {
     return !inputStack.isEmpty();
   }
 
   /**
    * Run the staged work.
    */
-  public void runStaged() {
+  void runStaged() {
     inputStack.notifyIfNotEmpty();
   }
 
@@ -461,7 +471,7 @@ public class Workflow<S, R> {
    *
    * @return the delay
    */
-  public long getDelay() {
+  long getDelay() {
     return delay;
   }
 
@@ -472,7 +482,7 @@ public class Workflow<S, R> {
    *
    * @param delay the new delay
    */
-  public void setDelay(long delay) {
+  void setDelay(long delay) {
     this.delay = Math.max(0, delay);
   }
 
@@ -487,14 +497,14 @@ public class Workflow<S, R> {
    * Start preview mode. This sets the delay to the default delay time (see {@link #DELAY}). It
    * should be called when all new work should respect the timeout delay.
    */
-  public void startPreview() {
+  void startPreview() {
     setDelay(DELAY);
   }
 
   /**
    * Stop preview. This sets the delay to zero.
    */
-  public void stopPreview() {
+  void stopPreview() {
     setDelay(0);
   }
 

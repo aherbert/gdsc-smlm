@@ -32,7 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <S> the generic type
  * @param <R> the generic type
  */
-public interface WorkflowWorker<S, R> {
+interface WorkflowWorker<S, R> {
   /**
    * Compare the settings and return false if any settings that the work depends on have changed.
    *
