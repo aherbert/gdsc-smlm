@@ -96,13 +96,13 @@ public class RenameResults implements PlugIn {
       final String[] fields = line.split("[=]");
       if (fields.length == 2) {
         final String oldName = fields[0].trim();
-        final String newName = fields[1].trim();
 
         if (!mappedNames.containsKey(oldName)) {
           IJ.error(TITLE, "An unknown original name has been specified: " + oldName);
           return 0;
         }
 
+        final String newName = fields[1].trim();
         if (oldName.equals(newName)) {
           // No update required
           continue;
