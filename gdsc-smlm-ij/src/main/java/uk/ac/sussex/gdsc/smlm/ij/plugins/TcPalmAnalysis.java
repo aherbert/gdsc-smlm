@@ -168,7 +168,7 @@ public class TcPalmAnalysis implements PlugIn {
   private static SoftLock instanceLock = new SoftLock();
 
   /** The plugin settings. */
-  private TcPalmAnalysisSettings.Builder settings;
+  TcPalmAnalysisSettings.Builder settings;
 
   /** The results. */
   private MemoryPeakResults results;
@@ -271,7 +271,7 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private static class ClusterData {
     int id;
-    LocalList<PeakResult> results;
+    LocalList<PeakResult> clusterResults;
     float x;
     float y;
     float width;
@@ -287,27 +287,27 @@ public class TcPalmAnalysis implements PlugIn {
       id = result.getId();
       x = width = result.getXPosition();
       y = height = result.getYPosition();
-      results = new LocalList<>();
-      results.add(result);
+      clusterResults = new LocalList<>();
+      clusterResults.add(result);
     }
 
     ClusterData(int id, List<PeakResult> list) {
       this.id = id;
-      results = new LocalList<>(list);
-      results.sort((p1, p2) -> Integer.compare(p1.getFrame(), p2.getFrame()));
-      final PeakResult result = results.unsafeGet(0);
+      clusterResults = new LocalList<>(list);
+      clusterResults.sort((p1, p2) -> Integer.compare(p1.getFrame(), p2.getFrame()));
+      final PeakResult result = clusterResults.unsafeGet(0);
       x = width = result.getXPosition();
       y = height = result.getYPosition();
-      final int size = results.size();
+      final int size = clusterResults.size();
       for (int i = 1; i < size; i++) {
-        updateBounds(results.unsafeGet(i));
+        updateBounds(clusterResults.unsafeGet(i));
       }
       finish();
     }
 
     void add(PeakResult result) {
       updateBounds(result);
-      results.add(result);
+      clusterResults.add(result);
     }
 
     private void updateBounds(PeakResult result) {
@@ -328,14 +328,14 @@ public class TcPalmAnalysis implements PlugIn {
     /**
      * Called when no more results will be added to the cluster data.
      */
-    private void finish() {
-      results.trimToSize();
+    void finish() {
+      clusterResults.trimToSize();
       // Set dimensions non-zero so the rectangle contains/intersects methods do not ignore
       // the zero sized cluster.
       width = Math.max(width - x, Float.MIN_VALUE);
       height = Math.max(height - y, Float.MIN_VALUE);
-      start = results.unsafeGet(0).getFrame();
-      end = results.unsafeGet(results.size() - 1).getFrame();
+      start = clusterResults.unsafeGet(0).getFrame();
+      end = clusterResults.unsafeGet(clusterResults.size() - 1).getFrame();
     }
 
     /**
@@ -358,9 +358,9 @@ public class TcPalmAnalysis implements PlugIn {
      * @return true if within
      */
     boolean isWithin(CoordinatePredicate r, FloatUnaryOperator mapX, FloatUnaryOperator mapY) {
-      final int size = results.size();
+      final int size = clusterResults.size();
       for (int i = 0; i < size; i++) {
-        final PeakResult result = results.unsafeGet(i);
+        final PeakResult result = clusterResults.unsafeGet(i);
         if (!r.test(mapX.applyAsFloat(result.getXPosition()),
             mapY.applyAsFloat(result.getYPosition()))) {
           return false;
@@ -378,9 +378,9 @@ public class TcPalmAnalysis implements PlugIn {
      */
     boolean intersects(Rectangle2D r) {
       if (r.intersects(x, y, width, height)) {
-        final int size = results.size();
+        final int size = clusterResults.size();
         for (int i = 0; i < size; i++) {
-          final PeakResult result = results.unsafeGet(i);
+          final PeakResult result = clusterResults.unsafeGet(i);
           if (r.contains(result.getXPosition(), result.getYPosition())) {
             return true;
           }
@@ -399,9 +399,9 @@ public class TcPalmAnalysis implements PlugIn {
      * @return true if intersects
      */
     boolean intersects(CoordinatePredicate r, FloatUnaryOperator mapX, FloatUnaryOperator mapY) {
-      final int size = results.size();
+      final int size = clusterResults.size();
       for (int i = 0; i < size; i++) {
-        final PeakResult result = results.unsafeGet(i);
+        final PeakResult result = clusterResults.unsafeGet(i);
         if (r.test(mapX.applyAsFloat(result.getXPosition()),
             mapY.applyAsFloat(result.getYPosition()))) {
           return true;
@@ -414,12 +414,12 @@ public class TcPalmAnalysis implements PlugIn {
       double[] xyz = this.xyz;
       if (xyz == null) {
         final double[] tmp = new double[3];
-        results.forEach(r -> {
+        clusterResults.forEach(r -> {
           tmp[0] += r.getXPosition();
           tmp[1] += r.getYPosition();
           tmp[2] += r.getZPosition();
         });
-        final int size = results.size();
+        final int size = clusterResults.size();
         for (int i = 0; i < 3; i++) {
           tmp[i] /= size;
         }
@@ -432,7 +432,7 @@ public class TcPalmAnalysis implements PlugIn {
       Hull2d hull = this.hull;
       if (hull == null) {
         final Hull.Builder builder = ConvexHull2d.newBuilder();
-        results.forEach(r -> {
+        clusterResults.forEach(r -> {
           builder.add(r.getXPosition(), r.getYPosition());
         });
         hull = this.hull = (Hull2d) builder.build();
@@ -527,7 +527,7 @@ public class TcPalmAnalysis implements PlugIn {
 
       final ClusterData first = clusters.get(0);
       final LocalList<PeakResult> results = new LocalList<>();
-      results.addAll(first.results);
+      results.addAll(first.clusterResults);
       int start = first.start;
       int end = first.end;
       for (int i = 1; i < clusters.size(); i++) {
@@ -544,7 +544,7 @@ public class TcPalmAnalysis implements PlugIn {
           // extend the burst
           end = Math.max(data.end, end);
         }
-        results.addAll(data.results);
+        results.addAll(data.clusterResults);
       }
       bursts.add(new int[] {start, end});
       burstLocalisations.add(results);
@@ -691,13 +691,13 @@ public class TcPalmAnalysis implements PlugIn {
         case 1: return c.getXyz()[0];
         case 2: return c.getXyz()[1];
         case 3: return c.getXyz()[2];
-        case 4: return c.results.size();
+        case 4: return c.clusterResults.size();
         case 5: return c.start;
         case 6: return c.end;
         case 7: return c.getDuration();
         case 8: return calibration.timeConverter.convert(c.getDuration());
         case 9: return calibration.convertArea(c.getArea());
-        case 10: return c.results.size() / calibration.convertArea(c.getArea());
+        case 10: return c.clusterResults.size() / calibration.convertArea(c.getArea());
         // @formatter:on
         default:
           throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
@@ -798,8 +798,6 @@ public class TcPalmAnalysis implements PlugIn {
      * @see #getSelectedRow
      */
     List<ClusterData> getSelectedData() {
-      final ClusterDataTableModel model = (ClusterDataTableModel) dataModel;
-      final List<ClusterData> data = model.data;
       final int iMin = selectionModel.getMinSelectionIndex();
       final int iMax = selectionModel.getMaxSelectionIndex();
 
@@ -808,6 +806,7 @@ public class TcPalmAnalysis implements PlugIn {
         return Collections.emptyList();
       }
 
+      final List<ClusterData> data = ((ClusterDataTableModel) dataModel).data;
       final LocalList<ClusterData> rvTmp = new LocalList<>(1 + (iMax - iMin));
 
       final IntUnaryOperator map = getRowIndexToModelFunction();
@@ -821,14 +820,12 @@ public class TcPalmAnalysis implements PlugIn {
 
     IntUnaryOperator getRowIndexToModelFunction() {
       final RowSorter<?> sorter = getRowSorter();
-      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToModel;
-      return map;
+      return sorter == null ? i -> i : sorter::convertRowIndexToModel;
     }
 
     IntUnaryOperator getModelIndexToRowFunction() {
       final RowSorter<?> sorter = getRowSorter();
-      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToView;
-      return map;
+      return sorter == null ? i -> i : sorter::convertRowIndexToView;
     }
   }
 
@@ -931,15 +928,17 @@ public class TcPalmAnalysis implements PlugIn {
       try (BufferedWriter out = Files.newBufferedWriter(Paths.get(saveName))) {
         final StringBuilder sb = new StringBuilder();
         // Use the same column names
-        for (int i = 0, cols = model.getColumnCount(); i < cols; i++) {
+        final int cols = model.getColumnCount();
+        for (int i = 0; i < cols; i++) {
           sb.append(model.getColumnName(i)).append(',');
         }
         write(newLine, out, sb);
         // Return the same order as the table
         final IntUnaryOperator map = table.getRowIndexToModelFunction();
-        for (int j = 0, rows = model.getRowCount(); j < rows; j++) {
+        final int rows = model.getRowCount();
+        for (int j = 0; j < rows; j++) {
           final int row = map.applyAsInt(j);
-          for (int i = 0, cols = model.getColumnCount(); i < cols; i++) {
+          for (int i = 0; i < cols; i++) {
             sb.append(model.getValueAt(row, i)).append(',');
           }
           write(newLine, out, sb);
@@ -1357,10 +1356,7 @@ public class TcPalmAnalysis implements PlugIn {
     gd.hideCancelButton();
     gd.setOKLabel("Close");
     gd.showDialog();
-    if (gd.wasCanceled()) {
-      return false;
-    }
-    return true;
+    return !gd.wasCanceled();
   }
 
   /**
@@ -1368,7 +1364,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param event the event
    */
-  private void showLoopSettingsDialog(ActionEvent event) {
+  private void showLoopSettingsDialog(@SuppressWarnings("unused") ActionEvent event) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     // Require results settings to use the standard ResultsManager image options
     final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
@@ -1392,7 +1388,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param event the event
    */
-  private void showAnalysisSettingsDialog(ActionEvent event) {
+  private void showAnalysisSettingsDialog(@SuppressWarnings("unused") ActionEvent event) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addCheckbox("Disable_overlap_check", settings.getDisableOverlapCheck());
     gd.addCheckbox("Show_size_histogram", settings.getShowSizeHistogram());
@@ -1429,7 +1425,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param roi the roi
    */
-  private void addWork(Roi roi) {
+  void addWork(Roi roi) {
     if (roi == null || !roi.isArea()) {
       return;
     }
@@ -1489,7 +1485,7 @@ public class TcPalmAnalysis implements PlugIn {
             previous = current;
             postAnalysisAction.run();
           }
-        } catch (final InterruptedException e) {
+        } catch (final InterruptedException ignored) {
           // Signal this was interrupted while waiting.
           // Note: This currently does not matter and is ignored.
           Thread.currentThread().interrupt();
@@ -1613,7 +1609,7 @@ public class TcPalmAnalysis implements PlugIn {
     final MemoryPeakResults subset = new MemoryPeakResults();
     subset.copySettings(results);
     clusters.forEach(c -> {
-      c.results.forEach(peak -> {
+      c.clusterResults.forEach(peak -> {
         if (scaledBounds.contains(peak.getXPosition(), peak.getYPosition())) {
           subset.add(peak);
         }
@@ -1701,7 +1697,7 @@ public class TcPalmAnalysis implements PlugIn {
   private CumulativeCountData createCumulativeCountData(LocalList<ClusterData> clusters,
       boolean createPlotData) {
     final Int2IntOpenHashMap all = new Int2IntOpenHashMap(maxT - minT + 1);
-    clusters.forEach(c -> c.results.forEach(peak -> all.addTo(peak.getFrame(), 1)));
+    clusters.forEach(c -> c.clusterResults.forEach(peak -> all.addTo(peak.getFrame(), 1)));
     final int[] frames = all.keySet().toIntArray();
     final int[] counts = all.values().toIntArray();
     SortUtils.sortData(counts, frames, true, false);
@@ -1779,18 +1775,18 @@ public class TcPalmAnalysis implements PlugIn {
   private void runPlot(TcPalmAnalysisSettings settings) {
     final WindowOrganiser wo = new WindowOrganiser();
 
-    String timeLabel = "Time";
+    String timeLabel;
     UnaryOperator<float[]> timeConverter;
     double timeScale;
     if (settings.getTimeInSeconds()) {
-      timeLabel += " (s)";
+      timeLabel = "Time (s)";
       timeScale = 1.0 / results.getCalibration().getTimeCalibration().getExposureTime();
       timeConverter = frames -> {
-        SimpleArrayUtils.apply(frames, f -> f *= timeScale);
+        SimpleArrayUtils.apply(frames, f -> (float) (f * timeScale));
         return frames;
       };
     } else {
-      timeLabel += " (frame)";
+      timeLabel = "Time (frame)";
       timeConverter = UnaryOperator.identity();
       timeScale = 1;
     }
@@ -1898,7 +1894,7 @@ public class TcPalmAnalysis implements PlugIn {
       final LocalList<PeakResult> list = new LocalList<>();
       // Build from the current selection
       clusters.forEach(cluster -> {
-        cluster.results.forEach(peak -> {
+        cluster.clusterResults.forEach(peak -> {
           final int t = peak.getFrame();
           if (t >= min && t <= max) {
             list.add(peak);
@@ -1919,7 +1915,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param bursts the bursts
    */
-  private synchronized void runBurstPlotSelection(LocalList<int[]> bursts) {
+  synchronized void runBurstPlotSelection(LocalList<int[]> bursts) {
     this.bursts = bursts;
     final Plot plot = activationsPlotData.plot;
     plot.restorePlotObjects();
@@ -1995,7 +1991,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param bursts the bursts
    */
-  private void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts) {
+  void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts) {
     // Overlay the clusters on the image.
     runBurstOverlay(bursts, image, colourMap);
     loopImage.setBursts(bursts).update();
@@ -2019,8 +2015,8 @@ public class TcPalmAnalysis implements PlugIn {
    * @param image the image
    * @param colourMap the colour map
    */
-  private static void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts,
-      ImageJImagePeakResults image, ColourMap colourMap) {
+  static void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts, ImageJImagePeakResults image,
+      ColourMap colourMap) {
     if (bursts.isEmpty()) {
       image.getImagePlus().setOverlay(null);
       return;
@@ -2052,7 +2048,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param event the event
    */
-  private void analyseRois(ActionEvent event) {
+  private void analyseRois(@SuppressWarnings("unused") ActionEvent event) {
     final RoiManager manager = RoiManager.getInstance();
     if (manager == null) {
       IJ.error(TITLE, "ROI manager is not open");
@@ -2151,7 +2147,7 @@ public class TcPalmAnalysis implements PlugIn {
     final Trace[] traces = allClusters.stream().map(c -> {
       final Trace t = new Trace();
       t.setId(c.id);
-      c.results.forEach(t::add);
+      c.clusterResults.forEach(t::add);
       return t;
     }).toArray(Trace[]::new);
     TraceMolecules.saveResults(results, traces, "TC PALM");
@@ -2190,8 +2186,8 @@ public class TcPalmAnalysis implements PlugIn {
     final Consumer<HistogramPlotBuilder> action = builder -> {
       /* noop. */
     };
-    plotHistogram(settings.getShowSizeHistogram(), wo, clusters, "Size", c -> c.results.size(),
-        null, action);
+    plotHistogram(settings.getShowSizeHistogram(), wo, clusters, "Size",
+        c -> c.clusterResults.size(), null, action);
     plotHistogram(settings.getShowDurationHistogram(), wo, clusters,
         "Duration (" + calibration.getTimeUnitName() + ")",
         c -> calibration.timeConverter.convert(c.getDuration()), null, action);
@@ -2200,7 +2196,8 @@ public class TcPalmAnalysis implements PlugIn {
         c -> calibration.convertArea(c.getArea()), null, action);
     plotHistogram(settings.getShowDensityHistogram(), wo, clusters,
         "Density (" + calibration.getDistanceUnitName() + "^-2)",
-        c -> c.results.size() / calibration.convertArea(c.getArea()), Double::isFinite, action);
+        c -> c.clusterResults.size() / calibration.convertArea(c.getArea()), Double::isFinite,
+        action);
     wo.tile();
   }
 
