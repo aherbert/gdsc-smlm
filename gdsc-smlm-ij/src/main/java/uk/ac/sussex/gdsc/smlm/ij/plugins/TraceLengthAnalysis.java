@@ -33,6 +33,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -46,6 +47,7 @@ import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
+import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis;
@@ -98,7 +100,7 @@ public class TraceLengthAnalysis implements PlugIn {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    String inputOption = "";
+    String inputOption;
     double msdThreshold;
     boolean normalise;
 
@@ -158,7 +160,7 @@ public class TraceLengthAnalysis implements PlugIn {
     try {
       distanceConverter = results.getDistanceConverter(DistanceUnit.UM);
       timeConverter = results.getTimeConverter(TimeUnit.SECOND);
-    } catch (final Exception ex) {
+    } catch (final ConversionException | ConfigurationException ex) {
       IJ.error(TITLE, "Cannot convert units to um or seconds: " + ex.getMessage());
       return;
     }
@@ -175,7 +177,7 @@ public class TraceLengthAnalysis implements PlugIn {
       final double rawPrecision = distanceConverter.convertBack(precision / 1e3);
       // Get the localisation error (4s^2) in units^2
       error = 4 * rawPrecision * rawPrecision;
-    } catch (final Exception ex) {
+    } catch (final ConversionException | ConfigurationException ex) {
       ImageJUtils.log(TITLE + " - Unable to compute precision: " + ex.getMessage());
     }
 
