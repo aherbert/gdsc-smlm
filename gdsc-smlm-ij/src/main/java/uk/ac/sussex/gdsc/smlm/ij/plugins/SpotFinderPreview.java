@@ -105,13 +105,17 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
   private Overlay overlay;
-  private ImagePlus imp;
-  private boolean preview;
+  /** The image. */
+  ImagePlus imp;
+  /** The preview flag. */
+  boolean preview;
   private Label label;
   private Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates;
 
-  private int currentSlice;
-  private MaximaSpotFilter filter;
+  /** The current slice. */
+  int currentSlice;
+  /** The filter. */
+  MaximaSpotFilter filter;
 
   // All the fields that will be updated when reloading the configuration file
   private Choice textCameraModelName;
@@ -138,7 +142,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   private PSF lastPsf;
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -407,7 +411,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
     ((ExtendedGenericDialog) gd).collectOptions();
 
-    final boolean result = !gd.invalidNumber();
     if (!preview) {
       setLabel("");
       this.imp.setOverlay(overlay);
@@ -417,7 +420,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     if (!PeakFit.configurePsfModel(config, PeakFit.FLAG_NO_SAVE)) {
       return false;
     }
-    return result;
+    return !gd.invalidNumber();
   }
 
   private void setLabel(String message) {
@@ -432,12 +435,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       return;
     }
 
-    final Rectangle bounds = ip.getRoi();
-
     // Only do this if the settings changed
     final Calibration calibration = fitConfig.getCalibration();
-    final FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
-    final PSF psf = fitConfig.getPsf();
 
     boolean newCameraModel = filter == null;
     if (!calibration.equals(lastCalibration)) {
@@ -462,6 +461,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       fitConfig.setCameraModel(cameraModel);
     }
 
+    final FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
+    final PSF psf = fitConfig.getPsf();
+
     if (newCameraModel || !fitEngineSettings.equals(lastFitEngineSettings)
         || !psf.equals(lastPsf)) {
       // Configure a jury filter
@@ -481,6 +483,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       }
       ImageJUtils.log(filter.getDescription());
     }
+
+    final Rectangle bounds = ip.getRoi();
 
     lastCalibration = calibration;
     lastFitEngineSettings = fitEngineSettings;
@@ -522,7 +526,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     run(ip, filter);
   }
 
-  private void run(ImageProcessor ip, MaximaSpotFilter filter) {
+  /**
+   * Run the spot filter on the image.
+   *
+   * @param ip the image
+   * @param filter the filter
+   */
+  void run(ImageProcessor ip, MaximaSpotFilter filter) {
     if (refreshing) {
       return;
     }
@@ -695,8 +705,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         final double[] matchScore =
             RankedScoreCalculator.getMatchScore(calc.getScoredAssignments(), nPredicted);
         int matches = 0;
-        for (int i = 0; i < matchScore.length; i++) {
-          if (matchScore[i] != 0) {
+        for (final double s : matchScore) {
+          if (s != 0) {
             matches++;
           }
         }
@@ -892,7 +902,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
           refreshSettings(template.getPsf(), custom);
         }
         if (template.hasFitEngineSettings()) {
-          refreshSettings(template.getFitEngineSettings(), custom);
+          refreshSettings(template.getFitEngineSettings());
         }
 
         refreshing = false;
@@ -918,9 +928,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
    * some existing spot settings untouched as the user may have updated them (e.g. PSF width).
    *
    * @param fitEngineSettings the config
-   * @param isCustomTemplate True if a custom template.
    */
-  private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate) {
+  private void refreshSettings(FitEngineSettings fitEngineSettings) {
     // Set the configuration
     // This will clear everything and merge the configuration so
     // remove the fit settings (as we do not care about those).
@@ -933,14 +942,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         .select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
     textDataFilterMethod.select(
         SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
-    textSmooth.setText("" + config.getDataFilterParameterValue(0));
+    textSmooth.setText(String.valueOf(config.getDataFilterParameterValue(0)));
     if (config.getDataFiltersCount() > 1) {
       textDataFilterMethod2.select(SettingsManager.getDataFilterMethodNames()[config
           .getDataFilterMethod(1, settings.defaultDataFilterMethod).ordinal()]);
-      textSmooth2.setText("" + config.getDataFilterParameterValue(1, settings.defaultSmooth));
+      textSmooth2
+          .setText(String.valueOf(config.getDataFilterParameterValue(1, settings.defaultSmooth)));
       // XXX - What about the Absolute/Relative flag?
     }
-    textSearch.setText("" + config.getSearch());
-    textBorder.setText("" + config.getBorder());
+    textSearch.setText(String.valueOf(config.getSearch()));
+    textBorder.setText(String.valueOf(config.getBorder()));
   }
 }
