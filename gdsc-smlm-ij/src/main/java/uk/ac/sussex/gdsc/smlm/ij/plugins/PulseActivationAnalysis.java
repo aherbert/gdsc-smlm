@@ -119,7 +119,8 @@ public class PulseActivationAnalysis implements PlugIn {
   private UniformRandomProvider initialisedRng;
 
   private ResultsSettings.Builder resultsSettingsBuilder;
-  private MemoryPeakResults results;
+  /** The localisation results. */
+  MemoryPeakResults results;
   private Trace[] traces;
 
   // The output. Used for the loop functionality
@@ -127,14 +128,16 @@ public class PulseActivationAnalysis implements PlugIn {
 
   private Choice magnificationChoice;
 
-  private Activation[] specificActivations;
-  private Activation[] nonSpecificActivations;
+  /** The specific activations. */
+  Activation[] specificActivations;
+  /** The non specific activations. */
+  Activation[] nonSpecificActivations;
   private int[] counts;
 
   private int nextPeakResultId;
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * The analysis lock. All access to state modified by the analysis must be synchronized on this.
@@ -148,12 +151,16 @@ public class PulseActivationAnalysis implements PlugIn {
   /** The last run settings. All access to this must be synchronized. */
   private RunSettings lastRunSettings;
 
+  // Here we use a simple workflow with only one worker since the results are
+  // written straight back to this class' objects
+  private Workflow<RunSettings, Object> workflow;
+
   /**
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
     /** The colours for each channel. */
-    static final Color[] COLORS = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
+    static final Color[] COLORS = {Color.RED, Color.GREEN, Color.BLUE};
 
     static final int C21 = 0;
     static final int C31 = 1;
@@ -291,6 +298,9 @@ public class PulseActivationAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * The correction type.
+   */
   private enum Correction {
     //@formatter:off
     NONE{ @Override
@@ -313,9 +323,12 @@ public class PulseActivationAnalysis implements PlugIn {
      *
      * @return the name
      */
-    public abstract String getName();
+    abstract String getName();
   }
 
+  /**
+   * The distribution used in the simulation.
+   */
   private enum SimulationDistribution {
     //@formatter:off
     POINT{ @Override
@@ -336,9 +349,12 @@ public class PulseActivationAnalysis implements PlugIn {
      *
      * @return the name
      */
-    public abstract String getName();
+    abstract String getName();
   }
 
+  /**
+   * Base class for a shape.
+   */
   private abstract class Shape {
     float x;
     float y;
@@ -359,6 +375,9 @@ public class PulseActivationAnalysis implements PlugIn {
     abstract float[] sample(UniformRandomProvider rng);
   }
 
+  /**
+   * A 2D point.
+   */
   private class Point extends Shape {
     float[] xy;
 
@@ -383,6 +402,9 @@ public class PulseActivationAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * A 2D line.
+   */
   private class Line extends Shape {
     double radius;
     double length;
@@ -412,6 +434,9 @@ public class PulseActivationAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * A 2D circle.
+   */
   private class Circle extends Shape {
     double radius;
 
@@ -427,6 +452,9 @@ public class PulseActivationAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * Represent a photo-activation of a molecule.
+   */
   private static class Activation implements Molecule {
     final Trace trace;
     float x;
@@ -974,6 +1002,9 @@ public class PulseActivationAnalysis implements PlugIn {
     return x;
   }
 
+  /**
+   * Contains settings for a run of unmixing.
+   */
   private class RunSettings {
     double densityRadius;
     int minNeighbours;
@@ -1015,7 +1046,7 @@ public class PulseActivationAnalysis implements PlugIn {
       return Correction.NONE;
     }
 
-    public boolean newUnmixSettings(RunSettings lastRunSettings) {
+    boolean newUnmixSettings(RunSettings lastRunSettings) {
       if (lastRunSettings == null) {
         return true;
       }
@@ -1038,7 +1069,7 @@ public class PulseActivationAnalysis implements PlugIn {
       return false;
     }
 
-    public boolean newNonSpecificCorrectionSettings(RunSettings lastRunSettings) {
+    boolean newNonSpecificCorrectionSettings(RunSettings lastRunSettings) {
       if (lastRunSettings == null) {
         return true;
       }
@@ -1055,10 +1086,6 @@ public class PulseActivationAnalysis implements PlugIn {
           && lastRunSettings.nonSpecificCorrectionCutoff != nonSpecificCorrectionCutoff);
     }
   }
-
-  // Here we use a simple workflow with only one worker since the results are
-  // written straight back to this class' objects
-  private Workflow<RunSettings, Object> workflow;
 
   private void runPulseAnalysis() {
     // Use a simple workflow with one worker
@@ -1262,11 +1289,11 @@ public class PulseActivationAnalysis implements PlugIn {
     resultsSettingsBuilder.getResultsImageSettingsBuilder()
         .setImageTypeValue(gd.getNextChoiceIndex());
 
-    final boolean preview = gd.getNextBoolean();
-
     if (gd.invalidNumber()) {
       return false;
     }
+
+    final boolean preview = gd.getNextBoolean();
 
     // This should not fail as this plugin built the dialog
     ((NonBlockingExtendedGenericDialog) gd).collectOptions();
@@ -1319,7 +1346,7 @@ public class PulseActivationAnalysis implements PlugIn {
    *
    * @param runSettings the run settings
    */
-  private void runAnalysis(RunSettings runSettings) {
+  void runAnalysis(RunSettings runSettings) {
     if (runSettings == null) {
       lastRunSettings = null;
       return;
@@ -1469,7 +1496,7 @@ public class PulseActivationAnalysis implements PlugIn {
     imp.setDimensions(images.length, 1, 1);
     final CompositeImage ci = new CompositeImage(imp, IJ.COMPOSITE);
 
-    autoAdjust(ci, ci.getProcessor());
+    autoAdjust(ci);
 
     imp = WindowManager.getImage(name);
     if (imp != null && imp.isComposite()) {
@@ -1505,9 +1532,8 @@ public class PulseActivationAnalysis implements PlugIn {
    * the afore mentioned command.
    *
    * @param imp the image
-   * @param ip the image
    */
-  private static void autoAdjust(ImagePlus imp, ImageProcessor ip) {
+  private static void autoAdjust(ImagePlus imp) {
     final ij.measure.Calibration cal = imp.getCalibration();
     imp.setCalibration(null);
     final ImageStatistics stats = imp.getStatistics(); // get uncalibrated stats
@@ -1522,7 +1548,7 @@ public class PulseActivationAnalysis implements PlugIn {
     }
     final int threshold = stats.pixelCount / autoThreshold;
     int index = -1;
-    boolean found = false;
+    boolean found;
     int count;
     do {
       index++;
@@ -1593,7 +1619,10 @@ public class PulseActivationAnalysis implements PlugIn {
     futures.clear();
   }
 
-  private abstract class UnmixWorker {
+  /**
+   * A worker class for unmixing channels.
+   */
+  private class UnmixWorker {
     final int[] newChannel;
     final int from;
     final int to;
@@ -1601,7 +1630,7 @@ public class PulseActivationAnalysis implements PlugIn {
     int[] assignedChannel = new int[settings.channels];
     double[] probability = new double[settings.channels];
 
-    public UnmixWorker(int[] newChannel, int from, int to, UniformRandomProvider rng) {
+    UnmixWorker(int[] newChannel, int from, int to, UniformRandomProvider rng) {
       this.newChannel = newChannel;
       this.from = from;
       this.to = to;
@@ -1662,7 +1691,7 @@ public class PulseActivationAnalysis implements PlugIn {
     final RunSettings runSettings;
     final int[][] density;
 
-    public SpecificUnmixWorker(RunSettings runSettings, int[][] density, int[] newChannel, int from,
+    SpecificUnmixWorker(RunSettings runSettings, int[][] density, int[] newChannel, int from,
         int to, UniformRandomProvider rng) {
       super(newChannel, from, to, rng);
       this.runSettings = runSettings;
@@ -1743,13 +1772,13 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   /**
-   * For processing the unmixing of specific channel activations.
+   * For processing the unmixing of non-specific channel activations.
    */
   private class NonSpecificUnmixWorker extends UnmixWorker implements Runnable {
     final RunSettings runSettings;
     final DensityCounter dc;
 
-    public NonSpecificUnmixWorker(RunSettings runSettings, DensityCounter dc, int[] newChannel,
+    NonSpecificUnmixWorker(RunSettings runSettings, DensityCounter dc, int[] newChannel,
         int from, int to, UniformRandomProvider rng) {
       super(newChannel, from, to, rng);
       this.runSettings = runSettings;
@@ -2008,6 +2037,7 @@ public class PulseActivationAnalysis implements PlugIn {
           final float y = nextCoordinate(rng);
           shapes[i] = new Point(x, y);
         }
+        break;
     }
     return shapes;
   }
