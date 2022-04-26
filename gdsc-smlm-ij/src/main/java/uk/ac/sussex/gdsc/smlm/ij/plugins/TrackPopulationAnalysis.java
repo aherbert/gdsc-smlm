@@ -163,15 +163,21 @@ import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
  */
 public class TrackPopulationAnalysis implements PlugIn {
   private static final String TITLE = "Track Population Analysis";
-  private static final String[] FEATURE_NAMES = {"Anomalous exponent",
-      "Effective diffusion coefficient", "Length of confinement", "Drift vector magnitude"};
+  /** The feature names. */
+  static final String[] FEATURE_NAMES = {"Anomalous exponent", "Effective diffusion coefficient",
+      "Length of confinement", "Drift vector magnitude"};
   private static final String[] FEATURE_UNITS = {null, "μm^2/s", "μm", "μm"};
-  private static final int FEATURE_D = 1;
+  /** The diffusion coefficient feature. */
+  static final int FEATURE_D = 1;
   private static final int SORT_DIMENSION = 1;
+
   // Limits for fitting the MSD
-  private static final double MIN_D = Double.MIN_NORMAL;
-  private static final double MIN_SIGMA = Double.MIN_NORMAL;
-  private static final double MIN_ALPHA = Math.ulp(1.0);
+  /** The minimum diffusion coefficient during fitting. */
+  static final double MIN_D = Double.MIN_NORMAL;
+  /** The minimum sigma during fitting. */
+  static final double MIN_SIGMA = Double.MIN_NORMAL;
+  /** The minimum alpha during fitting. */
+  static final double MIN_ALPHA = Math.ulp(1.0);
 
   private static AtomicReference<TextWindow> modelTableRef = new AtomicReference<>();
 
@@ -469,8 +475,6 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @see #getSelectedRow
      */
     List<TrackData> getSelectedData() {
-      final TrackDataTableModel model = (TrackDataTableModel) dataModel;
-      final List<TrackData> data = model.data;
       final int iMin = selectionModel.getMinSelectionIndex();
       final int iMax = selectionModel.getMaxSelectionIndex();
 
@@ -481,6 +485,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
       final LocalList<TrackData> rvTmp = new LocalList<>(1 + (iMax - iMin));
 
+      final List<TrackData> data = ((TrackDataTableModel) dataModel).data;
       final IntUnaryOperator map = getRowIndexToModelFunction();
       for (int i = iMin; i <= iMax; i++) {
         if (selectionModel.isSelectedIndex(i)) {
@@ -492,8 +497,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     IntUnaryOperator getRowIndexToModelFunction() {
       final RowSorter<?> sorter = getRowSorter();
-      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToModel;
-      return map;
+      return sorter == null ? i -> i : sorter::convertRowIndexToModel;
     }
   }
 
@@ -509,7 +513,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     private static final double FROM_RADIANS = 1.0 / (2 * Math.PI);
 
     private final Settings settings;
-    private final TrackDataJTable table;
+    /** The table. */
+    final TrackDataJTable table;
     private final MixtureMultivariateGaussianDistribution model;
     private final Calibration cal;
     private final TypeConverter<DistanceUnit> distanceConverter;
@@ -521,7 +526,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     private JMenuItem analysisFitJumpDistances;
     private JMenuItem analysisResidenceTime;
     private JMenuItem optionsTrackData;
-    private transient Consumer<List<TrackData>> selectedAction;
+    /** The selected action. */
+    transient Consumer<List<TrackData>> selectedAction;
 
     /**
      * Create a new instance.
@@ -651,9 +657,6 @@ public class TrackPopulationAnalysis implements PlugIn {
      * Show a dialog to select what to display for a selected track.
      */
     private void doOptionsTrackData() {
-      // So we know what to close
-      final Settings oldSettings = settings.copy();
-
       // Show dialog to choose the track data
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(getTitle() + " options");
       gd.addCheckbox("Show_track_image", settings.showTrackImage);
@@ -668,6 +671,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       if (gd.wasCanceled()) {
         return;
       }
+
+      // So we know what to close
+      final Settings oldSettings = settings.copy();
 
       settings.showTrackImage = gd.getNextBoolean();
       final double nmPerPixel = gd.getNextNumber();
@@ -1397,7 +1403,6 @@ public class TrackPopulationAnalysis implements PlugIn {
     private void doDataSave() {
       // Get the currently selected track(s), or else all the data
       final List<TrackData> selected = table.getSelectedData();
-      final List<TrackData> all = ((TrackDataTableModel) table.getModel()).data;
       // Get the name for the dataset
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage("Save track data to a results set");
@@ -1418,7 +1423,8 @@ public class TrackPopulationAnalysis implements PlugIn {
         return;
       }
       settings.dataSaveName = name;
-      final List<TrackData> data = saveSelected ? selected : all;
+      final List<TrackData> data =
+          saveSelected ? selected : ((TrackDataTableModel) table.getModel()).data;
 
       // This may be a combined dataset with overlapping traces from the same frames.
       // Save with simple calibration (i.e. no PSF or full calibration).
@@ -2524,7 +2530,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         final double d = x * x / (2 * t);
         TextUtils.formatTo(sb, ", precision=%s nm, D limit=%s um^2/s",
             MathUtils.rounded(x * 1000, 4), MathUtils.rounded(d, 4));
-      } catch (final DataException ex) {
+      } catch (final DataException ignored) {
         // No precision
       }
       IJ.log(sb.toString());
@@ -2758,7 +2764,7 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param lvmSolution1 the lvm solution
    * @return the residual sum of squares
    */
-  private static double getResidualSumOfSquares(final Optimum lvmSolution1) {
+  static double getResidualSumOfSquares(final Optimum lvmSolution1) {
     final RealVector res = lvmSolution1.getResiduals();
     return res.dotProduct(res);
   }
@@ -2961,7 +2967,7 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param feature the feature
    * @return the feature label
    */
-  private static String getFeatureLabel(int feature) {
+  static String getFeatureLabel(int feature) {
     return getFeatureLabel(feature, false);
   }
 
