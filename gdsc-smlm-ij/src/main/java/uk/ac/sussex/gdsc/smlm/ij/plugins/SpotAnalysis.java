@@ -73,6 +73,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -129,7 +130,7 @@ public class SpotAnalysis extends PlugInFrame
   private static final String BLUR_SPOT_TITLE = PLUGIN_TITLE + " Blur spot";
   private static final String AVG_SPOT_TITLE = PLUGIN_TITLE + " Average spot";
   private static final String[] RESULTS_TITLES =
-      new String[] {RAW_MEAN_TITLE, RAW_SD_TITLE, RAW_SPLOT_TITLE, BLUR_SPOT_TITLE, AVG_SPOT_TITLE};
+      {RAW_MEAN_TITLE, RAW_SD_TITLE, RAW_SPLOT_TITLE, BLUR_SPOT_TITLE, AVG_SPOT_TITLE};
 
   private static final AtomicReference<Frame> INSTANCE = new AtomicReference<>();
   private static final AtomicReference<TextWindow> RESULTS_WINDOW = new AtomicReference<>();
@@ -159,7 +160,8 @@ public class SpotAnalysis extends PlugInFrame
 
   private int runMode;
   private transient ImagePlus imp;
-  private transient ImagePlus rawImp;
+  /** The raw imp. */
+  transient ImagePlus rawImp;
   private transient ImagePlus blurImp;
 
   private double gain;
@@ -173,24 +175,26 @@ public class SpotAnalysis extends PlugInFrame
   private int currentSlice;
   private Rectangle areaBounds;
 
-  private final TreeSet<Spot> onFrames = new TreeSet<>();
+  private final Set<Spot> onFrames = new TreeSet<>();
   private final IntArrayList candidateFrames = new IntArrayList();
 
   private final Int2ObjectOpenHashMap<Trace> traces = new Int2ObjectOpenHashMap<>();
   private int id;
   private boolean updated;
-  private int blurCount;
 
   private final transient Object runLock = new Object();
 
   // Stores the list of images last used in the selection options
-  private ArrayList<String> imageList = new ArrayList<>();
+  private List<String> imageList = new ArrayList<>();
 
+  /**
+   * Represent a spot in a frame with a signal intensity.
+   */
   private class Spot implements Comparable<Spot> {
     int frame;
     double signal;
 
-    public Spot(int frame, double signal) {
+    Spot(int frame, double signal) {
       this.frame = frame;
       this.signal = signal;
     }
@@ -220,11 +224,14 @@ public class SpotAnalysis extends PlugInFrame
     }
   }
 
+  /**
+   * Represent a spot and a trace.
+   */
   private static class TraceResult {
     Spot spot;
     Trace trace;
 
-    public TraceResult(Spot spot, Trace trace) {
+    TraceResult(Spot spot, Trace trace) {
       this.spot = spot;
       this.trace = trace;
     }
@@ -243,7 +250,7 @@ public class SpotAnalysis extends PlugInFrame
     Rectangle bounds;
     double blur;
 
-    public BlurWorker(Ticker ticker, ImageStack inputStack, int slice, int slices, Rectangle bounds,
+    BlurWorker(Ticker ticker, ImageStack inputStack, int slice, int slices, Rectangle bounds,
         double blur, ImageStack outputStack) {
       this.ticker = ticker;
       this.inputStack = inputStack;
@@ -258,8 +265,8 @@ public class SpotAnalysis extends PlugInFrame
     public void run() {
       final GaussianBlur gb = new GaussianBlur();
       for (int i = 0; i < slices && slice <= inputStack.getSize(); i++, slice++) {
-        IJ.showStatus(String.format("Calculating blur ... %.1f%%",
-            (100.0 * ++blurCount) / inputStack.getSize()));
+        ImageJUtils.showStatus(
+            () -> String.format("Calculating blur ... %.1f%%", 100.0 * ticker.getProgress()));
         final ImageProcessor ip = inputStack.getProcessor(slice).duplicate();
         ip.setRoi(bounds);
         ip.snapshot();
@@ -654,7 +661,6 @@ public class SpotAnalysis extends PlugInFrame
       final List<Future<?>> futures = new LinkedList<>();
 
       final Ticker ticker = Ticker.create(new ImageJTrackProgress(true), nSlices, true);
-      blurCount = 0;
       final int slices = 5;
       ImageJUtils.showSlowProgress(0, nSlices);
       for (int n = 1; n <= nSlices; n += slices) {
@@ -788,7 +794,7 @@ public class SpotAnalysis extends PlugInFrame
       if (smoothing < 0.01 || smoothing > 0.9) {
         smoothing = 0.25;
       }
-    } catch (final NumberFormatException ex) {
+    } catch (final NumberFormatException ignored) {
       // Ignore
     }
 
@@ -867,8 +873,11 @@ public class SpotAnalysis extends PlugInFrame
     ImageJUtils.display(title, plot);
   }
 
+  /**
+   * Adds the frame.
+   */
   @SuppressWarnings("unchecked")
-  private void addFrame() {
+  void addFrame() {
     if (rawImp != null) {
       final int slice = rawImp.getCurrentSlice();
       final double signal = getSignal(slice);
@@ -891,7 +900,13 @@ public class SpotAnalysis extends PlugInFrame
     }
   }
 
-  private double getSignal(int slice) {
+  /**
+   * Gets the signal.
+   *
+   * @param slice the slice
+   * @return the signal
+   */
+  double getSignal(int slice) {
     return (rawMean[slice - 1] - smoothMean[slice - 1]) * area;
   }
 
@@ -1006,7 +1021,7 @@ public class SpotAnalysis extends PlugInFrame
             s.nextDouble(); // cx
             s.nextDouble(); // cy
             signal = s.nextDouble();
-          } catch (final NoSuchElementException ex) {
+          } catch (final NoSuchElementException ignored) {
             // Ignore
           }
         }
@@ -1028,7 +1043,7 @@ public class SpotAnalysis extends PlugInFrame
     IJ.showStatus("Saved traces");
   }
 
-  private void saveTracesToFile(ArrayList<TraceResult> traceResults) {
+  private void saveTracesToFile(List<TraceResult> traceResults) {
     final String resultsDirectory = IJ.getDirectory(PLUGIN_TITLE);
     if (resultsDirectory == null) {
       return;
@@ -1037,21 +1052,20 @@ public class SpotAnalysis extends PlugInFrame
     // Save the traces to a single file.
     // Also save the blinks and on/off times into data files for histogram analysis
 
-    final BufferedWriter[] files = new BufferedWriter[5];
-    try {
-      files[0] = openBufferedWriter(resultsDirectory + "traces.txt",
-          String.format("#ms/frame = %s%n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
-              MathUtils.rounded(msPerFrame, 3)));
-      files[1] = openBufferedWriter(resultsDirectory + "tOn.txt", "");
-      files[2] = openBufferedWriter(resultsDirectory + "tOff.txt", "");
-      files[3] = openBufferedWriter(resultsDirectory + "blinks.txt", "");
-      files[4] = openBufferedWriter(resultsDirectory + "signal.txt", "");
+    try (
+        BufferedWriter files0 = openBufferedWriter(resultsDirectory + "traces.txt",
+            String.format("#ms/frame = %s%n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
+                MathUtils.rounded(msPerFrame, 3)));
+        BufferedWriter files1 = openBufferedWriter(resultsDirectory + "tOn.txt", "");
+        BufferedWriter files2 = openBufferedWriter(resultsDirectory + "tOff.txt", "");
+        BufferedWriter files3 = openBufferedWriter(resultsDirectory + "blinks.txt", "");
+        BufferedWriter files4 = openBufferedWriter(resultsDirectory + "signal.txt", "")) {
       for (final TraceResult traceResult : traceResults) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(traceResult.spot.frame).append('\t');
-        sb.append(traceResult.trace.getHead().getXPosition()).append('\t');
-        sb.append(traceResult.trace.getHead().getYPosition()).append('\t');
-        sb.append(traceResult.spot.signal).append('\t');
+        sb.append(traceResult.spot.frame).append('\t')
+            .append(traceResult.trace.getHead().getXPosition()).append('\t')
+            .append(traceResult.trace.getHead().getYPosition()).append('\t')
+            .append(traceResult.spot.signal).append('\t');
         final int nBlinks = traceResult.trace.getBlinks() - 1;
         sb.append(nBlinks);
 
@@ -1059,38 +1073,27 @@ public class SpotAnalysis extends PlugInFrame
         final int[] off = traceResult.trace.getOffTimes();
         int time = traceResult.trace.getHead().getFrame();
         for (int i = 0; i < on.length; i++) {
-          writeLine(files[1], Double.toString(msPerFrame * on[i]));
+          writeLine(files1, Double.toString(msPerFrame * on[i]));
 
           sb.append('\t').append(time).append('\t').append(time + on[i] - 1);
           if (off != null && i < off.length) {
-            writeLine(files[2], Double.toString(msPerFrame * off[i]));
+            writeLine(files2, Double.toString(msPerFrame * off[i]));
             time += on[i] + off[i];
           }
         }
-        writeLine(files[0], sb.toString());
-        writeLine(files[3], Integer.toString(nBlinks));
-        writeLine(files[4], String.format("# Id=%d, Blinks=%d, Signal=%f", traceResult.spot.frame,
+        writeLine(files0, sb.toString());
+        writeLine(files3, Integer.toString(nBlinks));
+        writeLine(files4, String.format("# Id=%d, Blinks=%d, Signal=%f", traceResult.spot.frame,
             nBlinks, traceResult.spot.signal));
         for (int k = 0; k < traceResult.trace.size(); k++) {
           final PeakResult r = traceResult.trace.get(k);
-          writeLine(files[4], String.format("%d %f", r.getFrame(), r.getIntensity()));
+          writeLine(files4, String.format("%d %f", r.getFrame(), r.getIntensity()));
         }
       }
-    } catch (final Exception ex) {
+    } catch (final IOException ex) {
       // Q. Add better handling of errors?
       Logger.getLogger(getClass().getName()).log(Level.WARNING, ex,
           () -> "Failed to save traces to results directory: " + resultsDirectory);
-    } finally {
-      for (final BufferedWriter tracesFile : files) {
-        if (tracesFile != null) {
-          try {
-            tracesFile.close();
-          } catch (final IOException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to close traces file",
-                ex);
-          }
-        }
-      }
     }
   }
 
@@ -1217,8 +1220,12 @@ public class SpotAnalysis extends PlugInFrame
     return panel;
   }
 
-
-  private void imageUpdated(ImagePlus imp) {
+  /**
+   * Image updated.
+   *
+   * @param imp the imp
+   */
+  void imageUpdated(ImagePlus imp) {
     ImagePlus from = null;
     ImagePlus to = null;
     if (imp == rawImp) {
