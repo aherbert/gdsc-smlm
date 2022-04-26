@@ -140,7 +140,7 @@ public class SpotFit implements PlugIn {
    * an image.
    */
   private static class SpotFitPluginTool extends PlugInTool {
-    private static SpotFitPluginTool toolInstance = new SpotFitPluginTool();
+    final static SpotFitPluginTool INSTANCE = new SpotFitPluginTool();
 
     private static final AtomicReference<CustomTextWindow> RESULTS_WINDOW = new AtomicReference<>();
     private static final Pattern PATTERN = Pattern.compile("\t");
@@ -166,6 +166,9 @@ public class SpotFit implements PlugIn {
     private final double[] lower;
     private final double[] upper;
 
+    /**
+     * A result of comparison between 2 channels.
+     */
     private static class ComparisonResult {
       final int channel;
       final double background;
@@ -188,7 +191,6 @@ public class SpotFit implements PlugIn {
         this.r2 = r2;
       }
     }
-
 
     private SpotFitPluginTool() {
       settingsInstance = SettingsManager.readSpotFitSettings(0);
@@ -337,8 +339,6 @@ public class SpotFit implements PlugIn {
         final int slice = imp.getZ();
         final int frame = imp.getFrame();
 
-        final int stackIndex = imp.getStackIndex(channel, slice, frame);
-
         final ImageExtractor ie = ImageExtractor.wrap(null, imp.getWidth(), imp.getHeight());
 
         if (isRemoveEvent(event)) {
@@ -346,6 +346,7 @@ public class SpotFit implements PlugIn {
           return;
         }
 
+        final int stackIndex = imp.getStackIndex(channel, slice, frame);
         final ImageStack stack = imp.getImageStack();
         final ImageProcessor ip = stack.getProcessor(stackIndex);
 
@@ -472,7 +473,7 @@ public class SpotFit implements PlugIn {
       return config;
     }
 
-    protected void setupPeakFiltering(FitConfiguration config, Rectangle bounds, ImageProcessor ip,
+    void setupPeakFiltering(FitConfiguration config, Rectangle bounds, ImageProcessor ip,
         SpotFitSettings settings) {
       config.setCoordinateShift(settings.getSearchRadius());
       config.setSignalStrength(settings.getSnrThreshold());
@@ -500,67 +501,75 @@ public class SpotFit implements PlugIn {
     }
 
     private static String createHeader() {
-      final StringBuilder sb = new StringBuilder();
-      sb.append("Image\t");
-      sb.append("C\t");
-      sb.append("Z\t");
-      sb.append("T\t");
-      sb.append("Region\t");
-      sb.append("Background\t");
-      sb.append("Intensity\t");
-      sb.append("X\t");
-      sb.append("Y\t");
-      sb.append("S\t");
-      sb.append("Mean (PWHM)\t");
-      sb.append("Noise\t");
-      sb.append("SNR\t");
-      sb.append("C2\t");
-      sb.append("C2 Background\t");
-      sb.append("C2 Intensity\t");
-      sb.append("Corr\t");
-      sb.append("C1 Mean\t");
-      sb.append("C2 Mean\t");
-      sb.append("C1 Radial means\t");
-      sb.append("C2 Radial means\t");
+      final StringBuilder sb = new StringBuilder(256);
+      //@formatter:off
+      final String[] names = {
+        "Image",
+        "C",
+        "Z",
+        "T",
+        "Region",
+        "Background",
+        "Intensity",
+        "X",
+        "Y",
+        "S",
+        "Mean (PWHM)",
+        "Noise",
+        "SNR",
+        "C2",
+        "C2 Background",
+        "C2 Intensity",
+        "Corr",
+        "C1 Mean",
+        "C2 Mean",
+        "C1 Radial means",
+        "C2 Radial means",
+      };
+      //@formatter:on
+      Arrays.stream(names).forEach(s -> sb.append(s).append('\t'));
+      sb.setLength(sb.length() - 1);
       return sb.toString();
     }
 
     private void addResult(ImagePlus imp, int channel, int slice, int frame, Rectangle bounds,
         FitResult fitResult, ComparisonResult comparisonResult, boolean drawSelected) {
-      final StringBuilder sb = new StringBuilder();
-      sb.append(imp.getTitle()).append('\t');
-      sb.append(channel).append('\t');
-      sb.append(slice).append('\t');
-      sb.append(frame).append('\t');
-      sb.append(bounds.x).append(',');
-      sb.append(bounds.y).append(' ');
-      sb.append(bounds.width).append('x');
-      sb.append(bounds.height);
+      final StringBuilder sb = new StringBuilder(256);
+      //@formatter:off
+      sb.append(imp.getTitle()).append('\t')
+        .append(channel).append('\t')
+        .append(slice).append('\t')
+        .append(frame).append('\t')
+        .append(bounds.x).append(',')
+        .append(bounds.y).append(' ')
+        .append(bounds.width).append('x')
+        .append(bounds.height);
       final double[] params = fitResult.getParameters();
       sb.append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.BACKGROUND]));
       final double signal = params[Gaussian2DFunction.SIGNAL];
-      sb.append('\t').append(MathUtils.rounded(signal));
-      sb.append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.X_POSITION]));
-      sb.append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.Y_POSITION]));
+      sb.append('\t').append(MathUtils.rounded(signal))
+        .append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.X_POSITION]))
+        .append('\t').append(MathUtils.rounded(params[Gaussian2DFunction.Y_POSITION]));
       final double xsd = params[Gaussian2DFunction.X_SD];
       sb.append('\t').append(MathUtils.rounded(xsd));
       final double noise = validationData.getNoise();
       final double mean = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, xsd);
       final double snr = mean / noise;
-      sb.append('\t').append(MathUtils.rounded(mean));
-      sb.append('\t').append(MathUtils.rounded(noise));
-      sb.append('\t').append(MathUtils.rounded(snr));
+      sb.append('\t').append(MathUtils.rounded(mean))
+        .append('\t').append(MathUtils.rounded(noise))
+        .append('\t').append(MathUtils.rounded(snr));
       if (comparisonResult != null) {
-        sb.append('\t').append(comparisonResult.channel);
-        sb.append('\t').append(MathUtils.rounded(comparisonResult.background));
-        sb.append('\t').append(MathUtils.rounded(comparisonResult.intensity));
-        sb.append('\t').append(MathUtils.rounded(comparisonResult.corr));
-        sb.append('\t').append(MathUtils.rounded(comparisonResult.m1));
-        sb.append('\t').append(MathUtils.rounded(comparisonResult.m2));
-        sb.append('\t').append(Arrays.stream(comparisonResult.r1)
+        sb.append('\t').append(comparisonResult.channel)
+          .append('\t').append(MathUtils.rounded(comparisonResult.background))
+          .append('\t').append(MathUtils.rounded(comparisonResult.intensity))
+          .append('\t').append(MathUtils.rounded(comparisonResult.corr))
+          .append('\t').append(MathUtils.rounded(comparisonResult.m1))
+          .append('\t').append(MathUtils.rounded(comparisonResult.m2))
+          .append('\t').append(Arrays.stream(comparisonResult.r1)
+            .mapToObj(i -> MathUtils.rounded(i)).collect(Collectors.joining(", ")))
+          .append('\t').append(Arrays.stream(comparisonResult.r2)
             .mapToObj(i -> MathUtils.rounded(i)).collect(Collectors.joining(", ")));
-        sb.append('\t').append(Arrays.stream(comparisonResult.r2)
-            .mapToObj(i -> MathUtils.rounded(i)).collect(Collectors.joining(", ")));
+        //@formatter:on
       } else {
         sb.append("\t\t\t\t\t\t\t\t");
       }
@@ -651,9 +660,9 @@ public class SpotFit implements PlugIn {
         final Roi[] rois = overlay.toArray();
         final int size = overlay.size();
         overlay = new Overlay();
-        for (int i = 0; i < rois.length; i++) {
-          if (rois[i] instanceof PointRoi) {
-            final PointRoi roi = (PointRoi) rois[i];
+        for (final Roi nextRoi : rois) {
+          if (nextRoi instanceof PointRoi) {
+            final PointRoi roi = (PointRoi) nextRoi;
             boolean boundsCheck = true;
             if (isDisplayedHyperStack) {
               // Must be on the same channel/slice/frame
@@ -670,7 +679,7 @@ public class SpotFit implements PlugIn {
               }
             }
           }
-          overlay.add(rois[i]);
+          overlay.add(nextRoi);
         }
         if (overlay.size() != size) {
           if (overlay.size() == 0) {
@@ -707,7 +716,7 @@ public class SpotFit implements PlugIn {
                 i--;
               }
             }
-          } catch (final NumberFormatException ex) {
+          } catch (final NumberFormatException ignored) {
             // Ignore
           }
         }
@@ -886,7 +895,7 @@ public class SpotFit implements PlugIn {
    */
   public static void addPluginTool() {
     // Add the tool
-    Toolbar.addPlugInTool(SpotFitPluginTool.toolInstance);
+    Toolbar.addPlugInTool(SpotFitPluginTool.INSTANCE);
     IJ.showStatus("Added " + TITLE + " Tool");
   }
 
@@ -903,6 +912,6 @@ public class SpotFit implements PlugIn {
       return;
     }
 
-    SpotFitPluginTool.toolInstance.showOptionsDialog();
+    SpotFitPluginTool.INSTANCE.showOptionsDialog();
   }
 }
