@@ -248,8 +248,7 @@ public class TrackPopulationImporter implements PlugIn {
   static CustomLong2IntOpenHashMap createCategoryMap(BufferedReader reader) throws IOException {
     final CustomLong2IntOpenHashMap map = new CustomLong2IntOpenHashMap(16);
     map.defaultReturnValue(-1);
-    String line;
-    while ((line = reader.readLine()) != null) {
+    for (String line = reader.readLine(); line != null; line = reader.readLine()) {
       final String[] fields = CSV.split(line);
       if (fields.length != 3) {
         throw new IllegalArgumentException("Expected 3 fields: " + line);
