@@ -107,9 +107,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
 
-  private FitEngineConfiguration config;
-  private AutoThreshold.Method[] methods;
-  private double[] levels;
+  /** The fit engine configuration. */
+  FitEngineConfiguration config;
+  /** The threshold methods to compute. */
+  AutoThreshold.Method[] methods;
+  /** The SNR levels to compute. */
+  double[] levels;
   private String[] methodNames;
 
   private boolean extraOptions;
@@ -121,7 +124,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private ImagePlus imp;
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Store the filter candidates data.
@@ -170,38 +173,37 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    private static AutoThreshold.Method[] thresholdMethods;
-    private static double[] snrLevels;
-    private static String[] thresholdMethodNames;
-    private static String[] sortMethods = new String[] {"(None)", "tp", "fp", "tn", "fn",
-        "Precision", "Recall", "F0.5", "F1", "F2", "Jaccard", "MCC"};
+    static final AutoThreshold.Method[] THRESHOLD_METHODS;
+    static final double[] SNR_LEVELS;
+    static final String[] THRESHOLD_METHOD_NAMES;
+    static final String[] SORT_METHODS = {"(None)", "tp", "fp", "tn", "fn", "Precision", "Recall",
+        "F0.5", "F1", "F2", "Jaccard", "MCC"};
 
     static {
       final DoubleArrayList list = new DoubleArrayList(20);
       for (int snr = 20; snr <= 70; snr += 5) {
         list.add(snr);
       }
-      snrLevels = list.toDoubleArray();
+      SNR_LEVELS = list.toDoubleArray();
 
-      thresholdMethods = AutoThreshold.Method.values();
-      thresholdMethodNames = new String[thresholdMethods.length + snrLevels.length];
+      THRESHOLD_METHODS = AutoThreshold.Method.values();
+      THRESHOLD_METHOD_NAMES = new String[THRESHOLD_METHODS.length + SNR_LEVELS.length];
 
       // Enable all methods
       int count = 0;
-      while (count < thresholdMethods.length) {
-        thresholdMethodNames[count] = thresholdMethods[count].toString();
+      while (count < THRESHOLD_METHODS.length) {
+        THRESHOLD_METHOD_NAMES[count] = THRESHOLD_METHODS[count].toString();
         count++;
       }
       // Add signal-to-noise threshold methods
-      for (int j = 0; j < snrLevels.length; j++) {
-        thresholdMethodNames[count] = "SNR" + snrLevels[j];
+      for (final double snr : SNR_LEVELS) {
+        THRESHOLD_METHOD_NAMES[count] = "SNR" + snr;
         count++;
       }
     }
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     boolean[] thresholdMethodOptions;
     double fractionPositives;
@@ -215,7 +217,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     Settings() {
       // Set defaults
-      thresholdMethodOptions = new boolean[thresholdMethodNames.length];
+      thresholdMethodOptions = new boolean[THRESHOLD_METHOD_NAMES.length];
       Arrays.fill(thresholdMethodOptions, true);
       // Turn some off
       // These often fail to converge
@@ -229,7 +231,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       negativesAfterAllPositives = 10;
       selectMethods = true;
       compactBins = 1024;
-      sortIndex = sortMethods.length - 3; // F2 to favour recall
+      sortIndex = SORT_METHODS.length - 3; // F2 to favour recall
       useFractionScores = true;
     }
 
@@ -266,6 +268,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
+  /**
+   * The filter candidate data.
+   */
   private static class FilterCandidates {
     // Integer counts of positives (matches) and negatives
     final int pos;
@@ -284,6 +289,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
+  /**
+   * The rank result data.
+   */
   private static class RankResult {
     final float threshold;
     final FractionClassificationResult fresult;
@@ -304,6 +312,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
+  /**
+   * The ranked results data.
+   */
   private static class RankResults {
     final ScoredSpot[] spots;
     /**
@@ -312,9 +323,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
      */
     final double[] zPosition;
 
-    ArrayList<RankResult> results = new ArrayList<>();
+    List<RankResult> results = new ArrayList<>();
 
-    public RankResults(ScoredSpot[] spots, double[] zPosition) {
+    RankResults(ScoredSpot[] spots, double[] zPosition) {
       this.spots = spots;
       this.zPosition = zPosition;
     }
@@ -337,7 +348,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     float[] data;
     double[] region;
 
-    public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
+    Worker(BlockingQueue<Integer> jobs, ImageStack stack,
         Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates,
         Int2ObjectOpenHashMap<FilterCandidates> filterCandidates, Ticker ticker) {
       this.jobs = jobs;
@@ -427,9 +438,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
             final int height2 = regionBounds2.height;
             int size2 = 0;
             for (int y = 0; y < height2; y++) {
-              // If width is not even we can use adjacent positions due to image wrapping
-              for (int x = 0, index = y * width2; x < width2; x += 2) {
-                // Assume neighbour pixels should have equal noise and average them
+              // Assume neighbour pixels should have equal noise and average them
+              for (int x = 1, index = y * width2; x < width2; x += 2, index += 2) {
                 region[size2++] = region[index] + region[index + 1];
               }
             }
@@ -620,7 +630,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     gd.addSlider("Min_negatives_after_positives", 0, 10, settings.negativesAfterAllPositives);
     gd.addCheckbox("Select_methods", settings.selectMethods);
     gd.addNumericField("Compact_bins", settings.compactBins, 0);
-    gd.addChoice("Sort", Settings.sortMethods, settings.sortIndex);
+    gd.addChoice("Sort", Settings.SORT_METHODS, settings.sortIndex);
     gd.addCheckbox("Use_fraction_scores", settings.useFractionScores);
 
     // Collect options for fitting that may effect ranking
@@ -668,18 +678,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       return false;
     }
 
-    methodNames = Settings.thresholdMethodNames.clone();
+    methodNames = Settings.THRESHOLD_METHOD_NAMES.clone();
     if (settings.selectMethods) {
-      int count = 0;
-      int count1 = 0;
-      int count2 = 0;
-      methods = new AutoThreshold.Method[Settings.thresholdMethods.length];
-      levels = new double[Settings.snrLevels.length];
-
       gd = new ExtendedGenericDialog(TITLE);
       gd.addHelp(HelpUrls.getUrl("smart-spot-ranking"));
-      for (int i = 0; i < Settings.thresholdMethodNames.length; i++) {
-        gd.addCheckbox(Settings.thresholdMethodNames[i], settings.thresholdMethodOptions[i]);
+      for (int i = 0; i < Settings.THRESHOLD_METHOD_NAMES.length; i++) {
+        gd.addCheckbox(Settings.THRESHOLD_METHOD_NAMES[i], settings.thresholdMethodOptions[i]);
       }
 
       gd.showDialog();
@@ -688,14 +692,19 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
         return false;
       }
 
-      for (int i = 0, j = 0; i < Settings.thresholdMethodNames.length; i++) {
+      int count = 0;
+      int count1 = 0;
+      int count2 = 0;
+      methods = new AutoThreshold.Method[Settings.THRESHOLD_METHODS.length];
+      levels = new double[Settings.SNR_LEVELS.length];
+      for (int i = 0, j = 0; i < Settings.THRESHOLD_METHOD_NAMES.length; i++) {
         settings.thresholdMethodOptions[i] = gd.getNextBoolean();
         if (settings.thresholdMethodOptions[i]) {
-          methodNames[count++] = Settings.thresholdMethodNames[i];
-          if (i < Settings.thresholdMethods.length) {
-            methods[count1++] = Settings.thresholdMethods[i];
+          methodNames[count++] = Settings.THRESHOLD_METHOD_NAMES[i];
+          if (i < Settings.THRESHOLD_METHODS.length) {
+            methods[count1++] = Settings.THRESHOLD_METHODS[i];
           } else {
-            levels[count2++] = Settings.snrLevels[j++];
+            levels[count2++] = Settings.SNR_LEVELS[j++];
           }
         }
       }
@@ -705,8 +714,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       levels = Arrays.copyOf(levels, count2);
     } else {
       // Do them all
-      methods = Settings.thresholdMethods.clone();
-      levels = Settings.snrLevels.clone();
+      methods = Settings.THRESHOLD_METHODS.clone();
+      levels = Settings.SNR_LEVELS.clone();
     }
 
     if (methodNames.length == 0) {
@@ -763,14 +772,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     // Process the frames
     filterCandidates.keySet().forEach((IntConsumer) value -> put(jobs, value));
     // Finish all the worker threads by passing in a null job
-    for (int i = 0; i < threads.size(); i++) {
+    for (int i = threads.size(); i-- != 0;) {
       put(jobs, -1);
     }
 
     // Wait for all to finish
-    for (int i = 0; i < threads.size(); i++) {
+    for (final Thread thread : threads) {
       try {
-        threads.get(i).join();
+        thread.join();
       } catch (final InterruptedException ex) {
         Thread.currentThread().interrupt();
         throw new ConcurrentRuntimeException("Unexpected interrupt", ex);
@@ -905,12 +914,15 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
+  /**
+   * The scored result data.
+   */
   private static class ScoredResult {
     int index;
     double score;
     String result;
 
-    public ScoredResult(int index, double score, String result) {
+    ScoredResult(int index, double score, String result) {
       this.index = index;
       this.score = score;
       this.result = result;
@@ -1196,34 +1208,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   private static String createHeader() {
     final StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.getTablePrefix());
-    sb.append('\t');
-    sb.append("Spots\t");
-    sb.append("countPositive\t");
-    sb.append("countNegative\t");
-    sb.append("fP\t");
-    sb.append("fN\t");
-
-    sb.append("% nP\t");
-    sb.append("% nN\t");
-
-    sb.append("cTotal\t");
-    sb.append("cP\t");
-    sb.append("cN\t");
-
-    sb.append("cfTotal\t");
-    sb.append("cfP\t");
-    sb.append("cfN\t");
-
-    sb.append("Spot Av\t");
-    sb.append("Spot SD\t");
-    sb.append("Candidate Av\t");
-    sb.append("Candidate SD\t");
-
-    sb.append("Method\t");
-    sb.append("Bins\t");
-    sb.append("T Av\t");
-    sb.append("T SD\t");
-    sb.append("Time\t");
+    sb.append("\tSpots\tcountPositive\tcountNegative\tfP\tfN\t% nP\t% nN\tcTotal\tcP\tcN\t"
+        + "cfTotal\tcfP\tcfN\tSpot Av\tSpot SD\tCandidate Av\tCandidate SD\t"
+        + "Method\tBins\tT Av\tT SD\tTime\t");
 
     addScoreColumns(sb, null);
     addScoreColumns(sb, "f ");
@@ -1232,13 +1219,13 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private static void addScoreColumns(StringBuilder sb, String prefix) {
-    for (int i = 1; i < Settings.sortMethods.length; i++) {
-      addScoreColumn(sb, prefix, Settings.sortMethods[i]);
+    for (int i = 1; i < Settings.SORT_METHODS.length; i++) {
+      addScoreColumn(sb, prefix, Settings.SORT_METHODS[i]);
     }
   }
 
   private double addScores(StringBuilder sb, FractionClassificationResult result) {
-    final double[] scores = new double[Settings.sortMethods.length - 1];
+    final double[] scores = new double[Settings.SORT_METHODS.length - 1];
     int index = 0;
     scores[index++] = result.getTruePositives();
     scores[index++] = result.getFalsePositives();
@@ -1261,8 +1248,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     if (prefix != null) {
       sb.append(prefix);
     }
-    sb.append(name);
-    sb.append('\t');
+    sb.append(name).append('\t');
   }
 
   private double getSa() {
