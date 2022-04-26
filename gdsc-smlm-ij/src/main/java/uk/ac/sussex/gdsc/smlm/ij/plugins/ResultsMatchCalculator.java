@@ -109,7 +109,7 @@ public class ResultsMatchCalculator implements PlugIn {
     /** The description. */
     private final String description;
 
-    private CoordinateMethod(String description) {
+    CoordinateMethod(String description) {
       this.description = description;
     }
 
@@ -199,21 +199,21 @@ public class ResultsMatchCalculator implements PlugIn {
     private static final int SAVE_MATCHED = 0x01;
     private static final int SAVE_UNMATCHED = 0x02;
 
-    String inputOption1 = "";
-    String inputOption2 = "";
-    CoordinateMethod coordinateMethod1 = CoordinateMethod.ALL;
-    CoordinateMethod coordinateMethod2 = CoordinateMethod.ALL;
-    double distanceThreshold = 0.5;
-    int increments = 5;
-    double delta = 0.1;
-    double beta = 4;
-    boolean showTable = true;
+    String inputOption1;
+    String inputOption2;
+    CoordinateMethod coordinateMethod1;
+    CoordinateMethod coordinateMethod2;
+    double distanceThreshold;
+    int increments;
+    double delta;
+    double beta;
+    boolean showTable;
     boolean showPairs;
     int saveClassificationsOption;
-    String classificationsFile = "";
+    String classificationsFile;
     boolean idAnalysis;
     boolean savePairs;
-    String pairsDirectory = "";
+    String pairsDirectory;
     boolean outputEndFrame;
 
     Settings() {
@@ -328,7 +328,7 @@ public class ResultsMatchCalculator implements PlugIn {
 
     final ImageRoiPainter painter;
 
-    public PairsTextWindow(String title, String headings, int width, int height) {
+    PairsTextWindow(String title, String headings, int width, int height) {
       super(title, headings, "", width, height);
       painter =
           new ImageRoiPainter(getTextPanel(), null, ResultsMatchCalculator::getRoiCoordinates);
@@ -351,13 +351,13 @@ public class ResultsMatchCalculator implements PlugIn {
     // Load the results
     final MemoryPeakResults results1 =
         ResultsManager.loadInputResults(settings.inputOption1, false, null, null);
-    final MemoryPeakResults results2 =
-        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     IJ.showStatus("");
     if (results1 == null || results1.size() == 0) {
       IJ.error(TITLE, "No results 1 could be loaded");
       return;
     }
+    final MemoryPeakResults results2 =
+        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     if (results2 == null || results2.size() == 0) {
       IJ.error(TITLE, "No results 2 could be loaded");
       return;
@@ -558,7 +558,7 @@ public class ResultsMatchCalculator implements PlugIn {
     final TextWindow pairsWindow = createPairsWindow(resultsWindow, results1.getSource());
     pairsWindow.getTextPanel().clear();
     final Ticker ticker = ImageJUtils.createTicker(pairs.size(), 0, "Writing pairs table");
-    try (final BufferedTextWindow bw = new BufferedTextWindow(pairsWindow)) {
+    try (BufferedTextWindow bw = new BufferedTextWindow(pairsWindow)) {
       final StringBuilder sb = new StringBuilder();
       for (final PointPair pair : pairs) {
         bw.append(addPairResult(sb, pair));
@@ -887,78 +887,49 @@ public class ResultsMatchCalculator implements PlugIn {
   }
 
   private static String createResultsHeader(boolean idAnalysis) {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("Image 1\t");
-    sb.append("Image 2\t");
-    sb.append("Distance (px)\t");
-    sb.append("N\t");
-    sb.append("TP\t");
-    sb.append("FP\t");
-    sb.append("FN\t");
-    sb.append("Jaccard\t");
-    sb.append("RMSD\t");
-    sb.append("Precision\t");
-    sb.append("Recall\t");
-    sb.append("F0.5\t");
-    sb.append("F1\t");
-    sb.append("F2\t");
-    sb.append("F-beta");
-    if (idAnalysis) {
-      sb.append("\tId1-N");
-      sb.append("\tId1-TP");
-      sb.append("\tId1-Recall");
-      sb.append("\tId2-N");
-      sb.append("\tId2-TP");
-      sb.append("\tId2-Recall");
-    }
-    return sb.toString();
+    final String header = "Image 1\tImage 2\tDistance (px)\tN\tTP\tFP\tFN\tJaccard\tRMSD\t"
+        + "Precision\tRecall\tF0.5\tF1\tF2\tF-beta";
+    return idAnalysis ? header + "\tId1-N\tId1-TP\tId1-Recall\tId2-N\tId2-TP\tId2-Recall" : header;
   }
 
   private void addResult(StringBuilder sb, String i1, String i2, double distanceThrehsold,
       MatchResult result, MatchResult idResult1, MatchResult idResult2) {
     sb.setLength(0);
-    sb.append(i1).append('\t');
-    sb.append(i2).append('\t');
-    sb.append(ROUNDER.round(distanceThrehsold)).append('\t');
-    sb.append(result.getNumberPredicted()).append('\t');
-    sb.append(result.getTruePositives()).append('\t');
-    sb.append(result.getFalsePositives()).append('\t');
-    sb.append(result.getFalseNegatives()).append('\t');
-    sb.append(ROUNDER.round(result.getJaccard())).append('\t');
-    sb.append(ROUNDER.round(result.getRmsd())).append('\t');
-    sb.append(ROUNDER.round(result.getPrecision())).append('\t');
-    sb.append(ROUNDER.round(result.getRecall())).append('\t');
-    sb.append(ROUNDER.round(result.getFScore(0.5))).append('\t');
-    sb.append(ROUNDER.round(result.getFScore(1.0))).append('\t');
-    sb.append(ROUNDER.round(result.getFScore(2.0))).append('\t');
-    sb.append(ROUNDER.round(result.getFScore(settings.beta)));
+    sb.append(i1).append('\t')
+    // @formatter:off
+      .append(i2).append('\t')
+      .append(ROUNDER.round(distanceThrehsold)).append('\t')
+      .append(result.getNumberPredicted()).append('\t')
+      .append(result.getTruePositives()).append('\t')
+      .append(result.getFalsePositives()).append('\t')
+      .append(result.getFalseNegatives()).append('\t')
+      .append(ROUNDER.round(result.getJaccard())).append('\t')
+      .append(ROUNDER.round(result.getRmsd())).append('\t')
+      .append(ROUNDER.round(result.getPrecision())).append('\t')
+      .append(ROUNDER.round(result.getRecall())).append('\t')
+      .append(ROUNDER.round(result.getFScore(0.5))).append('\t')
+      .append(ROUNDER.round(result.getFScore(1.0))).append('\t')
+      .append(ROUNDER.round(result.getFScore(2.0))).append('\t')
+      .append(ROUNDER.round(result.getFScore(settings.beta)));
     if (idResult1 != null) {
-      sb.append('\t').append(idResult1.getNumberPredicted());
-      sb.append('\t').append(idResult1.getTruePositives());
-      sb.append('\t').append(ROUNDER.round(idResult1.getRecall()));
+      sb.append('\t').append(idResult1.getNumberPredicted())
+        .append('\t').append(idResult1.getTruePositives())
+        .append('\t').append(ROUNDER.round(idResult1.getRecall()));
     } else if (idResult2 != null) {
       sb.append("\t-\t-\t-");
     }
     if (idResult2 != null) {
-      sb.append('\t').append(idResult2.getNumberPredicted());
-      sb.append('\t').append(idResult2.getTruePositives());
-      sb.append('\t').append(ROUNDER.round(idResult2.getRecall()));
+      sb.append('\t').append(idResult2.getNumberPredicted())
+        .append('\t').append(idResult2.getTruePositives())
+        .append('\t').append(ROUNDER.round(idResult2.getRecall()));
     } else if (idResult1 != null) {
       sb.append("\t-\t-\t-");
     }
+    // @formatter:on
   }
 
   private static String createPairsHeader() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("T\t");
-    sb.append("X1\t");
-    sb.append("Y1\t");
-    sb.append("Z1\t");
-    sb.append("X2\t");
-    sb.append("Y2\t");
-    sb.append("Z2\t");
-    sb.append("Distance\t");
-    return sb.toString();
+    return "T\tX1\tY1\tZ1\tX2\tY2\tZ2\tDistance";
   }
 
   private static String addPairResult(StringBuilder sb, PointPair pair) {
@@ -988,15 +959,21 @@ public class ResultsMatchCalculator implements PlugIn {
     }
   }
 
+  /**
+   * Gets the ROI coordinates.
+   *
+   * @param line the line
+   * @return the ROI coordinates
+   */
   @Nullable
-  private static double[] getRoiCoordinates(String line) {
+  static double[] getRoiCoordinates(String line) {
     // Extract the startT and x,y coordinates from the first available point in the pair
     final int[] index = {1, 4};
     final String[] fields = line.split("\t");
     final int startT = Integer.parseInt(fields[0]);
     for (final int i : index) {
       if (i < fields.length) {
-        if (fields[i].equals("-")) {
+        if ("-".equals(fields[i])) {
           continue;
         }
         final double x = Double.parseDouble(fields[i]);
