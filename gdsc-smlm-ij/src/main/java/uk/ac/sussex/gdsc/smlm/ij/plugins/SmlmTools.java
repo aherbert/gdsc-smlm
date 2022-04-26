@@ -49,6 +49,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 
@@ -70,7 +71,7 @@ public class SmlmTools extends PlugInFrame {
     SCREEN_DIMENSION = IJ.getScreenSize();
   }
 
-  private final HashMap<String, String[]> plugins = new HashMap<>();
+  private final Map<String, String[]> plugins = new HashMap<>();
   private boolean addSpacer;
 
   /**
@@ -174,12 +175,12 @@ public class SmlmTools extends PlugInFrame {
 
           // Put a spacer between plugins if specified
           if ((tokens.length == 2 && tokens[0].startsWith("Plugins")
-              && tokens[1].trim().equals("\"-\"")) || line.length() == 0) {
+              && "\"-\"".equals(tokens[1].trim())) || line.length() == 0) {
             configPlugins.add(new String[] {"spacer", ""});
           }
         }
       }
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Ignore
     }
 
@@ -200,10 +201,10 @@ public class SmlmTools extends PlugInFrame {
     int col = 0;
     int row = 0;
     for (final String[] plugin : configPlugins) {
-      if (plugin[0].equals("next")) {
+      if ("next".equals(plugin[0])) {
         col++;
         row = 0;
-      } else if (plugin[0].equals("spacer")) {
+      } else if ("spacer".equals(plugin[0])) {
         addSpacer = true;
       } else {
         row = addPlugin(mainPanel, grid, plugin[0], plugin[1], col, row);
@@ -269,7 +270,7 @@ public class SmlmTools extends PlugInFrame {
     if (Files.exists(path)) {
       try {
         return Files.newInputStream(path);
-      } catch (IOException e) {
+      } catch (IOException ignored) {
         // Ignore and resort to default
       }
     }
@@ -314,7 +315,7 @@ public class SmlmTools extends PlugInFrame {
       if (addSpacer) {
         try {
           ij.Menus.getImageJMenu("Plugins").addSeparator();
-        } catch (final NoSuchMethodError ex) {
+        } catch (final NoSuchMethodError ignored) {
           // Ignore. This ImageJ method is from IJ 1.48+
         }
       }
