@@ -746,7 +746,9 @@ public class CreateData implements PlugIn {
   private static final class CreateDataSettingsHelper {
     /** The create data settings. */
     private final CreateDataSettingsOrBuilder createDataSettings;
-    /** Set to true if the camera type is {@link CameraType#EMCCD}. */
+    /**
+     * Set to true if the camera type is {@link CameraType#EMCCD}.
+     */
     private final boolean isEmCcd;
     /** The total gain. */
     private double totalGain;

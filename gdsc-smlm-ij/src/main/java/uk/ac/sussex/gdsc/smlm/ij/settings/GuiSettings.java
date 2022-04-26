@@ -75,7 +75,7 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
  */
 public final class GuiSettings {
   /** The default GUIFilterSettings. */
-  public static class DefaultGUIFilterSettings {
+  public static class DefaultGuiFilterSettings {
     /** Default settings instance. */
     public static final GUIFilterSettings INSTANCE;
 
@@ -86,7 +86,7 @@ public final class GuiSettings {
   }
 
   /** The default PSFCalculatorSettings. */
-  public static class DefaultPSFCalculatorSettings {
+  public static class DefaultPsfCalculatorSettings {
     /** Default settings instance. */
     public static final PSFCalculatorSettings INSTANCE;
 
@@ -104,7 +104,7 @@ public final class GuiSettings {
   }
 
   /** The default PSFEstimatorSettings. */
-  public static class DefaultPSFEstimatorSettings {
+  public static class DefaultPsfEstimatorSettings {
     /** Default settings instance. */
     public static final PSFEstimatorSettings INSTANCE;
 
@@ -196,6 +196,7 @@ public final class GuiSettings {
       INSTANCE = builder.build();
     }
   }
+
   /** The default ClusteringSettings. */
   public static class DefaultClusteringSettings {
     /** Default settings instance. */
@@ -306,7 +307,7 @@ public final class GuiSettings {
   }
 
   /** The default PSFCreatorSettings. */
-  public static class DefaultPSFCreatorSettings {
+  public static class DefaultPsfCreatorSettings {
     /** Default settings instance. */
     public static final PSFCreatorSettings INSTANCE;
 
@@ -412,6 +413,7 @@ public final class GuiSettings {
       INSTANCE = builder.build();
     }
   }
+
   /** The default CubicSplineManagerSettings. */
   public static class DefaultCubicSplineManagerSettings {
     /** Default settings instance. */

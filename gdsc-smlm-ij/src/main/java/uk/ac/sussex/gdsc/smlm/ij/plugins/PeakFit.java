@@ -2367,7 +2367,7 @@ public class PeakFit implements PlugInFilter {
     // Add ability to run the PSF Calculator to get the width
     if (ImageJUtils.isShowGenericDialog()) {
       if (calculatorSettings == null) {
-        calculatorSettings = GuiSettings.DefaultPSFCalculatorSettings.INSTANCE;
+        calculatorSettings = GuiSettings.DefaultPsfCalculatorSettings.INSTANCE;
       }
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
       gd.addAndGetButton("Run PSF calculator", event -> {

@@ -983,7 +983,7 @@ public final class SettingsManager {
    * @return the GUIFilterSettings
    */
   public static GUIFilterSettings readGuiFilterSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultGUIFilterSettings.INSTANCE).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultGuiFilterSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -993,7 +993,7 @@ public final class SettingsManager {
    * @return the PSFCalculatorSettings
    */
   public static PSFCalculatorSettings readPsfCalculatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultPSFCalculatorSettings.INSTANCE).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPsfCalculatorSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1003,7 +1003,7 @@ public final class SettingsManager {
    * @return the PSFEstimatorSettings
    */
   public static PSFEstimatorSettings readPsfEstimatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultPSFEstimatorSettings.INSTANCE).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPsfEstimatorSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1119,7 +1119,7 @@ public final class SettingsManager {
    * @return the PSFCreatorSettings
    */
   public static PSFCreatorSettings readPsfCreatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultPSFCreatorSettings.INSTANCE).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPsfCreatorSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1278,7 +1278,7 @@ public final class SettingsManager {
 
   /**
    * Write the message to file.
-   * 
+   *
    * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param message the message
@@ -1331,7 +1331,7 @@ public final class SettingsManager {
 
   /**
    * Read the message from file.
-   * 
+   *
    * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param parser the parser

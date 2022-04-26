@@ -139,7 +139,7 @@ public class SeriesImageSource extends ImageSource {
   /**
    * Store details for an image.
    */
-  private static abstract class Image {
+  private abstract static class Image {
     int width;
     int height;
     int size;

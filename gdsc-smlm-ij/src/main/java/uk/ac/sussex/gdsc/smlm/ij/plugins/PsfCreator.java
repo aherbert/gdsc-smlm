@@ -4286,7 +4286,7 @@ public class PsfCreator implements PlugInFilter {
     if (ImageJUtils.isShowGenericDialog()) {
       gd.addAndGetButton("Reset", event -> {
         final boolean interactive = settings.getInteractiveMode();
-        final PSFCreatorSettings defaults = GuiSettings.DefaultPSFCreatorSettings.INSTANCE;
+        final PSFCreatorSettings defaults = GuiSettings.DefaultPsfCreatorSettings.INSTANCE;
         int ti = 0;
         int cbi = 0;
         tf.get(ti++).setText(Double.toString(defaults.getAnalysisWindow()));

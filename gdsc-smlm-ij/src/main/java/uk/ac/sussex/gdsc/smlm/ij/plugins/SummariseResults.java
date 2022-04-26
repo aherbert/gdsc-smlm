@@ -139,9 +139,9 @@ public class SummariseResults implements PlugIn {
 
   private static String createHeader() {
     final StringBuilder sb =
-        new StringBuilder(256).append("Dataset\tN\tFrames\tTime\tMemory\tBounds" +
-        // Calibration
-            "\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\t3D\tPrecision Method");
+        new StringBuilder(256).append("Dataset\tN\tFrames\tTime\tMemory\tBounds"
+            // Calibration
+            + "\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\t3D\tPrecision Method");
     for (final String statName : new String[] {"Precision (nm)", "SNR"}) {
       sb.append("\tAv ").append(statName)
       // @formatter:off

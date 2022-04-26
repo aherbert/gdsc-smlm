@@ -140,7 +140,7 @@ public class SpotFit implements PlugIn {
    * an image.
    */
   private static class SpotFitPluginTool extends PlugInTool {
-    final static SpotFitPluginTool INSTANCE = new SpotFitPluginTool();
+    static final SpotFitPluginTool INSTANCE = new SpotFitPluginTool();
 
     private static final AtomicReference<CustomTextWindow> RESULTS_WINDOW = new AtomicReference<>();
     private static final Pattern PATTERN = Pattern.compile("\t");

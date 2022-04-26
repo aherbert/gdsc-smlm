@@ -60,7 +60,7 @@ public class FilterResults implements PlugIn {
   private MemoryPeakResults results;
 
   private GUIFilterSettings.Builder filterSettings =
-      GuiSettings.DefaultGUIFilterSettings.INSTANCE.toBuilder();
+      GuiSettings.DefaultGuiFilterSettings.INSTANCE.toBuilder();
 
   // Used to pass data from analyseResults() to checkLimits()
   private float minDrift = Float.MAX_VALUE;
@@ -334,7 +334,9 @@ public class FilterResults implements PlugIn {
       // sp will not be null
 
       // We stored the drift=z, intensity=signal, background=snr
-      if ((sp.z[i] > filterSettings.getMaxDrift()) || (sp.intensity[i] < filterSettings.getMinSignal()) || (sp.background[i] < filterSettings.getMinSnr())) {
+      if ((sp.z[i] > filterSettings.getMaxDrift())
+          || (sp.intensity[i] < filterSettings.getMinSignal())
+          || (sp.background[i] < filterSettings.getMinSnr())) {
         continue;
       }
 

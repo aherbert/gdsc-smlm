@@ -60,7 +60,8 @@ public final class Shape3DHelper {
 
   // https://en.m.wikipedia.org/wiki/Tetrahedron
   // based on alternated cube
-  private static final float[][] TETRA_VERTICES = {{1, 1, 1}, {1, -1, -1}, {-1, 1, -1}, {-1, -1, 1}};
+  private static final float[][] TETRA_VERTICES =
+      {{1, 1, 1}, {1, -1, -1}, {-1, 1, -1}, {-1, -1, 1}};
   private static final int[][] TETRA_FACES = {{0, 1, 2}, {0, 1, 3}, {1, 2, 3}, {0, 2, 3}};
 
   // https://en.m.wikipedia.org/wiki/Octahedron
@@ -69,8 +70,8 @@ public final class Shape3DHelper {
   private static final int[][] OCTA_FACES =
       {{0, 3, 4}, {3, 1, 4}, {1, 2, 4}, {2, 0, 4}, {3, 0, 5}, {1, 3, 5}, {2, 1, 5}, {0, 2, 5},};
 
-  private static final float[][] CUBE_VERTICES = {{1, 1, -1}, {-1, 1, -1}, {-1, -1, -1}, {1, -1, -1},
-      {1, 1, 1}, {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},};
+  private static final float[][] CUBE_VERTICES = {{1, 1, -1}, {-1, 1, -1}, {-1, -1, -1},
+      {1, -1, -1}, {1, 1, 1}, {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},};
   private static final int[][] CUBE_FACES = {{0, 1, 3}, {3, 1, 2}, {0, 4, 7}, {0, 7, 3}, {1, 5, 6},
       {1, 6, 2}, {3, 7, 6}, {3, 6, 2}, {0, 4, 5}, {0, 5, 1}, {4, 5, 7}, {4, 6, 7},};
   private static final int[][] CUBE_FACES4 =

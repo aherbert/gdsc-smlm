@@ -1660,7 +1660,7 @@ public class ResultsManager implements PlugIn {
    * @param results The results
    * @return True if OK; false if calibration dialog cancelled
    */
-  private static boolean checkCalibration(MemoryPeakResults results) {
+  public static boolean checkCalibration(MemoryPeakResults results) {
     // Check for Calibration
     final String msg = (results.hasCalibration()) ? "partially calibrated" : "uncalibrated";
     final CalibrationWriter calibration = results.getCalibrationWriterSafe();
