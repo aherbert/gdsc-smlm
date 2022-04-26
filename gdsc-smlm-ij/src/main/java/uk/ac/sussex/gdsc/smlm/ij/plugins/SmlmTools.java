@@ -71,9 +71,6 @@ public class SmlmTools extends PlugInFrame {
     SCREEN_DIMENSION = IJ.getScreenSize();
   }
 
-  private final Map<String, String[]> plugins = new HashMap<>();
-  private boolean addSpacer;
-
   /**
    * Constructor.
    *
@@ -197,7 +194,8 @@ public class SmlmTools extends PlugInFrame {
 
     mainPanel.setLayout(grid);
 
-    addSpacer = false;
+    final HashMap<String, String[]> plugins = new HashMap<>();
+    boolean addSpacer = false;
     int col = 0;
     int row = 0;
     for (final String[] plugin : configPlugins) {
@@ -207,7 +205,8 @@ public class SmlmTools extends PlugInFrame {
       } else if ("spacer".equals(plugin[0])) {
         addSpacer = true;
       } else {
-        row = addPlugin(mainPanel, grid, plugin[0], plugin[1], col, row);
+        row = addPlugin(plugins, addSpacer, mainPanel, grid, plugin[0], plugin[1], col, row);
+        addSpacer = false;
       }
     }
 
@@ -291,8 +290,8 @@ public class SmlmTools extends PlugInFrame {
   }
 
   @SuppressWarnings("unused")
-  private int addPlugin(Panel mainPanel, GridBagLayout grid, String commandName,
-      final String command, int col, int row) {
+  private static int addPlugin(Map<String, String[]> plugins, boolean addSpacer, Panel mainPanel,
+      GridBagLayout grid, String commandName, final String command, int col, int row) {
     // Disect the ImageJ plugins.config string, e.g.:
     // Plugins>GDSC SMLM, "Peak Fit", uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit
 
@@ -333,7 +332,6 @@ public class SmlmTools extends PlugInFrame {
     });
 
     if (addSpacer) {
-      addSpacer = false;
       if (row != 0) {
         row = add(mainPanel, grid, new Panel(), col, row);
       }
