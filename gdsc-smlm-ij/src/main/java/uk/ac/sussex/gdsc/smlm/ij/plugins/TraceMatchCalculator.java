@@ -32,6 +32,7 @@ import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -75,18 +76,18 @@ public class TraceMatchCalculator implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    private static final String[] SORT_OPTIONS = new String[] {"Score", "Time"};
+    private static final String[] SORT_OPTIONS = {"Score", "Time"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    String inputOption1 = "";
-    String inputOption2 = "";
-    String inputOption3 = "";
-    double distanceThreshold = 1;
-    double beta = 4;
+    String inputOption1;
+    String inputOption2;
+    String inputOption3;
+    double distanceThreshold;
+    double beta;
     boolean showPairs;
-    int sortIndex = 1;
+    int sortIndex;
 
     Settings() {
       // Set defaults
@@ -158,15 +159,13 @@ public class TraceMatchCalculator implements PlugIn {
     // Load the results
     final MemoryPeakResults results1 =
         ResultsManager.loadInputResults(settings.inputOption1, false, null, null);
-    final MemoryPeakResults results2 =
-        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
-    final MemoryPeakResults results3 =
-        ResultsManager.loadInputResults(settings.inputOption3, false, null, null);
     IJ.showStatus("");
     if (results1 == null || results1.size() == 0) {
       IJ.error(TITLE, "No results 1 could be loaded");
       return;
     }
+    final MemoryPeakResults results2 =
+        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     if (results2 == null || results2.size() == 0) {
       IJ.error(TITLE, "No results 2 could be loaded");
       return;
@@ -175,6 +174,8 @@ public class TraceMatchCalculator implements PlugIn {
       IJ.error(TITLE, "Distance unit should be the same for the results 1 & 2");
       return;
     }
+    final MemoryPeakResults results3 =
+        ResultsManager.loadInputResults(settings.inputOption3, false, null, null);
     if (results3 != null && results1.getDistanceUnit() != results3.getDistanceUnit()) {
       IJ.error(TITLE, "Distance unit should be the same for the results 1 & 3");
       return;
@@ -284,7 +285,7 @@ public class TraceMatchCalculator implements PlugIn {
             pairs.add(new PointPair(null, c));
           }
 
-          final List<? extends PointPair> sortedPairs = sort(pairs);
+          final List<? extends PointPair> sortedPairs = sortPointPairs(pairs);
 
           for (final PointPair pair : sortedPairs) {
             addPairResult(wap.textWindow, pair);
@@ -329,7 +330,7 @@ public class TraceMatchCalculator implements PlugIn {
             }
           }
 
-          final List<? extends Triple> sortedTriples = sort(triples);
+          final List<? extends Triple> sortedTriples = sortTriples(triples);
 
           for (final Triple t : sortedTriples) {
             addTripleResult(wap.textWindow, t);
@@ -375,7 +376,7 @@ public class TraceMatchCalculator implements PlugIn {
             final String[] fields = line.split("\t");
             for (final int i : index) {
               if (i < fields.length) {
-                if (fields[i].equals("-")) {
+                if ("-".equals(fields[i])) {
                   continue;
                 }
                 final int startT = Integer.parseInt(fields[i]);
@@ -421,63 +422,78 @@ public class TraceMatchCalculator implements PlugIn {
     return pulses;
   }
 
-  private static String createResultsHeader() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("Image 1\t");
-    sb.append("Image 2\t");
-    sb.append("Distance (px)\t");
-    sb.append("N\t");
-    sb.append("TP\t");
-    sb.append("FP\t");
-    sb.append("FN\t");
-    sb.append("Jaccard\t");
-    sb.append("Score\t");
-    sb.append("Precision\t");
-    sb.append("Recall\t");
-    sb.append("F0.5\t");
-    sb.append("F1\t");
-    sb.append("F2\t");
-    sb.append("F-beta");
+  private static String toHeader(String[] names) {
+    final StringBuilder sb = new StringBuilder(256);
+    Arrays.stream(names).forEach(x -> sb.append(x).append('\t'));
+    sb.setLength(sb.length() - 1);
     return sb.toString();
+  }
+
+  private static String createResultsHeader() {
+    final String[] names = {
+        // @formatter:off
+        "Image 1",
+        "Image 2",
+        "Distance (px)",
+        "N",
+        "TP",
+        "FP",
+        "FN",
+        "Jaccard",
+        "Score",
+        "Precision",
+        "Recall",
+        "F0.5",
+        "F1",
+        "F2",
+        "F-beta",
+        // @formatter:on
+    };
+    return toHeader(names);
   }
 
   private void addResult(Consumer<String> output, StringBuilder sb, String i1, String i2,
       double distanceThrehsold, MatchResult result) {
     sb.setLength(0);
-    sb.append(i1).append('\t');
-    sb.append(i2).append('\t');
-    sb.append(IJ.d2s(distanceThrehsold, 2)).append('\t');
-    sb.append(result.getNumberPredicted()).append('\t');
-    sb.append(result.getTruePositives()).append('\t');
-    sb.append(result.getFalsePositives()).append('\t');
-    sb.append(result.getFalseNegatives()).append('\t');
-    sb.append(IJ.d2s(result.getJaccard(), 4)).append('\t');
-    sb.append(IJ.d2s(result.getRmsd(), 4)).append('\t');
-    sb.append(IJ.d2s(result.getPrecision(), 4)).append('\t');
-    sb.append(IJ.d2s(result.getRecall(), 4)).append('\t');
-    sb.append(IJ.d2s(result.getFScore(0.5), 4)).append('\t');
-    sb.append(IJ.d2s(result.getFScore(1.0), 4)).append('\t');
-    sb.append(IJ.d2s(result.getFScore(2.0), 4)).append('\t');
-    sb.append(IJ.d2s(result.getFScore(settings.beta), 4));
+    // @formatter:off
+    sb.append(i1).append('\t')
+      .append(i2).append('\t')
+      .append(IJ.d2s(distanceThrehsold, 2)).append('\t')
+      .append(result.getNumberPredicted()).append('\t')
+      .append(result.getTruePositives()).append('\t')
+      .append(result.getFalsePositives()).append('\t')
+      .append(result.getFalseNegatives()).append('\t')
+      .append(IJ.d2s(result.getJaccard(), 4)).append('\t')
+      .append(IJ.d2s(result.getRmsd(), 4)).append('\t')
+      .append(IJ.d2s(result.getPrecision(), 4)).append('\t')
+      .append(IJ.d2s(result.getRecall(), 4)).append('\t')
+      .append(IJ.d2s(result.getFScore(0.5), 4)).append('\t')
+      .append(IJ.d2s(result.getFScore(1.0), 4)).append('\t')
+      .append(IJ.d2s(result.getFScore(2.0), 4)).append('\t')
+      .append(IJ.d2s(result.getFScore(settings.beta), 4));
+    // @formatter:on
 
     output.accept(sb.toString());
   }
 
   private static String createPairsHeader() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("Start1\t");
-    sb.append("End2\t");
-    sb.append("X1\t");
-    sb.append("Y1\t");
-    sb.append("Z1\t");
-    sb.append("Start2\t");
-    sb.append("End2\t");
-    sb.append("X2\t");
-    sb.append("Y2\t");
-    sb.append("Z2\t");
-    sb.append("Distance\t");
-    sb.append("Score\t");
-    return sb.toString();
+    final String[] names = {
+        // @formatter:off
+        "Start1",
+        "End1",
+        "X1",
+        "Y1",
+        "Z1",
+        "Start2",
+        "End2",
+        "X2",
+        "Y2",
+        "Z2",
+        "Distance",
+        "Score",
+        // @formatter:on
+    };
+    return toHeader(names);
   }
 
   private void addPairResult(TextWindow pairsWindow, PointPair pair) {
@@ -502,27 +518,30 @@ public class TraceMatchCalculator implements PlugIn {
   }
 
   private static String createTriplesHeader() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("Start1\t");
-    sb.append("End2\t");
-    sb.append("X1\t");
-    sb.append("Y1\t");
-    sb.append("Z1\t");
-    sb.append("Start2\t");
-    sb.append("End2\t");
-    sb.append("X2\t");
-    sb.append("Y2\t");
-    sb.append("Z2\t");
-    sb.append("Distance\t");
-    sb.append("Score\t");
-    sb.append("Start3\t");
-    sb.append("End3\t");
-    sb.append("X3\t");
-    sb.append("Y3\t");
-    sb.append("Z3\t");
-    sb.append("Distance2\t");
-    sb.append("Score2\t");
-    return sb.toString();
+    final String[] names = {
+        // @formatter:off
+        "Start1",
+        "End1",
+        "X1",
+        "Y1",
+        "Z1",
+        "Start2",
+        "End2",
+        "X2",
+        "Y2",
+        "Z2",
+        "Distance",
+        "Score",
+        "Start3",
+        "End3",
+        "X3",
+        "Y3",
+        "Z3",
+        "Distance2",
+        "Score2",
+        // @formatter:on
+    };
+    return toHeader(names);
   }
 
   private void addTripleResult(TextWindow triplesWindow, Triple triple) {
@@ -552,7 +571,7 @@ public class TraceMatchCalculator implements PlugIn {
     }
   }
 
-  private List<? extends PointPair> sort(List<PointPair> pairs) {
+  private List<? extends PointPair> sortPointPairs(List<PointPair> pairs) {
     if (settings.sortIndex == 1) {
       // Sort by time
       final ArrayList<TimeComparablePointPair> newPairs = new ArrayList<>(pairs.size());
@@ -566,7 +585,7 @@ public class TraceMatchCalculator implements PlugIn {
     return pairs;
   }
 
-  private List<? extends Triple> sort(ArrayList<Triple> triples) {
+  private List<? extends Triple> sortTriples(List<Triple> triples) {
     if (settings.sortIndex == 1) {
       // Sort by time
       final List<TimeComparableTriple> sorted = new ArrayList<>(triples.size());
@@ -584,6 +603,9 @@ public class TraceMatchCalculator implements PlugIn {
     return sorted;
   }
 
+  /**
+   * A PointPair that can be compared using time.
+   */
   private static class TimeComparablePointPair extends PointPair {
     int startT = Integer.MAX_VALUE;
     final Pulse p1;
@@ -635,7 +657,14 @@ public class TraceMatchCalculator implements PlugIn {
     }
   }
 
-  private static int comparePulsesStartT(Pulse p1, Pulse p2) {
+  /**
+   * Compare pulses using the start time.
+   *
+   * @param p1 pulse 1
+   * @param p2 pulse 2
+   * @return the result
+   */
+  static int comparePulsesStartT(Pulse p1, Pulse p2) {
     // Data for a point always beats no data
     if (p1 == null) {
       return (p2 == null) ? 0 : 1;
@@ -646,7 +675,14 @@ public class TraceMatchCalculator implements PlugIn {
     return p1.getStart() - p2.getStart();
   }
 
-  private static int comparePulsesEndT(Pulse p1, Pulse p2) {
+  /**
+   * Compare pulses using the end time.
+   *
+   * @param p1 pulse 1
+   * @param p2 pulse 2
+   * @return the result
+   */
+  static int comparePulsesEndT(Pulse p1, Pulse p2) {
     // Data for a point always beats no data
     if (p1 == null) {
       return (p2 == null) ? 0 : 1;
@@ -657,7 +693,14 @@ public class TraceMatchCalculator implements PlugIn {
     return p1.getEnd() - p2.getEnd();
   }
 
-  private static int comparePulsesCoords(Pulse p1, Pulse p2) {
+  /**
+   * Compare pulses using coordinates.
+   *
+   * @param p1 pulse 1
+   * @param p2 pulse 2
+   * @return the result
+   */
+  static int comparePulsesCoords(Pulse p1, Pulse p2) {
     // Data for a point always beats no data
     if (p1 == null) {
       return (p2 == null) ? 0 : 1;
@@ -680,6 +723,9 @@ public class TraceMatchCalculator implements PlugIn {
     return 0;
   }
 
+  /**
+   * A triple of Pulse results.
+   */
   private static class Triple {
     final Pulse p1;
     final Pulse p2;
@@ -698,6 +744,9 @@ public class TraceMatchCalculator implements PlugIn {
     }
   }
 
+  /**
+   * A triple that can be compared using time.
+   */
   private static class TimeComparableTriple extends Triple {
     int startT = Integer.MAX_VALUE;
 
@@ -762,6 +811,9 @@ public class TraceMatchCalculator implements PlugIn {
     }
   }
 
+  /**
+   * A triple that can be compared using score.
+   */
   private static class ScoreComparableTriple extends Triple {
     double score;
 
