@@ -65,9 +65,9 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
   // Track image contrast adjustments when the dialog is visible
 
   /** The image ID. */
-  private int imageId;
+  int imageId;
   /** Flag to show when the dialog is visible. */
-  private boolean dialogVisible;
+  boolean dialogVisible;
   /** The display min of the image. */
   private double min;
   /** The display max of the image. */
@@ -166,8 +166,12 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     return FLAGS;
   }
 
-
-  private void saveMinMax(ImagePlus imp) {
+  /**
+   * Save the current processor min and max.
+   *
+   * @param imp the image
+   */
+  void saveMinMax(ImagePlus imp) {
     final ImageProcessor ip = imp.getProcessor();
     min = ip.getMin();
     max = ip.getMax();
