@@ -145,6 +145,9 @@ public class TraceExporter implements PlugIn {
     }
   }
 
+  /**
+   * The export format.
+   */
   private enum ExportFormat implements NamedObject {
     SPOT_ON("Spot-On"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS("NOBIAS"), NONE("None");
 
@@ -221,7 +224,7 @@ public class TraceExporter implements PlugIn {
     return true;
   }
 
-  private static boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults,
+  private static boolean showMultiDialog(List<MemoryPeakResults> allResults,
       MemoryResultsList items) {
     // Show a list box containing all the results. This should remember the last set of chosen
     // items.
@@ -315,13 +318,13 @@ public class TraceExporter implements PlugIn {
       });
     }
 
-    if (settings.format == 3) {
+    if (settings.format == ExportFormat.NOBIAS.ordinal()) {
       exportNobias(results);
-    } else if (settings.format == 2) {
+    } else if (settings.format == ExportFormat.VB_SPT.ordinal()) {
       exportVbSpt(results);
-    } else if (settings.format == 1) {
+    } else if (settings.format == ExportFormat.ANA_DNA.ordinal()) {
       exportAnaDda(results);
-    } else if (settings.format == 0) {
+    } else if (settings.format == ExportFormat.SPOT_ON.ordinal()) {
       exportSpotOn(results);
     }
     ImageJUtils.log("Exported %s: %s in %s", results.getName(),
@@ -445,8 +448,6 @@ public class TraceExporter implements PlugIn {
       final TypeConverter<TimeUnit> converter = UnitConverterUtils.createConverter(TimeUnit.FRAME,
           TimeUnit.SECOND, results.getCalibrationReader().getExposureTime());
 
-      @SuppressWarnings("resource")
-      final BufferedWriter writer = out;
       results.forEach(DistanceUnit.UM, (XyrResultProcedure) (x, y, result) -> {
         try {
           if (result.hasEndFrame()) {
@@ -454,28 +455,28 @@ public class TraceExporter implements PlugIn {
             final String sx = Float.toString(x);
             final String sy = Float.toString(y);
             for (int t = result.getFrame(); t <= result.getEndFrame(); t++) {
-              writer.write(Integer.toString(t));
-              writer.write(",");
-              writer.write(Float.toString(converter.convert(t)));
-              writer.write(",");
-              writer.write(sId);
-              writer.write(",");
-              writer.write(sx);
-              writer.write(",");
-              writer.write(sy);
-              writer.newLine();
+              out.write(Integer.toString(t));
+              out.write(",");
+              out.write(Float.toString(converter.convert(t)));
+              out.write(",");
+              out.write(sId);
+              out.write(",");
+              out.write(sx);
+              out.write(",");
+              out.write(sy);
+              out.newLine();
             }
           } else {
-            writer.write(Integer.toString(result.getFrame()));
-            writer.write(",");
-            writer.write(Float.toString(converter.convert(result.getFrame())));
-            writer.write(",");
-            writer.write(Integer.toString(result.getId()));
-            writer.write(",");
-            writer.write(Float.toString(x));
-            writer.write(",");
-            writer.write(Float.toString(y));
-            writer.newLine();
+            out.write(Integer.toString(result.getFrame()));
+            out.write(",");
+            out.write(Float.toString(converter.convert(result.getFrame())));
+            out.write(",");
+            out.write(Integer.toString(result.getId()));
+            out.write(",");
+            out.write(Float.toString(x));
+            out.write(",");
+            out.write(Float.toString(y));
+            out.newLine();
           }
         } catch (final IOException ex) {
           throw new UncheckedIOException(ex);
