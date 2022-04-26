@@ -110,6 +110,20 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
  * Opens peaks results and displays/converts them.
  */
 public class ResultsManager implements PlugIn {
+  /** Use this to add extra options to the dialog. */
+  public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
+  /** Use this to add the results directory to the file results dialog. */
+  public static final int FLAG_RESULTS_DIRECTORY = 0x00000002;
+  /** Use this to add the results file to the file results dialog. */
+  public static final int FLAG_RESULTS_FILE = 0x00000004;
+  /** Use this to avoid adding the section header to the dialog. */
+  public static final int FLAG_NO_SECTION_HEADER = 0x00000008;
+  /** Use this to add a choice of table format to the dialog. */
+  public static final int FLAG_TABLE_FORMAT = 0x00000010;
+  /** Use this to remove the None option from the results image options. */
+  public static final int FLAG_IMAGE_REMOVE_NONE = 0x00000020;
+  /** Use this to avoid adding the LUT option to the results image options. */
+  public static final int FLAG_IMAGE_NO_LUT = 0x00000040;
 
   private static final String TITLE = "Peak Results Manager";
   private static final Logger logger = ImageJPluginLoggerHelper.getLogger(ResultsManager.class);
@@ -815,21 +829,6 @@ public class ResultsManager implements PlugIn {
     return true;
   }
 
-  /** Use this to add extra options to the dialog. */
-  public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
-  /** Use this to add the results directory to the file results dialog. */
-  public static final int FLAG_RESULTS_DIRECTORY = 0x00000002;
-  /** Use this to add the results file to the file results dialog. */
-  public static final int FLAG_RESULTS_FILE = 0x00000004;
-  /** Use this to avoid adding the section header to the dialog. */
-  public static final int FLAG_NO_SECTION_HEADER = 0x00000008;
-  /** Use this to add a choice of table format to the dialog. */
-  public static final int FLAG_TABLE_FORMAT = 0x00000010;
-  /** Use this to remove the None option from the results image options. */
-  public static final int FLAG_IMAGE_REMOVE_NONE = 0x00000020;
-  /** Use this to avoid adding the LUT option to the results image options. */
-  public static final int FLAG_IMAGE_NO_LUT = 0x00000040;
-
   /**
    * Adds the table results options.
    *
@@ -1396,7 +1395,7 @@ public class ResultsManager implements PlugIn {
    * @param memoryResults the memory results
    * @return The name
    */
-  private static String getName(MemoryPeakResults memoryResults) {
+  static String getName(MemoryPeakResults memoryResults) {
     return memoryResults.getName() + " [" + memoryResults.size() + "]";
   }
 
@@ -1517,13 +1516,13 @@ public class ResultsManager implements PlugIn {
    */
   public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration,
       DistanceUnit distanceUnit, IntensityUnit intensityUnit, LoadOption... extraOptions) {
-    MemoryPeakResults results = null;
-    PeakResultsReader reader = null;
-    if (inputOption.equals(INPUT_NONE)) {
+    MemoryPeakResults results;
+    if (INPUT_NONE.equals(inputOption)) {
       // Do nothing
-    } else if (inputOption.equals(INPUT_FILE)) {
+      return null;
+    } else if (INPUT_FILE.equals(inputOption)) {
       IJ.showStatus("Reading results file ...");
-      reader = new PeakResultsReader(findFileName(extraOptions));
+      final PeakResultsReader reader = new PeakResultsReader(findFileName(extraOptions));
       IJ.showStatus("Reading " + reader.getFormat() + " results file ...");
       final ResultOption[] options = reader.getOptions();
       if (options.length != 0) {
@@ -1551,7 +1550,7 @@ public class ResultsManager implements PlugIn {
         return results;
       }
 
-      if (checkCalibration && !checkCalibration(results, reader)) {
+      if (checkCalibration && !checkCalibration(results)) {
         return null;
       }
       if (distanceUnit != null && results.getDistanceUnit() != distanceUnit) {
@@ -1661,22 +1660,7 @@ public class ResultsManager implements PlugIn {
    * @param results The results
    * @return True if OK; false if calibration dialog cancelled
    */
-  public static boolean checkCalibration(MemoryPeakResults results) {
-    return checkCalibration(results, null);
-  }
-
-  /**
-   * Check the calibration of the results exists, if not then prompt for it with a dialog.
-   *
-   * <p>The calibration is rechecked after the dialog is shown.
-   *
-   * <p>Missing calibration is written to the Logger for the the class.
-   *
-   * @param results The results
-   * @param reader Used to determine the file type
-   * @return True if OK; false if calibration is missing
-   */
-  private static boolean checkCalibration(MemoryPeakResults results, PeakResultsReader reader) {
+  private static boolean checkCalibration(MemoryPeakResults results) {
     // Check for Calibration
     final String msg = (results.hasCalibration()) ? "partially calibrated" : "uncalibrated";
     final CalibrationWriter calibration = results.getCalibrationWriterSafe();
@@ -1774,6 +1758,7 @@ public class ResultsManager implements PlugIn {
       case UNRECOGNIZED:
       default:
         missing.add("Camera type");
+        break;
     }
 
     if (missing.isEmpty()) {
@@ -1781,7 +1766,7 @@ public class ResultsManager implements PlugIn {
     }
 
     logger.info(() -> {
-      final StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder(128);
       sb.append("Calibration missing: ");
       for (int i = 0; i < missing.size(); i++) {
         if (i != 0) {
@@ -1802,7 +1787,7 @@ public class ResultsManager implements PlugIn {
    */
   private MemoryPeakResults loadResults(String inputOption) {
     LoadOption loadOption = null;
-    if (inputOption.equals(INPUT_FILE)) {
+    if (INPUT_FILE.equals(inputOption)) {
       fileInput = true;
       loadOption = new FilenameLoadOption(settings.inputFilename);
     }
@@ -1842,15 +1827,15 @@ public class ResultsManager implements PlugIn {
         }
         omDirectory = fc.getCurrentDirectory().getPath() + File.separator;
       });
-    } catch (final Exception ex) {
+    } catch (final Exception ignored) {
       // Ignore
     }
     if (omDirectory == null) {
       return;
     }
     OpenDialog.setDefaultDirectory(omDirectory);
-    for (int i = 0; i < omFiles.length; i++) {
-      final String path = omDirectory + omFiles[i].getName();
+    for (final File file : omFiles) {
+      final String path = omDirectory + file.getName();
       load(path);
     }
   }
