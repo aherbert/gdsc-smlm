@@ -1024,11 +1024,7 @@ public abstract class Image3D {
 
     // Compute bounds assuming width,height,depth is small and positive.
     int x1;
-    int y1;
-    int z1;
     int xw1;
-    int yh1;
-    int zd1;
     if (x < 0) {
       x1 = 0;
       xw1 = MathUtils.clip(0, nc, x + width);
@@ -1040,6 +1036,8 @@ public abstract class Image3D {
     if (width == 0) {
       return 0;
     }
+    int y1;
+    int yh1;
     if (y < 0) {
       y1 = 0;
       yh1 = MathUtils.clip(0, nr, y + height);
@@ -1051,6 +1049,8 @@ public abstract class Image3D {
     if (height == 0) {
       return 0;
     }
+    int z1;
+    int zd1;
     if (z < 0) {
       z1 = 0;
       zd1 = MathUtils.clip(0, ns, z + depth);
