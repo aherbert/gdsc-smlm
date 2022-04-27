@@ -1679,7 +1679,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   /**
    * Linear MSD function.
-   * 
+   *
    * <pre>
    * y = ax
    * </pre>
@@ -1752,7 +1752,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   /**
    * Linear MSD function with intercept.
-   * 
+   *
    * <pre>
    * y = ax + 4c^2
    * </pre>
@@ -1835,7 +1835,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   /**
    * Linear MSD function with corrected intercept.
-   * 
+   *
    * <pre>
    * y = ax - a/3 + 4c^2
    * </pre>

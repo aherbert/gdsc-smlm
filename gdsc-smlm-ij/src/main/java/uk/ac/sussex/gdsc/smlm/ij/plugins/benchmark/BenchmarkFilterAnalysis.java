@@ -407,7 +407,7 @@ public class BenchmarkFilterAnalysis
    * should be done on a copy and the copy saved.
    */
   private static class BenchmarkFilterAnalysisResult {
-    final static AtomicReference<BenchmarkFilterAnalysisResult> LAST_RESULT =
+    static final AtomicReference<BenchmarkFilterAnalysisResult> LAST_RESULT =
         new AtomicReference<>(new BenchmarkFilterAnalysisResult());
 
     SettingsList lastAnalyseSettings;
@@ -4072,7 +4072,8 @@ public class BenchmarkFilterAnalysis
 
   private static String createSensitivityHeader() {
     return "Filter\tParam\tValue\tJ Sensitivity (delta)\tJ Sensitivity (unit)\t"
-        + "P Sensitivity (delta)\tP Sensitivity (unit)\tR Sensitivity (delta)\tR Sensitivity (unit)";
+        + "P Sensitivity (delta)\tP Sensitivity (unit)\tR Sensitivity (delta)\t"
+        + "R Sensitivity (unit)";
   }
 
   private int filterAnalysis(FilterSet filterSet, int setNumber, DirectFilter currentOptimum,

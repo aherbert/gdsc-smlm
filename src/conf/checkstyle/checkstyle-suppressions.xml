@@ -27,7 +27,7 @@
 
 <suppressions>
   <suppress checks="MissingJavadocType" files=".*[\\/]test[\\/].*" />
-  <suppress checks="LineLength" files=".*BenchmarkSpotFit.java" lines="2324-2336" />
+  <suppress checks="LineLength" files=".*BenchmarkSpotFit.java" lines="2336-2348" />
   <suppress checks="LineLength" files=".*TsfPeakResultsReader.java" lines="67-95" />
   <suppress checks="LineLength" files=".*LvmGradientProcedureTest.java" lines="133-182" />
   <suppress checks="AbbreviationAsWordInName" files=".*[\\/]results[\\/]Calibration.java" lines="110-112" />

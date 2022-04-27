@@ -933,7 +933,7 @@ public class BenchmarkFit implements PlugIn {
   }
 
   /**
-   * Gets the square pixel adjustment
+   * Gets the square pixel adjustment.
    *
    * @return the adjustment
    */
