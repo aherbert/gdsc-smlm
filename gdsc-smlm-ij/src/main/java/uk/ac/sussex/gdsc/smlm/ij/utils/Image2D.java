@@ -37,6 +37,8 @@ public abstract class Image2D {
    */
   public static final int MAX_SIZE_OF_32_BIT_ARRAY = 1073741824;
 
+  private static final String REGION_NOT_WITHIN_THE_DATA = "Region not within the data";
+
   /** The number of rows (max y). */
   public final int nr;
   /** The number of columns (max x). */
@@ -322,7 +324,7 @@ public abstract class Image2D {
     final int height = image.getHeight();
     if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1
         || (long) y + height > nr) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     int base = y * nc + x;
     for (int r = 0, i = 0; r < height; r++) {
@@ -348,7 +350,7 @@ public abstract class Image2D {
     // Check the region range
     if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1
         || (long) y + height > nr) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     final int size = width * height;
     int base = y * nc + x;
@@ -377,7 +379,7 @@ public abstract class Image2D {
       return;
     }
     if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     int base = y * nc + x;
     for (int r = 0, i = 0; r < height; r++) {
@@ -404,7 +406,7 @@ public abstract class Image2D {
       return;
     }
     if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     final boolean isFloat = image.getBitDepth() == 32;
     int base = y * nc + x;

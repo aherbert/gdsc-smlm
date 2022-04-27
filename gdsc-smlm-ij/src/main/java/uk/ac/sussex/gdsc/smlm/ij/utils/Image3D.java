@@ -38,6 +38,8 @@ public abstract class Image3D {
    */
   public static final int MAX_SIZE_OF_32_BIT_ARRAY = 1073741824;
 
+  private static final String REGION_NOT_WITHIN_THE_DATA = "Region not within the data";
+
   /** The number of slices (max z). */
   public final int ns;
   /** The number of rows (max y). */
@@ -367,7 +369,7 @@ public abstract class Image3D {
     final int depth = image.getSize();
     if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
         || z < 0 || depth < 1 || (long) z + depth > ns) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     for (int s = 0, i = 0; s < depth; s++, z++) {
       int base = z * nrByNc + y * nc + x;
@@ -397,7 +399,7 @@ public abstract class Image3D {
     // Check the region range
     if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
         || z < 0 || depth < 1 || (long) z + depth > ns) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     final int size = width * height;
     final ImageStack stack = new ImageStack(width, height, depth);
@@ -436,7 +438,7 @@ public abstract class Image3D {
     // Check the region range
     if (x < 0 || width < 1 || (long) x + width > nc || y < 0 || height < 1 || (long) y + height > nr
         || z < 0 || depth < 1 || (long) z + depth > ns) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     final ImageStack stack2 = new ImageStack(width, height, depth);
     for (int s = 0; s < depth; s++, z++) {
@@ -466,7 +468,7 @@ public abstract class Image3D {
     }
     if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr || z < 0
         || (long) z + depth > ns) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     for (int s = 0, i = 0; s < depth; s++, z++) {
       int base = z * nrByNc + y * nc + x;
@@ -498,7 +500,7 @@ public abstract class Image3D {
     }
     if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr || z < 0
         || (long) z + depth > ns) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     final boolean isFloat = stack.getBitDepth() == 32;
     final FloatProcessor fp = (isFloat) ? new FloatProcessor(width, height) : null;
@@ -531,7 +533,7 @@ public abstract class Image3D {
       return;
     }
     if (x < 0 || (long) x + width > nc || y < 0 || (long) y + height > nr || z < 0 || z >= ns) {
-      throw new IllegalArgumentException("Region not within the data");
+      throw new IllegalArgumentException(REGION_NOT_WITHIN_THE_DATA);
     }
     final boolean isFloat = image.getBitDepth() == 32;
     int base = z * nrByNc + y * nc + x;
