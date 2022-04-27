@@ -42,6 +42,11 @@ public class ObjectAnalyzer {
   private int maxObject;
   private int minObjectSize;
 
+  private int maxx;
+  private int xlimit;
+  private int ylimit;
+  private int[] offset;
+
   /**
    * Instantiates a new object analyzer using 4N connected neighbours.
    *
@@ -219,18 +224,12 @@ public class ObjectAnalyzer {
     return listLen;
   }
 
-  private int maxx;
-  private int maxy;
-  private int xlimit;
-  private int ylimit;
-  private int[] offset;
-
   /**
    * Creates the direction offset tables.
    */
   private void initialise(ImageProcessor ip) {
     maxx = ip.getWidth();
-    maxy = ip.getHeight();
+    final int maxy = ip.getHeight();
 
     xlimit = maxx - 1;
     ylimit = maxy - 1;
