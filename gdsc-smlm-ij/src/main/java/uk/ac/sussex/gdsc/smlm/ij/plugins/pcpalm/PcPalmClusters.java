@@ -194,6 +194,9 @@ public class PcPalmClusters implements PlugIn {
     }
   }
 
+  /**
+   * Data for the histogram.
+   */
   private static class HistogramData {
     float[][] histogram;
     int frames;
@@ -492,13 +495,13 @@ public class PcPalmClusters implements PlugIn {
           break;
         }
         final String[] fields = line.split("[\t, ]+");
-        if (fields[0].equalsIgnoreCase("frames")) {
+        if ("frames".equalsIgnoreCase(fields[0])) {
           frames = Integer.parseInt(fields[1]);
         }
-        if (fields[0].equalsIgnoreCase("area")) {
+        if ("area".equalsIgnoreCase(fields[0])) {
           area = Double.parseDouble(fields[1]);
         }
-        if (fields[0].equalsIgnoreCase("units")) {
+        if ("units".equalsIgnoreCase(fields[0])) {
           units = fields[1];
         }
       }
@@ -532,7 +535,7 @@ public class PcPalmClusters implements PlugIn {
       }
 
       // Create a contiguous histogram from zero
-      int maxN = data.keySet().intStream().max().orElse(0);
+      final int maxN = data.keySet().intStream().max().orElse(0);
 
       final float[][] hist = new float[2][maxN + 1];
       for (int n = 1; n <= maxN; n++) {
