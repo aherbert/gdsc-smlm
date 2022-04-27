@@ -120,8 +120,7 @@ public class PcPalmAnalysis implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String resultsDirectory;
     double correlationDistance;
@@ -300,10 +299,10 @@ public class PcPalmAnalysis implements PlugIn {
       final List<CorrelationResult> newResults = new ArrayList<>(results);
 
       int count = 0;
-      for (int i = 0; i < fileList.length; i++) {
+      for (final File file : fileList) {
         final XStream xs = new XStream(new DomDriver());
         xs.allowTypes(new Class[] {CorrelationResult.class});
-        if (fileList[i].isFile() && loadResult(newResults, xs, fileList[i].getPath())) {
+        if (file.isFile() && loadResult(newResults, xs, file.getPath())) {
           count++;
         }
       }
@@ -556,10 +555,6 @@ public class PcPalmAnalysis implements PlugIn {
       log("Computing density histogram");
 
       // Compute all-vs-all distance matrix.
-      // Create histogram of distances at different radii.
-      final int nBins = (int) (settings.correlationDistance / settings.correlationInterval) + 1;
-      final double maxDistance2 = settings.correlationDistance * settings.correlationDistance;
-      final int[] h = new int[nBins];
 
       // TODO - Update this using a grid with a resolution of maxDistance to increase speed
       // by only comparing to neighbours within range.
@@ -587,7 +582,6 @@ public class PcPalmAnalysis implements PlugIn {
       final double boundaryMiny = (settings.useBorder) ? miny + settings.correlationDistance : miny;
       final double boundaryMaxy = (settings.useBorder) ? maxy - settings.correlationDistance : maxy;
 
-      int countN = 0;
       if (boundaryMaxx <= boundaryMinx || boundaryMaxy <= boundaryMiny) {
         log("ERROR: 'Use border' option of %s nm is not possible: Width = %s nm, Height = %s nm",
             MathUtils.rounded(settings.correlationDistance, 4), MathUtils.rounded(maxx - minx, 3),
@@ -595,6 +589,12 @@ public class PcPalmAnalysis implements PlugIn {
         return;
       }
 
+      // Create histogram of distances at different radii.
+      final int nBins = (int) (settings.correlationDistance / settings.correlationInterval) + 1;
+      final double maxDistance2 = settings.correlationDistance * settings.correlationDistance;
+      final int[] h = new int[nBins];
+
+      int countN = 0;
       for (int i = molecules.size(); i-- > 0;) {
         final Molecule m = molecules.get(i);
         // Optionally ignore molecules that are near the edge of the boundary
@@ -641,7 +641,7 @@ public class PcPalmAnalysis implements PlugIn {
         radius = Arrays.copyOf(radius, nBins);
       }
 
-      final double[][] gr = new double[][] {radius, pcf, null};
+      final double[][] gr = {radius, pcf, null};
 
       final CorrelationResult result =
           new CorrelationResult(0, moleculesResults.results.getSource(), boundaryMinx, boundaryMiny,
@@ -1167,42 +1167,49 @@ public class PcPalmAnalysis implements PlugIn {
     final double pcw = (moleculesResults.maxx - moleculesResults.minx) / 100.0;
     final double pch = (moleculesResults.maxy - moleculesResults.miny) / 100.0;
 
-    final StringBuilder sb = new StringBuilder();
-    sb.append(result.id).append('\t');
-    sb.append(moleculesResults.results.getName()).append('\t');
-    sb.append(IJ.d2s(minx)).append('\t');
-    sb.append(IJ.d2s((minx) / pcw)).append('\t');
-    sb.append(IJ.d2s(miny)).append('\t');
-    sb.append(IJ.d2s((miny) / pch)).append('\t');
-    sb.append(IJ.d2s(maxx - minx)).append('\t');
-    sb.append(IJ.d2s((maxx - minx) / pcw)).append('\t');
-    sb.append(IJ.d2s(maxy - miny)).append('\t');
-    sb.append(IJ.d2s((maxy - miny) / pch)).append('\t');
-    sb.append(MathUtils.rounded(uniquePoints, 4)).append('\t');
-    sb.append(MathUtils.rounded(peakDensity, 4)).append('\t');
-    sb.append(MathUtils.rounded(settings.nmPerPixel, 4)).append('\t');
-    sb.append(settings.binaryImage).append('\t');
+    final StringBuilder sb = new StringBuilder(512);
+    sb.append(result.id).append('\t')
+    // @formatter:off
+      .append(moleculesResults.results.getName()).append('\t')
+      .append(IJ.d2s(minx)).append('\t')
+      .append(IJ.d2s((minx) / pcw)).append('\t')
+      .append(IJ.d2s(miny)).append('\t')
+      .append(IJ.d2s((miny) / pch)).append('\t')
+      .append(IJ.d2s(maxx - minx)).append('\t')
+      .append(IJ.d2s((maxx - minx) / pcw)).append('\t')
+      .append(IJ.d2s(maxy - miny)).append('\t')
+      .append(IJ.d2s((maxy - miny) / pch)).append('\t')
+      .append(MathUtils.rounded(uniquePoints, 4)).append('\t')
+      .append(MathUtils.rounded(peakDensity, 4)).append('\t')
+      .append(MathUtils.rounded(settings.nmPerPixel, 4)).append('\t')
+      .append(settings.binaryImage).append('\t');
+    // @formatter:on
 
     createResultsTable().append(sb.toString());
   }
 
   private static TextWindow createResultsTable() {
     return ImageJUtils.refresh(resultsTableRef, () -> {
-      final StringBuilder sb = new StringBuilder();
-      sb.append("ID\t");
-      sb.append("Image Source\t");
-      sb.append("X\t");
-      sb.append("X %\t");
-      sb.append("Y\t");
-      sb.append("Y %\t");
-      sb.append("Width\t");
-      sb.append("Width %\t");
-      sb.append("Height\t");
-      sb.append("Height %\t");
-      sb.append("N\t");
-      sb.append("PeakDensity (um^-2)\t");
-      sb.append("nm/pixel\t");
-      sb.append("Binary\t");
+      final StringBuilder sb = new StringBuilder(512);
+      Arrays.stream(new String[] {
+          // @formatter:off
+          "ID",
+          "Image Source",
+          "X",
+          "X %",
+          "Y",
+          "Y %",
+          "Width",
+          "Width %",
+          "Height",
+          "Height %",
+          "N",
+          "PeakDensity (um^-2)",
+          "nm/pixel",
+          "Binary",
+          // @formatter:on
+      }).forEach(s -> sb.append(s).append('\t'));
+      sb.setLength(sb.length() - 1);
       return new TextWindow(TITLE, sb.toString(), (String) null, 800, 300);
     });
   }
