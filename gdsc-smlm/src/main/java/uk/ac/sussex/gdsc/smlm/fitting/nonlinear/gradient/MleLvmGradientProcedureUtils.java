@@ -114,8 +114,8 @@ public final class MleLvmGradientProcedureUtils {
    * @return true, if is strictly positive
    */
   private static boolean isStrictlyPositive(double[] y) {
-    for (int i = 0; i < y.length; i++) {
-      if (y[i] <= 0) {
+    for (final double d : y) {
+      if (d <= 0) {
         return false;
       }
     }
