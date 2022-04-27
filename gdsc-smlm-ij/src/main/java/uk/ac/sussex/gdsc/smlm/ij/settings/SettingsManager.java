@@ -808,7 +808,7 @@ public final class SettingsManager {
    * @param clazz the clazz
    * @return the path
    */
-  private static Path createSettingsPath(Class<?> clazz) {
+  static Path createSettingsPath(Class<?> clazz) {
     return Paths.get(settingsDirectory, clazz.getSimpleName().toLowerCase(Locale.US) + ".settings");
   }
 
