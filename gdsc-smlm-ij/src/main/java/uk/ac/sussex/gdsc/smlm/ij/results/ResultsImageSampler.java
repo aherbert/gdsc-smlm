@@ -60,7 +60,6 @@ public class ResultsImageSampler {
   private final int lx;
   private final int ly;
   private final int xblocks;
-  private final int yblocks;
   private final int xyblocks;
 
   /** The size for samples. */
@@ -86,6 +85,9 @@ public class ResultsImageSampler {
    */
   private double snrThreshold = 3;
 
+  /**
+   * List structure for PeakResult data.
+   */
   private static class PeakResultList {
     int size;
     PeakResult[] data;
@@ -101,7 +103,7 @@ public class ResultsImageSampler {
     void add(PeakResult peakResult) {
       data[size++] = peakResult;
       if (size == data.length) {
-        final PeakResult[] data2 = new PeakResult[size * 2];
+        final PeakResult[] data2 = new PeakResult[size << 1];
         System.arraycopy(data, 0, data2, 0, size);
         data = data2;
       }
@@ -112,9 +114,17 @@ public class ResultsImageSampler {
     }
   }
 
+  /**
+   * A result sample.
+   */
   private static class ResultsSample {
     long index;
     final PeakResultList list;
+
+    ResultsSample(long index, PeakResultList data) {
+      this.index = index;
+      this.list = data;
+    }
 
     static ResultsSample createEmpty(long index) {
       return new ResultsSample(index, new PeakResultList(null));
@@ -124,21 +134,19 @@ public class ResultsImageSampler {
       return new ResultsSample(index, new PeakResultList());
     }
 
-    ResultsSample(long index, PeakResultList data) {
-      this.index = index;
-      this.list = data;
-    }
-
-    public int size() {
+    int size() {
       return list.size;
     }
 
-    public void add(PeakResult peakResult) {
+    void add(PeakResult peakResult) {
       list.add(peakResult);
     }
   }
 
-  private static enum IndexComparator implements Comparator<ResultsSample> {
+  /**
+   * Compare ResultSample using the index.
+   */
+  private enum IndexComparator implements Comparator<ResultsSample> {
     /** An instance of the comparator. */
     INSTANCE;
 
@@ -148,7 +156,10 @@ public class ResultsImageSampler {
     }
   }
 
-  private static enum CountComparator implements Comparator<ResultsSample> {
+  /**
+   * Compare ResultSample using the size (count) ascending.
+   */
+  private enum CountComparator implements Comparator<ResultsSample> {
     /** An instance of the comparator. */
     INSTANCE;
 
@@ -163,7 +174,10 @@ public class ResultsImageSampler {
     }
   }
 
-  private static enum ReverseCountComparator implements Comparator<ResultsSample> {
+  /**
+   * Compare ResultSample using the size (count) descending.
+   */
+  private enum ReverseCountComparator implements Comparator<ResultsSample> {
     /** An instance of the comparator. */
     INSTANCE;
 
@@ -202,7 +216,7 @@ public class ResultsImageSampler {
     final int ux = size * (int) Math.ceil((double) (bounds.x + bounds.width) / size);
     final int uy = size * (int) Math.ceil((double) (bounds.y + bounds.height) / size);
     xblocks = (ux - lx) / size;
-    yblocks = (uy - ly) / size;
+    final int yblocks = (uy - ly) / size;
     xyblocks = xblocks * yblocks;
   }
 
@@ -253,8 +267,8 @@ public class ResultsImageSampler {
         long emptyCandidate = 0;
         final long[] list = new long[(int) Math.min(empty, maxNumberOfEmptySamples)];
         int count = 0;
-        OUTER: for (int i = 0; i < data.length; i++) {
-          final long current = data[i].index;
+        OUTER: for (final ResultsSample rs : data) {
+          final long current = rs.index;
           // If the current index is bigger than the candidate then it must be empty
           while (current > emptyCandidate) {
             // Add all those that are empty
@@ -273,8 +287,8 @@ public class ResultsImageSampler {
         if (empty < data.length) {
           // We can pick all the indices that are missing
           long emptyCandidate = 0;
-          for (int i = 0; i < data.length; i++) {
-            final long current = data[i].index;
+          for (final ResultsSample rs : data) {
+            final long current = rs.index;
             // If the current index is bigger than the candidate then it must be empty
             while (current > emptyCandidate) {
               // Add all those that are empty
@@ -287,8 +301,8 @@ public class ResultsImageSampler {
           // There are many empty blocks so just sample blocks
           // after those with localisations.
           long emptyCandidate = 1;
-          for (int i = 0; i < data.length; i++) {
-            final long current = data[i].index;
+          for (final ResultsSample rs : data) {
+            final long current = rs.index;
             // If the current index is bigger than the candidate then it must be empty
             if (current > emptyCandidate) {
               // Note: we only sample the next empty index after an index with data
@@ -311,12 +325,12 @@ public class ResultsImageSampler {
     final Long2ObjectOpenHashMap<ResultsSample> map = new Long2ObjectOpenHashMap<>(results.size());
     ResultsSample next = ResultsSample.create(-1);
     // For SNR computation
-    Object[] pixelArray = stack.getImageArray();
-    int width = stack.getWidth();
-    int height = stack.getHeight();
+    final Object[] pixelArray = stack.getImageArray();
+    final int width = stack.getWidth();
+    final int height = stack.getHeight();
     float[] buffer = null;
     // Use a null float[] as this is not used for the getBoxRegionBounds method
-    ImageExtractor ie = ImageExtractor.wrap(null, width, height);
+    final ImageExtractor ie = ImageExtractor.wrap(null, width, height);
     for (final PeakResult p : results.toArray()) {
       // Avoid invalid slices
       if (p.getFrame() < 1 || p.getFrame() > stack.getSize()) {
@@ -450,7 +464,6 @@ public class ResultsImageSampler {
    * @return the sample image (could be null if no samples were made)
    */
   public ImagePlus getSample(int countNo, int countLow, int countHigh) {
-    final ImageStack out = new ImageStack(size, size);
     if (!isValid()) {
       return null;
     }
@@ -489,12 +502,14 @@ public class ResultsImageSampler {
     final int[] xyz = new int[3];
     final Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
     final Overlay overlay = new Overlay();
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(128);
     if (nmPerPixel == 1) {
       sb.append("Sample X Y Z Signal\n");
     } else {
       sb.append("Sample X(nm) Y(nm) Z(nm) Signal\n");
     }
+
+    final ImageStack out = new ImageStack(size, size);
 
     for (final ResultsSample sample : samples) {
       getXyz(sample.index, xyz);
@@ -529,11 +544,13 @@ public class ResultsImageSampler {
           final PeakResult p = sample.list.get(i);
           ox[i] = p.getXPosition() - xyz[0];
           oy[i] = p.getYPosition() - xyz[1];
-          sb.append(position).append(' ');
-          sb.append(MathUtils.rounded(ox[i] * nmPerPixel)).append(' ');
-          sb.append(MathUtils.rounded(oy[i] * nmPerPixel)).append(' ');
-          sb.append(MathUtils.rounded(p.getZPosition() * nmPerPixel)).append(' ');
-          sb.append(MathUtils.rounded(p.getIntensity())).append('\n');
+          sb.append(position).append(' ')
+          // @formatter:off
+            .append(MathUtils.rounded(ox[i] * nmPerPixel)).append(' ')
+            .append(MathUtils.rounded(oy[i] * nmPerPixel)).append(' ')
+            .append(MathUtils.rounded(p.getZPosition() * nmPerPixel)).append(' ')
+            .append(MathUtils.rounded(p.getIntensity())).append('\n');
+          // @formatter:on
         }
         final PointRoi roi = new OffsetPointRoi(ox, oy, sampleSize);
         roi.setPosition(position);
