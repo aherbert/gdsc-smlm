@@ -158,8 +158,7 @@ public class PcPalmFitting implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     double correlationDistance;
@@ -343,7 +342,7 @@ public class PcPalmFitting implements PlugIn {
     // - load a correlation curve
     // - use previous results (if available)
     // - select a set of analysis results (if available)
-    String[] options = new String[] {INPUT_FROM_FILE, "", ""};
+    String[] options = {INPUT_FROM_FILE, "", ""};
     int count = 1;
     final CorrelationCurveResult previous = latestResult.get();
     if (previous != null) {
@@ -366,7 +365,7 @@ public class PcPalmFitting implements PlugIn {
     settings.inputOption = gd.getNextChoice();
     settings.save();
 
-    if (settings.inputOption.equals(INPUT_PREVIOUS)) {
+    if (INPUT_PREVIOUS.equals(settings.inputOption)) {
       // In the case of a macro the previous results may be null
       if (previous == null) {
         return false;
@@ -376,7 +375,7 @@ public class PcPalmFitting implements PlugIn {
       peakDensity = previous.peakDensity;
       spatialDomain = previous.spatialDomain;
       return true;
-    } else if (settings.inputOption.equals(INPUT_FROM_FILE)) {
+    } else if (INPUT_FROM_FILE.equals(settings.inputOption)) {
       return loadCorrelationCurve();
     }
 
@@ -410,7 +409,7 @@ public class PcPalmFitting implements PlugIn {
   }
 
   private boolean selectAnalysisResults(List<CorrelationResult> allResults,
-      ArrayList<CorrelationResult> results) {
+      List<CorrelationResult> results) {
     // If no results then fail
     if (allResults.isEmpty()) {
       return false;
@@ -434,8 +433,7 @@ public class PcPalmFitting implements PlugIn {
 
     // Remove bad results from the dataset.
     final ArrayList<CorrelationResult> newResults = new ArrayList<>(results.size());
-    for (int i = 0; i < results.size(); i++) {
-      final CorrelationResult r = results.get(i);
+    for (final CorrelationResult r : results) {
       // If the PC-PALM Analysis has been done on too few molecules then the g(r) curve will be bad
       if (r.uniquePoints < 10) {
         header();
@@ -465,8 +463,8 @@ public class PcPalmFitting implements PlugIn {
   }
 
   private static boolean selectNextCorrelation(List<CorrelationResult> allResults,
-      ArrayList<CorrelationResult> results) {
-    final ArrayList<String> titles = buildTitlesList(allResults, results);
+      List<CorrelationResult> results) {
+    final List<String> titles = buildTitlesList(allResults, results);
 
     // Show a dialog allowing the user to select an input image
     if (titles.isEmpty()) {
@@ -514,14 +512,14 @@ public class PcPalmFitting implements PlugIn {
           return true;
         }
       }
-    } catch (final NumberFormatException ex) {
+    } catch (final NumberFormatException ignored) {
       // Ignore
     }
     return false;
   }
 
-  private static ArrayList<String> buildTitlesList(List<CorrelationResult> allResults,
-      ArrayList<CorrelationResult> results) {
+  private static List<String> buildTitlesList(List<CorrelationResult> allResults,
+      List<CorrelationResult> results) {
     // Make all subsequent results match the same nmPerPixel limit
     double nmPerPixel = 0;
     boolean spatialDomain = false;
@@ -544,7 +542,7 @@ public class PcPalmFitting implements PlugIn {
     return titles;
   }
 
-  private static boolean alreadySelected(ArrayList<CorrelationResult> results,
+  private static boolean alreadySelected(List<CorrelationResult> results,
       CorrelationResult result) {
     for (final CorrelationResult r2 : results) {
       if (result.id == r2.id) {
@@ -629,7 +627,7 @@ public class PcPalmFitting implements PlugIn {
       if (parameters != null) {
         ImageJUtils.log("  Plot %s: Over-counting estimate = %s", clusteredModel.getName(),
             MathUtils.rounded(peakDensityNm2 / parameters[1], 4));
-        ImageJUtils.log("  Plot %s == %s", clusteredModel.getName(), resultColour.toString());
+        ImageJUtils.log("  Plot %s == %s", clusteredModel.getName(), resultColour);
         plot.setColor(color);
         plot.addPoints(clusteredModel.getX(), clusteredModel.value(parameters), Plot.LINE);
         addNonFittedPoints(plot, gr, clusteredModel, parameters);
@@ -647,7 +645,7 @@ public class PcPalmFitting implements PlugIn {
       if (parameters != null) {
         ImageJUtils.log("  Plot %s: Over-counting estimate = %s", emulsionModel.getName(),
             MathUtils.rounded(peakDensityNm2 / parameters[1], 4));
-        ImageJUtils.log("  Plot %s == %s", emulsionModel.getName(), resultColour.toString());
+        ImageJUtils.log("  Plot %s == %s", emulsionModel.getName(), resultColour);
         plot.setColor(color);
         plot.addPoints(emulsionModel.getX(), emulsionModel.value(parameters), Plot.LINE);
         addNonFittedPoints(plot, gr, emulsionModel, parameters);
@@ -688,7 +686,7 @@ public class PcPalmFitting implements PlugIn {
     return y;
   }
 
-  private static double[][] combineCurves(ArrayList<CorrelationResult> results, int maxSize) {
+  private static double[][] combineCurves(List<CorrelationResult> results, int maxSize) {
     final double[][] gr = new double[3][maxSize];
     final Statistics[] grStats = new Statistics[maxSize];
     for (int i = 0; i < maxSize; i++) {
@@ -735,8 +733,8 @@ public class PcPalmFitting implements PlugIn {
         // Ignore the r=0 value by starting with an offset if necessary
         for (int i = offset; i < gr[0].length; i++) {
           output.write(String.format("%f\t%f\t%f", gr[0][i], gr[1][i], gr[2][i]));
-          for (int j = 0; j < curves.length; j++) {
-            output.write(String.format("\t%f", curves[j][i - offset]));
+          for (final double[] curve : curves) {
+            output.write(String.format("\t%f", curve[i - offset]));
           }
           output.newLine();
         }
@@ -794,23 +792,23 @@ public class PcPalmFitting implements PlugIn {
         // This is a header line. Extract the key-value pair
         final Matcher match = pattern.matcher(line);
         if (match.find()) {
-          if (match.group(1).equals(HEADER_SPATIAL_DOMAIN)) {
+          if (HEADER_SPATIAL_DOMAIN.equals(match.group(1))) {
             // Do not use Boolean.parseBoolean because this will not fail if the field is
             // neither true/false - it only return true for a match to true
             spatialDomainSet = true;
-            if (match.group(2).equalsIgnoreCase("true")) {
+            if ("true".equalsIgnoreCase(match.group(2))) {
               spatialDomain = true;
-            } else if (match.group(2).equalsIgnoreCase("false")) {
+            } else if ("false".equalsIgnoreCase(match.group(2))) {
               spatialDomain = false;
             } else {
               // We want to know if the field is not true/false
               spatialDomainSet = false;
             }
-          } else if (match.group(1).equals(HEADER_PEAK_DENSITY)) {
+          } else if (HEADER_PEAK_DENSITY.equals(match.group(1))) {
             try {
               peakDensity = Double.parseDouble(match.group(2));
               peakDensitySet = true;
-            } catch (final NumberFormatException ex) {
+            } catch (final NumberFormatException ignored) {
               // Ignore this.
             }
           }
@@ -844,7 +842,7 @@ public class PcPalmFitting implements PlugIn {
           try {
             radius = scanner.nextDouble();
             gr = scanner.nextDouble();
-          } catch (final NoSuchElementException ex) {
+          } catch (final NoSuchElementException ignored) {
             IJ.error(TITLE, "Incorrect fields on line " + count);
             return false;
           }
@@ -852,7 +850,7 @@ public class PcPalmFitting implements PlugIn {
           double error = 0;
           try {
             error = scanner.nextDouble();
-          } catch (final NoSuchElementException ex) {
+          } catch (final NoSuchElementException ignored) {
             // Ignore
           }
           data.add(new double[] {radius, gr, error});
@@ -1044,9 +1042,8 @@ public class PcPalmFitting implements PlugIn {
       }
     }
 
-    double[] parameters;
     // The model is: sigma, density, range, amplitude
-    final double[] initialSolution = new double[] {sigmaS, proteinDensity, sigmaS * 5, 1};
+    final double[] initialSolution = {sigmaS, proteinDensity, sigmaS * 5, 1};
 
     // Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
     // LVM fitting does not support constrained fitting so use a bounded optimiser.
@@ -1056,10 +1053,10 @@ public class PcPalmFitting implements PlugIn {
 
     // Put some bounds around the initial guess. Use the fitting tolerance (in %) if provided.
     final double limit = (settings.fittingTolerance > 0) ? 1 + settings.fittingTolerance / 100 : 2;
-    final double[] lB = new double[] {initialSolution[0] / limit, initialSolution[1] / limit, 0, 0};
+    final double[] lB = {initialSolution[0] / limit, initialSolution[1] / limit, 0, 0};
     // The amplitude and range should not extend beyond the limits of the g(r) curve.
-    final double[] uB = new double[] {initialSolution[0] * limit, initialSolution[1] * limit,
-        MathUtils.max(x), MathUtils.max(gr[1])};
+    final double[] uB = {initialSolution[0] * limit, initialSolution[1] * limit, MathUtils.max(x),
+        MathUtils.max(gr[1])};
     ImageJUtils.log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s",
         clusteredModel.getName(), MathUtils.rounded(lB[0], 4), MathUtils.rounded(uB[0], 4),
         MathUtils.rounded(lB[1] * 1e6, 4), MathUtils.rounded(uB[1] * 1e6, 4));
@@ -1071,7 +1068,7 @@ public class PcPalmFitting implements PlugIn {
       return null;
     }
 
-    parameters = constrainedSolution.getPointRef();
+    double[] parameters = constrainedSolution.getPointRef();
     int evaluations = boundedEvaluations;
 
     // Refit using a LVM
@@ -1270,7 +1267,7 @@ public class PcPalmFitting implements PlugIn {
         if (optimum == null || constrainedSolution.getValue() < optimum.getValue()) {
           optimum = constrainedSolution;
         }
-      } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
+      } catch (final TooManyEvaluationsException | TooManyIterationsException ignored) {
         // Ignore
       } finally {
         boundedEvaluations += maxEvaluations.getMaxEval();
@@ -1290,7 +1287,7 @@ public class PcPalmFitting implements PlugIn {
         if (constrainedSolution.getValue() < optimum.getValue()) {
           optimum = constrainedSolution;
         }
-      } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
+      } catch (final TooManyEvaluationsException | TooManyIterationsException ignored) {
         // Ignore
       } finally {
         boundedEvaluations += maxEvaluations.getMaxEval();
@@ -1326,8 +1323,7 @@ public class PcPalmFitting implements PlugIn {
     }
 
     // The model is: sigma, density, range, amplitude, alpha
-    final double[] initialSolution =
-        new double[] {sigmaS, proteinDensity, sigmaS * 5, 1, sigmaS * 5};
+    final double[] initialSolution = {sigmaS, proteinDensity, sigmaS * 5, 1, sigmaS * 5};
 
     // Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
     // LVM fitting does not support constrained fitting so use a bounded optimiser.
@@ -1346,12 +1342,11 @@ public class PcPalmFitting implements PlugIn {
 
     // Put some bounds around the initial guess. Use the fitting tolerance (in %) if provided.
     final double limit = (settings.fittingTolerance > 0) ? 1 + settings.fittingTolerance / 100 : 2;
-    final double[] lB =
-        new double[] {initialSolution[0] / limit, initialSolution[1] / limit, 0, 0, 0};
+    final double[] lB = {initialSolution[0] / limit, initialSolution[1] / limit, 0, 0, 0};
     // The amplitude and range should not extend beyond the limits of the g(r) curve.
     // TODO - Find out the expected range for the alpha parameter.
-    final double[] uB = new double[] {initialSolution[0] * limit, initialSolution[1] * limit,
-        MathUtils.max(x), MathUtils.max(gr[1]), MathUtils.max(x) * 2};
+    final double[] uB = {initialSolution[0] * limit, initialSolution[1] * limit, MathUtils.max(x),
+        MathUtils.max(gr[1]), MathUtils.max(x) * 2};
     ImageJUtils.log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s",
         emulsionModel.getName(), MathUtils.rounded(lB[0], 4), MathUtils.rounded(uB[0], 4),
         MathUtils.rounded(lB[1] * 1e6, 4), MathUtils.rounded(uB[1] * 1e6, 4));
@@ -1761,8 +1756,8 @@ public class PcPalmFitting implements PlugIn {
      * @param amplitude Amplitude of the cluster
      * @return the value
      */
-    public double evaluate(double radius, final double sigma, final double density,
-        final double range, final double amplitude) {
+    double evaluate(double radius, final double sigma, final double density, final double range,
+        final double amplitude) {
       final double grStoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
           * StdMath.exp(-radius * radius / (4 * sigma * sigma));
       final double grProtein = amplitude * StdMath.exp(-radius / range) + 1;
@@ -1802,6 +1797,9 @@ public class PcPalmFitting implements PlugIn {
     }
   }
 
+  /**
+   * Model function to compute the sum-of-squares.
+   */
   private static class SumOfSquaresModelFunction {
     BaseModelFunction fun;
     double[] x;
@@ -1881,10 +1879,13 @@ public class PcPalmFitting implements PlugIn {
     }
   }
 
+  /**
+   * Wrap the SumOfSquaresModelFunction as a {@link MultivariateFunction}.
+   */
   private static class SumOfSquaresMultivariateFunction implements MultivariateFunction {
     SumOfSquaresModelFunction function;
 
-    public SumOfSquaresMultivariateFunction(SumOfSquaresModelFunction function) {
+    SumOfSquaresMultivariateFunction(SumOfSquaresModelFunction function) {
       this.function = function;
     }
 
@@ -1894,11 +1895,14 @@ public class PcPalmFitting implements PlugIn {
     }
   }
 
+  /**
+   * Wrap the SumOfSquaresModelFunction as a {@link MultivariateVectorFunction}.
+   */
   private static class SumOfSquaresMultivariateVectorFunction
       implements MultivariateVectorFunction {
     SumOfSquaresModelFunction function;
 
-    public SumOfSquaresMultivariateVectorFunction(SumOfSquaresModelFunction function) {
+    SumOfSquaresMultivariateVectorFunction(SumOfSquaresModelFunction function) {
       this.function = function;
     }
 
@@ -1932,7 +1936,7 @@ public class PcPalmFitting implements PlugIn {
   private abstract static class EmulsionModelFunction extends BaseModelFunction {
     double[] lastValue;
 
-    public EmulsionModelFunction() {
+    EmulsionModelFunction() {
       super("Emulsion Clustered Model");
     }
 
@@ -2043,8 +2047,8 @@ public class PcPalmFitting implements PlugIn {
      * @param alpha Measure of the coherence length between circles
      * @return the value
      */
-    public double evaluate(double radius, final double sigma, final double density,
-        final double range, final double amplitude, final double alpha) {
+    double evaluate(double radius, final double sigma, final double density, final double range,
+        final double amplitude, final double alpha) {
       final double grStoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
           * StdMath.exp(-radius * radius / (4 * sigma * sigma));
       final double grProtein =
@@ -2085,18 +2089,23 @@ public class PcPalmFitting implements PlugIn {
 
   private static TextWindow createResultsTable() {
     return ImageJUtils.refresh(resultsTableRef, () -> {
-      final StringBuilder sb = new StringBuilder();
-      sb.append("Model\t");
-      sb.append("Colour\t");
-      sb.append("Valid\t");
-      sb.append("Precision (nm)\t");
-      sb.append("Density (um^-2)\t");
-      sb.append("Domain Radius (nm)\t");
-      // TODO - Find out the units of the domain density
-      sb.append("Domain Density\t");
-      sb.append("N-cluster\t");
-      sb.append("Coherence\t");
-      sb.append("Adjusted R2\t");
+      final StringBuilder sb = new StringBuilder(512);
+      Arrays.stream(new String[] {
+          // @formatter:off
+          "Model",
+          "Colour",
+          "Valid",
+          "Precision (nm)",
+          "Density (um^-2)",
+          "Domain Radius (nm)",
+          // TODO - Find out the units of the domain density
+          "Domain Density",
+          "N-cluster",
+          "Coherence",
+          "Adjusted R2",
+          // @formatter:on
+      }).forEach(s -> sb.append(s).append('\t'));
+      sb.setLength(sb.length() - 1);
       return new TextWindow(TITLE, sb.toString(), (String) null, 800, 300);
     });
   }
@@ -2104,17 +2113,19 @@ public class PcPalmFitting implements PlugIn {
   private void addResult(String model, String resultColour, boolean valid, double precision,
       double density, double domainRadius, double domainDensity, double ncluster, double coherence,
       double adjustedR2) {
-    final StringBuilder sb = new StringBuilder();
-    sb.append(model).append('\t');
-    sb.append(resultColour).append('\t');
-    sb.append(valid).append('\t');
-    sb.append(MathUtils.rounded(precision, 4)).append('\t');
-    sb.append(MathUtils.rounded(density * 1e6, 4)).append('\t');
-    sb.append(getString(domainRadius)).append('\t');
-    sb.append(getString(domainDensity)).append('\t');
-    sb.append(getString(ncluster)).append('\t');
-    sb.append(getString(coherence)).append('\t');
-    sb.append(MathUtils.rounded(adjustedR2, 4)).append('\t');
+    final StringBuilder sb = new StringBuilder(512);
+    sb.append(model).append('\t')
+    // @formatter:off
+      .append(resultColour).append('\t')
+      .append(valid).append('\t')
+      .append(MathUtils.rounded(precision, 4)).append('\t')
+      .append(MathUtils.rounded(density * 1e6, 4)).append('\t')
+      .append(getString(domainRadius)).append('\t')
+      .append(getString(domainDensity)).append('\t')
+      .append(getString(ncluster)).append('\t')
+      .append(getString(coherence)).append('\t')
+      .append(MathUtils.rounded(adjustedR2, 4)).append('\t');
+    // @formatter:on
     resultsTable.append(sb.toString());
   }
 
