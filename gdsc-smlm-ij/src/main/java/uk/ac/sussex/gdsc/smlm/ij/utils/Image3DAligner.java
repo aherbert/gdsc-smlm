@@ -67,6 +67,9 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLi
  *      Cross-Correlation by J.P. Lewis</a>
  */
 public class Image3DAligner {
+  private static final String IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE =
+      "Image is larger than the initialised reference";
+
   /**
    * The limit for the range of the data as an integer.
    *
@@ -139,6 +142,9 @@ public class Image3DAligner {
 
   private CubicSplineCalculator calc;
 
+  /**
+   * Data for the discrete Hartley transform.
+   */
   private class DhtData {
     DoubleDht3D dht;
     double[] input;
@@ -343,7 +349,7 @@ public class Image3DAligner {
       throw new IllegalArgumentException("Require a 3D image");
     }
     // Check for data
-    for (int i = 0, size = image.getDataLength(); i < size; i++) {
+    for (int i = image.getDataLength(); i-- > 0;) {
       if (image.get(i) != 0) {
         return;
       }
@@ -369,9 +375,8 @@ public class Image3DAligner {
 
     for (int z = 0; z < depth; z++) {
       final float[] pixels = (float[]) image.getPixels(1 + z);
-      if (lwz[z] == 0) {
-        // Special case happens with Tukey window at the ends
-      } else {
+      // Special case happens with Tukey window at the ends
+      if (lwz[z] != 0) {
         calculateWeightedCentre(pixels, width, height, lwx, lwy, lwz[z], sum);
       }
     }
@@ -430,9 +435,8 @@ public class Image3DAligner {
     final double[] sum = new double[2];
 
     for (int z = 0, i = 0; z < depth; z++) {
-      if (lwz[z] == 0) {
-        // Special case happens with Tukey window at the ends
-      } else {
+      // Special case happens with Tukey window at the ends
+      if (lwz[z] != 0) {
         calculateWeightedCentre(image, i, width, height, lwx, lwy, lwz[z], sum);
       }
       i += inc;
@@ -556,7 +560,15 @@ public class Image3DAligner {
     }
   }
 
-  private static int getInsert(int maxN, int n) {
+  /**
+   * Gets the insert point for data of size n into a size of max N. This is done to ensure alignment
+   * of the FHT power spectrum centre with the centre of the data.
+   *
+   * @param maxN the max N
+   * @param n the n
+   * @return the insert point
+   */
+  static int getInsert(int maxN, int n) {
     // Note the FHT power spectrum centre is at n/2 of an even sized image.
     // So we must insert the centre at that point. To do this we check for odd/even
     // and offset if necessary.
@@ -665,15 +677,13 @@ public class Image3DAligner {
 
   private static double transform(double value, double scale) {
     // Ensure zero is zero
-    if (value == 0.0) {
-      return 0.0;
+    if (value == 0) {
+      return 0;
     }
 
     // Maintain the sign information
     return Math.round(value * scale); // / scale
   }
-
-
 
   /**
    * Align the image with the reference. Compute the translation required to move the target image
@@ -706,7 +716,7 @@ public class Image3DAligner {
     final int height = image.getHeight();
     final int depth = image.getSize();
     if (width > nc || height > nr || depth > ns) {
-      throw new IllegalArgumentException("Image is larger than the initialised reference");
+      throw new IllegalArgumentException(IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE);
     }
 
     target = createDht(image, target);
@@ -731,7 +741,7 @@ public class Image3DAligner {
     final int height = image.getHeight();
     final int depth = image.getSize();
     if (width > nc || height > nr || depth > ns) {
-      throw new IllegalArgumentException("Image is larger than the initialised reference");
+      throw new IllegalArgumentException(IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE);
     }
 
     target = createDht(image, target);
@@ -769,7 +779,7 @@ public class Image3DAligner {
     final int height = image.getHeight();
     final int depth = image.getSize();
     if (width > nc || height > nr || depth > ns) {
-      throw new IllegalArgumentException("Image is larger than the initialised reference");
+      throw new IllegalArgumentException(IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE);
     }
 
     target = createDht(image, target);
@@ -794,7 +804,7 @@ public class Image3DAligner {
     final int height = image.getHeight();
     final int depth = image.getSize();
     if (width > nc || height > nr || depth > ns) {
-      throw new IllegalArgumentException("Image is larger than the initialised reference");
+      throw new IllegalArgumentException(IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE);
     }
 
     target = createDht(image, target);
@@ -880,7 +890,7 @@ public class Image3DAligner {
     final int halfnc = nc / 2;
     final int halfnr = nr / 2;
     final int halfns = ns / 2;
-    final int[] centre = new int[] {halfnc, halfnr, halfns};
+    final int[] centre = {halfnc, halfnr, halfns};
 
     // Compute the shift from the centre
     final int dx = halfnc - ix;
@@ -1024,7 +1034,7 @@ public class Image3DAligner {
 
     // Report the shift required to move from the centre of the target image to the reference
     // @formatter:off
-    final double[] result = new double[] {
+    final double[] result = {
       halfnc - xyz[0],
       halfnr - xyz[1],
       halfns - xyz[2],
@@ -1052,7 +1062,7 @@ public class Image3DAligner {
       final int oz = xyz[2] - z;
 
       // Scale to the cubic spline dimensions of 0-1
-      final double[] origin = new double[] {ox / 3.0, oy / 3.0, oz / 3.0};
+      final double[] origin = {ox / 3.0, oy / 3.0, oz / 3.0};
 
       // Simple condensing search
       if (searchMode == SearchMode.BINARY) {
@@ -1104,7 +1114,7 @@ public class Image3DAligner {
             }
             return result;
           }
-        } catch (final Exception ex) {
+        } catch (final Exception ignored) {
           // Ignore this
         }
       }
@@ -1223,8 +1233,8 @@ public class Image3DAligner {
         if (x1 >= 0) {
           result[0] = sum[xwyhzd - width - h] - sum[xwyhz - width - h] - sum[xwyhzd - width]
               + sum[xwyhz - width];
-          result[1] = sumSq[xwyhzd - width - h] - sumSq[xwyhz - width - h]
-              - sumSq[xwyhzd - width] + sumSq[xwyhz - width];
+          result[1] = sumSq[xwyhzd - width - h] - sumSq[xwyhz - width - h] - sumSq[xwyhzd - width]
+              + sumSq[xwyhz - width];
         }
         result[0] = result[0] + sum[xwyhz - h] - sum[xwyhzd - h];
         result[1] = result[1] + sumSq[xwyhz - h] - sumSq[xwyhzd - h];
@@ -1252,6 +1262,9 @@ public class Image3DAligner {
     }
   }
 
+  /**
+   * A 3D spline function..
+   */
   private static class SplineFunction {
     final CustomTricubicFunction function;
     CubicSplinePosition[] sp = new CubicSplinePosition[3];
