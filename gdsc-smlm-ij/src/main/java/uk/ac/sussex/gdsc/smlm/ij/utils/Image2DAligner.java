@@ -99,6 +99,9 @@ public class Image2DAligner {
   private double[] wx;
   private double[] wy;
 
+  /**
+   * Data for the discrete Hartley transform.
+   */
   private class DhtData {
     DoubleDht2D dht;
     double[] input;
@@ -298,7 +301,7 @@ public class Image2DAligner {
       throw new IllegalArgumentException("Require a 2D image");
     }
     // Check for data
-    for (int i = 0, size = image.getDataLength(); i < size; i++) {
+    for (int i = image.getDataLength(); i-- > 0; ) {
       if (image.get(i) != 0) {
         return;
       }
@@ -459,7 +462,15 @@ public class Image2DAligner {
     }
   }
 
-  private static int getInsert(int maxN, int n) {
+  /**
+   * Gets the insert point for data of size n into a size of max N. This is done to ensure
+   * alignment of the FHT power spectrum centre with the centre of the data.
+   *
+   * @param maxN the max N
+   * @param n the n
+   * @return the insert point
+   */
+  static int getInsert(int maxN, int n) {
     // Note the FHT power spectrum centre is at n/2 of an even sized image.
     // So we must insert the centre at that point. To do this we check for odd/even
     // and offset if necessary.
@@ -693,7 +704,7 @@ public class Image2DAligner {
     // Note: The correlation is for the movement of the reference over the target
     final int halfnc = nc / 2;
     final int halfnr = nr / 2;
-    final int[] centre = new int[] {halfnc, halfnr};
+    final int[] centre = {halfnc, halfnr};
 
     // Compute the shift from the centre
     final int dx = halfnc - ix;
@@ -816,7 +827,7 @@ public class Image2DAligner {
 
     // Report the shift required to move from the centre of the target image to the reference
     // @formatter:off
-    final double[] result = new double[] {
+    final double[] result = {
       halfnc - xy[0],
       halfnr - xy[1],
       buffer[maxi]
@@ -975,7 +986,7 @@ public class Image2DAligner {
    */
   public static double[] performCubicFit(FloatProcessor fp, int x, int y, int refinements,
       double relativeThreshold) {
-    final double[] centre = new double[] {x, y, fp.getf(x, y)};
+    final double[] centre = {x, y, fp.getf(x, y)};
     // This value will be progressively halved.
     // Start with a value that allows the number of iterations to fully cover the region +/- 1 pixel
     // 0.5 will result in an minimum range of 0.5 / 2^9 = 0.000976
@@ -1059,7 +1070,7 @@ public class Image2DAligner {
     }
 
     // Offset centre by 1 so it is exactly in the middle of the 2x2 grid of bicubic interpolators
-    final double[] centre = new double[] {1, 1, surface.get(12)};
+    final double[] centre = {1, 1, surface.get(12)};
     final double[] y = new double[9];
     final int[] iy = new int[3];
     // This value will be progressively halved.
@@ -1068,7 +1079,7 @@ public class Image2DAligner {
     double range = 0.5;
     while (refinements-- > 0) {
       final double previous = centre[2];
-      if (performCubicSearch(surface, nodes, range, centre, y, iy)
+      if (performCubicSearch(nodes, range, centre, y, iy)
           // The centre moved. Check convergence.
           && (centre[2] - previous) / centre[2] < relativeThreshold) {
         break;
@@ -1084,7 +1095,6 @@ public class Image2DAligner {
   /**
    * Perform a cubic search refinement.
    *
-   * @param surface the surface (to allow debugging)
    * @param nodes the nodes for interpolation
    * @param range the range
    * @param centre the centre
@@ -1092,7 +1102,7 @@ public class Image2DAligner {
    * @param iy working space for iy
    * @return true, if the centre moved
    */
-  private static boolean performCubicSearch(Image2D surface, CachedBicubicInterpolator[][] nodes,
+  private static boolean performCubicSearch(CachedBicubicInterpolator[][] nodes,
       double range, double[] centre, double[] y, int[] iy) {
 
     // Pre-compute the node position and the fraction between 0-1 for y values
