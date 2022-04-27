@@ -186,7 +186,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private MemoryPeakResults results;
   private CreateData.SimulationParameters simulationParameters;
 
-  private FitEngineConfiguration config;
+  /** The fit engine configuration. */
+  FitEngineConfiguration config;
   private FitConfiguration filterFitConfig;
 
   private Choice textPsf;
@@ -215,19 +216,19 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains reference results.
    */
   private static class ReferenceResults {
-    final ArrayList<DoubletResult> doubletResults;
+    final List<DoubletResult> doubletResults;
     final ResidualsScore residualsScoreMax;
     final ResidualsScore residualsScoreAv;
     final int numberOfMolecules;
     final String analysisPrefix;
 
-    ReferenceResults(ArrayList<DoubletResult> doubletResults, ResidualsScore residualsScoreMax,
+    ReferenceResults(List<DoubletResult> doubletResults, ResidualsScore residualsScoreMax,
         ResidualsScore residualsScoreAv, int numberOfMolecules, String analysisPrefix) {
       this.doubletResults = doubletResults;
       this.residualsScoreMax = residualsScoreMax;
@@ -243,7 +244,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static class Settings {
     static final String[] MATCHING_METHODS = {"Simple", "By residuals", "By candidate"};
     static final String[] SELECTION_CRITERIAS = {"R2", "AIC", "BIC", "ML AIC", "ML BIC"};
-    static final String[] NAMES = new String[] {"Candidate:N results in candidate",
+    static final String[] NAMES = {"Candidate:N results in candidate",
         "Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
         "Multiples:Neighbours", "Singles:Almost", "Doublets:Almost", "Multiples:Almost"
 
@@ -252,8 +253,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         {"Score n=1", "Score n=2", "Score n=N", "Iter n=1", "Eval n=1", "Iter n>1", "Eval n>1"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     boolean useBenchmarkSettings;
     double iterationIncrease;
@@ -349,6 +349,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     }
   }
 
+  /**
+   * Represent the score for all the residuals thresholds.
+   */
   private static class ResidualsScore {
     final double[] residuals;
     final double[] jaccard;
@@ -402,6 +405,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     }
   }
 
+  /**
+   * Wrap the DoubletReulst as a Coordinate.
+   */
   private static class ResultCoordinate extends BasePoint {
     final DoubletResult result;
     final int id;
@@ -558,7 +564,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final Ticker ticker;
     double[] region;
     float[] data;
-    ArrayList<DoubletResult> results = new ArrayList<>();
+    List<DoubletResult> results = new ArrayList<>();
     int daic;
     int dbic;
     int cic;
@@ -784,7 +790,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           region = ie.crop(regionBounds, region);
 
           final boolean[] amplitudeEstimate = new boolean[1];
-          float signal = 0;
           double sum = 0;
           final int width = regionBounds.width;
           final int height = regionBounds.height;
@@ -792,7 +797,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           for (int k = size; k-- > 0;) {
             sum += region[k];
           }
-          signal = (float) (sum - background * size);
+          float signal = (float) (sum - background * size);
           if (signal <= 0) {
             amplitudeEstimate[0] = true;
             signal = spot.intensity - ((relativeIntensity) ? 0 : background);
@@ -1405,6 +1410,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           case 0:
           default:
             s2 = result.fitResult2.getParameters()[Gaussian2DFunction.SIGNAL];
+            break;
         }
         final double sf = BenchmarkSpotFit.computeSignalFactor(s1, s2);
         final double fScore = signalScore.scoreAndFlatten(sf, 256);
@@ -1554,8 +1560,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         final int[] mx = new int[multiples];
         final int[] my = new int[multiples];
         final int[] count = new int[3];
-        final int[][] coords = new int[][] {sx, dx, mx, sy, dy, my};
-        final Color[] color = new Color[] {Color.red, Color.green, Color.blue};
+        final int[][] coords = {sx, dx, mx, sy, dy, my};
+        final Color[] color = {Color.red, Color.green, Color.blue};
         for (int j = 0; j < spotMatchCount.length; j++) {
           final int c = DoubletAnalysis.getMatchClass(spotMatchCount[j]);
           if (c < 0) {
@@ -1625,7 +1631,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @param n the number of results that match to the spot
    * @return the class (none = -1, single = 0, double = 1, multiple = 2)
    */
-  private static int getMatchClass(int n) {
+  static int getMatchClass(int n) {
     if (n == 0) {
       return -1;
     }
@@ -1928,13 +1934,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates =
         ResultsMatchCalculator.getCoordinates(results, false);
 
-    final long[] sumCount = new long[1];
-    actualCoordinates.values().forEach(list -> sumCount[0] += list.size());
-    final double density = 1e6 * sumCount[0]
-        / (simulationParameters.pixelPitch * simulationParameters.pixelPitch
-            * results.getBounds().getWidth() * results.getBounds().getHeight()
-            * actualCoordinates.size());
-
     // Create a pool of workers
     final int nThreads = Prefs.getThreads();
     final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
@@ -1955,14 +1954,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final long startTime = System.nanoTime();
     actualCoordinates.keySet().forEach(frame -> put(jobs, frame));
     // Finish all the worker threads by passing in a null job
-    for (int i = 0; i < threads.size(); i++) {
+    for (int i = threads.size(); i-- != 0;) {
       put(jobs, -1);
     }
 
     // Wait for all to finish
-    for (int i = 0; i < threads.size(); i++) {
+    for (final Thread thread : threads) {
       try {
-        threads.get(i).join();
+        thread.join();
       } catch (final InterruptedException ex) {
         Thread.currentThread().interrupt();
         throw new ConcurrentRuntimeException(ex);
@@ -1977,7 +1976,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     int cic = 0;
     int daic = 0;
     int dbic = 0;
-    ArrayList<DoubletResult> results = null;
+    List<DoubletResult> results = null;
     int maxH = 0;
     int maxH2 = 0;
     int maxH3 = 0;
@@ -2040,6 +2039,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     MemoryUtils.runGarbageCollector();
 
+    final long[] sumCount = {0};
+    actualCoordinates.values().forEach(list -> sumCount[0] += list.size());
+    final double density = 1e6 * sumCount[0]
+        / (simulationParameters.pixelPitch * simulationParameters.pixelPitch
+            * this.results.getBounds().getWidth() * this.results.getBounds().getHeight()
+            * actualCoordinates.size());
+
     Collections.sort(results, DoubletResult::compare);
     summariseResults(results, density, runTime);
 
@@ -2093,7 +2099,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @param density the density
    * @param runTime the run time
    */
-  private void summariseResults(ArrayList<DoubletResult> results, double density, long runTime) {
+  private void summariseResults(List<DoubletResult> results, double density, long runTime) {
     // If we are only assessing results with no neighbour candidates
     // TODO - Count the number of actual results that have no neighbours
 
@@ -2102,21 +2108,17 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final FitConfiguration fitConfig = config.getFitConfiguration();
 
     // Store details we want in the analysis table
-    final StringBuilder sb = new StringBuilder();
-    sb.append(MathUtils.rounded(density)).append('\t');
-    sb.append(MathUtils.rounded(getSa())).append('\t');
-    sb.append(config.getFittingWidth()).append('\t');
-    sb.append(PsfProtosHelper.getName(fitConfig.getPsfType()));
-    sb.append(":").append(PeakFit.getSolverName(fitConfig));
+    final StringBuilder sb = new StringBuilder(512);
+    sb.append(MathUtils.rounded(density)).append('\t').append(MathUtils.rounded(getSa()))
+        .append('\t').append(config.getFittingWidth()).append('\t')
+        .append(PsfProtosHelper.getName(fitConfig.getPsfType())).append(':')
+        .append(PeakFit.getSolverName(fitConfig));
     if (fitConfig.isModelCameraMle()) {
-      sb.append(":Camera\t");
-
       // Add details of the noise model for the MLE
       final CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
-      sb.append("EM=").append(r.isEmCcd());
-      sb.append(":A=").append(MathUtils.rounded(r.getCountPerElectron()));
-      sb.append(":N=").append(MathUtils.rounded(r.getReadNoise()));
-      sb.append('\t');
+      sb.append(":Camera\tEM=").append(r.isEmCcd()).append(":A=")
+          .append(MathUtils.rounded(r.getCountPerElectron())).append(":N=")
+          .append(MathUtils.rounded(r.getReadNoise())).append('\t');
     } else {
       sb.append("\t\t");
     }
@@ -2131,33 +2133,32 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int n = countN(results);
 
     // Create the benchmark settings and the fitting settings
-    sb.append(numberOfMolecules).append('\t');
-    sb.append(n).append('\t');
-    sb.append(MathUtils.rounded(density)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.minSignal)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.maxSignal)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.averageSignal)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.sd)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.pixelPitch)).append('\t');
-    sb.append(MathUtils.rounded(getSa() * simulationParameters.pixelPitch)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.gain)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.readNoise)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.background)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.noise)).append('\t');
-    sb.append(MathUtils.rounded(simulationParameters.averageSignal / simulationParameters.noise))
-        .append('\t');
-    sb.append(config.getFittingWidth()).append('\t');
-    sb.append(PsfProtosHelper.getName(fitConfig.getPsfType()));
-    sb.append(":").append(PeakFit.getSolverName(fitConfig));
+    sb.append(numberOfMolecules).append('\t')
+    // @formatter:off
+      .append(n).append('\t')
+      .append(MathUtils.rounded(density)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.minSignal)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.maxSignal)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.averageSignal)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.sd)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.pixelPitch)).append('\t')
+      .append(MathUtils.rounded(getSa() * simulationParameters.pixelPitch)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.gain)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.readNoise)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.background)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.noise)).append('\t')
+      .append(MathUtils.rounded(simulationParameters.averageSignal / simulationParameters.noise))
+        .append('\t')
+      .append(config.getFittingWidth()).append('\t')
+      .append(PsfProtosHelper.getName(fitConfig.getPsfType()))
+      .append(':').append(PeakFit.getSolverName(fitConfig));
+    // @formatter:on
     if (fitConfig.isModelCameraMle()) {
-      sb.append(":Camera\t");
-
       // Add details of the noise model for the MLE
       final CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
-      sb.append("EM=").append(r.isEmCcd());
-      sb.append(":A=").append(MathUtils.rounded(r.getCountPerElectron()));
-      sb.append(":N=").append(MathUtils.rounded(r.getReadNoise()));
-      sb.append('\t');
+      sb.append(":Camera\tEM=").append(r.isEmCcd()).append(":A=")
+          .append(MathUtils.rounded(r.getCountPerElectron())).append(":N=")
+          .append(MathUtils.rounded(r.getReadNoise())).append('\t');
     } else {
       sb.append("\t\t");
     }
@@ -2312,7 +2313,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @param results the doublet fitting results
    * @return the total localisation results we could have fit
    */
-  private static int countN(ArrayList<DoubletResult> results) {
+  private static int countN(List<DoubletResult> results) {
     int total = 0;
     for (final DoubletResult r : results) {
       total += r.matchCount;
@@ -2330,7 +2331,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @param useMax Use the max residuals
    * @return the residuals score
    */
-  private ResidualsScore computeScores(ArrayList<DoubletBonus> data, double tp, double fp, int n,
+  private ResidualsScore computeScores(List<DoubletBonus> data, double tp, double fp, int n,
       boolean useMax) {
     // Add data at ends to complete the residuals scale from 0 to 1
     data.add(new DoubletBonus(0, 0, 0, 0));
@@ -2476,7 +2477,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @return the string
    */
   private static String createSummaryHeader() {
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(512);
     sb.append("Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\t"
         + "ReadNoise (ADUs)\tB (photons)\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
     for (final String name : Settings.NAMES2) {
@@ -2493,54 +2494,56 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    *
    * @param results the results
    */
-  private static void showResults(ArrayList<DoubletResult> results, boolean show) {
+  private static void showResults(List<DoubletResult> results, boolean show) {
     if (!show) {
       return;
     }
 
     try (BufferedTextWindow tw = new BufferedTextWindow(createResultsTable())) {
       tw.setIncrement(0);
-      final StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder(512);
       for (final DoubletResult result : results) {
         sb.setLength(0);
-        sb.append(result.frame).append('\t');
-        sb.append(result.spot.x).append('\t');
-        sb.append(result.spot.y).append('\t');
-        sb.append(IJ.d2s(result.spot.intensity, 1)).append('\t');
-        sb.append(result.matchCount).append('\t');
-        sb.append(result.neighbours).append('\t');
-        sb.append(result.almostNeighbours).append('\t');
-        sb.append(MathUtils.rounded(result.score1)).append('\t');
-        sb.append(MathUtils.rounded(result.score2)).append('\t');
+        sb.append(result.frame).append('\t')
+        // @formatter:off
+          .append(result.spot.x).append('\t')
+          .append(result.spot.y).append('\t')
+          .append(IJ.d2s(result.spot.intensity, 1)).append('\t')
+          .append(result.matchCount).append('\t')
+          .append(result.neighbours).append('\t')
+          .append(result.almostNeighbours).append('\t')
+          .append(MathUtils.rounded(result.score1)).append('\t')
+          .append(MathUtils.rounded(result.score2)).append('\t');
         add(sb, result.fitResult1);
         add(sb, result.fitResult2);
-        sb.append(IJ.d2s(result.sumOfSquares1, 1)).append('\t');
-        sb.append(IJ.d2s(result.sumOfSquares2, 1)).append('\t');
-        sb.append(IJ.d2s(result.ll1, 1)).append('\t');
-        sb.append(IJ.d2s(result.ll2, 1)).append('\t');
-        sb.append(IJ.d2s(result.value1, 1)).append('\t');
-        sb.append(IJ.d2s(result.value2, 1)).append('\t');
-        sb.append(MathUtils.rounded(result.r1)).append('\t');
-        sb.append(MathUtils.rounded(result.r2)).append('\t');
-        sb.append(MathUtils.rounded(result.aic1)).append('\t');
-        sb.append(MathUtils.rounded(result.aic2)).append('\t');
-        sb.append(MathUtils.rounded(result.bic1)).append('\t');
-        sb.append(MathUtils.rounded(result.bic2)).append('\t');
-        sb.append(MathUtils.rounded(result.maic1)).append('\t');
-        sb.append(MathUtils.rounded(result.maic2)).append('\t');
-        sb.append(MathUtils.rounded(result.mbic1)).append('\t');
-        sb.append(MathUtils.rounded(result.mbic2)).append('\t');
-        sb.append(MathUtils.rounded(result.angle[0])).append('\t');
-        sb.append(MathUtils.rounded(result.angle[1])).append('\t');
-        sb.append(MathUtils.rounded(result.gap)).append('\t');
-        sb.append(MathUtils.rounded(result.xshift[0])).append('\t');
-        sb.append(MathUtils.rounded(result.yshift[0])).append('\t');
-        sb.append(MathUtils.rounded(result.xshift[1])).append('\t');
-        sb.append(MathUtils.rounded(result.yshift[1])).append('\t');
-        sb.append(result.iter1).append('\t');
-        sb.append(result.iter2).append('\t');
-        sb.append(result.eval1).append('\t');
-        sb.append(result.eval2).append('\t');
+        sb.append(IJ.d2s(result.sumOfSquares1, 1)).append('\t')
+          .append(IJ.d2s(result.sumOfSquares2, 1)).append('\t')
+          .append(IJ.d2s(result.ll1, 1)).append('\t')
+          .append(IJ.d2s(result.ll2, 1)).append('\t')
+          .append(IJ.d2s(result.value1, 1)).append('\t')
+          .append(IJ.d2s(result.value2, 1)).append('\t')
+          .append(MathUtils.rounded(result.r1)).append('\t')
+          .append(MathUtils.rounded(result.r2)).append('\t')
+          .append(MathUtils.rounded(result.aic1)).append('\t')
+          .append(MathUtils.rounded(result.aic2)).append('\t')
+          .append(MathUtils.rounded(result.bic1)).append('\t')
+          .append(MathUtils.rounded(result.bic2)).append('\t')
+          .append(MathUtils.rounded(result.maic1)).append('\t')
+          .append(MathUtils.rounded(result.maic2)).append('\t')
+          .append(MathUtils.rounded(result.mbic1)).append('\t')
+          .append(MathUtils.rounded(result.mbic2)).append('\t')
+          .append(MathUtils.rounded(result.angle[0])).append('\t')
+          .append(MathUtils.rounded(result.angle[1])).append('\t')
+          .append(MathUtils.rounded(result.gap)).append('\t')
+          .append(MathUtils.rounded(result.xshift[0])).append('\t')
+          .append(MathUtils.rounded(result.yshift[0])).append('\t')
+          .append(MathUtils.rounded(result.xshift[1])).append('\t')
+          .append(MathUtils.rounded(result.yshift[1])).append('\t')
+          .append(result.iter1).append('\t')
+          .append(result.iter2).append('\t')
+          .append(result.eval1).append('\t')
+          .append(result.eval2).append('\t');
+        // @formatter:on
         addParams(sb, result.fitResult1);
         addParams(sb, result.fitResult2);
 
@@ -2799,23 +2802,24 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     }
 
     final StringBuilder sb = new StringBuilder(results.analysisPrefix);
-    sb.append(settings.analysisTitle).append('\t');
-    sb.append((settings.useMaxResiduals) ? "Max" : "Average").append('\t');
-    sb.append(Settings.SELECTION_CRITERIAS[settings.selectionCriteria]).append('\t');
+    sb.append(settings.analysisTitle).append('\t')
+        .append((settings.useMaxResiduals) ? "Max" : "Average").append('\t')
+        .append(Settings.SELECTION_CRITERIAS[settings.selectionCriteria]).append('\t');
     if (filterFitConfig.isSmartFilter()) {
       sb.append(filterFitConfig.getSmartFilterName()).append("\t\t\t\t\t\t\t\t");
     } else {
-      sb.append('\t');
-      sb.append(filterFitConfig.getCoordinateShiftFactor()).append('\t');
-      sb.append(filterFitConfig.getSignalStrength()).append('\t');
-      sb.append(filterFitConfig.getMinPhotons()).append('\t');
-      sb.append(filterFitConfig.getMinWidthFactor()).append('\t');
-      sb.append(filterFitConfig.getMaxWidthFactor()).append('\t');
-      sb.append(filterFitConfig.getPrecisionThreshold()).append('\t');
-      sb.append(filterFitConfig.getPrecisionMethod()).append('\t');
+      sb.append('\t')
+      //@formatter:off
+        .append(filterFitConfig.getCoordinateShiftFactor()).append('\t')
+        .append(filterFitConfig.getSignalStrength()).append('\t')
+        .append(filterFitConfig.getMinPhotons()).append('\t')
+        .append(filterFitConfig.getMinWidthFactor()).append('\t')
+        .append(filterFitConfig.getMaxWidthFactor()).append('\t')
+        .append(filterFitConfig.getPrecisionThreshold()).append('\t')
+        .append(filterFitConfig.getPrecisionMethod()).append('\t');
+      //@formatter:on
     }
-    sb.append(settings.analysisDriftAngle).append('\t');
-    sb.append(settings.minGap).append('\t');
+    sb.append(settings.analysisDriftAngle).append('\t').append(settings.minGap).append('\t');
 
     addJaccardScores(sb);
 
@@ -2930,13 +2934,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final double[] residuals = residualsScore.residuals;
     final double[] jaccard = residualsScore.jaccard;
     final int maxJaccardIndex = residualsScore.maxJaccardIndex;
-    sb.append(MathUtils.rounded(jaccard[jaccard.length - 1])).append('\t');
-    sb.append(MathUtils.rounded(jaccard[maxJaccardIndex])).append('\t')
-        .append(MathUtils.rounded(residuals[maxJaccardIndex]));
-
-    sb.append('\t').append(MathUtils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.15)));
-    // sb.append('\t').append(MathUtils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.3)));
-    // sb.append('\t').append(MathUtils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 1)));
+    sb.append(MathUtils.rounded(jaccard[jaccard.length - 1])).append('\t')
+        .append(MathUtils.rounded(jaccard[maxJaccardIndex])).append('\t')
+        .append(MathUtils.rounded(residuals[maxJaccardIndex])).append('\t')
+        .append(MathUtils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.15)));
 
     residualsScore.bestResiduals[0] = residuals[maxJaccardIndex];
     // Find the range that has a Jaccard within a % of the max
@@ -3048,15 +3049,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     settings = Settings.load();
     config = configRef.get().createCopy();
 
-    final StringBuilder sb =
-        new StringBuilder("Filters the doublet fits and reports the performance increase\n");
+    final StringBuilder sb = new StringBuilder(256);
 
     // Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
     final FitConfiguration fitConfig = config.getFitConfiguration();
-    sb.append("SD0 = ").append(MathUtils.rounded(fitConfig.getInitialXSd())).append("\n");
-    // sb.append("SD1 =
-    // ").append(MathUtils.rounded(fitConfig.getInitialPeakStdDev1())).append("\n");
-    sb.append("Fit Width = ").append(config.getFittingWidth()).append("\n");
+    sb.append("Filters the doublet fits and reports the performance increase\nSD0 = ")
+        .append(MathUtils.rounded(fitConfig.getInitialXSd()))
+        // .append("\nSD1 =
+        // ").append(MathUtils.rounded(fitConfig.getInitialPeakStdDev1()));
+        .append("\nFit Width = ").append(config.getFittingWidth()).append('\n');
 
     gd.addMessage(sb.toString());
 
@@ -3214,39 +3215,35 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         }
 
         cbSmartFilter.setState(fitConfig.isSmartFilter());
-        textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-        textSignalStrength.setText("" + fitConfig.getSignalStrength());
-        textMinPhotons.setText("" + fitConfig.getMinPhotons());
-        textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
-        textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
-        textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+        textCoordinateShiftFactor.setText(String.valueOf(fitConfig.getCoordinateShiftFactor()));
+        textSignalStrength.setText(String.valueOf(fitConfig.getSignalStrength()));
+        textMinPhotons.setText(String.valueOf(fitConfig.getMinPhotons()));
+        textMinWidthFactor.setText(String.valueOf(fitConfig.getMinWidthFactor()));
+        textWidthFactor.setText(String.valueOf(fitConfig.getMaxWidthFactor()));
+        textPrecisionThreshold.setText(String.valueOf(fitConfig.getPrecisionThreshold()));
         textPrecisionMethod.select(fitConfig.getPrecisionMethod().ordinal());
-      } else if (template != null) {
-        if (template.hasFitEngineSettings()) {
-          final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-          final FitEngineConfiguration config2 = FitEngineConfiguration.create(
-              template.getFitEngineSettings(), template.getCalibration(), template.getPsf());
-          final FitConfiguration fitConfig2 = config2.getFitConfiguration();
-          if (custom && template.hasPsf()) {
-            textPsf.select(PeakFit.getPsfTypeNames()[fitConfig2.getPsfType().ordinal()]);
-          }
-          textDataFilterType.select(config2.getDataFilterType().ordinal());
-          textDataFilter.select(config2.getDataFilterMethod(0).ordinal());
-          textSmooth.setText("" + config2.getDataFilterParameterValue(0));
-          textSearch.setText("" + config2.getSearch());
-          textBorder.setText("" + config2.getBorder());
-          textFitting.setText("" + config2.getFitting());
-          textFitSolver.select(FitProtosHelper.getName(fitConfig2.getFitSolver()));
-
-          // Copy settings not in the dialog for the fit solver
-          final FitConfiguration fitConfig = config.getFitConfiguration();
-          if (custom) {
-            fitConfig.setPsf(fitConfig2.getPsf());
-          }
-          fitConfig.setFitSolverSettings(fitConfig2.getFitSolverSettings());
+      } else if (template != null && template.hasFitEngineSettings()) {
+        final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+        final FitEngineConfiguration config2 = FitEngineConfiguration
+            .create(template.getFitEngineSettings(), template.getCalibration(), template.getPsf());
+        final FitConfiguration fitConfig2 = config2.getFitConfiguration();
+        if (custom && template.hasPsf()) {
+          textPsf.select(PeakFit.getPsfTypeNames()[fitConfig2.getPsfType().ordinal()]);
         }
-      } else {
-        // Ignore
+        textDataFilterType.select(config2.getDataFilterType().ordinal());
+        textDataFilter.select(config2.getDataFilterMethod(0).ordinal());
+        textSmooth.setText(String.valueOf(config2.getDataFilterParameterValue(0)));
+        textSearch.setText(String.valueOf(config2.getSearch()));
+        textBorder.setText(String.valueOf(config2.getBorder()));
+        textFitting.setText(String.valueOf(config2.getFitting()));
+        textFitSolver.select(FitProtosHelper.getName(fitConfig2.getFitSolver()));
+
+        // Copy settings not in the dialog for the fit solver
+        final FitConfiguration fitConfig = config.getFitConfiguration();
+        if (custom) {
+          fitConfig.setPsf(fitConfig2.getPsf());
+        }
+        fitConfig.setFitSolverSettings(fitConfig2.getFitSolverSettings());
       }
     } else if (event.getSource() instanceof Checkbox) {
       final Checkbox checkbox = (Checkbox) event.getSource();
@@ -3260,12 +3257,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         }
 
         cbSmartFilter.setState(filterFitConfig.isSmartFilter());
-        textCoordinateShiftFactor.setText("" + filterFitConfig.getCoordinateShiftFactor());
-        textSignalStrength.setText("" + filterFitConfig.getSignalStrength());
-        textMinPhotons.setText("" + filterFitConfig.getMinPhotons());
-        textMinWidthFactor.setText("" + filterFitConfig.getMinWidthFactor());
-        textWidthFactor.setText("" + filterFitConfig.getMaxWidthFactor());
-        textPrecisionThreshold.setText("" + filterFitConfig.getPrecisionThreshold());
+        textCoordinateShiftFactor
+            .setText(String.valueOf(filterFitConfig.getCoordinateShiftFactor()));
+        textSignalStrength.setText(String.valueOf(filterFitConfig.getSignalStrength()));
+        textMinPhotons.setText(String.valueOf(filterFitConfig.getMinPhotons()));
+        textMinWidthFactor.setText(String.valueOf(filterFitConfig.getMinWidthFactor()));
+        textWidthFactor.setText(String.valueOf(filterFitConfig.getMaxWidthFactor()));
+        textPrecisionThreshold.setText(String.valueOf(filterFitConfig.getPrecisionThreshold()));
         textPrecisionMethod.select(filterFitConfig.getPrecisionMethod().ordinal());
       } else {
         if (!updateFitConfiguration(config)) {
@@ -3276,15 +3274,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         textPsf.select(PeakFit.getPsfTypeNames()[fitConfig.getPsfType().ordinal()]);
         textDataFilterType.select(config.getDataFilterType().ordinal());
         textDataFilter.select(config.getDataFilterMethod(0).ordinal());
-        textSmooth.setText("" + config.getDataFilterParameterValue(0));
-        textSearch.setText("" + config.getSearch());
-        textBorder.setText("" + config.getBorder());
-        textFitting.setText("" + config.getFitting());
+        textSmooth.setText(String.valueOf(config.getDataFilterParameterValue(0)));
+        textSearch.setText(String.valueOf(config.getSearch()));
+        textBorder.setText(String.valueOf(config.getBorder()));
+        textFitting.setText(String.valueOf(config.getFitting()));
         textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
-        textMatchDistance.setText("" + settings.matchDistance);
-        textLowerDistance.setText("" + settings.lowerDistance);
-        textSignalFactor.setText("" + settings.signalFactor);
-        textLowerFactor.setText("" + settings.lowerSignalFactor);
+        textMatchDistance.setText(String.valueOf(settings.matchDistance));
+        textLowerDistance.setText(String.valueOf(settings.lowerDistance));
+        textSignalFactor.setText(String.valueOf(settings.signalFactor));
+        textLowerFactor.setText(String.valueOf(settings.lowerSignalFactor));
       }
     }
   }
