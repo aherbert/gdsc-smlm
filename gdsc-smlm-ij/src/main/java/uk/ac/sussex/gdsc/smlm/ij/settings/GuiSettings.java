@@ -558,7 +558,7 @@ public final class GuiSettings {
 
     static {
       final TcPalmAnalysisSettings.Builder builder = TcPalmAnalysisSettings.newBuilder();
-      ResultsImageSettings.Builder resultsImageSettings = builder.getResultsImageSettingsBuilder();
+      final ResultsImageSettings.Builder resultsImageSettings = builder.getResultsImageSettingsBuilder();
       resultsImageSettings.setImageType(ResultsImageType.DRAW_LOCALISATIONS);
       resultsImageSettings.setLutName(LutColour.FIRE.getName());
       builder.setLoopSize(512);
