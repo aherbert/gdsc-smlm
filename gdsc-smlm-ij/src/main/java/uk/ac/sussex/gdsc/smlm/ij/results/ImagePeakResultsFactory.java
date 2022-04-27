@@ -34,7 +34,10 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 /**
  * A factory for creating ImagePeakResults objects.
  */
-public class ImagePeakResultsFactory {
+public final class ImagePeakResultsFactory {
+
+  /** No insatnces. */
+  private ImagePeakResultsFactory() {}
 
   /**
    * Create a PeakResults image using the specified parameters.
@@ -122,6 +125,7 @@ public class ImagePeakResultsFactory {
 
       default:
         image = new ImageJImagePeakResults(title, bounds, imageScale);
+        break;
     }
     int flags = 0;
 
