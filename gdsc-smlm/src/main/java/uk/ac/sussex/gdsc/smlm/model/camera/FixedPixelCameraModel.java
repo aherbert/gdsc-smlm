@@ -227,7 +227,6 @@ public abstract class FixedPixelCameraModel implements CameraModel {
     removeBiasAndGain(data);
   }
 
-
   @Override
   public void removeBiasAndGain(float[] data) {
     if (data == null) {

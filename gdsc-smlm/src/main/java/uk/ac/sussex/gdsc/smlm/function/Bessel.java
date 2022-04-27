@@ -35,7 +35,6 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
-
 /**
  * Class for computing various Bessel functions
  *

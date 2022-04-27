@@ -280,7 +280,6 @@ public class TurboLog2 extends TurboLog {
     return logMantissa[(m + roundF) >>> q] + getLogExpF(e);
   }
 
-
   /**
    * Calculate the natural logarithm. Requires the argument be finite and positive.
    *

@@ -731,7 +731,6 @@ public class ResultsMatchCalculator implements PlugIn {
     return getCoordinates(results, coordinateMethod, false);
   }
 
-
   /**
    * Build a map between the peak id (time point) and a list of coordinates.
    *

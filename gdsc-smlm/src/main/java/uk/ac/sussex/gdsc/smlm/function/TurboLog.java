@@ -433,7 +433,6 @@ public class TurboLog extends FastLog {
     return logMantissa[m >>> q] + logExpF[e];
   }
 
-
   /**
    * Calculate the natural logarithm. Requires the argument be finite and positive.
    *
@@ -460,7 +459,6 @@ public class TurboLog extends FastLog {
     }
     return logMantissa[(int) (m >>> qd)] + logExpD[e];
   }
-
 
   @Override
   public double logD(double x) {

@@ -1102,7 +1102,6 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     values[3] = value * wxDelta * wyDelta;
   }
 
-
   /**
    * Check if the stack should be updated to move the rolling window to the given peak.
    *

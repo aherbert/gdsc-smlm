@@ -92,7 +92,6 @@ public class MleGradientCalculator extends GradientCalculator {
         // We ignore this contribution to the gradient for stability
         // compute(alpha, beta, dfiDa, Double.MIN_VALUE, xi);
 
-
         // We assume y[i] is positive but must handle zero
       } else if (xi <= 0.0) {
         chisq += fi;

@@ -118,7 +118,6 @@ class PoissonGaussianFunctionTest {
     Assertions.assertEquals(1, cumulativeProbability(1.7, 10, 0.75, true), 0.02);
   }
 
-
   private static void cumulativeProbabilityIsOne(final double gain, final double mu,
       final double sd, final boolean usePicard) {
     final double p2 = cumulativeProbability(gain, mu, sd, usePicard);

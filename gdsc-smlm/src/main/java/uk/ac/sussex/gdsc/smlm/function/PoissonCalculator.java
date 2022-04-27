@@ -314,7 +314,6 @@ public class PoissonCalculator {
     return ll;
   }
 
-
   /**
    * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
    * must be positive.

@@ -78,7 +78,6 @@ public interface CameraModel {
    */
   float[] getBias(Rectangle bounds);
 
-
   /**
    * Gets the per-pixel camera bias (offset). The coordinates are expected to fit within the camera
    * bounds.

@@ -220,7 +220,6 @@ public class PulseActivationAnalysis implements PlugIn {
     double activationDensity;
     double nonSpecificFrequency;
 
-
     String magnification = MAGNIFICATIONS[1];
 
     Settings() {

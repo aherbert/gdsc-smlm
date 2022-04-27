@@ -185,7 +185,6 @@ public class PcPalmAnalysis implements PlugIn {
     }
   }
 
-
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);

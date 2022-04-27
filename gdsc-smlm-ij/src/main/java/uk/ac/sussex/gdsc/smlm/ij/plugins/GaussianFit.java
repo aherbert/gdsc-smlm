@@ -269,7 +269,6 @@ public class GaussianFit implements ExtendedPlugInFilter {
     return PsfTypeLoader.PSF_TYPE_VALUES;
   }
 
-
   /**
    * Gets the PSF type names.
    *

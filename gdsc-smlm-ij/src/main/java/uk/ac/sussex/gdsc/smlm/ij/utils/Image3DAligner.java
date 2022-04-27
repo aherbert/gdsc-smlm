@@ -296,7 +296,6 @@ public class Image3DAligner {
     setReference(createDht(image, reference));
   }
 
-
   /**
    * Sets the reference image and the size of the target image.
    *

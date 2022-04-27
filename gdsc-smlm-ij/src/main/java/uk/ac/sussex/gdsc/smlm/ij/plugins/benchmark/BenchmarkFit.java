@@ -1002,7 +1002,6 @@ public class BenchmarkFit implements PlugIn {
       t.start();
     }
 
-
     // Store all the fitting results
     results = new double[totalFrames * startPoints.length][];
     resultsTime = new long[results.length];

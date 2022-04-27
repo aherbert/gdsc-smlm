@@ -818,7 +818,6 @@ public class MultivariateGaussianMixtureExpectationMaximization {
     // components of mixture model to be created
     final LocalList<MultivariateGaussianDistribution> distributions = new LocalList<>();
 
-
     int from = 0;
     while (from < sortedData.length) {
       // Find the end

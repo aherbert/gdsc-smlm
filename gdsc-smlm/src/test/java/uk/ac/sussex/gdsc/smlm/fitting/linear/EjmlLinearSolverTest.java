@@ -593,7 +593,6 @@ class EjmlLinearSolverTest {
     }
   }
 
-
   private class LinearInversionExecutable extends InversionExecutable {
     public LinearInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
       super("Linear Inversion", a, answer);
@@ -607,7 +606,6 @@ class EjmlLinearSolverTest {
       return null;
     }
   }
-
 
   private class CholeskyInversionExecutable extends InversionExecutable {
     public CholeskyInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
@@ -623,7 +621,6 @@ class EjmlLinearSolverTest {
     }
   }
 
-
   private class CholeskyLdltInversionExecutable extends InversionExecutable {
     public CholeskyLdltInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
       super("CholeskyLDLT Inversion", a, answer);
@@ -637,7 +634,6 @@ class EjmlLinearSolverTest {
       return null;
     }
   }
-
 
   private class PseudoInverseInversionExecutable extends InversionExecutable {
     public PseudoInverseInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
@@ -653,7 +649,6 @@ class EjmlLinearSolverTest {
     }
   }
 
-
   private class DirectInversionInversionExecutable extends InversionExecutable {
     public DirectInversionInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
       super("DirectInversion Inversion", a, answer);
@@ -667,7 +662,6 @@ class EjmlLinearSolverTest {
       return null;
     }
   }
-
 
   private class DiagonalDirectInversionInversionExecutable extends InversionExecutable {
     public DiagonalDirectInversionInversionExecutable(DenseMatrix64F[] a, double[][] answer) {

@@ -5534,7 +5534,6 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-
   private void addToResultsWindow(final String text) {
     if (text != null) {
       if (resultsWindow != null) {
@@ -7872,7 +7871,6 @@ public class BenchmarkFilterAnalysis
   static double getLowerDistanceInPixels() {
     return FIT_RESULTS_DATA_CACHE.get().lowerDistanceInPixels;
   }
-
 
   /**
    * Gets the signal factor from the latest read of the fit results.

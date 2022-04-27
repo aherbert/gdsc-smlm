@@ -383,7 +383,6 @@ public class ClassificationMatchCalculator implements PlugIn {
       return;
     }
 
-
     // Extract indices
     final int[] set1 = new int[allMatches.size()];
     final int[] set2 = new int[allMatches.size()];
