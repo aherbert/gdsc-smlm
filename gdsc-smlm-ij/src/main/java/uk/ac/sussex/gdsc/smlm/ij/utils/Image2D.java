@@ -68,7 +68,7 @@ public abstract class Image2D {
     if (image.getBitDepth() == 32) {
       copyFrom((float[]) image.getPixels(), 0, nr * nc, 0);
     } else {
-      for (int i = 0, size = nr * nc; i < size; i++) {
+      for (int i = nr * nc; i-- > 0;) {
         setf(i, image.getf(i));
       }
     }
@@ -793,9 +793,7 @@ public abstract class Image2D {
 
     // Compute bounds assuming width,d is small and positive.
     int x1;
-    int y1;
     int xw1;
-    int yh1;
     if (x < 0) {
       x1 = 0;
       xw1 = MathUtils.clip(0, nc, x + width);
@@ -807,6 +805,8 @@ public abstract class Image2D {
     if (width == 0) {
       return 0;
     }
+    int y1;
+    int yh1;
     if (y < 0) {
       y1 = 0;
       yh1 = MathUtils.clip(0, nr, y + height);
