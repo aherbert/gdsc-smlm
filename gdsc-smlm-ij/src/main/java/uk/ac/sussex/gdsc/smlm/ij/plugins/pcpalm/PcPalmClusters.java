@@ -59,7 +59,9 @@ import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2IntOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.function.IntIntConsumer;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
@@ -477,7 +479,7 @@ public class PcPalmClusters implements PlugIn {
 
       String line;
 
-      final ArrayList<float[]> data = new ArrayList<>();
+      final CustomInt2IntOpenHashMap data = new CustomInt2IntOpenHashMap();
 
       // Read the header and store the calibration if present
       for (line = input.readLine(); line != null; line = input.readLine()) {
@@ -514,15 +516,13 @@ public class PcPalmClusters implements PlugIn {
           final int molecules = scanner.nextInt();
           final float frequency = scanner.nextFloat();
 
-          // Check for duplicates
-          for (final float[] d : data) {
-            if (d[0] == molecules) {
-              error("Duplicate molecules field on line " + count);
-              return null;
-            }
+          // Error on duplicates
+          final int s = data.size();
+          data.put(molecules, Float.floatToIntBits(frequency));
+          if (s == data.size()) {
+            error("Duplicate molecules field on line " + count);
+            return null;
           }
-
-          data.add(new float[] {molecules, frequency});
         }
       }
 
@@ -532,22 +532,14 @@ public class PcPalmClusters implements PlugIn {
       }
 
       // Create a contiguous histogram from zero
-      int maxN = 0;
-      for (final float[] d : data) {
-        if (maxN < d[0]) {
-          maxN = (int) d[0];
-        }
-      }
+      int maxN = data.keySet().intStream().max().orElse(0);
 
       final float[][] hist = new float[2][maxN + 1];
-      for (int n = 0; n <= maxN; n++) {
+      for (int n = 1; n <= maxN; n++) {
         hist[0][n] = n;
-        for (final float[] d : data) {
-          if (n == d[0]) {
-            hist[1][n] = d[1];
-          }
-        }
       }
+      data.forEach((IntIntConsumer) (k, v) -> hist[1][k] = Float.intBitsToFloat(v));
+
       final HistogramData histogramData = new HistogramData(hist, frames, area, units);
       histogramData.filename = filename;
       return histogramData;
