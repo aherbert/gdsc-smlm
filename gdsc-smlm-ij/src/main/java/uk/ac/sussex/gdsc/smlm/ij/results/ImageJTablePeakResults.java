@@ -171,17 +171,13 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     converters = helper.getConverters();
 
     if (hasCalibration()) {
-      if (showPrecision) {
-        if (computePrecision) {
-          try {
-            calculator = Gaussian2DPeakResultHelper.create(getPsf(), getCalibrationReader(),
-                Gaussian2DPeakResultHelper.LSE_PRECISION);
-            canComputePrecision = true;
-          } catch (final ConfigurationException ex) {
-            // Cannot compute precision
-          } catch (final ConversionException ex) {
-            // Cannot compute precision
-          }
+      if (showPrecision && computePrecision) {
+        try {
+          calculator = Gaussian2DPeakResultHelper.create(getPsf(), getCalibrationReader(),
+              Gaussian2DPeakResultHelper.LSE_PRECISION);
+          canComputePrecision = true;
+        } catch (final ConfigurationException | ConversionException ignored) {
+          // Cannot compute precision
         }
       }
 
@@ -190,7 +186,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
           toPixelConverter = UnitConverterUtils.createConverter(distanceUnit, DistanceUnit.PIXEL,
               getCalibrationReader().getNmPerPixel());
         }
-      } catch (final ConversionException ex) {
+      } catch (final ConversionException ignored) {
         // Gracefully fail so ignore this
       }
     }
@@ -282,11 +278,11 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
           continue;
         }
         // Allow for units
-        if (headings[i].equals("X") || headings[i].startsWith("X (")) {
+        if ("X".equals(headings[i]) || headings[i].startsWith("X (")) {
           indexX = i;
           continue;
         }
-        if (headings[i].equals("Y") || headings[i].startsWith("Y (")) {
+        if ("Y".equals(headings[i]) || headings[i].startsWith("Y (")) {
           indexY = i;
           continue;
         }
@@ -325,10 +321,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
       sb.append("\tCategory");
     }
     if (showFittingData) {
-      sb.append("\torigX");
-      sb.append("\torigY");
-      sb.append("\torigValue");
-      sb.append("\tError");
+      sb.append("\torigX\torigY\torigValue\tError");
     }
     if (showNoiseData) {
       sb.append("\tNoise");
@@ -342,10 +335,10 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
       sb.append("\tSNR");
     }
 
-    for (int i = 0; i < outIndices.length; i++) {
-      sb.append('\t').append(names[outIndices[i]]);
-      if (!TextUtils.isNullOrEmpty(unitNames[outIndices[i]])) {
-        sb.append(" (").append(unitNames[outIndices[i]]).append(')');
+    for (final int index : outIndices) {
+      sb.append('\t').append(names[index]);
+      if (!TextUtils.isNullOrEmpty(unitNames[index])) {
+        sb.append(" (").append(unitNames[index]).append(')');
       }
       addDeviation(sb);
     }
@@ -410,19 +403,19 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
         error, noise, meanIntensity);
     if (isShowDeviations()) {
       if (paramsStdDev != null) {
-        for (int i = 0; i < outIndices.length; i++) {
-          addFloat(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
-          addFloat(sb, converters[outIndices[i]].convert(paramsStdDev[outIndices[i]]));
+        for (final int index : outIndices) {
+          addFloat(sb, converters[index].convert(params[index]));
+          addFloat(sb, converters[index].convert(paramsStdDev[index]));
         }
       } else {
-        for (int i = 0; i < outIndices.length; i++) {
-          addFloat(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
+        for (final int index : outIndices) {
+          addFloat(sb, converters[index].convert(params[index]));
           sb.append("\t0");
         }
       }
     } else {
-      for (int i = 0; i < outIndices.length; i++) {
-        addFloat(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
+      for (final int index : outIndices) {
+        addFloat(sb, converters[index].convert(params[index]));
       }
     }
     if (isShowPrecision()) {
@@ -525,17 +518,13 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     if (!tableActive) {
       return;
     }
-    int counter = 0;
     for (final PeakResult result : results) {
       addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getCategory(),
           result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
           result.getNoise(), result.getMeanIntensity(), result.getParameters(),
           result.getParameterDeviations(), result.getPrecision());
-      if (counter++ > 31) {
-        if (!tableActive) {
-          return;
-        }
-        counter = 0;
+      if (!tableActive) {
+        return;
       }
     }
   }
@@ -698,7 +687,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
       final double x = Double.parseDouble(fields[indexX]);
       final double y = Double.parseDouble(fields[indexY]);
       return new double[] {startT, toPixelConverter.convert(x), toPixelConverter.convert(y)};
-    } catch (final ArrayIndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final ArrayIndexOutOfBoundsException | NumberFormatException ignored) {
       // Will happen if any index is still at the default of -1
       // or if there are not enough fields
       // or in case any field is not a number.
