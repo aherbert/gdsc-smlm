@@ -129,6 +129,9 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
    */
   public static final int DISPLAY_ID = 0x0800;
 
+  /** 1/2. */
+  private static final float HALF = 0.5f;
+
   /** The empty value. */
   private double empty;
 
@@ -371,21 +374,21 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
   }
 
   private String createInfo() {
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(512);
     if (getSource() != null) {
-      sb.append("Source: ").append(getSource().toXml()).append("\n");
+      sb.append("Source: ").append(getSource().toXml()).append('\n');
     }
     if (getBounds() != null) {
-      sb.append("Bounds: ").append(getBoundsString()).append("\n");
+      sb.append("Bounds: ").append(getBoundsString()).append('\n');
     }
     if (getCalibration() != null) {
-      sb.append("Calibration:\n").append(getCalibration()).append("\n");
+      sb.append("Calibration:\n").append(getCalibration()).append('\n');
     }
     if (getCalibration() != null) {
-      sb.append("PSF:\n").append(getCalibration()).append("\n");
+      sb.append("PSF:\n").append(getCalibration()).append('\n');
     }
     if (!TextUtils.isNullOrEmpty(getConfiguration())) {
-      sb.append("Configuration:\n").append(getConfiguration()).append("\n");
+      sb.append("Configuration:\n").append(getConfiguration()).append('\n');
     }
     return (sb.length() > 0) ? sb.toString() : null;
   }
@@ -397,9 +400,8 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
    * <p>Use to perform any other processing before begin().
    */
   protected void preBegin() {
-    if ((displayFlags & DISPLAY_SIGNAL) != 0) {
-      // Signal is OK to be equalised
-    } else {
+    // Signal is OK to be equalised
+    if ((displayFlags & DISPLAY_SIGNAL) == 0) {
       // Peak and localisation should not use equalisation
       displayFlags &= ~DISPLAY_EQUALIZED;
     }
@@ -501,8 +503,8 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
 
       // Get the histogram
       final int[] h = new int[k + 1];
-      for (int i = 0; i < pixels.length; i++) {
-        h[pixels[i] & 0xffff]++;
+      for (final short s : pixels) {
+        h[s & 0xffff]++;
       }
 
       // Skip empty data
@@ -593,7 +595,7 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
 
   private static int findNonNaNIndex(double[] data) {
     for (int i = 0; i < data.length; i++) {
-      if (!(data[i] != data[i])) {
+      if (!Double.isNaN(data[i])) {
         return i;
       }
     }
@@ -1050,9 +1052,9 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     // the
     // getValue(...) method will never be called.
 
-    if (dx < 0.5f) {
+    if (dx < HALF) {
       // Interpolate to the lower x pixel
-      wx = 0.5f + dx;
+      wx = HALF + dx;
       if (x1 == 0) {
         xDelta = 0;
       } else {
@@ -1068,9 +1070,9 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
       }
     }
 
-    if (dy < 0.5f) {
+    if (dy < HALF) {
       // Interpolate to the lower y pixel
-      wy = 0.5f + dy;
+      wy = HALF + dy;
       if (y1 == 0) {
         yDelta = 0;
       } else {
