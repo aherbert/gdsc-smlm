@@ -53,6 +53,11 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
  *      Cross-Correlation by J.P. Lewis</a>
  */
 public class Image2DAligner {
+  private static final String NO_DATA_IN_2D_IMAGE = "No data in 2D image";
+  private static final String REQUIRE_A_2D_IMAGE = "Require a 2D image";
+  private static final String REQUIRE_A_2D_TARGET_IMAGE = "Require a 2D target image";
+  private static final String IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE =
+      "Image is larger than the initialised reference";
 
   /**
    * The limit for the range of the data as an integer.
@@ -228,7 +233,7 @@ public class Image2DAligner {
   public void setReference(ImageProcessor image, int width, int height) {
     check2D(image);
     if (width < 2 || height < 2) {
-      throw new IllegalArgumentException("Require a 2D target image");
+      throw new IllegalArgumentException(REQUIRE_A_2D_TARGET_IMAGE);
     }
     nc = MathUtils.nextPow2(Math.max(width, image.getWidth()));
     nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
@@ -251,7 +256,7 @@ public class Image2DAligner {
   public void setReference(Image2D image, int width, int height) {
     check2D(image);
     if (width < 2 || height < 2) {
-      throw new IllegalArgumentException("Require a 2D target image");
+      throw new IllegalArgumentException(REQUIRE_A_2D_TARGET_IMAGE);
     }
     nc = MathUtils.nextPow2(Math.max(width, image.getWidth()));
     nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
@@ -279,7 +284,7 @@ public class Image2DAligner {
    */
   private static void check2D(ImageProcessor image) {
     if (image.getWidth() < 2 || image.getHeight() < 2) {
-      throw new IllegalArgumentException("Require a 2D image");
+      throw new IllegalArgumentException(REQUIRE_A_2D_IMAGE);
     }
     // Check for data
     final int size = image.getWidth() * image.getHeight();
@@ -288,7 +293,7 @@ public class Image2DAligner {
         return;
       }
     }
-    throw new IllegalArgumentException("No data in 2D image");
+    throw new IllegalArgumentException(NO_DATA_IN_2D_IMAGE);
   }
 
   /**
@@ -298,15 +303,15 @@ public class Image2DAligner {
    */
   private static void check2D(Image2D image) {
     if (image.getWidth() < 2 || image.getHeight() < 2) {
-      throw new IllegalArgumentException("Require a 2D image");
+      throw new IllegalArgumentException(REQUIRE_A_2D_IMAGE);
     }
     // Check for data
-    for (int i = image.getDataLength(); i-- > 0; ) {
+    for (int i = image.getDataLength(); i-- > 0;) {
       if (image.get(i) != 0) {
         return;
       }
     }
-    throw new IllegalArgumentException("No data in 2D image");
+    throw new IllegalArgumentException(NO_DATA_IN_2D_IMAGE);
   }
 
   /**
@@ -463,8 +468,8 @@ public class Image2DAligner {
   }
 
   /**
-   * Gets the insert point for data of size n into a size of max N. This is done to ensure
-   * alignment of the FHT power spectrum centre with the centre of the data.
+   * Gets the insert point for data of size n into a size of max N. This is done to ensure alignment
+   * of the FHT power spectrum centre with the centre of the data.
    *
    * @param maxN the max N
    * @param n the n
@@ -598,7 +603,7 @@ public class Image2DAligner {
     final int width = image.getWidth();
     final int height = image.getHeight();
     if (width > nc || height > nr) {
-      throw new IllegalArgumentException("Image is larger than the initialised reference");
+      throw new IllegalArgumentException(IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE);
     }
 
     target = createDht(image, target);
@@ -633,7 +638,7 @@ public class Image2DAligner {
     final int width = image.getWidth();
     final int height = image.getHeight();
     if (width > nc || height > nr) {
-      throw new IllegalArgumentException("Image is larger than the initialised reference");
+      throw new IllegalArgumentException(IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE);
     }
 
     target = createDht(image, target);
@@ -1102,8 +1107,8 @@ public class Image2DAligner {
    * @param iy working space for iy
    * @return true, if the centre moved
    */
-  private static boolean performCubicSearch(CachedBicubicInterpolator[][] nodes,
-      double range, double[] centre, double[] y, int[] iy) {
+  private static boolean performCubicSearch(CachedBicubicInterpolator[][] nodes, double range,
+      double[] centre, double[] y, int[] iy) {
 
     // Pre-compute the node position and the fraction between 0-1 for y values
     for (int j = -1, k = 0, l = 0; j <= 1; j++, k++) {

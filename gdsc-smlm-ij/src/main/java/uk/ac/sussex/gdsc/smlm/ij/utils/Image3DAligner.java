@@ -67,6 +67,9 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLi
  *      Cross-Correlation by J.P. Lewis</a>
  */
 public class Image3DAligner {
+  private static final String NO_DATA_IN_3D_IMAGE = "No data in 3D image";
+  private static final String REQUIRE_A_3D_IMAGE = "Require a 3D image";
+  private static final String REQUIRE_A_3D_TARGET_IMAGE = "Require a 3D target image";
   private static final String IMAGE_IS_LARGER_THAN_THE_INITIALISED_REFERENCE =
       "Image is larger than the initialised reference";
 
@@ -281,7 +284,7 @@ public class Image3DAligner {
   public void setReference(ImageStack image, int width, int height, int depth) {
     check3D(image);
     if (width < 2 || height < 2 || depth < 2) {
-      throw new IllegalArgumentException("Require a 3D target image");
+      throw new IllegalArgumentException(REQUIRE_A_3D_TARGET_IMAGE);
     }
     nc = MathUtils.nextPow2(Math.max(width, image.getWidth()));
     nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
@@ -310,7 +313,7 @@ public class Image3DAligner {
   public void setReference(Image3D image, int width, int height, int depth) {
     check3D(image);
     if (width < 2 || height < 2 || depth < 2) {
-      throw new IllegalArgumentException("Require a 3D target image");
+      throw new IllegalArgumentException(REQUIRE_A_3D_TARGET_IMAGE);
     }
     nc = MathUtils.nextPow2(Math.max(width, image.getWidth()));
     nr = MathUtils.nextPow2(Math.max(height, image.getHeight()));
@@ -329,7 +332,7 @@ public class Image3DAligner {
 
   private static void check3D(ImageStack image) {
     if (image.getWidth() < 2 || image.getHeight() < 2 || image.getSize() < 2) {
-      throw new IllegalArgumentException("Require a 3D image");
+      throw new IllegalArgumentException(REQUIRE_A_3D_IMAGE);
     }
     // Check for data
     final int size = image.getWidth() * image.getHeight();
@@ -341,12 +344,12 @@ public class Image3DAligner {
         }
       }
     }
-    throw new IllegalArgumentException("No data in 3D image");
+    throw new IllegalArgumentException(NO_DATA_IN_3D_IMAGE);
   }
 
   private static void check3D(Image3D image) {
     if (image.getWidth() < 2 || image.getHeight() < 2 || image.getSize() < 2) {
-      throw new IllegalArgumentException("Require a 3D image");
+      throw new IllegalArgumentException(REQUIRE_A_3D_IMAGE);
     }
     // Check for data
     for (int i = image.getDataLength(); i-- > 0;) {
@@ -354,7 +357,7 @@ public class Image3DAligner {
         return;
       }
     }
-    throw new IllegalArgumentException("No data in 3D image");
+    throw new IllegalArgumentException(NO_DATA_IN_3D_IMAGE);
   }
 
   private DhtData createDht(ImageStack image, DhtData dhtData) {
