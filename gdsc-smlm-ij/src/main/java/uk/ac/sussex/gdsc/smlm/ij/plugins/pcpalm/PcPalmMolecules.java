@@ -139,17 +139,15 @@ public class PcPalmMolecules implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     static final String[] RUN_MODE =
         {"PC-PALM", "Manual Tracing", "In-memory results", "Simulation"};
-    static String[] singlesMode =
-        new String[] {"Ignore", "Include in molecules histogram", "Include in final filtering"};
-    static final String[] BLINKING_DISTRIBUTION =
-        new String[] {"Poisson", "Geometric", "None", "Binomial"};
+    static final String[] SINGLE_MODE =
+        {"Ignore", "Include in molecules histogram", "Include in final filtering"};
+    static final String[] BLINKING_DISTRIBUTION = {"Poisson", "Geometric", "None", "Binomial"};
     static final String[] CLUSTER_SIMULATION =
-        new String[] {"None", "Circles", "Non-overlapping circles", "Circles Mask"};
+        {"None", "Circles", "Non-overlapping circles", "Circles Mask"};
 
     String inputOption;
     boolean chooseRoi;
@@ -688,7 +686,7 @@ public class PcPalmMolecules implements PlugIn {
         + "Use the precision to trace localisations into molecule pulses.");
 
     gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
-    gd.addChoice("Singles_mode", Settings.singlesMode, settings.singlesModeIndex);
+    gd.addChoice("Singles_mode", Settings.SINGLE_MODE, settings.singlesModeIndex);
     gd.addCheckbox("Simplex_fit", settings.simplexFitting);
     gd.addCheckbox("Show_histograms", settings.showHistograms);
     gd.addCheckbox("Binary_image", settings.binaryImage);
@@ -880,7 +878,7 @@ public class PcPalmMolecules implements PlugIn {
       log("  Initial Gaussian: %f @ %f +/- %f", parameters[0], parameters[1], parameters[2]);
     }
 
-    final double[] initialSolution = new double[] {parameters[0], parameters[1], parameters[2], -1};
+    final double[] initialSolution = {parameters[0], parameters[1], parameters[2], -1};
 
     // Fit to a skewed Gaussian (or appropriate function)
     final double[] skewParameters = fitSkewGaussian(x, y, initialSolution);
@@ -1017,8 +1015,8 @@ public class PcPalmMolecules implements PlugIn {
    * @param singles a list of the singles (not grouped into molecules)
    * @return a list of molecules
    */
-  private static ArrayList<Molecule> extractMolecules(MemoryPeakResults results,
-      double[] precisions, double sigmaRaw, ArrayList<Molecule> singles) {
+  private static List<Molecule> extractMolecules(MemoryPeakResults results, double[] precisions,
+      double sigmaRaw, List<Molecule> singles) {
     return traceMolecules(results, precisions, sigmaRaw * 2.5, 1, singles);
   }
 
@@ -1032,8 +1030,8 @@ public class PcPalmMolecules implements PlugIn {
    * @param singles a list of the singles (not grouped into molecules)
    * @return a list of molecules
    */
-  private static ArrayList<Molecule> traceMolecules(MemoryPeakResults results, double[] precisions,
-      double distance, int time, ArrayList<Molecule> singles) {
+  private static List<Molecule> traceMolecules(MemoryPeakResults results, double[] precisions,
+      double distance, int time, List<Molecule> singles) {
     // These plugins are not really supported so just leave them to throw an exception if
     // the data cannot be handled
     final TypeConverter<IntensityUnit> ic =
@@ -1087,7 +1085,7 @@ public class PcPalmMolecules implements PlugIn {
    * @param sigmaS The precision estimate
    * @return the array list
    */
-  private static ArrayList<Molecule> filterMolecules(List<Molecule> molecules, double sigmaS) {
+  private static List<Molecule> filterMolecules(List<Molecule> molecules, double sigmaS) {
     final ArrayList<Molecule> newMolecules = new ArrayList<>(molecules.size());
     final double limit = 3 * sigmaS;
     for (final Molecule m : molecules) {
@@ -1249,7 +1247,6 @@ public class PcPalmMolecules implements PlugIn {
         Arrays.fill(mask, 255);
         MaskDistribution maskDistribution =
             new MaskDistribution(mask, maskSize, maskSize, 0, maskScale, maskScale, rng);
-        double[] centre;
         IJ.showStatus("Computing clusters mask");
         final int roiRadius = (int) Math.round((settings.clusterRadius * 2) / maskScale);
 
@@ -1261,7 +1258,9 @@ public class PcPalmMolecules implements PlugIn {
               / (Math.PI * MathUtils.pow2(settings.clusterRadius / maskScale)));
         }
 
-        while ((centre = maskDistribution.next()) != null && clusterCentres.size() < totalSteps) {
+        for (double[] centre = maskDistribution.next();
+            centre != null && clusterCentres.size() < totalSteps;
+            centre = maskDistribution.next()) {
           IJ.showProgress(clusterCentres.size(), totalSteps);
           // The mask returns the coordinates with the centre of the image at 0,0
           centre[0] += width / 2;
@@ -1417,7 +1416,7 @@ public class PcPalmMolecules implements PlugIn {
               final double r = settings.clusterRadius * ((u > 1) ? 2 - u : u);
               final double x = r * Math.cos(t);
               final double y = r * Math.sin(t);
-              final double[] xy = new double[] {clusterCentre[0] + x, clusterCentre[1] + y};
+              final double[] xy = {clusterCentre[0] + x, clusterCentre[1] + y};
               xyz.add(xy);
               for (int k = 0; k < 2; k++) {
                 com[k] += xy[k];
@@ -1697,9 +1696,6 @@ public class PcPalmMolecules implements PlugIn {
       final int roiRadius, final int fill) {
     int minx = cx - roiRadius;
     int maxx = cx + roiRadius;
-    final int miny = cy - roiRadius;
-    final int maxy = cy + roiRadius;
-    final int r2 = roiRadius * roiRadius;
 
     // Pre-calculate x range
     if (minx < 0) {
@@ -1711,6 +1707,10 @@ public class PcPalmMolecules implements PlugIn {
     if (minx > maxx) {
       return;
     }
+
+    final int miny = cy - roiRadius;
+    final int maxy = cy + roiRadius;
+    final int r2 = roiRadius * roiRadius;
 
     int count = 0;
     final int[] dx2 = new int[roiRadius * 2 + 1];
@@ -1831,11 +1831,14 @@ public class PcPalmMolecules implements PlugIn {
     return true;
   }
 
+  /**
+   * Procedure to find the start and end of all results.
+   */
   private static class FrameProcedure implements PeakResultProcedure {
     int start;
     int end;
 
-    public FrameProcedure(int start, int end) {
+    FrameProcedure(int start, int end) {
       this.start = start;
       this.end = end;
     }
@@ -2041,10 +2044,8 @@ public class PcPalmMolecules implements PlugIn {
     if (binary) {
       final byte[] data = new byte[width * height];
       for (final Molecule m : molecules) {
-        if (checkBounds) {
-          if (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy) {
-            continue;
-          }
+        if (checkBounds && (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy)) {
+          continue;
         }
 
         // Shift to the origin. This makes the image more memory efficient.
@@ -2123,14 +2124,14 @@ public class PcPalmMolecules implements PlugIn {
    * Allow optimisation using Apache Commons Math 3 Optimiser.
    */
   private abstract class SkewNormalOptimiserFunction extends SkewNormalFunction {
-    public SkewNormalOptimiserFunction(double[] parameters) {
-      super(parameters);
-    }
-
     protected DoubleArrayList x;
     protected DoubleArrayList y;
 
-    public void addData(float[] x, float[] y) {
+    SkewNormalOptimiserFunction(double[] parameters) {
+      super(parameters);
+    }
+
+    void addData(float[] x, float[] y) {
       this.x = new DoubleArrayList(x.length);
       this.y = new DoubleArrayList(x.length);
       for (int i = 0; i < x.length; i++) {
@@ -2139,11 +2140,11 @@ public class PcPalmMolecules implements PlugIn {
       }
     }
 
-    public double[] calculateTarget() {
+    double[] calculateTarget() {
       return y.toDoubleArray();
     }
 
-    public double[] calculateWeights() {
+    double[] calculateWeights() {
       final double[] w = new double[y.size()];
       Arrays.fill(w, 1);
       return w;
@@ -2158,7 +2159,7 @@ public class PcPalmMolecules implements PlugIn {
     // Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
     // Use the deprecated API since the new one is not yet documented.
 
-    public SkewNormalDifferentiableFunction(double[] parameters) {
+    SkewNormalDifferentiableFunction(double[] parameters) {
       super(parameters);
     }
 
@@ -2201,7 +2202,7 @@ public class PcPalmMolecules implements PlugIn {
    */
   private class SkewNormalMultivariateFunction extends SkewNormalOptimiserFunction
       implements MultivariateFunction {
-    public SkewNormalMultivariateFunction(double[] parameters) {
+    SkewNormalMultivariateFunction(double[] parameters) {
       super(parameters);
     }
 
