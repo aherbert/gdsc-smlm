@@ -2807,7 +2807,7 @@ public class BenchmarkFilterAnalysis
       spotFitResults.fitResults.int2ObjectEntrySet()
           .forEach(e -> put(jobs, new Job(e.getIntKey(), e.getValue())));
       // Finish all the worker threads by passing in a null job
-      for (int i = 0; i < threads.size(); i++) {
+      for (int i = threads.size(); i-- != 0;) {
         put(jobs, new Job(0, null));
       }
 
