@@ -153,7 +153,7 @@ public final class JsonUtils {
    * <p>Adapted from <a href="https://stackoverflow.com/a/49564514">StackOverflow pretty-print JSON
    * in Java</a>.
    *
-   * <Blockquote><p>"The basic idea is to trigger the formatting based on special characters in
+   * <blockquote><p>"The basic idea is to trigger the formatting based on special characters in
    * JSON. For example, if a '{' or '[' is observed, the code will create a new line and increase
    * the indent level.</p>
    *
