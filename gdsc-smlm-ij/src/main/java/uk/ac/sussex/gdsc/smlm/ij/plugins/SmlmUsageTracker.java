@@ -31,10 +31,16 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import uk.ac.sussex.gdsc.core.ij.ImageJAnalyticsUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
-import uk.ac.sussex.gdsc.smlm.Version;
 
 /**
  * Provide methods to track code usage within ImageJ.
+ *
+ * <p>Note:
+ *
+ * <p>This class currently does not record any tracking information.
+ * Previous versions recorded a plugin execution as the equivalent of
+ * a page view on a website. Analytics could be used to understand
+ * the usage of the different plugins in the GDSC SMLM library.
  */
 public class SmlmUsageTracker implements PlugIn {
   private static final String TITLE = "SMLM Usage Tracker";
@@ -52,28 +58,19 @@ public class SmlmUsageTracker implements PlugIn {
   /**
    * Initialise on demand the analytics code.
    *
-   * <p>This is used to avoid synchronisation during initialisation.
+   * <p>This is a placeholder for initialisation of an analytics provider.
    *
    * <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialisation on
    * demand</a>
    */
   private static class LazyAnalyticsHolder {
-    static {
-      // Record the version of the GDSC SMLM plugins
-      ImageJAnalyticsUtils.addCustomDimension(7, Version.getVersion());
-      // Prompt the user to opt-in/out of analytics if the status is unknown
-      if (ImageJAnalyticsUtils.unknownStatus()) {
-        showDialog(true);
-      }
-    }
-
     /**
      * Checks if is disabled.
      *
      * @return true, if is disabled
      */
     static boolean isDisabled() {
-      return ImageJAnalyticsUtils.isDisabled();
+      return true;
     }
   }
 
@@ -142,7 +139,8 @@ public class SmlmUsageTracker implements PlugIn {
 
   @Override
   public void run(String arg) {
-    // If this is the first plugin to call recordPlugin(...) then the dialog may be shown.
+    // If this is the first plugin to call recordPlugin(...) then the dialog may be shown
+    // automatically if the opt-in/out status is unknown.
     DIALOG_SHOWN.set(false);
     recordPlugin(this.getClass(), arg);
     if (!DIALOG_SHOWN.get()) {
@@ -151,7 +149,7 @@ public class SmlmUsageTracker implements PlugIn {
   }
 
   /**
-   * Show a dialog allowing users to opt in/out of Google Analytics.
+   * Show a dialog allowing users to opt in/out of analytics.
    *
    * @param autoMessage Set to true to display the message about automatically showing when the
    *        status is unknown
