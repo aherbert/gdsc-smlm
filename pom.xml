@@ -176,7 +176,6 @@ Software for single molecule localisation microscopy (SMLM)
     <dependency>
       <groupId>it.unimi.dsi</groupId>
       <artifactId>fastutil-core</artifactId>
-      <version>8.5.6</version>
     </dependency>
 
     <!-- TESTING -->
