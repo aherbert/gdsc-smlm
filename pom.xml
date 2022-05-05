@@ -334,7 +334,6 @@ Software for single molecule localisation microscopy (SMLM)
         <configuration>
           <!-- Resource on the classpath. -->
           <configFile>eclipse/eclipse-code-format.xml</configFile>
-          <overrideConfigCompilerVersion>true</overrideConfigCompilerVersion>
         </configuration>
       </plugin>
       <plugin>
