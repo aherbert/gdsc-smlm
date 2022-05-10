@@ -206,7 +206,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
   @Override
   public void shuffle(UniformRandomProvider randomSource) {
-    Collections.shuffle(results, new JdkRandomAdapter(randomSource));
+    Collections.shuffle(results, new JdkRandomAdapter(randomSource::nextInt));
   }
 
   @Override
