@@ -128,7 +128,7 @@ If not connected to the internet then the tracker identified that messages could
 User Preferences
 ~~~~~~~~~~~~~~~~
 
-To notify users of analytics a dialog was shown when the user runs a GDSC plugin and their preferences are not known. This presented the user with the choice to opt-in.
+To notify users of analytics a dialog was shown when the user runs a GDSC plugin and their preferences were not known. This presented the user with the choice to opt-in.
 
 Preferences were saved in the ``ImageJ`` preferences file. This is written when ``ImageJ`` closes and stores user preferences between ``ImageJ`` sessions. The following settings were stored:
 
