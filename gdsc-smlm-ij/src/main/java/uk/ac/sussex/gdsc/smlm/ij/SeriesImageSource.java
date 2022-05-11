@@ -652,7 +652,7 @@ public class SeriesImageSource extends ImageSource {
     }
 
     /**
-     * Adapted from ij.io.FileOpener.validateFileInfo
+     * Adapted from {@code ij.io.FileOpener.validateFileInfo}.
      *
      * @param file the file
      * @param fi the file info
