@@ -721,7 +721,10 @@ public class DriftCalculator implements PlugIn {
 
     // Check we have enough data
     if (roiSpots.length == 0) {
-      IJ.error("No peak fit results in the selected ROIs");
+      IJ.error("No localisation results in the selected ROIs.\n \n"
+          + "ROIs must be marked on an image with a 1:1 pixel scale,\n"
+          + "for example the original image or a localisation image with\n"
+          + "the same pixel dimensions as the original image.");
       return null;
     }
 
@@ -937,8 +940,10 @@ public class DriftCalculator implements PlugIn {
    */
   private static Spot[][] findSpots(MemoryPeakResults results, Roi[] rois, int[] limits) {
     final ArrayList<Spot[]> roiSpots = new ArrayList<>(rois.length);
+    // Working list
+    final LocalList<Spot> list = new LocalList<>(limits[1] - limits[0] + 1);
     for (final Roi roi : rois) {
-      final Spot[] spots = findSpots(results, roi.getBounds(), limits);
+      final Spot[] spots = findSpots(results, roi.getBounds(), list);
       if (spots.length > 0) {
         roiSpots.add(spots);
       }
@@ -946,8 +951,8 @@ public class DriftCalculator implements PlugIn {
     return roiSpots.toArray(new Spot[0][]);
   }
 
-  private static Spot[] findSpots(MemoryPeakResults results, Rectangle bounds, int[] limits) {
-    final LocalList<Spot> list = new LocalList<>(limits[1] - limits[0] + 1);
+  private static Spot[] findSpots(MemoryPeakResults results, Rectangle bounds, LocalList<Spot> list) {
+    list.clear();
     final float minx = bounds.x;
     final float miny = bounds.y;
     final float maxx = (float) bounds.x + bounds.width;

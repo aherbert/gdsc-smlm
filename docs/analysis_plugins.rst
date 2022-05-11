@@ -261,7 +261,9 @@ Fiducial Markers
 
 This method uses constant fiducial markers that are placed within the image to allow the drift to be tracked (e.g. fluorescent beads). The method is only available in the drop-down options when there are ROIs listed in the ``ImageJ`` ROI manager.
 
-Rectangular ROIs can be placed around the fiducial markers on the original image and then added to the ROI manager (press ``Ctrl+T``). All the ROIs in the manager will be used to calculate the drift. Ensure that you choose regions containing a constant bright spot that is present through the majority of frames. If multiple spots are within the ROI only the brightest one per frame will be used. Ideally these are fluorescent beads added to the image as fiducial markers.
+Rectangular ROIs can be placed around the fiducial markers on the original image and then added to the ROI manager (press ``Ctrl+T``). The ROIs do not have to be marked on the original image. Note however that each ROI's bounds (x,y,width,height) are used to find spots within the input localisations and must correspond to the original image pixels. For example the ROIs can be marked on an image with the same pixel dimensions as the original image such as an average intensity projection or a super-resolution reconstruction of the data made using an image scale of 1. This type of image can be created using the ``Image output`` option of the :ref:`results_plugins:Results Manager` plugin.
+
+All the ROIs in the manager will be used to calculate the drift. Ensure that you choose regions containing a constant bright spot that is present through the majority of frames. If multiple spots are within the ROI only the brightest one per frame will be used. Ideally these are fluorescent beads added to the image as fiducial markers.
 
 The ``Marked ROIs`` method performs the following steps:
 
@@ -277,8 +279,7 @@ The ``Marked ROIs`` method performs the following steps:
 
 #.  Calculate the change to the drift and repeats from step 2 until convergence.
 
-
-The ``Marked ROIs`` method requires no additional parameters, only ROIs within the ``ROI Manager``. Note however that each ROI's bounds (x,y,width,height) are used to find spots within the input localisations and so the ROI should be selected using an image with the same scale and image bounds as the input data. Ideally this should be an average intensity projection of the original image but it can be a super-resolution reconstruction of the data made using an image scale of 1.
+The ``Marked ROIs`` method requires no additional parameters, only ROIs within the ``ROI Manager``.
 
 
 ..
