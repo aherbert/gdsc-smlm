@@ -356,11 +356,11 @@ public class SeriesImageSource extends ImageSource {
           contiguous = true;
         }
         if (size == 0) {
-          bytesPerFrame = getBytesPerFrame(fi.fileType);
-          reader = new FastImageReader(fi);
-        } else {
           canRead = false;
           bytesPerFrame = 0;
+        } else {
+          bytesPerFrame = getBytesPerFrame(fi.fileType);
+          reader = new FastImageReader(fi);
         }
       } else {
         canRead = false;
@@ -1646,7 +1646,8 @@ public class SeriesImageSource extends ImageSource {
     // Calculate the required image and slice
     int id = Arrays.binarySearch(imageSize, frame);
     if (id < 0) {
-      id = -(id + 1);
+      // id = -(id + 1)
+      id = ~id;
     }
     // Note that frame is 1-based index and the slice is 0-based.
     final int slice = (id == 0) ? frame - 1 : frame - imageSize[id - 1] - 1;
