@@ -952,7 +952,7 @@ public class PcPalmMolecules implements PlugIn {
     }
   }
 
-  private double[] optimiseLeastSquares(float[] x, float[] y, double[] initialSolution) {
+  private static double[] optimiseLeastSquares(float[] x, float[] y, double[] initialSolution) {
     // Least-squares optimisation using numerical gradients
     final SkewNormalDifferentiableFunction function =
         new SkewNormalDifferentiableFunction(initialSolution);
@@ -976,7 +976,7 @@ public class PcPalmMolecules implements PlugIn {
     return optimum.getPoint().toArray();
   }
 
-  private double[] optimiseSimplex(float[] x, float[] y, double[] initialSolution) {
+  private static double[] optimiseSimplex(float[] x, float[] y, double[] initialSolution) {
     // Simplex optimisation
     final SkewNormalMultivariateFunction sn2 = new SkewNormalMultivariateFunction(initialSolution);
     sn2.addData(x, y);
@@ -2123,7 +2123,7 @@ public class PcPalmMolecules implements PlugIn {
   /**
    * Allow optimisation using Apache Commons Math 3 Optimiser.
    */
-  private abstract class SkewNormalOptimiserFunction extends SkewNormalFunction {
+  private static abstract class SkewNormalOptimiserFunction extends SkewNormalFunction {
     protected DoubleArrayList x;
     protected DoubleArrayList y;
 
@@ -2154,7 +2154,7 @@ public class PcPalmMolecules implements PlugIn {
   /**
    * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
    */
-  private class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction
+  private static class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction
       implements MultivariateVectorFunction {
     // Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
     // Use the deprecated API since the new one is not yet documented.
@@ -2200,7 +2200,7 @@ public class PcPalmMolecules implements PlugIn {
   /**
    * Allow optimisation using Apache Commons Math 3 Simplex.
    */
-  private class SkewNormalMultivariateFunction extends SkewNormalOptimiserFunction
+  private static class SkewNormalMultivariateFunction extends SkewNormalOptimiserFunction
       implements MultivariateFunction {
     SkewNormalMultivariateFunction(double[] parameters) {
       super(parameters);
