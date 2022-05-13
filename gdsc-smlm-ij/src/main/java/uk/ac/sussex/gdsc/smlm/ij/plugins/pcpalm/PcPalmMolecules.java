@@ -945,7 +945,7 @@ public class PcPalmMolecules implements PlugIn {
   @Nullable
   private double[] fitSkewGaussian(float[] x, float[] y, double[] initialSolution) {
     try {
-      return (settings.simplexFitting) ? optimiseSimplex(x, y, initialSolution)
+      return (settings != null && settings.simplexFitting) ? optimiseSimplex(x, y, initialSolution)
           : optimiseLeastSquares(x, y, initialSolution);
     } catch (final TooManyEvaluationsException ex) {
       return null;
