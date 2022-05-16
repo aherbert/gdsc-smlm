@@ -2,6 +2,13 @@
 // (Single Molecule Localisation Microscopy).
 // Place in the ImageJ/macros/toolsets directory.
 
+// Action tool commands that display a dialog box may not run correctly if they
+// are invoked using the run() function. Use doCommand instead to use a separate thread.
+// Note:
+// In ImageJ 1.53q the doCommand function runs the command twice. But using run will show
+// a broken dialog if the plugin errors. Here we use doCommand in the hope that this bug
+// will be fixed in future versions.
+
 macro 'PSF Calculator Action Tool - T06091 T0f092 C00f Ta612+ Taf12=' {
    doCommand('PSF Calculator');
 };
