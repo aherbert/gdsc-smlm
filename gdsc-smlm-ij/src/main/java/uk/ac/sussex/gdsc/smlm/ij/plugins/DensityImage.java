@@ -614,7 +614,7 @@ public class DensityImage implements PlugIn {
     image.setLutName("grays");
     image.setLiveImage(false);
     image.begin();
-    final StandardResultProcedure sp = new StandardResultProcedure(newResults, DistanceUnit.PIXEL);
+    final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
     sp.getXyr();
     for (int i = 0; i < density.length; i++) {
       if (density[i] < densityThreshold) {

@@ -25,6 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.AbstractPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.ThreadSafePeakResults;
 
@@ -36,6 +38,8 @@ public abstract class ImageJAbstractPeakResults extends AbstractPeakResults
   /**
    * Sets the calibration.
    *
+   * <p>The calibration distance unit is set to pixels and the intensity unit to photons.
+   *
    * @param nmPerPixel the nm per pixel
    * @param gain the gain
    */
@@ -43,6 +47,8 @@ public abstract class ImageJAbstractPeakResults extends AbstractPeakResults
     final CalibrationWriter cw = getCalibrationWriterSafe();
     cw.setNmPerPixel(nmPerPixel);
     cw.setCountPerPhoton(gain);
+    cw.setDistanceUnit(DistanceUnit.PIXEL);
+    cw.setIntensityUnit(IntensityUnit.PHOTON);
     setCalibration(cw.getCalibration());
   }
 }
