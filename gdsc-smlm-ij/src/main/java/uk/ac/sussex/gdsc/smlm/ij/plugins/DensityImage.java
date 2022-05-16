@@ -658,7 +658,7 @@ public class DensityImage implements PlugIn {
 
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
 
-    gd.addNumericField("Radius", settings.radius, 3);
+    gd.addNumericField("Radius", settings.radius, 3, 6, "px");
     if (!titles.isEmpty()) {
       gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", settings.chooseRoi);
     }
