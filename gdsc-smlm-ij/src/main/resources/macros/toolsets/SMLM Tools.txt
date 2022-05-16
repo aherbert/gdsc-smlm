@@ -30,6 +30,6 @@ macro 'Results Manager Action Tool - R00ff L03f3 L06f6 L09f9 L0cfc C00f F00f3' {
    doCommand('Results Manager');
 };
 
-macro 'Find Clusters Action Tool - L3034 L1252 L989c L7aba Ld5d9 Lb7f7 C00f O52cc' {
-   doCommand('Find Clusters');
+macro 'Trace Molecules Action Tool - L3034 L1252 L989c L7aba Ld5d9 Lb7f7 C00f O52cc' {
+   doCommand('Dynamic Trace Molecules');
 };
