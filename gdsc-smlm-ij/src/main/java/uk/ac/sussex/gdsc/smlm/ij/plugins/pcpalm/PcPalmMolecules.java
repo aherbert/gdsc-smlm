@@ -2123,7 +2123,7 @@ public class PcPalmMolecules implements PlugIn {
   /**
    * Allow optimisation using Apache Commons Math 3 Optimiser.
    */
-  private static abstract class SkewNormalOptimiserFunction extends SkewNormalFunction {
+  private abstract static class SkewNormalOptimiserFunction extends SkewNormalFunction {
     protected DoubleArrayList x;
     protected DoubleArrayList y;
 
