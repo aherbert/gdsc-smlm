@@ -152,7 +152,7 @@ public class MeanVarianceTest implements PlugIn {
     double[] means;
     List<PairSample> samples;
 
-    ImageSample(ImagePlus imp, double start, double end) {
+    ImageSample(ImagePlus imp) {
       // Check stack has two slices
       if (imp.getStackSize() <= 1) {
         throw new IllegalArgumentException("Image must have at least 2-slices: " + imp.getTitle());
@@ -189,11 +189,7 @@ public class MeanVarianceTest implements PlugIn {
       slices = new float[size][];
       final float saturated = getSaturation(imp);
       final ImageStack stack = imp.getImageStack();
-      final double step = (end - start) / size;
-      for (int slice = 1, c = 0; slice <= size; slice++) {
-        if (c++ % 16 == 0) {
-          IJ.showProgress(start + c * step);
-        }
+      for (int slice = 1; slice <= size; slice++) {
         final float[] thisSlice =
             slices[slice - 1] = (float[]) stack.getProcessor(slice).toFloat(0, null).getPixels();
         checkSaturation(slice, thisSlice, saturated);
@@ -246,7 +242,7 @@ public class MeanVarianceTest implements PlugIn {
       for (int slice1 = 0, c = 0; slice1 < size; slice1++) {
         final float[] data1 = slices[slice1];
         for (int slice2 = slice1 + 1; slice2 < size; slice2++) {
-          if (c++ % 16 == 0) {
+          if ((c++ & 15) == 0) {
             IJ.showProgress(start + c * step);
           }
           final float[] data2 = slices[slice2];
@@ -419,7 +415,7 @@ public class MeanVarianceTest implements PlugIn {
       final StringBuilder sb = (settings.showTable) ? new StringBuilder() : null;
       final ImageSample sample = images.get(i);
       for (final PairSample pair : sample.samples) {
-        if (j % 16 == 0) {
+        if ((j & 15) == 0) {
           IJ.showProgress(j, total);
         }
 
@@ -597,14 +593,12 @@ public class MeanVarianceTest implements PlugIn {
     final double nImages = series.getNumberOfImages();
     final List<ImageSample> images = new ArrayList<>((int) nImages);
     ImagePlus imp = series.nextImage();
-    int count = 0;
     while (imp != null) {
       try {
-        images.add(new ImageSample(imp, count / nImages, (count + 1) / nImages));
+        images.add(new ImageSample(imp));
       } catch (final IllegalArgumentException ex) {
         ImageJUtils.log(ex.getMessage());
       }
-      count++;
       imp.close();
       imp = series.nextImage();
     }
@@ -619,7 +613,7 @@ public class MeanVarianceTest implements PlugIn {
     final ImagePlus imp = WindowManager.getCurrentImage();
     if (imp != null) {
       try {
-        images.add(new ImageSample(imp, 0, 1));
+        images.add(new ImageSample(imp));
       } catch (final IllegalArgumentException ex) {
         ImageJUtils.log(ex.getMessage());
       }

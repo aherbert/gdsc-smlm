@@ -52,6 +52,7 @@ import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -356,7 +357,7 @@ public class DiffusionRateTest implements PlugIn {
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
 
     for (int i = 0; i < settings.getParticles(); i++) {
-      if (i % 16 == 0) {
+      if ((i & 0xf) == 0) {
         IJ.showProgress(i, settings.getParticles());
         if (ImageJUtils.isInterrupted()) {
           return;
@@ -1064,8 +1065,8 @@ public class DiffusionRateTest implements PlugIn {
     return limits;
   }
 
-  private void aggregateIntoFrames(List<Point> points, boolean addError,
-      double precisionInPixels, NormalizedGaussianSampler gauss) {
+  private void aggregateIntoFrames(List<Point> points, boolean addError, double precisionInPixels,
+      NormalizedGaussianSampler gauss) {
     if (myAggregateSteps < 1) {
       return;
     }
@@ -1312,11 +1313,9 @@ public class DiffusionRateTest implements PlugIn {
     }
 
     final double scale = Math.sqrt(2 * pluginSettings.simpleD);
-    final int report = Math.max(1, pluginSettings.simpleParticles / 200);
+    final Ticker ticker =
+        Ticker.createStarted(new ImageJTrackProgress(), pluginSettings.simpleParticles, false);
     for (int particle = 0; particle < pluginSettings.simpleParticles; particle++) {
-      if (particle % report == 0) {
-        IJ.showProgress(particle, pluginSettings.simpleParticles);
-      }
       final double[] xyz = new double[3];
       if (pluginSettings.linearDiffusion) {
         final double[] dir = nextVector(gauss[0]);
@@ -1343,8 +1342,9 @@ public class DiffusionRateTest implements PlugIn {
         // Store the actual distances
         stats[i].add(xyz[i]);
       }
+      ticker.tick();
     }
-    IJ.showProgress(1);
+    ticker.stop();
 
     for (int i = 0; i < 3; i++) {
       plotJumpDistances(TITLE, stats2[i], i + 1);

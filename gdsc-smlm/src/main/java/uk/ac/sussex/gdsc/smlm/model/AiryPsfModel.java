@@ -602,7 +602,7 @@ public class AiryPsfModel extends PsfModel {
    */
   public void setMinSamplesPerDimension(int n) {
     if (n >= 2) {
-      this.minSamplesPerDimension = (n % 2 == 0) ? n : n + 1;
+      this.minSamplesPerDimension = ((n & 1) == 0) ? n : n + 1;
     }
   }
 
@@ -623,7 +623,7 @@ public class AiryPsfModel extends PsfModel {
    */
   public void setMaxSamplesPerDimension(int n) {
     if (n >= 2) {
-      this.maxSamplesPerDimension = (n % 2 == 0) ? n : n + 1;
+      this.maxSamplesPerDimension = ((n & 1) == 0) ? n : n + 1;
     }
   }
 

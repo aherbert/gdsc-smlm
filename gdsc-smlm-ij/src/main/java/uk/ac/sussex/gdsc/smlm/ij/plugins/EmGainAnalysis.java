@@ -343,7 +343,7 @@ public class EmGainAnalysis implements PlugInFilter {
     final int steps = settings.simulationSize;
     final int[] samples = new int[steps];
     for (int n = 0; n < steps; n++) {
-      if (n % 64 == 0) {
+      if ((n & 63) == 0) {
         IJ.showProgress(n, steps);
       }
 

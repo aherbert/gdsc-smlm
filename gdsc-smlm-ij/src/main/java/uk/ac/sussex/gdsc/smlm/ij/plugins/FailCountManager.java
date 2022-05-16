@@ -584,6 +584,7 @@ public class FailCountManager implements PlugIn {
     // Run
     final int totalFrames = Math.min(source.getFrames(), settings.getMaxFrames());
     final int step = ImageJUtils.getProgressInterval(totalFrames);
+    int next = step;
     IJ.showProgress(0);
     boolean shutdown = false;
     int slice = 0;
@@ -594,7 +595,8 @@ public class FailCountManager implements PlugIn {
         break;
       }
 
-      if (slice++ % step == 0) {
+      if (slice++ >= next) {
+        next = slice + step;
         final int frames = slice;
         if (ImageJUtils.showStatus(() -> "Fitting slice: " + frames + " / " + totalFrames)) {
           IJ.showProgress(slice, totalFrames);

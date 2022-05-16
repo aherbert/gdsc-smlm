@@ -101,7 +101,7 @@ class FhtFilterTest {
     if (operation == Operation.CORRELATION) {
       // Test the max correlation position
       final int max = SimpleArrayUtils.findMaxIndex(e);
-      final int x = max % 16;
+      final int x = max & 15;
       final int y = max / 16;
 
       Assertions.assertEquals(ex, x + ox);

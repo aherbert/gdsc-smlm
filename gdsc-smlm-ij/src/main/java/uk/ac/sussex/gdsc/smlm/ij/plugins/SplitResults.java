@@ -33,14 +33,15 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import java.awt.Rectangle;
 import java.util.concurrent.atomic.AtomicReference;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ObjectAnalyzer;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 /**
@@ -188,14 +189,8 @@ public class SplitResults implements PlugIn {
     }
 
     // Process the results mapping them to their objects
-    final Counter i = new Counter();
-    final int size = results.size();
-    final int step = ImageJUtils.getProgressInterval(size);
+    final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), results.size(), false);
     results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (xx, yy, result) -> {
-      if (i.incrementAndGet() % step == 0) {
-        IJ.showProgress(i.getCount(), size);
-      }
-
       // Map to the mask objects
       final int object;
       final int x = (int) ((xx - ox) / scaleX);
@@ -213,19 +208,20 @@ public class SplitResults implements PlugIn {
         }
       }
       resultsSet[object].add(result);
+      ticker.tick();
     });
-    IJ.showProgress(1);
+    ticker.stop();
 
     // Add the new results sets to memory
-    i.reset();
+    final int[] i = {0};
     for (int object = (settings.nonMaskDataset) ? 0 : 1; object <= maxObject; object++) {
       if (resultsSet[object].isNotEmpty()) {
         MemoryPeakResults.addResults(resultsSet[object]);
-        i.increment();
+        i[0]++;
       }
     }
 
     IJ.showStatus("Split " + TextUtils.pleural(results.size(), "result") + " into "
-        + TextUtils.pleural(i.getCount(), "set"));
+        + TextUtils.pleural(i[0], "set"));
   }
 }

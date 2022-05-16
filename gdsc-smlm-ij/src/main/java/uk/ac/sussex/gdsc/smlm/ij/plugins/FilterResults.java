@@ -159,7 +159,7 @@ public class FilterResults implements PlugIn {
       sp.z = new float[sp.x.length];
 
       for (int i = 0; i < sp.size(); i++) {
-        if (i % 64 == 0) {
+        if ((i & 63) == 0) {
           IJ.showProgress(i, sp.size());
         }
 

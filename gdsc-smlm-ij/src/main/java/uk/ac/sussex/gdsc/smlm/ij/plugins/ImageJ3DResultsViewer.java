@@ -185,6 +185,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static final String HELP_KEY = "d-results-viewer";
   private static final int NO_ENTRY = -1;
 
+  private static final int WAIT_SECONDS = 20;
+
   // To debug this from Eclipse relies on being able to find the native
   // runtime libraries for Open GL. See the README in the eclipse project folder.
 
@@ -1472,6 +1474,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     IJ.showStatus("Drawing 3D content ... ");
     final StopWatch sw = StopWatch.createStarted();
+    long waitSeconds = WAIT_SECONDS;
     final Future<Content> future = univ.addContentLater(content);
     Content added = null;
     for (;;) {
@@ -1490,7 +1493,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
 
         final long seconds = sw.getTime(TimeUnit.SECONDS);
-        if (seconds % 20 == 0) {
+        if (seconds >= waitSeconds) {
           final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
           egd.addMessage("Current wait time is " + sw.toString());
           egd.setOKLabel("Wait");
@@ -1499,6 +1502,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             future.cancel(true);
             break;
           }
+          waitSeconds = sw.getTime(TimeUnit.SECONDS) + WAIT_SECONDS;
         }
 
         IJ.showStatus("Drawing 3D content ... " + seconds);

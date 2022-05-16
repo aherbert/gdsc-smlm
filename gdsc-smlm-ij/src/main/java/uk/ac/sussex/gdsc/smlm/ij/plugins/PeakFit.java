@@ -3504,7 +3504,7 @@ public class PeakFit implements PlugInFilter {
     final Rectangle cropBounds =
         (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth()
             && bounds.height == source.getHeight()) ? null : bounds;
-    final int step = ImageJUtils.getProgressInterval(totalFrames);
+    final int step = MathUtils.nextPow2(ImageJUtils.getProgressInterval(totalFrames)) - 1;
 
     // To pre-process data for noise estimation
     boolean isFitCameraCounts = false;
@@ -3525,7 +3525,7 @@ public class PeakFit implements PlugInFilter {
         break;
       }
 
-      if (++slice % step == 0) {
+      if ((++slice & step) == 0) {
         final int frames = slice;
         if (ImageJUtils.showStatus(() -> String.format(format, frames, results.size()))) {
           IJ.showProgress(slice, totalFrames);
@@ -3889,7 +3889,7 @@ public class PeakFit implements PlugInFilter {
 
     final ImageStack stack =
         (extraSettings.showProcessedFrames) ? new ImageStack(bounds.width, bounds.height) : null;
-    final int step = ImageJUtils.getProgressInterval(totalFrames);
+    final int step = MathUtils.nextPow2(ImageJUtils.getProgressInterval(totalFrames)) - 1;
 
     // No crop bounds are supported.
     // To pre-process data for noise estimation
@@ -3910,7 +3910,7 @@ public class PeakFit implements PlugInFilter {
         return;
       }
 
-      if (slice % step == 0
+      if ((slice & step) == 0
           && ImageJUtils.showStatus(() -> String.format(format, slice, results.size()))) {
         IJ.showProgress(slice, totalFrames);
       }

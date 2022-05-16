@@ -951,7 +951,8 @@ public class DriftCalculator implements PlugIn {
     return roiSpots.toArray(new Spot[0][]);
   }
 
-  private static Spot[] findSpots(MemoryPeakResults results, Rectangle bounds, LocalList<Spot> list) {
+  private static Spot[] findSpots(MemoryPeakResults results, Rectangle bounds,
+      LocalList<Spot> list) {
     list.clear();
     final float minx = bounds.x;
     final float miny = bounds.y;

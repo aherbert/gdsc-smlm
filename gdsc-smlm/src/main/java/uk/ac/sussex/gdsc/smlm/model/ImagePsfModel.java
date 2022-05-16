@@ -135,7 +135,7 @@ public class ImagePsfModel extends PsfModel {
       throw new IllegalArgumentException("Image planes are not square");
     }
     psfWidth = (int) edge;
-    // if (psfWidth % 2 != 1)
+    // if ((psfWidth & 1) != 1)
     // throw new IllegalArgumentException("Image edge length is not an odd number");
     xyCentre = new double[image.length][];
     Arrays.fill(xyCentre, new double[] {psfWidth * 0.5, psfWidth * 0.5});

@@ -863,7 +863,7 @@ public class FilterAnalysis implements PlugIn {
     double maxScore = -1;
 
     for (final Filter filter : filterSet.getFilters()) {
-      if (count++ % 16 == 0) {
+      if ((count++ & 15) == 0) {
         IJ.showProgress(count, total);
       }
 

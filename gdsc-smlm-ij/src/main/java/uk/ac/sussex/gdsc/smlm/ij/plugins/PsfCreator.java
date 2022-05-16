@@ -2436,7 +2436,7 @@ public class PsfCreator implements PlugInFilter {
     final int size = psf.getWidth();
     final int cx = size / 2;
     // Even PSFs have the middle in the centre of two pixels
-    final int cx2 = (size % 2 == 0) ? cx - 1 : cx;
+    final int cx2 = ((size & 1) == 0) ? cx - 1 : cx;
 
     final double[] p1 = new double[size];
     final double[] p2 = new double[size];

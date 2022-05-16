@@ -107,6 +107,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   // Use Simpson's integration with n=4 to get the integral of the probability
   // over the range of each count.
   private static final int SIMPSON_N = 4;
+  private static final int SIMPSON_NM1 = SIMPSON_N - 1;
   private static final int SIMPSON_N_2 = SIMPSON_N / 2;
   private static final double SIMPSON_H = 1.0 / SIMPSON_N;
 
@@ -864,7 +865,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       final double expected = 1 - dirac;
       // Compute the sum using Simpson's rule:
       // Require an odd number to get an even number (n) of sub-intervals:
-      if (list.size() % 2 == 0) {
+      if ((list.size() & 0x1) == 0) {
         list.add(0);
       }
       final double[] g = list.elements();
@@ -1341,7 +1342,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       }
 
       while (index-- > 0) {
-        if (index % SIMPSON_N == mod) {
+        if ((index & SIMPSON_NM1) == mod) {
           f[index] = y[index / SIMPSON_N];
         } else {
           f[index] = fun.likelihood(start + index * SIMPSON_H, e);

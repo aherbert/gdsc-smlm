@@ -329,7 +329,7 @@ public class PsfImagePeakResults extends ImageJImagePeakResults {
     int counter = 0;
     for (final PeakResult result : results) {
       addPeak(result.getFrame(), result.getNoise(), result.getParameters());
-      if (++counter % 64 == 0) {
+      if ((++counter & 63) == 0) {
         updateImage();
         if (!imageActive) {
           return;
