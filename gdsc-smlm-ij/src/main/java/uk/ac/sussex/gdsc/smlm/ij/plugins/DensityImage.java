@@ -41,6 +41,7 @@ import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.rng.simple.internal.SeedFactory;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -202,6 +203,7 @@ public class DensityImage implements PlugIn {
       density = dm.calculateDensity(settings.radius, useAdjustment);
     }
 
+    IJ.showStatus("Calculating results ...");
     density = cropBorder(results, density);
 
     // Convert to float
@@ -229,7 +231,9 @@ public class DensityImage implements PlugIn {
     sp.getXy();
     final Rectangle bounds = results.getBounds();
     final double area = (double) bounds.width * bounds.height;
-    return new DensityManager(sp.x, sp.y, area);
+    final DensityManager dm = new DensityManager(sp.x, sp.y, area);
+    dm.setTracker(new ImageJTrackProgress());
+    return dm;
   }
 
   private ScoreCalculator createCalculator(MemoryPeakResults results) {
