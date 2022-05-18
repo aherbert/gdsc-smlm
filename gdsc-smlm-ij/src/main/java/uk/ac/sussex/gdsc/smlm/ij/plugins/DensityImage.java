@@ -41,8 +41,8 @@ import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.rng.simple.internal.SeedFactory;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
@@ -232,7 +232,7 @@ public class DensityImage implements PlugIn {
     final Rectangle bounds = results.getBounds();
     final double area = (double) bounds.width * bounds.height;
     final DensityManager dm = new DensityManager(sp.x, sp.y, area);
-    dm.setTracker(new ImageJTrackProgress());
+    dm.setTracker(SimpleImageJTrackProgress.getInstance());
     return dm;
   }
 
