@@ -33,7 +33,6 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import java.awt.Rectangle;
 import java.util.concurrent.atomic.AtomicReference;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -189,7 +188,7 @@ public class SplitResults implements PlugIn {
     }
 
     // Process the results mapping them to their objects
-    final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), results.size(), false);
+    final Ticker ticker = ImageJUtils.createTicker(results.size(), 1);
     results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (xx, yy, result) -> {
       // Map to the mask objects
       final int object;

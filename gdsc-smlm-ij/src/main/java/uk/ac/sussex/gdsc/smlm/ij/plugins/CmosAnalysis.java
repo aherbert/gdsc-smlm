@@ -68,7 +68,6 @@ import uk.ac.sussex.gdsc.core.data.IntegerType;
 import uk.ac.sussex.gdsc.core.data.SiPrefix;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.io.CustomTiffEncoder;
@@ -603,8 +602,7 @@ public class CmosAnalysis implements PlugIn {
     numberPerThread = (int) Math.ceil((double) numberPerThread / blockSize) * blockSize;
     final Pcg32 rng = Pcg32.xshrs(start);
     // Note the bias is increased by 3-fold so add 2 to the length
-    ticker = Ticker.createStarted(new ImageJTrackProgress(true),
-        (long) (photons.length + 2) * settings.frames, threadCount > 1);
+    ticker = ImageJUtils.createTicker((long) (photons.length + 2) * settings.frames, threadCount);
     for (final int p : photons) {
       ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));
 

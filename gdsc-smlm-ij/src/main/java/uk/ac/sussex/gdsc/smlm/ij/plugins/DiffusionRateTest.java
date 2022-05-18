@@ -52,7 +52,6 @@ import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -1313,8 +1312,7 @@ public class DiffusionRateTest implements PlugIn {
     }
 
     final double scale = Math.sqrt(2 * pluginSettings.simpleD);
-    final Ticker ticker =
-        Ticker.createStarted(new ImageJTrackProgress(), pluginSettings.simpleParticles, false);
+    final Ticker ticker = ImageJUtils.createTicker(pluginSettings.simpleParticles, 1);
     for (int particle = 0; particle < pluginSettings.simpleParticles; particle++) {
       final double[] xyz = new double[3];
       if (pluginSettings.linearDiffusion) {
