@@ -467,9 +467,9 @@ public class EmGainAnalysis implements PlugInFilter {
 
     final String[] paramNames = {"Photons", "Gain", "Noise", "Bias"};
     // Set bounds
-    final double[] lower = {0, 0.5 * settings.gain, 0, settings.bias - settings.noise};
-    final double[] upper =
-        {2 * photons, 2 * settings.gain, settings.gain, settings.bias + settings.noise};
+    final double[] lower = {0, 0.5 * settings.gain, 0, settings.bias - 2 * settings.noise};
+    final double[] upper = {Math.max(1, 2 * photons), 2 * settings.gain, 2 * settings.noise,
+        settings.bias + 2 * settings.noise};
 
     // Restart until converged.
     // TODO - Maybe fix this with a better optimiser. This needs to be tested on real data.
@@ -757,8 +757,8 @@ public class EmGainAnalysis implements PlugInFilter {
    * @param c0 The constant offset (bias)
    * @return The PDF
    */
-  static double[] pdf(final int max, final double photons, final double gain,
-      final double sd, int c0) {
+  static double[] pdf(final int max, final double photons, final double gain, final double sd,
+      int c0) {
     final double[] g = pdfEmGain(max, 1, photons, gain);
     double[] gg;
 
