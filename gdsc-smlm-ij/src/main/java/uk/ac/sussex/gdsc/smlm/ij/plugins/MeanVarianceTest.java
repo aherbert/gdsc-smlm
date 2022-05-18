@@ -36,6 +36,8 @@ import ij.text.TextWindow;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Point;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +49,7 @@ import org.apache.commons.math3.util.MathArrays;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -79,21 +82,29 @@ public class MeanVarianceTest implements PlugIn {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
+    String inputDirectory;
+    String inputDirectory2;
     double cameraGain;
     double bias;
+    double variance;
     boolean showTable;
     boolean showCharts;
 
     Settings() {
       // Set defaults
+      inputDirectory = "";
+      inputDirectory2 = "";
       bias = 500;
       showTable = true;
       showCharts = true;
     }
 
     Settings(Settings source) {
+      inputDirectory = source.inputDirectory;
+      inputDirectory2 = source.inputDirectory2;
       cameraGain = source.cameraGain;
       bias = source.bias;
+      variance = source.variance;
       showTable = source.showTable;
       showCharts = source.showCharts;
     }
@@ -267,16 +278,21 @@ public class MeanVarianceTest implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
+    final boolean emMode = (arg != null && arg.contains("em"));
+
     final Settings settings = Settings.load();
     settings.save();
 
-    String helpKey = "mean-variance-test";
+    final String helpKey = emMode ? "mean-variance-test-em-ccd" : "mean-variance-test";
     if (ImageJUtils.isExtraOptions()) {
       final ImagePlus imp = WindowManager.getCurrentImage();
       if (imp.getStackSize() > 1) {
         final GenericDialog gd = new GenericDialog(TITLE);
-        gd.addMessage("Perform single image analysis on the current image?");
+        gd.addMessage("Perform single image analysis on the current image?\n \n"
+            + "Provide the expected mean and variance of an image with zero exposure.\n"
+            + "This provides an anchor point for a line from measured values to the origin.");
         gd.addNumericField("Bias", settings.bias, 0);
+        gd.addNumericField("Variance", settings.variance, 0);
         gd.addHelp(HelpUrls.getUrl(helpKey));
         gd.showDialog();
         if (gd.wasCanceled()) {
@@ -284,6 +300,7 @@ public class MeanVarianceTest implements PlugIn {
         }
         singleImage = true;
         settings.bias = Math.abs(gd.getNextNumber());
+        settings.variance = Math.abs(gd.getNextNumber());
       } else {
         IJ.error(TITLE, "Single-image mode requires a stack");
         return;
@@ -291,7 +308,7 @@ public class MeanVarianceTest implements PlugIn {
     }
 
     List<ImageSample> images;
-    String inputDirectory = "";
+    String inputDirectory = emMode ? settings.inputDirectory2 : settings.inputDirectory;
     if (singleImage) {
       IJ.showStatus("Loading images...");
       images = getImages();
@@ -300,9 +317,22 @@ public class MeanVarianceTest implements PlugIn {
         return;
       }
     } else {
-      inputDirectory = IJ.getDirectory("Select image series ...");
-      if (inputDirectory == null) {
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+      gd.addMessage("Perform Mean-Variance test on an image series.");
+      gd.addDirectoryField("Input", inputDirectory);
+      gd.addHelp(HelpUrls.getUrl(helpKey));
+      gd.showDialog();
+      if (gd.wasCanceled()) {
         return;
+      }
+      inputDirectory = gd.getNextString();
+      if (!Files.isDirectory(Paths.get(inputDirectory))) {
+        return;
+      }
+      if (emMode) {
+        settings.inputDirectory2 = inputDirectory;
+      } else {
+        settings.inputDirectory = inputDirectory;
       }
 
       final SeriesOpener series = new SeriesOpener(inputDirectory);
@@ -329,8 +359,6 @@ public class MeanVarianceTest implements PlugIn {
       }
     }
 
-    final boolean emMode = (arg != null && arg.contains("em"));
-
     GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage("Set the output options:");
     gd.addCheckbox("Show_table", settings.showTable);
@@ -339,9 +367,6 @@ public class MeanVarianceTest implements PlugIn {
       // Ask the user for the camera gain ...
       gd.addMessage("Estimating the EM-gain requires the camera gain without EM readout enabled");
       gd.addNumericField("Camera_gain (Count/e-)", settings.cameraGain, 4);
-    }
-    if (emMode) {
-      helpKey += "-em-ccd";
     }
     gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
@@ -369,8 +394,10 @@ public class MeanVarianceTest implements PlugIn {
     final Statistics biasStats = new Statistics();
     final Statistics noiseStats = new Statistics();
     final double bias;
+    final double var0;
     if (singleImage) {
       bias = settings.bias;
+      var0 = settings.variance;
     } else {
       while (start < images.size()) {
         final ImageSample sample = images.get(start);
@@ -385,6 +412,7 @@ public class MeanVarianceTest implements PlugIn {
         }
       }
       bias = biasStats.getMean();
+      var0 = noiseStats.getMean();
     }
 
     // Get the mean-variance data
@@ -422,7 +450,12 @@ public class MeanVarianceTest implements PlugIn {
         mean[j] = pair.getMean();
         variance[j] = pair.variance;
         // Gain is in Count / e
-        double gain = variance[j] / (mean[j] - bias);
+        // Variance between images should scale linearly with exposure time.
+        // This scale is the gain.
+        // (mean - bias) ~ exposure time
+        // variance[0] is the base read noise
+        // variance = variance[0] + gain * (mean - bias)
+        double gain = (variance[j] - var0) / (mean[j] - bias);
         gainStats.add(gain);
         obs.add(mean[j], variance[j]);
 
@@ -485,12 +518,14 @@ public class MeanVarianceTest implements PlugIn {
       if (emMode) {
         final double totalGain = gain;
         final double emGain = totalGain / settings.cameraGain;
-        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(settings.cameraGain, 4));
+        ImageJUtils.log("  Gain = 1 / %s (Count/e-)",
+            MathUtils.rounded(1 / settings.cameraGain, 4));
         ImageJUtils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
         ImageJUtils.log("  Total Gain = %s (Count/e-)", MathUtils.rounded(totalGain, 4));
       } else {
         settings.cameraGain = gain;
-        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(settings.cameraGain, 4));
+        ImageJUtils.log("  Gain = 1 / %s (Count/e-)",
+            MathUtils.rounded(1 / settings.cameraGain, 4));
       }
     } else {
       IJ.showStatus("Computing fit");

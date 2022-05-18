@@ -172,7 +172,7 @@ The ``Mean-Variance Test`` plugin can be used to calculate the gain and read noi
 Input Images
 ~~~~~~~~~~~~
 
-When run the plugin will present a folder selection dialog. The folder should contain a set of calibration images. All the images should be taken of the same view with the camera in the same gain mode.
+When run the plugin will present a folder selection dialog. The folder should contain a set of calibration images. All the images should be taken of the same view with the camera in the same gain mode. Ideally the image should be uniform so that each pixel should have approximately the same value.
 
 At least one image should be taken with no exposure time. This is the image the camera records when no light has been registered on the sensor and is called the bias image.
 
@@ -184,13 +184,15 @@ All the images in the folder are opened and processed by the plugin. Each image 
 Analysis
 ~~~~~~~~
 
-If all the images are valid (contain at least 2 frames) then the plugin will perform the mean-variance test. The average value of the bias images is used as the bias. Each image is then analysed in turn. The mean of each frame is computed. Then a pairwise difference image (i.e. one frame subtracted from the other) is computed for all-vs-all frames. The variance of the difference image is recorded and used to approximate the camera gain:
+If all the images are valid (contain at least 2 frames) then the plugin will perform the mean-variance test. The average value of the bias images is used as the bias. Each image is then analysed in turn. The mean of each frame is computed. Then a pairwise difference image (i.e. one frame subtracted from the other) is computed for all-vs-all frames. If the system was perfect then the difference between frames would be zero as each pixel would have the same value. However the system has noise for example from the variations in photons emitted in a fixed time period (photon shot noise), or from the measurement of the electrons captured on the camera sensor (read noise). The photon shot noise variance will scale linearly with exposure time and the read noise should be constant. A plot of variance against exposure time will be linear and the gradient of the line is the gain. The gain represents how many counts are recorded per photo-electron captured by the camera sensor.
+
+The variance of the difference image is recorded and used to approximate the camera gain:
 
 .. math::
 
-    \mathit{gain}=\frac{\mathit{variance}}{\mathit{mean}-\mathit{bias}}
+    \mathit{gain}=\frac{\mathit{variance} - \mathit{bias\:variance}}{\mathit{mean}-\mathit{bias}}
 
-This is recorded in a summary table. A graph is then produced of the mean verses the variance. This data is fitted with a straight line. The gradient of the line is the camera gain. The read noise of the camera is computed as:
+where the bias and the variance of the bias image are the origin of the line. This is recorded in a summary table. A graph is then produced of the mean verses the variance. This data is fitted with a straight line. The gradient of the line is the camera gain. The read noise of the camera is computed as:
 
 .. math::
 
@@ -238,7 +240,7 @@ The plugin produces a summary table of the analysis for each pair of frames. The
    * - Gain
      - The gain estimate:
 
-       :math:`\mathit{gain}=\frac{\mathit{variance}}{\mathit{mean}-\mathit{bias}}`.
+       :math:`\mathit{gain}=\frac{\mathit{variance} - \mathit{bias\:variance}}{\mathit{mean}-\mathit{bias}}`.
 
 
 The plugin will produce a plot of the mean-variance data as show in :numref:`Figure %s <fig_mean_variance_plot>`. The plot will show the best fit line in red. If the data points with the highest mean lie well under the line it is possible that these images had saturated pixel values and should be removed from the input data set.
@@ -263,7 +265,7 @@ The plugin reports the final calculated gain and read noise to the ``ImageJ`` lo
     Read Noise = 47.53 (e-)
     Gain = 1 / 6.422 (ADU/e-)
 
-The parameters for the best fit line are shown as ``Variance = a + b * mean``. The parameter *b* is the gain. The read noise is shown in electrons. The units for the gain are Analogue-to-Digital Unit (ADU) per electron.
+The parameters for the best fit line are shown as ``Variance = a + b * mean``. The parameter *b* is the gain. Parameter *a* is approximately the bias value multiplied by the gain subtracted from the variance of the bias image. The read noise is shown in electrons. The units for the gain are Analogue-to-Digital Unit (ADU) per electron.
 
 Note that the gain can be expressed as electrons per ADU and so the output shows the gain using 1 over the reciprocal of the fit parameter to allow comparison with manufacturer gain values. E.g. In the example above 1 / 6.422 = 1 / (1 / 0.1557) and the gain would be 6.422 e-/ADU.
 
@@ -279,11 +281,11 @@ In single-image mode the plugin will compute the pairwise comparison of consecut
 
 .. math::
 
-    \mathit{gain}=\frac{\mathit{variance}}{\mathit{mean}-\mathit{bias}}
+    \mathit{gain}=\frac{\mathit{variance} - \mathit{bias\:variance}}{\mathit{mean}-\mathit{bias}}
 
-The bias must be provided since there is no input bias image; the plugin will ask the user to input the camera bias. The results will be displayed in a table as described above.
+The bias and bias variance must be provided since there is no input bias image; the plugin will ask the user to input the camera bias and variance. Note that these values serve as the origin for a straight line from the measured mean and variance, i.e. the mean and variance at zero exposure. If these are accurate then the gain approximation is close to that provided by the mean-variance test using different exposure times. They can be set as zero. In this case the estimate will not be accurate but does allow analysis of the relative gain through the time-series of the image.
 
-The plugin provides a plot of gain verses slice and a histogram of the values. These can be used to determine if the gain is constant throughout the image and so is a good estimate.
+The results will be displayed in a table as described above. In addition the plugin provides a plot of gain verses slice and a histogram of the values.
 
 
 .. index:: ! Mean-Variance Test EM-CCD
@@ -322,7 +324,7 @@ plugin. However the analysis of the difference image is used to approximate the 
 
 .. math::
 
-    \mathit{EM\:gain}=\frac{\mathit{variance}}{(\mathit{mean}-\mathit{bias})\:(2\times\mathit{gain})}
+    \mathit{EM\:gain}=\frac{\mathit{variance}- \mathit{bias\:variance}}{(\mathit{mean}-\mathit{bias})\:(2\times\mathit{gain})}
 
 This is recorded in a summary table. A graph is then produced of the mean verses the variance. This data is fitted with a straight line. The gradient of the line is the EM-gain multiplied by twice the camera gain therefore the EM-gain can be computed as:
 
@@ -369,11 +371,13 @@ In single-image mode the plugin will compute the pairwise comparison of consecut
 
 .. math::
 
-    \mathit{EM\:gain}=\frac{\mathit{variance}}{(\mathit{mean}-\mathit{bias})\:(2\times\mathit{gain})}
+    \mathit{EM\:gain}=\frac{\mathit{variance} - \mathit{bias\:variance}}{(\mathit{mean}-\mathit{bias})\:(2\times\mathit{gain})}
 
-The bias must be provided since there is no input bias image; the plugin will ask the user to input the camera bias and camera gain. Using a camera gain of 1 will calculate the total gain of the system. The results will be displayed in a table as described above.
+The bias and bias variance must be provided since there is no input bias image; the plugin will ask the user to input the camera bias and variance. Note that these values serve as the origin for a straight line from the measured mean and variance, i.e. the mean and variance at zero exposure. If these are accurate then the gain approximation is close to that provided by the mean-variance test using different exposure times. They can be set as zero. In this case the estimate will not be accurate but does allow analysis of the relative gain through the time-series of the image.
 
-The plugin provides a plot of gain verses slice and a histogram of the values. These can be used to determine if the gain is constant throughout the image and so is a good estimate.
+The camera gain must be input to report the EM-gain. Using a camera gain of 1 will calculate the total gain of the system.
+
+The results will be displayed in a table as described above. In addition the plugin provides a plot of gain verses slice and a histogram of the values.
 
 
 .. index:: ! EM-Gain Analysis
