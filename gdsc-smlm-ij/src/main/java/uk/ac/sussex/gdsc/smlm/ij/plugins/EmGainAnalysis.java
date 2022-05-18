@@ -391,7 +391,7 @@ public class EmGainAnalysis implements PlugInFilter {
     // Avoid super-saturated pixels by using 98% of histogram
     long sum = 0;
     for (final int i : data) {
-      sum += data[i];
+      sum += i;
     }
 
     final long sum2 = (long) (sum * 0.99);
