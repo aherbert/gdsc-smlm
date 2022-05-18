@@ -971,6 +971,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Truncate x for plotting
     int max = 0;
+    sum = 0;
     double plimit = 1 - settings.tail;
     while (sum < plimit && max < pmf.length) {
       sum += pmf[max] * step;
