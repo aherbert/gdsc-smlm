@@ -759,7 +759,7 @@ public class EmGainAnalysis implements PlugInFilter {
    */
   static double[] pdf(final int max, final double photons, final double gain,
       final double sd, int c0) {
-    final double[] g = pdfEmGain(max, photons, gain);
+    final double[] g = pdfEmGain(max, 1, photons, gain);
     double[] gg;
 
     if (sd > 0) {
