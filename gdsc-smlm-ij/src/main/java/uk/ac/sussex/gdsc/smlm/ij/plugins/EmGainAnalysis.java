@@ -297,10 +297,7 @@ public class EmGainAnalysis implements PlugInFilter {
     final int steps = settings.simulationSize;
     final Ticker ticker = ImageJUtils.createTicker(steps, 1);
     for (int n = 0; n < steps; n++) {
-      int index = binarySearch(g, rng.nextDouble());
-      if (index < 0) {
-        index = -(index + 1);
-      }
+      final int index = binarySearch(g, rng.nextDouble());
       h[bins[index]]++;
       ticker.tick();
     }
@@ -323,7 +320,9 @@ public class EmGainAnalysis implements PlugInFilter {
         return mid; // Key found
       }
     }
-    return -(low + 1); // key not found.
+    // key not found: -(low + 1) == ~low
+    // Since we will be immediately flipping the bits back just return low.
+    return low;
   }
 
   /**
