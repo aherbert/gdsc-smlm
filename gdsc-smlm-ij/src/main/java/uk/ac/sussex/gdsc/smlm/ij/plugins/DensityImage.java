@@ -61,6 +61,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
  */
 public class DensityImage implements PlugIn {
   private static final String TITLE = "Density Image";
+  private static final int ITERATIONS_99 = 99;
 
   private Rectangle roiBounds;
   private double scaledRoiMinX;
@@ -781,7 +782,6 @@ public class DensityImage implements PlugIn {
     double yMax = max(0, y);
     if (settings.confidenceIntervals) {
       // 99% confidence intervals
-      final int iterations = 99;
       double[] upper = null;
       double[] lower = null;
       final Rectangle bounds = results.getBounds();
@@ -791,9 +791,9 @@ public class DensityImage implements PlugIn {
       final UniformRandomProvider rng = RandomSource.XO_RO_SHI_RO_128_PP.create();
       final float[] xx = new float[results.size()];
       final float[] yy = new float[xx.length];
-      for (int i = 0; i < iterations; i++) {
-        IJ.showProgress(i, iterations);
-        IJ.showStatus(String.format("L-score confidence interval %d / %d", i + 1, iterations));
+      for (int i = 0; i < ITERATIONS_99; i++) {
+        IJ.showProgress(i, ITERATIONS_99);
+        IJ.showStatus(String.format("L-score confidence interval %d / %d", i + 1, ITERATIONS_99));
 
         // Randomise coordinates
         for (int j = xx.length; j-- > 0;) {
@@ -802,7 +802,7 @@ public class DensityImage implements PlugIn {
         }
         final double[][] values2 = calculateLScores(new DensityManager(xx, yy, area));
         final double[] scores = values2[1];
-        if (upper == null || lower == null) {
+        if (i == 0) {
           upper = scores;
           lower = scores.clone();
         } else {
