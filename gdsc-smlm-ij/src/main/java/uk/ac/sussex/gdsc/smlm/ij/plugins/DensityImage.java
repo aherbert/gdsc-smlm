@@ -37,9 +37,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.rng.simple.internal.SeedFactory;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
@@ -771,61 +771,60 @@ public class DensityImage implements PlugIn {
     final DensityManager dm = createDensityManager(results);
     final double[][] values = calculateLScores(dm);
 
-    // 99% confidence intervals
-    final int iterations = (settings.confidenceIntervals) ? 99 : 0;
-    double[] upper = null;
-    double[] lower = null;
-    final Rectangle bounds = results.getBounds();
-    final double area = (double) bounds.width * bounds.height;
-    // Use a uniform distribution for the coordinates
-    final HaltonSequenceGenerator dist = new HaltonSequenceGenerator(2);
-    dist.skipTo(SeedFactory.createInt());
-    for (int i = 0; i < iterations; i++) {
-      IJ.showProgress(i, iterations);
-      IJ.showStatus(String.format("L-score confidence interval %d / %d", i + 1, iterations));
+    final String title = results.getName() + " Ripley's (L(r) - r) / r";
+    final Plot plot = new Plot(title, "Radius", "(L(r) - r) / r");
+    final double[] x = values[0];
+    final double[] y = values[1];
+    plot.addPoints(x, y, Plot.LINE);
+    // Get the limits
+    double yMin = min(0, y);
+    double yMax = max(0, y);
+    if (settings.confidenceIntervals) {
+      // 99% confidence intervals
+      final int iterations = 99;
+      double[] upper = null;
+      double[] lower = null;
+      final Rectangle bounds = results.getBounds();
+      final double area = (double) bounds.width * bounds.height;
+      // Use a uniform distribution for the coordinates
+      // Require a 2-equidistributed generator
+      final UniformRandomProvider rng = RandomSource.XO_RO_SHI_RO_128_PP.create();
+      final float[] xx = new float[results.size()];
+      final float[] yy = new float[xx.length];
+      for (int i = 0; i < iterations; i++) {
+        IJ.showProgress(i, iterations);
+        IJ.showStatus(String.format("L-score confidence interval %d / %d", i + 1, iterations));
 
-      // Randomise coordinates
-      final float[] x = new float[results.size()];
-      final float[] y = new float[x.length];
-      for (int j = x.length; j-- > 0;) {
-        final double[] d = dist.nextVector();
-        x[j] = (float) (d[0] * bounds.width);
-        y[j] = (float) (d[1] * bounds.height);
-      }
-      final double[][] values2 = calculateLScores(new DensityManager(x, y, area));
-      if (upper == null || lower == null) {
-        upper = values2[1];
-        lower = upper.clone();
-      } else {
-        for (int m = upper.length; m-- > 0;) {
-          if (upper[m] < values2[1][m]) {
-            upper[m] = values2[1][m];
-          }
-          if (lower[m] > values2[1][m]) {
-            lower[m] = values2[1][m];
+        // Randomise coordinates
+        for (int j = xx.length; j-- > 0;) {
+          xx[j] = (float) (rng.nextDouble() * bounds.width);
+          yy[j] = (float) (rng.nextDouble() * bounds.height);
+        }
+        final double[][] values2 = calculateLScores(new DensityManager(xx, yy, area));
+        final double[] scores = values2[1];
+        if (upper == null || lower == null) {
+          upper = scores;
+          lower = scores.clone();
+        } else {
+          for (int m = upper.length; m-- > 0;) {
+            if (upper[m] < scores[m]) {
+              upper[m] = scores[m];
+            } else if (lower[m] > scores[m]) {
+              lower[m] = scores[m];
+            }
           }
         }
       }
-    }
-
-    final String title = results.getName() + " Ripley's (L(r) - r) / r";
-    final Plot plot = new Plot(title, "Radius", "(L(r) - r) / r");
-    plot.addPoints(values[0], values[1], Plot.LINE);
-    // Get the limits
-    double yMin = min(0, values[1]);
-    double yMax = max(0, values[1]);
-    if (iterations > 0) {
+      ImageJUtils.finished();
       yMin = min(yMin, lower);
       yMax = max(yMax, upper);
-    }
-    plot.setLimits(0, values[0][values[0].length - 1], yMin, yMax);
-    if (iterations > 0) {
       plot.setColor(Color.BLUE);
-      plot.addPoints(values[0], upper, 1);
+      plot.addPoints(x, upper, 1);
       plot.setColor(Color.RED);
-      plot.addPoints(values[0], lower, 1);
+      plot.addPoints(x, lower, 1);
       plot.setColor(Color.BLACK);
     }
+    plot.setLimits(0, x[x.length - 1], yMin, yMax);
     ImageJUtils.display(title, plot);
   }
 
