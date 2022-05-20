@@ -65,6 +65,7 @@ import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -520,7 +521,7 @@ public class TraceMolecules implements PlugIn {
   }
 
   private static Trace[] getTraces(Trace[] traces) {
-    final ArrayList<Trace> result = new ArrayList<>();
+    final List<Trace> result = new LocalList<>(traces.length);
     for (final Trace t : traces) {
       if (t.size() != 1) {
         result.add(t);
