@@ -2025,6 +2025,9 @@ plugin counts the number of localisations in the neighbourhood of each localisat
    * - Radius
      - Specify the radius of the local region around each localisation.
 
+   * - Distance unit
+     - Specify the distance unit of the radius. 
+
    * - Use ROI
      - If selected the user will be presented with a dialog allowing the selection of an image with an area ROI drawn on. If only one image has an area ROI it will be chosen automatically. The ROI will be scaled to the dimensions of the input results and only localisations within this region analysed.
 
