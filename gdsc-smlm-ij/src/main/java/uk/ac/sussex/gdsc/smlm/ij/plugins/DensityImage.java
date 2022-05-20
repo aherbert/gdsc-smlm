@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
@@ -36,9 +37,15 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -46,12 +53,13 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
@@ -824,39 +832,60 @@ public class DensityImage implements PlugIn {
     double yMax = max(0, y);
     if (settings.confidenceIntervals) {
       // 99% confidence intervals
-      double[] upper = null;
-      double[] lower = null;
       final Rectangle bounds = results.getBounds();
       final double area = (double) bounds.width * bounds.height;
+
+      IJ.showStatus("Computing L plot confidence interval");
+
+      // Respect the configured number of threads.
+      final int threads = Prefs.getThreads();
+      final Ticker ticker = ImageJUtils.createTicker(ITERATIONS_99, threads);
+
       // Use a uniform distribution for the coordinates
       // Require a 2-equidistributed generator
-      final UniformRandomProvider rng = RandomSource.XO_RO_SHI_RO_128_PP.create();
-      final float[] xx = new float[results.size()];
-      final float[] yy = new float[xx.length];
-      for (int i = 0; i < ITERATIONS_99; i++) {
-        IJ.showProgress(i, ITERATIONS_99);
-        IJ.showStatus(String.format("L-score confidence interval %d / %d", i + 1, ITERATIONS_99));
+      final JumpableUniformRandomProvider sourceRng =
+          (JumpableUniformRandomProvider) RandomSource.XO_RO_SHI_RO_128_PP.create();
 
-        // Randomise coordinates
-        for (int j = xx.length; j-- > 0;) {
-          xx[j] = (float) (rng.nextDouble() * bounds.width);
-          yy[j] = (float) (rng.nextDouble() * bounds.height);
+      final ExecutorService executor = Executors.newFixedThreadPool(threads);
+      final LocalList<Future<double[]>> futures = new LocalList<>(ITERATIONS_99);
+      Stream.generate(sourceRng::jump).limit(ITERATIONS_99).forEach(rng -> {
+        futures.add(executor.submit(() -> {
+          final float[] xx = new float[results.size()];
+          final float[] yy = new float[xx.length];
+          for (int j = xx.length; j-- > 0;) {
+            xx[j] = (float) (rng.nextDouble() * bounds.width);
+            yy[j] = (float) (rng.nextDouble() * bounds.height);
+          }
+          final double[] scores = calculateLScores(new DensityManager(xx, yy, area), radii, false);
+          ticker.tick();
+          return scores;
+        }));
+      });
+      executor.shutdown();
+      final double[] upper = new double[radii.length];
+      final double[] lower = SimpleArrayUtils.newDoubleArray(upper.length, Double.MAX_VALUE);
+      futures.forEach(f -> {
+        double[] scores;
+        // Here we just bubble up checked exceptions as unchecked
+        try {
+          scores = f.get();
+        } catch (final InterruptedException ex) {
+          // Restore interrupted state...
+          Thread.currentThread().interrupt();
+          throw new ConcurrentRuntimeException(ex);
+        } catch (final ExecutionException ex) {
+          throw new ConcurrentRuntimeException(ex);
         }
-        final double[] scores = calculateLScores(new DensityManager(xx, yy, area), radii, false);
-        if (i == 0) {
-          upper = scores;
-          lower = scores.clone();
-        } else {
-          for (int m = upper.length; m-- > 0;) {
-            if (upper[m] < scores[m]) {
-              upper[m] = scores[m];
-            } else if (lower[m] > scores[m]) {
-              lower[m] = scores[m];
-            }
+        for (int m = scores.length; m-- > 0;) {
+          if (upper[m] < scores[m]) {
+            upper[m] = scores[m];
+          } else if (lower[m] > scores[m]) {
+            lower[m] = scores[m];
           }
         }
-      }
+      });
       ImageJUtils.finished();
+
       yMin = min(yMin, lower);
       yMax = max(yMax, upper);
       plot.setColor(Color.BLUE);
