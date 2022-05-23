@@ -1118,36 +1118,30 @@ public class TraceMolecules implements PlugIn {
       return;
     }
 
-    IJ.log(String.format(
-        "Zero value closest to origin @ D-threshold=%g nm, T-threshold=%f s (%d frames)",
-        settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames()));
-
-    // Make fractional difference absolute so that lowest is best
-    for (final double[] result : results) {
-      result[2] = Math.abs(result[2]);
-    }
-
-    // Set the optimal thresholds using the lowest value.
-    // Q. Should this be done? Note these are actual values that can be used for tracing
-    // where as the optimal parameters from zero crossings are for interpolated points.
-    // This is valid for distance but not for time as the frames are discrete.
-    double[] best = {0, 0, Double.MAX_VALUE};
-    for (final double[] result : results) {
-      if (best[2] > result[2]) {
-        best = result;
-      }
-    }
-
-    settings.setDistanceThreshold(best[0]);
-
-    // The optimiser works using frames so convert back to the correct units
-    final TypeConverter<TimeUnit> convert = UnitConverterUtils.createConverter(TimeUnit.FRAME,
-        settings.getTimeUnit(), getExposureTimeInMilliSeconds());
-    settings.setTimeThreshold(convert.convert(best[1]));
+    // // Set the optimal thresholds using the lowest value.
+    // // Q. Should this be done? Note these are actual values that can be used for tracing
+    // // where as the optimal parameters from zero crossings are for interpolated points.
+    // // This is valid for distance but not for time as the frames are discrete.
+    // double[] best = {0, 0, Double.MAX_VALUE};
+    // for (final double[] result : results) {
+    // // Make fractional difference absolute so that lowest is best
+    // result[2] = Math.abs(result[2]);
+    // if (best[2] > result[2]) {
+    // best = result;
+    // }
+    // }
+    //
+    // settings.setDistanceThreshold(best[0]);
+    //
+    // // The optimiser works using frames so convert back to the correct units
+    // final TypeConverter<TimeUnit> convert = UnitConverterUtils.createConverter(TimeUnit.FRAME,
+    // settings.getTimeUnit(), getExposureTimeInMilliSeconds());
+    // settings.setTimeThreshold(convert.convert(best[1]));
 
     IJ.log(String.format(
         "Optimal fractional difference @ D-threshold=%g nm, T-threshold=%f s (%d frames)",
         settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames()));
+
     writeSettings();
   }
 
@@ -1170,6 +1164,7 @@ public class TraceMolecules implements PlugIn {
     if (altKeyDown) {
       gd.addCheckbox("Optimise_blinking", pluginSettings.inputOptimiseBlinkingRate);
     }
+    gd.addHelp(HelpUrls.getUrl("trace-molecules"));
 
     gd.showDialog();
 
