@@ -451,10 +451,10 @@ The following table describes the parameters used during the optimisation:
    * - Parameter
      - Description
 
-   * - Min Distance Threshold (px)
+   * - Min Distance Threshold (nm)
      - The minimum distance threshold.
 
-   * - Max Distance Threshold (px)
+   * - Max Distance Threshold (nm)
      - The maximum distance threshold.
 
    * - Min Time Threshold (seconds)
