@@ -139,7 +139,7 @@ public class TraceMolecules implements PlugIn {
   private double exposureTime;
 
   // Used for the plotting
-  private double[] ddistanceThresholds;
+  private double[] distanceThresholds;
   private int[] timeThresholds;
   private List<double[]> zeroCrossingPoints;
   private FloatProcessor fp;
@@ -1061,24 +1061,30 @@ public class TraceMolecules implements PlugIn {
   private void runOptimiser(TraceManager manager) {
     // Get an estimate of the number of molecules without blinking
     final Statistics stats = new Statistics();
-    final double nmPerPixel = this.results.getNmPerPixel();
     final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
     pp.getPrecision();
     stats.add(pp.precisions);
-    // Use twice the precision to get the initial distance threshold
 
     // Use 2.5x sigma as per the PC-PALM protocol in Sengupta, et al (2013) Nature Protocols 8, 345
-    final double dEstimate = stats.getMean() * 2.5 / nmPerPixel;
+    final double dEstimate = stats.getMean() * 2.5;
     final int traceCount = manager.traceMolecules(dEstimate, 1);
 
     if (!getParameters(traceCount, dEstimate)) {
       return;
     }
 
-    // TODO - Convert the distance threshold to use nm instead of pixels?
-    final List<double[]> results = runTracing(manager, settings.getMinDistanceThreshold(),
-        settings.getMaxDistanceThreshold(), settings.getMinTimeThreshold(),
+    // Convert the distance threshold from nm to native units
+    final Converter c =
+        CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
+    final double dMin = c.convertBack(settings.getMinDistanceThreshold());
+    final double dMax = c.convertBack(settings.getMaxDistanceThreshold());
+
+    final List<double[]> results = runTracing(manager, dMin, dMax, settings.getMinTimeThreshold(),
         settings.getMaxTimeThreshold(), settings.getOptimiserSteps());
+
+    // Convert distance threshold back to nm
+    results.stream().forEach(x -> x[0] = c.convert(x[0]));
+    SimpleArrayUtils.apply(distanceThresholds, c::convert);
 
     // Compute fractional difference from the true value:
     // Use blinking rate directly or the estimated number of molecules
@@ -1112,12 +1118,19 @@ public class TraceMolecules implements PlugIn {
       return;
     }
 
+    IJ.log(String.format(
+        "Zero value closest to origin @ D-threshold=%g nm, T-threshold=%f s (%d frames)",
+        settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames()));
+
     // Make fractional difference absolute so that lowest is best
     for (final double[] result : results) {
       result[2] = Math.abs(result[2]);
     }
 
-    // Set the optimal thresholds using the lowest value
+    // Set the optimal thresholds using the lowest value.
+    // Q. Should this be done? Note these are actual values that can be used for tracing
+    // where as the optimal parameters from zero crossings are for interpolated points.
+    // This is valid for distance but not for time as the frames are discrete.
     double[] best = {0, 0, Double.MAX_VALUE};
     for (final double[] result : results) {
       if (best[2] > result[2]) {
@@ -1141,13 +1154,14 @@ public class TraceMolecules implements PlugIn {
   private boolean getParameters(int traceCount, double distance) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle + " Optimiser");
 
-    final String msg = String.format("Estimate %d molecules at d=%f, t=1", traceCount, distance);
+    final String msg = String.format("Estimate %d molecules at d=%s nm, t=1", traceCount,
+        MathUtils.rounded(distance));
     IJ.log(msg);
     gd.addMessage(msg);
-    gd.addNumericField("Min_Distance_Threshold (px)", settings.getMinDistanceThreshold(), 2);
-    gd.addNumericField("Max_Distance_Threshold (px)", settings.getMaxDistanceThreshold(), 2);
-    gd.addNumericField("Min_Time_Threshold (frames)", settings.getMinTimeThreshold(), 0);
-    gd.addNumericField("Max_Time_Threshold (frames)", settings.getMaxTimeThreshold(), 0);
+    gd.addNumericField("Min_Distance_Threshold", settings.getMinDistanceThreshold(), 2, 6, "nm");
+    gd.addNumericField("Max_Distance_Threshold", settings.getMaxDistanceThreshold(), 2, 6, "nm");
+    gd.addNumericField("Min_Time_Threshold", settings.getMinTimeThreshold(), 0, 6, "frames");
+    gd.addNumericField("Max_Time_Threshold", settings.getMaxTimeThreshold(), 0, 6, "frames");
     gd.addSlider("Steps", 1, 20, settings.getOptimiserSteps());
     gd.addNumericField("Blinking_rate", settings.getBlinkingRate(), 2);
     final String[] plotNames = SettingsManager.getNames((Object[]) OptimiserPlot.values());
@@ -1269,10 +1283,10 @@ public class TraceMolecules implements PlugIn {
    */
   public List<double[]> runTracing(TraceManager manager, double minDistanceThreshold,
       double maxDistanceThreshold, int minTimeThreshold, int maxTimeThreshold, int optimiserSteps) {
-    ddistanceThresholds = getIntervals(minDistanceThreshold, maxDistanceThreshold, optimiserSteps);
+    distanceThresholds = getIntervals(minDistanceThreshold, maxDistanceThreshold, optimiserSteps);
     timeThresholds = convert(getIntervals(minTimeThreshold, maxTimeThreshold, optimiserSteps));
 
-    final int total = ddistanceThresholds.length * timeThresholds.length;
+    final int total = distanceThresholds.length * timeThresholds.length;
     final ArrayList<double[]> resultsList = new ArrayList<>(total);
 
     IJ.showStatus("Optimising tracing (" + total + " steps) ...");
@@ -1282,7 +1296,7 @@ public class TraceMolecules implements PlugIn {
     }
 
     int step = 0;
-    for (final double d : ddistanceThresholds) {
+    for (final double d : distanceThresholds) {
       for (final int t : timeThresholds) {
         IJ.showProgress(step++, total);
         final int n = manager.traceMolecules(d, t);
@@ -1375,7 +1389,7 @@ public class TraceMolecules implements PlugIn {
     // to below zero (i.e. too many traces)
 
     final int maxx = timeThresholds.length;
-    final int maxy = ddistanceThresholds.length;
+    final int maxy = distanceThresholds.length;
 
     // --------
     // Find zero crossings using linear interpolation
@@ -1393,7 +1407,7 @@ public class TraceMolecules implements PlugIn {
         final double[] result = results.get(i);
         data[y] = result[2];
       }
-      final double zeroCrossing = findZeroCrossing(data, ddistanceThresholds);
+      final double zeroCrossing = findZeroCrossing(data, distanceThresholds);
       if (zeroCrossing > 0) {
         zeroCrossingPoints.add(new double[] {timeThresholds[x], zeroCrossing});
       } else if (x == 0) {
@@ -1449,7 +1463,7 @@ public class TraceMolecules implements PlugIn {
       }
       final double zeroCrossing = findZeroCrossing(data, tThresholdsD);
       if (zeroCrossing > 0) {
-        zeroCrossingPoints.add(new double[] {zeroCrossing, ddistanceThresholds[y]});
+        zeroCrossingPoints.add(new double[] {zeroCrossing, distanceThresholds[y]});
       } else if (y == 0) {
         noZeroCrossingAtD0 = true;
       } else if (y == maxy - 1) {
@@ -1580,7 +1594,7 @@ public class TraceMolecules implements PlugIn {
     cal.xOrigin = origX - settings.getMinTimeThreshold() / cal.pixelWidth;
     cal.yOrigin = origY - settings.getMinDistanceThreshold() / cal.pixelHeight;
     cal.setXUnit("frame");
-    cal.setYUnit("pixel");
+    cal.setYUnit("nm");
 
     showPlot();
   }
@@ -1639,12 +1653,12 @@ public class TraceMolecules implements PlugIn {
     // Create lookup table that map the tested threshold values to a position in the image
     final int[] xLookup = createLookup(timeThresholds, settings.getMinTimeThreshold(), width);
     final int[] yLookup =
-        createLookup(ddistanceThresholds, settings.getMinDistanceThreshold(), height);
+        createLookup(distanceThresholds, settings.getMinDistanceThreshold(), height);
     origX = (settings.getMinTimeThreshold() != 0) ? xLookup[1] : 0;
     origY = (settings.getMinDistanceThreshold() != 0) ? yLookup[1] : 0;
 
     final int gridWidth = timeThresholds.length;
-    final int gridHeight = ddistanceThresholds.length;
+    final int gridHeight = distanceThresholds.length;
     for (int y = 0, i = 0; y < gridHeight; y++) {
       for (int x = 0; x < gridWidth; x++, i++) {
         final int x1 = xLookup[x];
@@ -1688,12 +1702,12 @@ public class TraceMolecules implements PlugIn {
     // Create lookup table that map the tested threshold values to a position in the image
     final int[] xLookup = createLookup(timeThresholds, settings.getMinTimeThreshold(), width);
     final int[] yLookup =
-        createLookup(ddistanceThresholds, settings.getMinDistanceThreshold(), height);
+        createLookup(distanceThresholds, settings.getMinDistanceThreshold(), height);
     origX = (settings.getMinTimeThreshold() != 0) ? xLookup[1] : 0;
     origY = (settings.getMinDistanceThreshold() != 0) ? yLookup[1] : 0;
 
     final int gridWidth = timeThresholds.length;
-    final int gridHeight = ddistanceThresholds.length;
+    final int gridHeight = distanceThresholds.length;
     for (int y = 0, prevY = 0; y < gridHeight; y++) {
       for (int x = 0, prevX = 0; x < gridWidth; x++) {
         // Get the 4 flanking values
