@@ -42,6 +42,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -94,6 +96,7 @@ public class DensityImage implements PlugIn {
   private static class Settings {
     static final String[] SCORE_METHODS = {"Density", "Ripley's K", "Ripley's K / Area",
         "Ripley's L", "Ripley's L - r", "Ripley's L / r", "Ripley's (L - r) / r"};
+    static final String[] L_PLOT_SCORE_METHODS = {"Ripley's L - r", "Ripley's (L - r) / r"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
@@ -112,6 +115,9 @@ public class DensityImage implements PlugIn {
     int resolution;
 
     int scoreMethodIndex;
+
+    boolean lplotUseSquareApproximation;
+    int lplotScoreMethodIndex;
 
     boolean filterLocalisations;
     double filterThreshold;
@@ -152,6 +158,8 @@ public class DensityImage implements PlugIn {
       useSquareApproximation = source.useSquareApproximation;
       resolution = source.resolution;
       scoreMethodIndex = source.scoreMethodIndex;
+      lplotUseSquareApproximation = source.lplotUseSquareApproximation;
+      lplotScoreMethodIndex = source.lplotScoreMethodIndex;
       filterLocalisations = source.filterLocalisations;
       filterThreshold = source.filterThreshold;
       computeRipleysPlot = source.computeRipleysPlot;
@@ -795,20 +803,24 @@ public class DensityImage implements PlugIn {
         distanceUnit, DistanceUnit.PIXEL, results.getCalibrationReader().getNmPerPixel());
 
     final String unitName = UnitHelper.getShortName(distanceUnit);
+    gd.addChoice("L-plot_score", Settings.L_PLOT_SCORE_METHODS, settings.lplotScoreMethodIndex);
     gd.addNumericField("Min_radius", distanceConverter.convertBack(settings.minR), 2, 6, unitName);
     gd.addNumericField("Max_radius", distanceConverter.convertBack(settings.maxR), 2, 6, unitName);
     gd.addNumericField("Increment", distanceConverter.convertBack(settings.incrementR), 2, 6,
         unitName);
     gd.addCheckbox("Confidence_intervals", settings.confidenceIntervals);
+    gd.addCheckbox("L-plot_use_square_approx", settings.lplotUseSquareApproximation);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
+    settings.lplotScoreMethodIndex = gd.getNextChoiceIndex();
     settings.minR = distanceConverter.convert(gd.getNextNumber());
     settings.maxR = distanceConverter.convert(gd.getNextNumber());
     settings.incrementR = distanceConverter.convert(gd.getNextNumber());
     settings.confidenceIntervals = gd.getNextBoolean();
+    settings.lplotUseSquareApproximation = gd.getNextBoolean();
 
     if (settings.minR > settings.maxR || settings.incrementR <= 0
         || (settings.maxR - settings.minR) / settings.incrementR > 10000 || gd.invalidNumber()) {
@@ -820,12 +832,14 @@ public class DensityImage implements PlugIn {
     IJ.showStatus("Computing L plot");
     final DensityManager dm = createDensityManager(results);
     dm.setTracker(null);
-    final double[] y = calculateLScores(dm, radii, true);
+    final double[] y = calculateLScores(dm, radii, true, settings.lplotUseSquareApproximation,
+        settings.lplotScoreMethodIndex);
     final double[] x = radii.clone();
     SimpleArrayUtils.apply(x, distanceConverter::convertBack);
 
-    final String title = results.getName() + " Ripley's (L(r) - r) / r";
-    final Plot plot = new Plot(title, "Radius (" + unitName + ")", "(L(r) - r) / r");
+    final String name = Settings.L_PLOT_SCORE_METHODS[settings.lplotScoreMethodIndex];
+    final String title = results.getName() + " Ripley's " + name;
+    final Plot plot = new Plot(title, "Radius (" + unitName + ")", name);
     plot.addPoints(x, y, Plot.LINE);
     // Get the limits
     double yMin = min(0, y);
@@ -856,7 +870,8 @@ public class DensityImage implements PlugIn {
             xx[j] = (float) (rng.nextDouble() * bounds.width);
             yy[j] = (float) (rng.nextDouble() * bounds.height);
           }
-          final double[] scores = calculateLScores(new DensityManager(xx, yy, area), radii, false);
+          final double[] scores = calculateLScores(new DensityManager(xx, yy, area), radii, false,
+              settings.lplotUseSquareApproximation, settings.lplotScoreMethodIndex);
           ticker.tick();
           return scores;
         }));
@@ -924,21 +939,40 @@ public class DensityImage implements PlugIn {
     return x.toDoubleArray();
   }
 
-  private static double[] calculateLScores(DensityManager dm, double[] radii, boolean progress) {
+  private static double[] calculateLScores(DensityManager dm, double[] radii, boolean progress,
+      boolean useSquareApproximation, int scoreMethodIndex) {
     final double[] scores = new double[radii.length];
     final int start = radii[0] == 0 ? 1 : 0;
+
+    final DoubleBinaryOperator normaliseFunction = scoreMethodIndex == 1
+        // (L(r) - r) / r
+        ? (s, r) -> s / r
+        // (L(r) - r)
+        : (s, r) -> s;
+
+    DoubleUnaryOperator scoreFunction;
+    if (useSquareApproximation) {
+      final int resolution = 10;
+      final boolean adjustForBorder = true;
+      scoreFunction = r -> {
+        final int[] d = dm.calculateSquareDensity((float) r, resolution, adjustForBorder);
+        // Scale square density to circle:
+        return normaliseFunction.applyAsDouble(((dm.ripleysLFunction(d, r) * Math.PI / 4) - r), r);
+      };
+    } else {
+      scoreFunction = r -> normaliseFunction.applyAsDouble(dm.ripleysLFunction(r) - r, r);
+    }
+
     if (progress) {
       final Ticker ticker = ImageJUtils.createTicker(radii.length - start, 1);
       for (int i = start; i < radii.length; i++) {
-        final double r = radii[i];
-        scores[i] = (dm.ripleysLFunction(r) - r) / r;
+        scores[i] = scoreFunction.applyAsDouble(radii[i]);
         ticker.tick();
       }
       ticker.stop();
     } else {
       for (int i = start; i < radii.length; i++) {
-        final double r = radii[i];
-        scores[i] = (dm.ripleysLFunction(r) - r) / r;
+        scores[i] = scoreFunction.applyAsDouble(radii[i]);
       }
     }
     return scores;
