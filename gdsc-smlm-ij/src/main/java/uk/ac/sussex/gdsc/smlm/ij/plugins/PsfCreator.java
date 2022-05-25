@@ -476,8 +476,6 @@ public class PsfCreator implements PlugInFilter {
 
     gd.showDialog();
 
-    SettingsManager.writeSettings(settings);
-
     if (gd.wasCanceled()) {
       return false;
     }
@@ -491,6 +489,8 @@ public class PsfCreator implements PlugInFilter {
     settings.setCentreEachSlice(gd.getNextBoolean());
     settings.setComCutOff(MathUtils.max(0, gd.getNextNumber()));
     settings.setInterpolationMethod(gd.getNextChoiceIndex());
+
+    SettingsManager.writeSettings(settings);
 
     // Check arguments
     try {
@@ -896,6 +896,7 @@ public class PsfCreator implements PlugInFilter {
     results.setSortAfterEnd(true);
     results.begin();
     final int threadCount = Prefs.getThreads();
+    //fitConfig.setLog(uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper.getDefaultLogger());
     final FitEngine engine = FitEngine.create(config,
         SynchronizedPeakResults.create(results, threadCount), threadCount, FitQueue.BLOCKING);
 

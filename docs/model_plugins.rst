@@ -441,7 +441,7 @@ Parameters
 
 When the configuration for the analysis has been configured a second dialog is shown to allow the fitting configuration to be specified. Details of the options can be found in section :numref:`{number}: {name} <fitting_plugins:Peak Fit>`.
 
-It is recommended that the peak filtering be configured to allow very wide (out-of-focus) spots (e.g. ``Width factor`` >= 5) and the ``Signal strength`` should allow poor spots (e.g. 5).
+It is recommended that the peak filtering be configured to allow very wide (out-of-focus) spots (e.g. ``Width factor`` >= 5) and the ``Signal strength`` should allow poor spots (e.g. 1).
 
 
 Output
