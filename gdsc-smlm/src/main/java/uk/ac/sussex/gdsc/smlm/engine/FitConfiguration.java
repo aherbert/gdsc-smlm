@@ -2176,7 +2176,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   public FitStatus validatePeak(int n, double[] initialParams, double[] params,
       double[] paramDevs) {
     // This requires local background and noise so that validation works the same
-    // way for simple filteroing as it would for a PreprocessedPeakResult.
+    // way for simple filtering as it would for a PreprocessedPeakResult.
 
     // TODO - Update this so it can use a callback function to get
     // local background / noise.
