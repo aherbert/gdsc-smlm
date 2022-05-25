@@ -91,9 +91,11 @@ public final class FitEngineConfiguration {
   public static FitEngineConfiguration create(FitEngineSettings fitEngineSettings,
       Calibration calibration, PSF psf) {
     Objects.requireNonNull(fitEngineSettings, "fitEngineSettings");
-    final FitConfiguration fitConfiguration =
-        FitConfiguration.create(fitEngineSettings.getFitSettings(), calibration, psf);
-    return new FitEngineConfiguration(fitEngineSettings.toBuilder(), fitConfiguration);
+    // Ensure the FitSettings for the FitConfguration is linked to the FitEngineSettings.Builder
+    final FitEngineSettings.Builder builder = fitEngineSettings.toBuilder();
+    final FitConfiguration fitConfiguration = FitConfiguration
+        .create(builder.getFitSettingsBuilder(), calibration.toBuilder(), psf.toBuilder());
+    return new FitEngineConfiguration(builder, fitConfiguration);
   }
 
   /**
