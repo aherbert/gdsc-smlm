@@ -207,13 +207,13 @@ The following parameters can be specified:
      - Set the resolution of alignment. Shifts computed below this resolution are considered equal.
 
    * - RMSD XY threshold
-     - Set the convergence threshold for the RMSD of the XY translation applied to the PSF centres in the current alignment iteration. Only available in interactive mode.
+     - Set the convergence threshold for the RMSD of the XY translation applied to the PSF centres in the current alignment iteration. Only available when not in interactive mode.
 
    * - RMSD Z threshold
-     - Set the convergence threshold for the RMSD of the Z translation applied to the PSF centres in the current alignment iteration. Only available in interactive mode.
+     - Set the convergence threshold for the RMSD of the Z translation applied to the PSF centres in the current alignment iteration. Only available when not in interactive mode.
 
    * - CoM shift threshold
-     - Set the convergence threshold for the change in the centre-of-mass of the combined PSF in the current alignment iteration. Only available in interactive mode.
+     - Set the convergence threshold for the change in the centre-of-mass of the combined PSF in the current alignment iteration. Only available when not in interactive mode.
 
    * - Reset
      - Press this button to reset to the default settings.
