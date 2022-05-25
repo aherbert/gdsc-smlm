@@ -392,7 +392,7 @@ public class DiffusionRateTest implements PlugIn {
               m.move(diffusionSigma, random);
             }
 
-            if (!dist.isWithin(m.getCoordinates())) {
+            if (dist.isWithin(m.getCoordinates())) {
               // The move was allowed
               break;
             }
