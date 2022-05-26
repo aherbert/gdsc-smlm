@@ -716,6 +716,14 @@ Thus the ``Load localisations`` plugin can be used to load selected slices of da
 If the user requires a subset of the data in the XY dimensions then this can be achieved using the ``Crop Results`` or ``ROI Crop Results`` plugins once the results have been loaded (see sections :numref:`%s <results_plugins:Crop Results>` and :numref:`%s <results_plugins:ROI Crop Results>`).
 
 
+.. index:: ! save localisations
+
+Save Localisations
+------------------
+
+Saves a set of localisations to a delimited text file. The file format is specified during runtime allowing any delimited localisation data to be saved. This provides an alternative to the fixed formats used by the ``Results Manager`` (see section :numref:`%s <results_plugins:Results Manager>`).
+
+
 .. index:: ! Trace Exporter
 
 Trace Exporter

@@ -171,7 +171,10 @@ Results Plugins
      - Draws an overlay on an image using all the localisations from a results dataset.
 
    * - :ref:`results_plugins:Load Localisations`
-     - Loads localisation data from a delimited text file.
+     - Loads localisation data from a delimited text file in a user-specified format.
+
+   * - :ref:`results_plugins:Save Localisations`
+     - Saves localisation data to a delimited text file in a user-specified format.
 
    * - :ref:`results_plugins:Trace Exporter`
      - Export traced datasets to file.
@@ -580,4 +583,3 @@ Issues
 Please file a bug report on GitHub_.
 
 .. _GitHub: https://github.com/aherbert/gdsc-smlm/
-
