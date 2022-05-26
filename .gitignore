@@ -8,6 +8,6 @@ gdsc-smlm-ij/plugins
 JumpDistanceAnalysisTest.dat
 /gdsc.smlm.settings.xml
 /luts
-/.checkstyle
+.checkstyle
 # Sphinx documentation
 docs/_build/
