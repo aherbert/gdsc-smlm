@@ -39,6 +39,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.ClusteringMode;
@@ -65,6 +66,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.OpticsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCalculatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFEstimatorSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SaveLocalisationsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TcPalmAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing;
@@ -193,6 +195,26 @@ public final class GuiSettings {
       builder.setComment("#");
       builder.setDelimiter("\\s+");
       builder.setName("Localisations");
+      INSTANCE = builder.build();
+    }
+  }
+
+  /** The default SaveLocalisationsSettings. */
+  public static class DefaultSaveLocalisationsSettings {
+    /** Default settings instance. */
+    public static final SaveLocalisationsSettings INSTANCE;
+
+    static {
+      final SaveLocalisationsSettings.Builder builder = SaveLocalisationsSettings.newBuilder();
+      builder.setInput("");
+      builder.setDirectory("");
+      builder.setFileSuffix("txt");
+      builder.setDelimiter(" ");
+      builder.setAddHeader(true);
+      builder.setTimeUnit(TimeUnit.FRAME);
+      builder.setDistanceUnit(DistanceUnit.PIXEL);
+      builder.setAngleUnit(AngleUnit.DEGREE);
+      builder.setFormat("T X Y I");
       INSTANCE = builder.build();
     }
   }

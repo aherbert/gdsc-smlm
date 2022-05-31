@@ -188,6 +188,19 @@ message LoadLocalisationsSettings {
   int32 field_category = 26;
 }
 
+// Settings for the Save Localisations plugin
+message SaveLocalisationsSettings {
+  string input = 1;
+  string directory = 2;
+  string delimiter = 3;
+  bool add_header = 4;
+  uk.ac.sussex.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;
+  uk.ac.sussex.gdsc.smlm.data.config.TimeUnit time_unit = 6;
+  uk.ac.sussex.gdsc.smlm.data.config.AngleUnit angle_unit = 7;
+  string format = 8;
+  string file_suffix = 9;
+}
+
 // Contain the settings for the clustering algorithm
 message ClusteringSettings {
   double distance_threshold = 1;

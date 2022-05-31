@@ -97,6 +97,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.OpticsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCalculatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFEstimatorSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SaveLocalisationsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SummariseResultsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TcPalmAnalysisSettings;
@@ -1024,6 +1025,17 @@ public final class SettingsManager {
    */
   public static LoadLocalisationsSettings readLoadLocalisationsSettings(int flags) {
     return new ConfigurationReader<>(GuiSettings.DefaultLoadLocalisationsSettings.INSTANCE)
+        .read(flags);
+  }
+
+  /**
+   * Read the SaveLocalisationsSettings from the settings file in the settings directory.
+   *
+   * @param flags the flags
+   * @return the SaveLocalisationsSettings
+   */
+  public static SaveLocalisationsSettings readSaveLocalisationsSettings(int flags) {
+    return new ConfigurationReader<>(GuiSettings.DefaultSaveLocalisationsSettings.INSTANCE)
         .read(flags);
   }
 
