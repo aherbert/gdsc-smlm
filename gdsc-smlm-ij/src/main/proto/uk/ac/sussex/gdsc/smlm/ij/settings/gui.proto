@@ -194,11 +194,12 @@ message SaveLocalisationsSettings {
   string directory = 2;
   string delimiter = 3;
   bool add_header = 4;
-  uk.ac.sussex.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;
-  uk.ac.sussex.gdsc.smlm.data.config.TimeUnit time_unit = 6;
-  uk.ac.sussex.gdsc.smlm.data.config.AngleUnit angle_unit = 7;
-  string format = 8;
-  string file_suffix = 9;
+  uk.ac.sussex.gdsc.smlm.data.config.TimeUnit time_unit = 5;
+  uk.ac.sussex.gdsc.smlm.data.config.IntensityUnit intensity_unit = 6;
+  uk.ac.sussex.gdsc.smlm.data.config.DistanceUnit distance_unit = 7;
+  uk.ac.sussex.gdsc.smlm.data.config.AngleUnit angle_unit = 8;
+  string format = 9;
+  string file_suffix = 10;
 }
 
 // Contain the settings for the clustering algorithm

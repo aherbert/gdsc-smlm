@@ -41,6 +41,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.ClusteringMode;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.ImageMode;
@@ -212,6 +213,7 @@ public final class GuiSettings {
       builder.setDelimiter(" ");
       builder.setAddHeader(true);
       builder.setTimeUnit(TimeUnit.FRAME);
+      builder.setIntensityUnit(IntensityUnit.PHOTON);
       builder.setDistanceUnit(DistanceUnit.PIXEL);
       builder.setAngleUnit(AngleUnit.DEGREE);
       builder.setFormat("T X Y I");

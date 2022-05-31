@@ -721,7 +721,45 @@ If the user requires a subset of the data in the XY dimensions then this can be 
 Save Localisations
 ------------------
 
-Saves a set of localisations to a delimited text file. The file format is specified during runtime allowing any delimited localisation data to be saved. This provides an alternative to the fixed formats used by the ``Results Manager`` (see section :numref:`%s <results_plugins:Results Manager>`).
+Saves a set of localisations to a delimited text file. The file format is specified during runtime allowing any localisation data to be saved. This provides an alternative to the fixed formats used by the ``Results Manager`` (see section :numref:`%s <results_plugins:Results Manager>`).
+
+When the plugin is run the localisation result set must be selected. The plugin reads the selected results and presents a list of the available fields. Each field has an identifier and a name (``id: name``). Custom PSF parameters are identified using ``pn`` where ``n`` is the parameter number. The format uses space-delimited identifiers to specify the output fields, for example ``T X Y`` would output the time and XY position of the localisations.
+
+The following parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Format
+     - The output format. A space-delimited set of field identifiers. Note this does not use the ``Delimiter`` field to delimit the identifiers.
+
+   * - Delimiter
+     - The field delimiter. This can be any text. Use ``\t`` for the tab character.
+
+   * - Directory
+     - The output directory. The results file will be named using the name of the result set plus the ``Suffix``.
+
+   * - Suffix
+     - The suffix for the output file. Use an empty text field for no suffix.
+
+   * - Add header
+     - If ``true`` then the field names will be added as a single line header to the output file. Note that if any field name contains the delimiter then the name is quoted with ``"``; if the delimiter contains ``"`` then an error is raised.
+
+   * - Time Unit
+     - The output time unit. Available when the results are calibrated with an exposure time.
+
+   * - Distance Unit
+     - The output distance unit. Available when the results are calibrated with a distance unit.
+
+   * - Intensity Unit
+     - The output intensity unit. Available when the results are calibrated with an intensity unit.
+
+   * - Angle Unit
+     - The output angle unit. Available when the results contain PSF angle data and are calibrated with an angle unit.
 
 
 .. index:: ! Trace Exporter
