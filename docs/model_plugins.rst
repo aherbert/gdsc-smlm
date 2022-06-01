@@ -590,13 +590,19 @@ Parameters
    * - Background fitting
      - Select this to allow the algorithm to fit the background. Note that the background should be zero as no data is inserted into the image apart from the PSF. This can be used to more closely match the fitting performed on real data.
 
+   * - PSF
+     - The PSF function used to fit the data.
+
    * - Fit solver
      - The solver used to fit the data.
 
        Note that a second dialog will be presented for the selected solver to be configured. The values are initially set to the defaults which should work in most cases. See the ``Peak Fit`` plugin for details of how to configure the solver (section :numref:`{number}<fitting_plugins:Peak Fit>`).
 
-   * - Fit function
-     - The function used to fit the data.
+   * - Min width factory
+     - The minimum width, relative to the starting width, to accept the fit.
+
+   * - Width factor
+     - The maximum width, relative to the starting width, to accept the fit.
 
    * - Offset fit
      - Fit each image with the initial guess for the centre shifted by an offset. The guess is shifted in each of the 4 diagonal directions from the true centre.
