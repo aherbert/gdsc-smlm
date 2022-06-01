@@ -707,7 +707,7 @@ PSF Combiner
 
 The ``PSF Combiner`` plugin produces an average PSF image from multiple PSF images. PSF images can be created using the ``PSF Creator`` plugin (see section :numref:`%s<model_plugins:PSF Creator>`).
 
-When the plugin is run it searches all the open images for valid PSF images. These will be tagged in the image info property with the z-centre, image scale and number of input images used to create the PSF. The plugin then presents a dialog where the user can select the images to combine (:numref:`Figure %s <fig_psf_combiner_dialog>`). The dialog is presented iteratively to allowing only one image to be selected from the available images each time. Select the first image from the dialog and click ``OK`` to include the image. The list of available images is then updated and the dialog reshown. Click ``Cancel`` to stop adding images. Note that the iterative addition of images allows the plugin to be fully supported by the ``ImageJ`` macro recorder.
+When the plugin is run it searches all the open images for valid PSF images. These will be tagged in the image info property with the z-centre, image scale and number of input images used to create the PSF. The plugin then presents a dialog where the user can select the images to combine (:numref:`Figure %s <fig_psf_combiner_dialog>`).
 
 .. _fig_psf_combiner_dialog:
 .. figure:: images/psf_combiner_dialog.png
@@ -716,7 +716,7 @@ When the plugin is run it searches all the open images for valid PSF images. The
 
     PSF Combiner dialog
 
-When the input images have been selected the plugin checks that each PSF has the same image scale. Note that input PSFs can have different X, Y and Z dimensions. If the scales are not the same then the images cannot be combined and an error is shown. Otherwise the plugin then presents a dialog where the z-depth of the combined PSF can be selected. This allows the size of the output PSF to be limited to N frames above and below the z-centre.
+When the input images have been selected the plugin checks that each PSF has the same image scale (pixel size and depth). Note that input PSFs can have different X, Y and Z dimensions. If the scales are not the same then the images cannot be combined and an error is shown. Otherwise the plugin then presents a dialog where the z-depth of the combined PSF can be selected. This allows the size of the output PSF to be limited to N frames above and below the z-centre.
 
 The combined PSF is created by overlaying the x,y,z-centres and summing the individual PSF images. Each PSF is weighted using the number of images used to created the PSF divided by the total number of images:
 
