@@ -744,6 +744,7 @@ public class PsfDrift implements PlugIn {
     gd.addMessage("Optionally average the end points to set drift outside the limits.\n"
         + "(Select zero to ignore)");
     gd.addSlider("Number_of_points", 0, 10, settings.positionsToAverage);
+    gd.addHelp(HelpUrls.getUrl("psf-drift"));
     gd.showDialog();
     if (gd.wasOKed()) {
       settings.positionsToAverage = Math.abs((int) gd.getNextNumber());
@@ -1223,7 +1224,7 @@ public class PsfDrift implements PlugIn {
     final UpdateDialogListener dl =
         new UpdateDialogListener(cx, cy, maxY, newCentre, scale, pw, label);
     gd2.addDialogListener(dl);
-    gd.addHelp(HelpUrls.getUrl("psf-hwhm"));
+    gd2.addHelp(HelpUrls.getUrl("psf-hwhm"));
     gd2.showDialog();
     if (gd2.wasOKed() && (settings.updateCentre || settings.updateHwhm)) {
       final ImagePSF.Builder b = psfSettings.toBuilder();
