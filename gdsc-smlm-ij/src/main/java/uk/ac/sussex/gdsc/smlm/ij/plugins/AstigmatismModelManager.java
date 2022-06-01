@@ -975,7 +975,8 @@ public class AstigmatismModelManager implements PlugIn {
     record("Initial", parameters);
     if (pluginSettings.getShowEstimatedCurve()) {
       plotFit(parameters);
-      IJ.showMessage(TITLE, "Showing the estimated curve parameters.\nClick OK to continue.");
+      IJ.showMessage(TITLE, "Showing the *estimated* curve parameters.\n \n"
+          + "Click OK to *fit* the curve parameters.");
     }
 
     //@formatter:off
