@@ -201,7 +201,7 @@ public class PsfCreator implements PlugInFilter {
   double nmPerPixel;
   private int boxRadius;
   private int zRadius;
-  private static AtomicReference<Point> yesNoPosition = new AtomicReference<>();
+  private static final AtomicReference<Point> YES_NO_POSITION = new AtomicReference<>();
 
   private ExecutorService threadPool;
   private double progress;
@@ -1000,7 +1000,7 @@ public class PsfCreator implements PlugInFilter {
               + "x = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n",
           n, cx, cy, cz, csd);
       gd.addSlider("Slice", z[0], z[z.length - 1], slice);
-      final Point previousPoint = yesNoPosition.get();
+      final Point previousPoint = YES_NO_POSITION.get();
       if (previousPoint != null) {
         gd.centerDialog(false);
         gd.setLocation(previousPoint);
@@ -1008,7 +1008,7 @@ public class PsfCreator implements PlugInFilter {
       gd.addDialogListener(new SimpleInteractivePlotListener());
       gd.showDialog();
 
-      yesNoPosition.set(gd.getLocation());
+      YES_NO_POSITION.set(gd.getLocation());
       return !gd.wasOKed();
     }
     return false;
@@ -1274,14 +1274,14 @@ public class PsfCreator implements PlugInFilter {
       ImageJUtils.addMessage(gd,
           "Add spot %d to the PSF?\n(The intensity profile is the sum within half the box region)",
           n);
-      final Point previousPoint = yesNoPosition.get();
+      final Point previousPoint = YES_NO_POSITION.get();
       if (previousPoint != null) {
         gd.centerDialog(false);
         gd.setLocation(previousPoint);
       }
       gd.showDialog();
 
-      yesNoPosition.set(gd.getLocation());
+      YES_NO_POSITION.set(gd.getLocation());
       if (!gd.wasOKed()) {
         return false;
       }

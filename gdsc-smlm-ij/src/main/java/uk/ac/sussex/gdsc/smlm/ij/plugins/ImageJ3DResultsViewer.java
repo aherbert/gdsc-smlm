@@ -207,7 +207,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static final Transform3D IDENTITY = new Transform3D();
 
   // No need to store this in settings as when the plugin is first run there are no windows
-  private static AtomicReference<String> lastWindow = new AtomicReference<>("");
+  private static final AtomicReference<String> LAST_WINDOW = new AtomicReference<>("");
 
   // @formatter:off
   private static final Map<PeakResultsDigest,
@@ -1111,7 +1111,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // or to reuse an existing window. If 'new window' then a new window should always
     // be selected. Otherwise open in the same window as last time. If there was no last
     // window then the settings will carried over from the last ImageJ session.
-    final String window = (settings.getNewWindow()) ? "" : lastWindow.get();
+    final String window = (settings.getNewWindow()) ? "" : LAST_WINDOW.get();
     gd.addChoice("Window", titles, window);
     gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency(), new OptionListener<Double>() {
       @Override
@@ -1324,7 +1324,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
     final String name = ResultsManager.getInputSource(gd);
     final int windowChoice = gd.getNextChoiceIndex();
-    lastWindow.set(titles[windowChoice]);
+    LAST_WINDOW.set(titles[windowChoice]);
     settings.setInputOption(name);
     settings.setTransparency(gd.getNextNumber());
     settings.setLut(gd.getNextChoiceIndex());
@@ -1371,7 +1371,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       univ = univList.get(windowChoice - 1); // Ignore the new window
     }
 
-    lastWindow.set(univ.getWindow().getTitle());
+    LAST_WINDOW.set(univ.getWindow().getTitle());
 
     results = results.copy();
 

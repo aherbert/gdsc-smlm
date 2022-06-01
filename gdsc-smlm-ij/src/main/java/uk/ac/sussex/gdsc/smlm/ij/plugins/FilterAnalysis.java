@@ -82,8 +82,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
  */
 public class FilterAnalysis implements PlugIn {
   private static final String TITLE = "Filter Analysis";
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
-  private static AtomicReference<TextWindow> sensitivityWindowRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> SENSITIVITY_WINDOW_REF = new AtomicReference<>();
 
   private static final AtomicReference<LastResults> LAST_RESULTS = new AtomicReference<>();
 
@@ -797,7 +797,7 @@ public class FilterAnalysis implements PlugIn {
       return IJ::log;
     }
 
-    return ImageJUtils.refresh(resultsWindowRef, () -> {
+    return ImageJUtils.refresh(RESULTS_WINDOW_REF, () -> {
       final String header = createResultsHeader();
       return new TextWindow(TITLE + " Results", header, "", 900, 300);
     })::append;
@@ -825,7 +825,7 @@ public class FilterAnalysis implements PlugIn {
       IJ.log(createSensitivityHeader());
       return IJ::log;
     }
-    return ImageJUtils.refresh(sensitivityWindowRef, () -> {
+    return ImageJUtils.refresh(SENSITIVITY_WINDOW_REF, () -> {
       final String header = createSensitivityHeader();
       return new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
     })::append;

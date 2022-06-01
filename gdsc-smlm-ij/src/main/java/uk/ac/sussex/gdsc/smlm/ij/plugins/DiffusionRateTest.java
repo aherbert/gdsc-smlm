@@ -86,7 +86,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 public class DiffusionRateTest implements PlugIn {
   private static final String TITLE = "Diffusion Rate Test";
 
-  private static AtomicReference<TextWindow> msdTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> MSD_TABLE_REF = new AtomicReference<>();
 
   // Used to allow other plugins to detect if a dataset is simulated
 
@@ -1252,7 +1252,7 @@ public class DiffusionRateTest implements PlugIn {
   }
 
   private TextWindow createMsdTable(double baseMsd) {
-    return ImageJUtils.refresh(msdTableRef, () -> {
+    return ImageJUtils.refresh(MSD_TABLE_REF, () -> {
       return new TextWindow("MSD Analysis", createHeader(baseMsd), "", 800, 300);
     });
   }

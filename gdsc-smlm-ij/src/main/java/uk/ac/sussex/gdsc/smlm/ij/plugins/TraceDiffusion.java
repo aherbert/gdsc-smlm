@@ -97,13 +97,14 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 public class TraceDiffusion implements PlugIn, CurveLogger {
   private static final String TITLE = "Trace Diffusion";
 
-  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> SUMMARY_TABLE_REF = new AtomicReference<>();
 
   // Used for the macro extensions
-  private static AtomicReference<double[][]> jumpDistanceParametersRef = new AtomicReference<>();
+  private static final AtomicReference<double[][]> JUMP_DISTANCE_PARAMETERS_REF =
+      new AtomicReference<>();
 
   // Used for the multiMode option
-  private static AtomicReference<List<String>> selectedRef = new AtomicReference<>();
+  private static final AtomicReference<List<String>> SELECTED_REF = new AtomicReference<>();
 
   /** The names for the different tracing modes. */
   private static final String[] TRACE_MODE =
@@ -239,7 +240,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    jumpDistanceParametersRef.set(null);
+    JUMP_DISTANCE_PARAMETERS_REF.set(null);
 
     extraOptions = ImageJUtils.isExtraOptions();
     if (MemoryPeakResults.isMemoryEmpty()) {
@@ -505,7 +506,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       // Fit Jump Distance cumulative probability
       numberOfDataPoints = jumpDistances.getN();
       jdParams = fitJumpDistance(jumpDistances, jdHistogram);
-      jumpDistanceParametersRef.set(jdParams);
+      JUMP_DISTANCE_PARAMETERS_REF.set(jdParams);
     }
 
     summarise(traces, fitMsdResult, numberOfDataPoints, jdParams);
@@ -972,7 +973,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       }
       return IJ::log;
     }
-    return ImageJUtils.refresh(summaryTableRef,
+    return ImageJUtils.refresh(SUMMARY_TABLE_REF,
         () -> new TextWindow(TITLE + " Data Summary", createHeader(), "", 800, 300))::append;
   }
 
@@ -2050,7 +2051,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    */
   public static String getNumberOfSpecies(Object[] args) {
     int species = 0;
-    final double[][] jumpDistanceParameters = jumpDistanceParametersRef.get();
+    final double[][] jumpDistanceParameters = JUMP_DISTANCE_PARAMETERS_REF.get();
     if (jumpDistanceParameters != null) {
       species = jumpDistanceParameters[0].length;
     }
@@ -2078,7 +2079,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    */
   public static String getD(Object[] args) {
     double value = 0;
-    final double[][] jumpDistanceParameters = jumpDistanceParametersRef.get();
+    final double[][] jumpDistanceParameters = JUMP_DISTANCE_PARAMETERS_REF.get();
     if (jumpDistanceParameters != null) {
       final int index = ((Double) args[0]).intValue();
       if (index >= 0 && index < jumpDistanceParameters[0].length) {
@@ -2108,7 +2109,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    */
   public static String getF(Object[] args) {
     double value = 0;
-    final double[][] jumpDistanceParameters = jumpDistanceParametersRef.get();
+    final double[][] jumpDistanceParameters = JUMP_DISTANCE_PARAMETERS_REF.get();
     if (jumpDistanceParameters != null) {
       final int index = ((Double) args[0]).intValue();
       if (index >= 0 && index < jumpDistanceParameters[1].length) {
@@ -2141,7 +2142,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   public static String getSpecies(Object[] args) {
     double value = 0;
     double value2 = 0;
-    final double[][] jumpDistanceParameters = jumpDistanceParametersRef.get();
+    final double[][] jumpDistanceParameters = JUMP_DISTANCE_PARAMETERS_REF.get();
     if (jumpDistanceParameters != null) {
       final int i = ((Double) args[0]).intValue();
       if (i >= 0 && i < jumpDistanceParameters[0].length) {
@@ -2160,7 +2161,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     // Show a list box containing all the results. This should remember the last set of chosen
     // items.
     final MultiDialog md = ResultsManager.createMultiDialog(TITLE);
-    md.setSelected(selectedRef.get());
+    md.setSelected(SELECTED_REF.get());
     md.setHelpUrl(HelpUrls.getUrl("trace-diffusion-multi"));
 
     md.showDialog();
@@ -2174,7 +2175,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       IJ.error(TITLE, "No results were selected");
       return false;
     }
-    selectedRef.set(selected);
+    SELECTED_REF.set(selected);
 
     for (final String name : selected) {
       final MemoryPeakResults r = MemoryPeakResults.getResults(name);

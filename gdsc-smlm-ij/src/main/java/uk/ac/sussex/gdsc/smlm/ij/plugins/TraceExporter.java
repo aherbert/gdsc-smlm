@@ -77,7 +77,7 @@ import us.hebi.matlab.mat.types.Struct;
  */
 public class TraceExporter implements PlugIn {
   private static final String TITLE = "Trace Exporter";
-  private static AtomicReference<List<String>> selectedRef = new AtomicReference<>();
+  private static final AtomicReference<List<String>> SELECTED_REF = new AtomicReference<>();
 
   /** The plugin settings. */
   private Settings settings;
@@ -230,7 +230,7 @@ public class TraceExporter implements PlugIn {
     // items.
     final MultiDialog md = new MultiDialog(TITLE, items);
     md.setDisplayConverter(items.getDisplayConverter());
-    md.setSelected(selectedRef.get());
+    md.setSelected(SELECTED_REF.get());
 
     md.showDialog();
 
@@ -243,7 +243,7 @@ public class TraceExporter implements PlugIn {
       IJ.error(TITLE, "No results were selected");
       return false;
     }
-    selectedRef.set(selected);
+    SELECTED_REF.set(selected);
 
     for (final String name : selected) {
       final MemoryPeakResults r = MemoryPeakResults.getResults(name);

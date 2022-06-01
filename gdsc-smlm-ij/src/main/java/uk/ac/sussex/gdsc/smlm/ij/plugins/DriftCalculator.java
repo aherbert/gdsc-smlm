@@ -100,8 +100,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 public class DriftCalculator implements PlugIn {
   private static final String TITLE = "Drift Calculator";
 
-  private static AtomicReference<PlotWindow> plotx = new AtomicReference<>();
-  private static AtomicReference<PlotWindow> ploty = new AtomicReference<>();
+  private static final AtomicReference<PlotWindow> PLOT_X = new AtomicReference<>();
+  private static final AtomicReference<PlotWindow> PLOT_Y = new AtomicReference<>();
 
   private int interpolationStart;
   private int interpolationEnd;
@@ -1155,8 +1155,8 @@ public class DriftCalculator implements PlugIn {
         extractValues(calculatedTimepoints, limits[0], limits[1], lastdx, lastdy);
 
     final PlotWindow window = plotDrift(null, interpolated, original, "Drift X", 1);
-    ploty.set(plotDrift(window, interpolated, original, "Drift Y", 2));
-    plotx.set(window);
+    PLOT_Y.set(plotDrift(window, interpolated, original, "Drift Y", 2));
+    PLOT_X.set(window);
   }
 
   private static PlotWindow plotDrift(PlotWindow parent, double[][] interpolated,

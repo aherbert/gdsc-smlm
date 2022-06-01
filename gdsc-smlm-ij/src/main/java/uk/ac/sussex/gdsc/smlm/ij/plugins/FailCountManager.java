@@ -89,14 +89,14 @@ import uk.ac.sussex.gdsc.smlm.results.count.WeightedFailCounter;
 public class FailCountManager implements PlugIn {
   private static final String TITLE = "Fail Count Manager";
 
-  private static AtomicInteger maxCounters = new AtomicInteger(200000);
+  private static final AtomicInteger MAX_COUNTERS = new AtomicInteger(200000);
 
   private static final String[] OPTIONS =
       SettingsManager.getNames((Object[]) FailCountOption.values());
 
-  private static AtomicReference<LocalList<FailCountData>> failCountDataRef =
+  private static final AtomicReference<LocalList<FailCountData>> FAIL_COUNT_DATA_REF =
       new AtomicReference<>(new LocalList<>(1));
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
 
   private FailCountManagerSettings.Builder settings;
 
@@ -634,7 +634,7 @@ public class FailCountManager implements PlugIn {
         failCountData.add(new FailCountData(job.getSlice(), results));
       }
     }
-    failCountDataRef.set(failCountData);
+    FAIL_COUNT_DATA_REF.set(failCountData);
     ImageJUtils.showStatus("");
 
     // Save for the future
@@ -747,7 +747,7 @@ public class FailCountManager implements PlugIn {
       }
 
       IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(countData.size(), "sequence"));
-      failCountDataRef.set(countData);
+      FAIL_COUNT_DATA_REF.set(countData);
     } catch (final NumberFormatException | IOException ex) {
       IJ.error(TITLE, "Failed to load data:\n" + ex.getMessage());
     }
@@ -793,7 +793,7 @@ public class FailCountManager implements PlugIn {
    * Save the data in memory to file.
    */
   private void saveData() {
-    final LocalList<FailCountData> failCountData = failCountDataRef.get();
+    final LocalList<FailCountData> failCountData = FAIL_COUNT_DATA_REF.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -833,7 +833,7 @@ public class FailCountManager implements PlugIn {
    * Show an interactive plot of the fail count data.
    */
   private void plotData() {
-    final LocalList<FailCountData> failCountData = failCountDataRef.get();
+    final LocalList<FailCountData> failCountData = FAIL_COUNT_DATA_REF.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -910,7 +910,7 @@ public class FailCountManager implements PlugIn {
   }
 
   private void analyseData() {
-    final LocalList<FailCountData> failCountData = failCountDataRef.get();
+    final LocalList<FailCountData> failCountData = FAIL_COUNT_DATA_REF.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -1133,7 +1133,7 @@ public class FailCountManager implements PlugIn {
   }
 
   private static CounterStatus checkCounters(LocalList<FailCounter> counters) {
-    final int localMaxCounters = maxCounters.get();
+    final int localMaxCounters = MAX_COUNTERS.get();
     if (counters.size() > localMaxCounters) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage("Too many counters to analyse: " + counters.size());
@@ -1152,13 +1152,13 @@ public class FailCountManager implements PlugIn {
         IJ.error(TITLE, "The max counters has not been increased, unable to continue");
         return CounterStatus.RETURN;
       }
-      maxCounters.set(newMaxCounters);
+      MAX_COUNTERS.set(newMaxCounters);
     }
     return CounterStatus.CONTINUE;
   }
 
   private static TextWindow createTable() {
-    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE + " Analysis Results",
+    return ImageJUtils.refresh(RESULTS_WINDOW_REF, () -> new TextWindow(TITLE + " Analysis Results",
         "Rank\tFail Counter\tScore", "", 600, 400));
   }
 

@@ -65,7 +65,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.XyWidthFilter2;
  */
 public class FreeFilterResults implements PlugIn {
   private static final String TITLE = "Free Filter Results";
-  private static AtomicReference<String> inputOptionRef = new AtomicReference<>("");
+  private static final AtomicReference<String> INPUT_OPTION_REF = new AtomicReference<>("");
 
   private String inputOption;
   private GUIFilterSettings.Builder filterSettings;
@@ -118,7 +118,7 @@ public class FreeFilterResults implements PlugIn {
     gd.addHelp(HelpUrls.getUrl("free-filter-results"));
 
     gd.addMessage("Select a dataset to filter");
-    ResultsManager.addInput(gd, inputOptionRef.get(), InputSource.MEMORY);
+    ResultsManager.addInput(gd, INPUT_OPTION_REF.get(), InputSource.MEMORY);
 
     filterSettings = SettingsManager.readGuiFilterSettings(0).toBuilder();
 
@@ -150,7 +150,7 @@ public class FreeFilterResults implements PlugIn {
       return false;
     }
 
-    inputOptionRef.set(inputOption);
+    INPUT_OPTION_REF.set(inputOption);
     return SettingsManager.writeSettings(filterSettings.build());
   }
 

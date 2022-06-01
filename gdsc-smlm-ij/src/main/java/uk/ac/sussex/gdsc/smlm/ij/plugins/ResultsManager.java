@@ -128,7 +128,7 @@ public class ResultsManager implements PlugIn {
   private static final String TITLE = "Peak Results Manager";
   private static final Logger logger = ImageJPluginLoggerHelper.getLogger(ResultsManager.class);
 
-  private static AtomicReference<List<String>> lastSelected = new AtomicReference<>();
+  private static final AtomicReference<List<String>> LAST_SELECTED = new AtomicReference<>();
 
   /** An empty array of load options. */
   private static final LoadOption[] EMPTY_LOAD_OPTIONS = new LoadOption[0];
@@ -494,7 +494,7 @@ public class ResultsManager implements PlugIn {
     if (arg.contains("multi")) {
       helpKey += "-multi";
       final MultiDialog md = createMultiDialog(TITLE);
-      md.setSelected(lastSelected.get());
+      md.setSelected(LAST_SELECTED.get());
       md.setHelpUrl(HelpUrls.getUrl(helpKey));
       md.showDialog();
       if (md.wasCancelled()) {
@@ -504,7 +504,7 @@ public class ResultsManager implements PlugIn {
       if (selected.isEmpty()) {
         return;
       }
-      lastSelected.set(selected);
+      LAST_SELECTED.set(selected);
       allResults = new ArrayList<>(selected.size());
       for (final String name : selected) {
         final MemoryPeakResults r = MemoryPeakResults.getResults(name);
@@ -1900,7 +1900,7 @@ public class ResultsManager implements PlugIn {
       return;
     }
     final MultiDialog md = createMultiDialog(TITLE);
-    md.setSelected(lastSelected.get());
+    md.setSelected(LAST_SELECTED.get());
     md.setHelpUrl(HelpUrls.getUrl("batch-save-results"));
     md.showDialog();
     if (md.wasCancelled()) {
@@ -1910,7 +1910,7 @@ public class ResultsManager implements PlugIn {
     if (selected.isEmpty()) {
       return;
     }
-    lastSelected.set(selected);
+    LAST_SELECTED.set(selected);
     resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     addFileResultsOptions(gd, resultsSettings, FLAG_RESULTS_DIRECTORY | FLAG_NO_SECTION_HEADER);

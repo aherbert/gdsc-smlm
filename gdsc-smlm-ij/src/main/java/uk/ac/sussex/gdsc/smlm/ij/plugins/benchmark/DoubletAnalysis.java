@@ -129,8 +129,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
   private static final String TITLE = "Doublet Analysis";
 
-  private static AtomicReference<FitEngineConfiguration> configRef;
-  private static AtomicReference<FitConfiguration> filterFitConfigRef;
+  private static final AtomicReference<FitEngineConfiguration> CONFIG_REF;
+  private static final AtomicReference<FitConfiguration> FILtER_FIT_CONFIG_REF;
 
   private static AtomicInteger lastId = new AtomicInteger();
 
@@ -167,17 +167,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     filterFitConfig.setMaxWidthFactor(0);
     filterFitConfig.setPrecisionMethod(PrecisionMethod.MORTENSEN);
 
-    configRef = new AtomicReference<>(config);
-    filterFitConfigRef = new AtomicReference<>(filterFitConfig);
+    CONFIG_REF = new AtomicReference<>(config);
+    FILtER_FIT_CONFIG_REF = new AtomicReference<>(filterFitConfig);
   }
 
-  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
-  private static AtomicReference<TextWindow> resultsTableRef = new AtomicReference<>();
-  private static AtomicReference<TextWindow> analysisTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> SUMMARY_TABLE_REF = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_TABLE_REF = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> ANALYSIS_TABLE_REF = new AtomicReference<>();
 
   // These are set during the initial analysis of fitted results.
   // They are used as a reference for subsequent analysis.
-  private static AtomicReference<ReferenceResults> referenceResults = new AtomicReference<>();
+  private static final AtomicReference<ReferenceResults> REFERENCE_RESULTS =
+      new AtomicReference<>();
 
   /** Updated each time the score is computed (thus it hold the latest score). */
   private ResidualsScore residualsScore;
@@ -1685,7 +1686,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final String helpKey = "doublet-analysis";
 
     settings = Settings.load();
-    config = configRef.get().createCopy();
+    config = CONFIG_REF.get().createCopy();
     final FitConfiguration fitConfig = config.getFitConfiguration();
 
     final double sa = getSa();
@@ -1815,7 +1816,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     gd.collectOptions();
 
     settings.save();
-    configRef.set(config);
+    CONFIG_REF.set(config);
 
     if (gd.invalidNumber()) {
       return false;
@@ -1926,7 +1927,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   }
 
   private void runFitting() {
-    referenceResults.set(null);
+    REFERENCE_RESULTS.set(null);
 
     final ImageStack stack = imp.getImageStack();
 
@@ -2302,7 +2303,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     createSummaryTable().append(sb.toString());
 
     // Store results in memory for later analysis
-    referenceResults.set(new ReferenceResults(results, residualsScoreMax, residualsScoreAv,
+    REFERENCE_RESULTS.set(new ReferenceResults(results, residualsScoreMax, residualsScoreAv,
         numberOfMolecules, analysisPrefix2));
   }
 
@@ -2467,7 +2468,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Creates the summary table.
    */
   private static TextWindow createSummaryTable() {
-    return ImageJUtils.refresh(summaryTableRef,
+    return ImageJUtils.refresh(SUMMARY_TABLE_REF,
         () -> new TextWindow(TITLE + " Summary", createSummaryHeader(), "", 1000, 300));
   }
 
@@ -2584,7 +2585,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Creates the results table.
    */
   private static TextWindow createResultsTable() {
-    return ImageJUtils.refresh(resultsTableRef,
+    return ImageJUtils.refresh(RESULTS_TABLE_REF,
         () -> new TextWindow(TITLE + " Results", createResultsHeader(), "", 1000, 300));
   }
 
@@ -2603,7 +2604,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Run analysis.
    */
   private void runAnalysis() {
-    final ReferenceResults results = referenceResults.get();
+    final ReferenceResults results = REFERENCE_RESULTS.get();
     if (results == null) {
       IJ.error(TITLE, "No doublet results in memory");
       return;
@@ -2886,7 +2887,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * @return true, if successful
    */
   public static boolean updateConfiguration(FitEngineConfiguration configuration) {
-    configuration.mergeFitEngineSettings(configRef.get().getFitEngineSettings());
+    configuration.mergeFitEngineSettings(CONFIG_REF.get().getFitEngineSettings());
     return true;
   }
 
@@ -3047,7 +3048,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     gd.addHelp(HelpUrls.getUrl("doublet-filter-analysis"));
 
     settings = Settings.load();
-    config = configRef.get().createCopy();
+    config = CONFIG_REF.get().createCopy();
 
     final StringBuilder sb = new StringBuilder(256);
 
@@ -3064,7 +3065,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // Collect options for filtering
     gd.addChoice("Selection_Criteria", Settings.SELECTION_CRITERIAS, settings.selectionCriteria);
 
-    filterFitConfig = filterFitConfigRef.get().createCopy();
+    filterFitConfig = FILtER_FIT_CONFIG_REF.get().createCopy();
 
     // Copy the settings used when fitting
     filterFitConfig.setCalibration(fitConfig.getCalibration());
@@ -3151,7 +3152,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     settings.saveTemplate = gd.getNextBoolean();
 
     settings.save();
-    filterFitConfigRef.set(filterFitConfig);
+    FILtER_FIT_CONFIG_REF.set(filterFitConfig);
 
     if (gd.invalidNumber()) {
       return false;
@@ -3181,7 +3182,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Creates the analysis table.
    */
   private static TextWindow createAnalysisTable() {
-    return ImageJUtils.refresh(analysisTableRef,
+    return ImageJUtils.refresh(ANALYSIS_TABLE_REF,
         () -> new TextWindow(TITLE + " Analysis", createAnalysisHeader(), "", 1200, 300));
   }
 

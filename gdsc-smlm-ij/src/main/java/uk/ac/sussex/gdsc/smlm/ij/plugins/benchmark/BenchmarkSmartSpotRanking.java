@@ -94,18 +94,19 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private static final byte TN = (byte) 3;
   private static final byte FN = (byte) 4;
 
-  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> SUMMARY_TABLE_REF = new AtomicReference<>();
 
   /** The reference to the latest fit engine configuration. */
-  private static AtomicReference<FitEngineConfiguration> configRef =
+  private static final AtomicReference<FitEngineConfiguration> CONFIG_REF =
       new AtomicReference<>(FitEngineConfiguration.create());
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
-  private static AtomicReference<
-      Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>>> coordinateCache =
+  private static final AtomicReference<
+      Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>>> COORDINATE_CACHE =
           new AtomicReference<>(Pair.of(-1, null));
 
-  private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
+  private static final AtomicReference<CandidateData> CANDIDATE_DATA_CACHE =
+      new AtomicReference<>();
 
   /** The fit engine configuration. */
   FitEngineConfiguration config;
@@ -615,7 +616,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     gd.addHelp(HelpUrls.getUrl("smart-spot-ranking"));
 
     settings = Settings.load();
-    config = configRef.get().createCopy();
+    config = CONFIG_REF.get().createCopy();
 
     ImageJUtils.addMessage(gd,
         "Rank candidate spots in the benchmark image created by " + CreateData.TITLE
@@ -672,7 +673,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
 
     settings.save();
-    configRef.set(config);
+    CONFIG_REF.set(config);
 
     if (gd.invalidNumber()) {
       return false;
@@ -729,7 +730,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private void runAnalysis() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    final Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>> coords = coordinateCache.get();
+    final Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>> coords = COORDINATE_CACHE.get();
 
     Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates;
     if (coords.getKey() != simulationParameters.id) {
@@ -737,7 +738,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       // The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
       // from the MemoryPeakResults
       actualCoordinates = ResultsMatchCalculator.getCoordinates(results, false);
-      coordinateCache.set(Pair.of(simulationParameters.id, actualCoordinates));
+      COORDINATE_CACHE.set(Pair.of(simulationParameters.id, actualCoordinates));
       refresh = true;
     } else {
       actualCoordinates = coords.getValue();
@@ -745,11 +746,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed.
-    CandidateData candidateData = candidateDataCache.get();
+    CandidateData candidateData = CANDIDATE_DATA_CACHE.get();
     if (refresh || candidateData == null
         || candidateData.differentSettings(filterResult.id, settings)) {
       candidateData = subsetFilterResults(filterResult.filterResults);
-      candidateDataCache.set(candidateData);
+      CANDIDATE_DATA_CACHE.set(candidateData);
     }
 
     final Int2ObjectOpenHashMap<FilterCandidates> filterCandidates = candidateData.filterCandidates;
@@ -1202,7 +1203,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private static TextWindow createTable() {
-    return ImageJUtils.refresh(summaryTableRef,
+    return ImageJUtils.refresh(SUMMARY_TABLE_REF,
         () -> new TextWindow(TITLE, createHeader(), "", 1000, 300));
   }
 

@@ -55,7 +55,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
  */
 public class FilterResults implements PlugIn {
   private static final String TITLE = "Filter Results";
-  private static AtomicReference<String> inputOptionRef = new AtomicReference<>("");
+  private static final AtomicReference<String> INPUT_OPTION_REF = new AtomicReference<>("");
 
   private MemoryPeakResults results;
 
@@ -88,7 +88,7 @@ public class FilterResults implements PlugIn {
       return;
     }
 
-    String inputOption = inputOptionRef.get();
+    String inputOption = INPUT_OPTION_REF.get();
 
     // Show a dialog allowing the results set to be filtered
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -99,7 +99,7 @@ public class FilterResults implements PlugIn {
       return;
     }
     inputOption = ResultsManager.getInputSource(gd);
-    inputOptionRef.set(inputOption);
+    INPUT_OPTION_REF.set(inputOption);
 
     results = ResultsManager.loadInputResults(inputOption, false, null, null);
     if (MemoryPeakResults.isEmpty(results)) {

@@ -110,7 +110,7 @@ public class PcPalmFitting implements PlugIn {
   private boolean valid2;
 
   // Used for the results table
-  private static AtomicReference<TextWindow> resultsTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_TABLE_REF = new AtomicReference<>();
   private TextWindow resultsTable;
 
   private boolean doneHeader;
@@ -123,7 +123,8 @@ public class PcPalmFitting implements PlugIn {
   // Save the input for the analysis
 
   /** The latest correlation curve (g(r)). */
-  private static AtomicReference<CorrelationCurveResult> latestResult = new AtomicReference<>();
+  private static final AtomicReference<CorrelationCurveResult> LATEST_RESULT =
+      new AtomicReference<>();
 
   /** The plugin settings. */
   private Settings settings;
@@ -344,7 +345,7 @@ public class PcPalmFitting implements PlugIn {
     // - select a set of analysis results (if available)
     String[] options = {INPUT_FROM_FILE, "", ""};
     int count = 1;
-    final CorrelationCurveResult previous = latestResult.get();
+    final CorrelationCurveResult previous = LATEST_RESULT.get();
     if (previous != null) {
       options[count++] = INPUT_PREVIOUS;
     }
@@ -560,7 +561,7 @@ public class PcPalmFitting implements PlugIn {
    * <p>Frequency domain results can be fit using the g(r) model.
    */
   private void analyse() {
-    latestResult.set(new CorrelationCurveResult(gr, peakDensity, spatialDomain));
+    LATEST_RESULT.set(new CorrelationCurveResult(gr, peakDensity, spatialDomain));
 
     String axisTitle;
     if (spatialDomain) {
@@ -2088,7 +2089,7 @@ public class PcPalmFitting implements PlugIn {
   }
 
   private static TextWindow createResultsTable() {
-    return ImageJUtils.refresh(resultsTableRef, () -> {
+    return ImageJUtils.refresh(RESULTS_TABLE_REF, () -> {
       final StringBuilder sb = new StringBuilder(512);
       Arrays.stream(new String[] {
           // @formatter:off
@@ -2137,6 +2138,6 @@ public class PcPalmFitting implements PlugIn {
    * Clear the current results.
    */
   static void clearResults() {
-    latestResult.set(null);
+    LATEST_RESULT.set(null);
   }
 }

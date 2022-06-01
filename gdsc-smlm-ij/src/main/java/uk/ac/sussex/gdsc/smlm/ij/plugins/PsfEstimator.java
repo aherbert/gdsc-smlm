@@ -86,7 +86,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private static final int EXCEPTION = 4;
   private static final int BAD_ESTIMATE = 5;
 
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
 
   private double initialPeakStdDev0 = 1;
   private double initialPeakStdDev1 = 1;
@@ -775,7 +775,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
    * Create the result window (if it is not available).
    */
   private static TextWindow createResultsWindow() {
-    return ImageJUtils.refresh(resultsWindowRef,
+    return ImageJUtils.refresh(RESULTS_WINDOW_REF,
         () -> new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300));
   }
 

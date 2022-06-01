@@ -99,10 +99,10 @@ public class PcPalmAnalysis implements PlugIn {
   private static ImageWindow imageWindow = new ImageWindow();
 
   // Used for the results table
-  private static AtomicReference<TextWindow> resultsTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_TABLE_REF = new AtomicReference<>();
 
   /** The results. This should be atomically updated. */
-  private static AtomicReference<List<CorrelationResult>> resultsRef =
+  private static final AtomicReference<List<CorrelationResult>> RESULTS_REF =
       new AtomicReference<>(Collections.emptyList());
 
   private boolean spatialDomain;
@@ -190,10 +190,10 @@ public class PcPalmAnalysis implements PlugIn {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
     settings = Settings.load();
     if ("save".equalsIgnoreCase(arg)) {
-      saveResults(resultsRef.get());
+      saveResults(RESULTS_REF.get());
     } else if ("load".equalsIgnoreCase(arg)) {
       // Atomically update the results
-      resultsRef.set(loadResults(resultsRef.get()));
+      RESULTS_REF.set(loadResults(RESULTS_REF.get()));
     } else {
       analyseResults(arg);
     }
@@ -1188,7 +1188,7 @@ public class PcPalmAnalysis implements PlugIn {
   }
 
   private static TextWindow createResultsTable() {
-    return ImageJUtils.refresh(resultsTableRef, () -> {
+    return ImageJUtils.refresh(RESULTS_TABLE_REF, () -> {
       final StringBuilder sb = new StringBuilder(512);
       Arrays.stream(new String[] {
           // @formatter:off
@@ -1228,17 +1228,17 @@ public class PcPalmAnalysis implements PlugIn {
    * @param result the result
    */
   private static void addCorrelationResult(CorrelationResult result) {
-    final ArrayList<CorrelationResult> list = new ArrayList<>(resultsRef.get());
+    final ArrayList<CorrelationResult> list = new ArrayList<>(RESULTS_REF.get());
     result.id = list.size() + 1;
     list.add(result);
-    resultsRef.set(list);
+    RESULTS_REF.set(list);
   }
 
   /**
    * Clear the current results.
    */
   static void clearResults() {
-    resultsRef.set(Collections.emptyList());
+    RESULTS_REF.set(Collections.emptyList());
   }
 
   /**
@@ -1247,6 +1247,6 @@ public class PcPalmAnalysis implements PlugIn {
    * @return the results
    */
   static List<CorrelationResult> getResults() {
-    return resultsRef.get();
+    return RESULTS_REF.get();
   }
 }

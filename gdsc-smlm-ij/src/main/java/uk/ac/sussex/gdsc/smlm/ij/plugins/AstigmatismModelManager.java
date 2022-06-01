@@ -122,7 +122,7 @@ public class AstigmatismModelManager implements PlugIn {
   private static final int P_BY = 7;
   private static final int P_Z0 = 8;
 
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
 
   /** The plugin settings. */
   AstigmatismModelManagerSettings.Builder pluginSettings;
@@ -1290,7 +1290,7 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private static TextWindow createResultWindow() {
-    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE,
+    return ImageJUtils.refresh(RESULTS_WINDOW_REF, () -> new TextWindow(TITLE,
         "N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 1000, 300));
   }
 

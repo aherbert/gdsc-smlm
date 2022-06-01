@@ -44,7 +44,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 public class ConvertResults implements PlugIn {
   private static final String TITLE = "Convert Results";
 
-  private static AtomicReference<String> inputOptionRef = new AtomicReference<>("");
+  private static final AtomicReference<String> INPUT_OPTION_REF = new AtomicReference<>("");
 
   private String inputOption;
 
@@ -81,7 +81,7 @@ public class ConvertResults implements PlugIn {
     gd.addHelp(HelpUrls.getUrl("convert-results"));
     gd.addMessage("Select results to convert");
 
-    inputOption = inputOptionRef.get();
+    inputOption = INPUT_OPTION_REF.get();
 
     ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
@@ -92,7 +92,7 @@ public class ConvertResults implements PlugIn {
     }
 
     inputOption = ResultsManager.getInputSource(gd);
-    inputOptionRef.set(inputOption);
+    INPUT_OPTION_REF.set(inputOption);
 
     return true;
   }

@@ -179,7 +179,7 @@ public class TrackPopulationAnalysis implements PlugIn {
   /** The minimum alpha during fitting. */
   static final double MIN_ALPHA = Math.ulp(1.0);
 
-  private static AtomicReference<TextWindow> modelTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> MODEL_TABLE_REF = new AtomicReference<>();
 
   /** The plugin settings. */
   private Settings settings;
@@ -2208,7 +2208,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final int[] count = new int[MathUtils.max(component) + 1];
     Arrays.stream(component).forEach(c -> count[c]++);
 
-    try (BufferedTextWindow tw = new BufferedTextWindow(ImageJUtils.refresh(modelTableRef,
+    try (BufferedTextWindow tw = new BufferedTextWindow(ImageJUtils.refresh(MODEL_TABLE_REF,
         () -> new TextWindow("Track Population Model", createHeader(), "", 800, 300)))) {
       final StringBuilder sb = new StringBuilder();
       for (int i = 0; i < weights.length; i++) {

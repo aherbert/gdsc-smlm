@@ -150,15 +150,15 @@ public class TcPalmAnalysis implements PlugIn {
   private static final String TITLE = "TC PALM Analysis";
 
   /** Text window showing the current localisation groups. */
-  private static AtomicReference<ClusterDataTableModelFrame> currentGroupsTable =
+  private static final AtomicReference<ClusterDataTableModelFrame> CURRENT_GROUPS_TABLE =
       new AtomicReference<>();
 
   /** Text window showing the current clusters. */
-  private static AtomicReference<ClusterDataTableModelFrame> currentClustersTable =
+  private static final AtomicReference<ClusterDataTableModelFrame> CURRENT_CLUSTERS_TABLE =
       new AtomicReference<>();
 
   /** Text window showing the clusters from all ROIs in the ROI Manager. */
-  private static AtomicReference<ClusterDataTableModelFrame> allClustersTable =
+  private static final AtomicReference<ClusterDataTableModelFrame> ALL_CLUSTERS_TABLE =
       new AtomicReference<>();
 
   /**
@@ -1243,9 +1243,9 @@ public class TcPalmAnalysis implements PlugIn {
     } finally {
       Roi.removeRoiListener(roiListener);
       // Remove the action from the single instance of the current clusters table
-      removeListener(currentGroupsTable.get());
-      removeListener(currentClustersTable.get());
-      removeListener(allClustersTable.get());
+      removeListener(CURRENT_GROUPS_TABLE.get());
+      removeListener(CURRENT_CLUSTERS_TABLE.get());
+      removeListener(ALL_CLUSTERS_TABLE.get());
       executor.shutdown();
       instanceLock.release();
       SettingsManager.writeSettings(settings);
@@ -1710,7 +1710,7 @@ public class TcPalmAnalysis implements PlugIn {
    * @return the text window
    */
   private static ClusterDataTableModelFrame createGroupsTable() {
-    return ConcurrencyUtils.refresh(currentGroupsTable, JFrame::isShowing, () -> {
+    return ConcurrencyUtils.refresh(CURRENT_GROUPS_TABLE, JFrame::isShowing, () -> {
       final ClusterDataTableModelFrame frame =
           new ClusterDataTableModelFrame(new ClusterDataTableModel(false));
       frame.setTitle(TITLE + " Current Localisation Groups");
@@ -1726,7 +1726,7 @@ public class TcPalmAnalysis implements PlugIn {
    * @return the text window
    */
   private static ClusterDataTableModelFrame createClustersTable(ClusterDataTableModelFrame parent) {
-    return ConcurrencyUtils.refresh(currentClustersTable, JFrame::isShowing, () -> {
+    return ConcurrencyUtils.refresh(CURRENT_CLUSTERS_TABLE, JFrame::isShowing, () -> {
       final ClusterDataTableModelFrame frame =
           new ClusterDataTableModelFrame(new ClusterDataTableModel(true));
       frame.setTitle(TITLE + " Current Clusters");
@@ -1747,7 +1747,7 @@ public class TcPalmAnalysis implements PlugIn {
    * @return the text window
    */
   private static ClusterDataTableModelFrame createAllClustersTable() {
-    return ConcurrencyUtils.refresh(allClustersTable, JFrame::isShowing, () -> {
+    return ConcurrencyUtils.refresh(ALL_CLUSTERS_TABLE, JFrame::isShowing, () -> {
       final ClusterDataTableModelFrame frame =
           new ClusterDataTableModelFrame(new ClusterDataTableModel(true));
       frame.setTitle(TITLE + " All Clusters");
@@ -1761,7 +1761,7 @@ public class TcPalmAnalysis implements PlugIn {
    * Clear the manually created selection from the current clusters table.
    */
   private static void clearClustersTableSelection() {
-    final ClusterDataTableModelFrame frame = currentGroupsTable.get();
+    final ClusterDataTableModelFrame frame = CURRENT_GROUPS_TABLE.get();
     if (frame != null) {
       frame.table.clearSelection();
     }
@@ -1999,7 +1999,8 @@ public class TcPalmAnalysis implements PlugIn {
     // Add to an activation bursts (clusters) table
     final LocalList<ClusterData> clusters = new LocalList<>(bursts.size());
     bursts.forEach(list -> clusters.add(new ClusterData(clusters.size() + 1, list)));
-    final ClusterDataTableModelFrame clustersTable = createClustersTable(currentGroupsTable.get());
+    final ClusterDataTableModelFrame clustersTable =
+        createClustersTable(CURRENT_GROUPS_TABLE.get());
     clustersTable.selectedAction = clusterData -> {
       loopImage.accept(clusterData);
       runClusterPlotSelection(clusterData);
@@ -2132,7 +2133,7 @@ public class TcPalmAnalysis implements PlugIn {
           minClusterSizeTextField.setText(Integer.toString(settings.getMinClusterSize()));
           // When analysis has finished the cluster should be selected in the
           // current clusters table.
-          final ClusterDataTableModelFrame currentClusters = currentClustersTable.get();
+          final ClusterDataTableModelFrame currentClusters = CURRENT_CLUSTERS_TABLE.get();
           if (currentClusters != null) {
             currentClusters.select(c);
           }

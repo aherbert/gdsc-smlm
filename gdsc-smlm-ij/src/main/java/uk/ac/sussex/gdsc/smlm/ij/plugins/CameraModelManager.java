@@ -66,11 +66,11 @@ public class CameraModelManager implements PlugIn {
   private static final String TITLE = "Camera Model Manager";
   private static final String INFO_TAG = "Per-pixel camera model data";
 
-  private static AtomicReference<String> directory = new AtomicReference<>("");
-  private static AtomicReference<String> filename = new AtomicReference<>("");
+  private static final AtomicReference<String> DIRECTORY = new AtomicReference<>("");
+  private static final AtomicReference<String> FILENAME = new AtomicReference<>("");
 
   /** Cache camera models for speed. */
-  private static Map<String, PerPixelCameraModel> cameraModels = new ConcurrentHashMap<>();
+  private static final Map<String, PerPixelCameraModel> CAMERA_MODELS = new ConcurrentHashMap<>();
 
   //@formatter:off
   private static final String[] OPTIONS = {
@@ -169,7 +169,7 @@ public class CameraModelManager implements PlugIn {
         .setSettings(settings.toBuilder().putCameraModelResources(name, resource.build()).build());
 
     // Cache this
-    cameraModels.put(name, cameraModel);
+    CAMERA_MODELS.put(name, cameraModel);
   }
 
   /**
@@ -180,7 +180,7 @@ public class CameraModelManager implements PlugIn {
    * @return the per pixel camera model (or null)
    */
   public static PerPixelCameraModel load(String name) {
-    PerPixelCameraModel model = cameraModels.get(name);
+    PerPixelCameraModel model = CAMERA_MODELS.get(name);
     if (model == null) {
       final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
       // Try and get the named resource
@@ -191,7 +191,7 @@ public class CameraModelManager implements PlugIn {
       model = loadFromFile(name, resource.getFilename());
 
       // Cache this
-      cameraModels.put(name, model);
+      CAMERA_MODELS.put(name, model);
     }
     return model;
   }
@@ -426,7 +426,7 @@ public class CameraModelManager implements PlugIn {
   private static void runLoadFromDirectory() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Load camera models from a directory.");
-    gd.addDirectoryField("Directory", directory.get());
+    gd.addDirectoryField("Directory", DIRECTORY.get());
     gd.addHelp(HelpUrls.getUrl("camera-model-manager-load-dir"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -434,7 +434,7 @@ public class CameraModelManager implements PlugIn {
     }
 
     final String dir = gd.getNextString();
-    directory.set(dir);
+    DIRECTORY.set(dir);
 
     final File[] fileList = (new File(dir)).listFiles(File::isFile);
     if (!ArrayUtils.isEmpty(fileList)) {
@@ -447,7 +447,7 @@ public class CameraModelManager implements PlugIn {
   private static void runLoadFromFile() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Load a camera model from file.");
-    gd.addFilenameField("Filename", filename.get());
+    gd.addFilenameField("Filename", FILENAME.get());
     gd.addHelp(HelpUrls.getUrl("camera-model-manager-load-file"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -455,7 +455,7 @@ public class CameraModelManager implements PlugIn {
     }
 
     final String file = gd.getNextString();
-    filename.set(file);
+    FILENAME.set(file);
 
     loadFromFileAndSaveResource(file);
   }

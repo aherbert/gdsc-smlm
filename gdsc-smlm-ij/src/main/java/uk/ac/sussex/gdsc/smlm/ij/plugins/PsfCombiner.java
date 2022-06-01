@@ -56,7 +56,7 @@ import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 public class PsfCombiner implements PlugIn {
   private static final String TITLE = "PSF Combiner";
 
-  private static AtomicReference<List<String>> lastSelected = new AtomicReference<>();
+  private static final AtomicReference<List<String>> LAST_SELECTED = new AtomicReference<>();
   private final List<Psf> input = new LinkedList<>();
 
   @Override
@@ -71,7 +71,7 @@ public class PsfCombiner implements PlugIn {
     }
 
     final MultiDialog md = new MultiDialog("Select PSFs", titles);
-    md.setSelected(lastSelected.get());
+    md.setSelected(LAST_SELECTED.get());
 
     md.setHelpUrl(HelpUrls.getUrl("psf-combiner"));
     md.showDialog();
@@ -86,7 +86,7 @@ public class PsfCombiner implements PlugIn {
       return;
     }
 
-    lastSelected.set(selected);
+    LAST_SELECTED.set(selected);
 
     for (final String title : selected) {
       input.add(new Psf(title));

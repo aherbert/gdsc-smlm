@@ -85,11 +85,12 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 public class CubicSplineManager implements PlugIn {
   private static final String TITLE = "Cubic Spline Manager";
 
-  private static AtomicReference<String> directory = new AtomicReference<>("");
-  private static AtomicReference<String> filename = new AtomicReference<>("");
+  private static final AtomicReference<String> DIRECTORY = new AtomicReference<>("");
+  private static final AtomicReference<String> FILENAME = new AtomicReference<>("");
 
   /** The cache of the last named cubic spline PSF that was either saved or loaded. */
-  private static AtomicReference<Pair<String, CubicSplinePsf>> cache = new AtomicReference<>();
+  private static final AtomicReference<Pair<String, CubicSplinePsf>> CACHE =
+      new AtomicReference<>();
 
   //@formatter:off
   private static final String[] OPTIONS = {
@@ -357,7 +358,7 @@ public class CubicSplineManager implements PlugIn {
     CubicSplineSettingsHolder
         .setSettings(settings.toBuilder().putCubicSplineResources(name, resource.build()).build());
 
-    cache.set(Pair.of(name, psfModel));
+    CACHE.set(Pair.of(name, psfModel));
   }
 
   /**
@@ -368,7 +369,7 @@ public class CubicSplineManager implements PlugIn {
    * @return the per pixel spline model (or null)
    */
   public static CubicSplinePsf load(String name) {
-    final Pair<String, CubicSplinePsf> previous = cache.get();
+    final Pair<String, CubicSplinePsf> previous = CACHE.get();
     if (previous != null && previous.getKey().equals(name)) {
       return previous.getValue();
     }
@@ -381,7 +382,7 @@ public class CubicSplineManager implements PlugIn {
     }
     final CubicSplinePsf psfModel = loadFromFile(name, resource.getFilename());
     if (psfModel != null) {
-      cache.set(Pair.of(name, psfModel));
+      CACHE.set(Pair.of(name, psfModel));
     }
     return psfModel;
   }
@@ -721,7 +722,7 @@ public class CubicSplineManager implements PlugIn {
   private static void runLoadFromDirectory() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Load spline models from a directory.");
-    gd.addDirectoryField("Directory", directory.get());
+    gd.addDirectoryField("Directory", DIRECTORY.get());
     gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-load-dir"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -729,7 +730,7 @@ public class CubicSplineManager implements PlugIn {
     }
 
     final String dir = gd.getNextString();
-    directory.set(dir);
+    DIRECTORY.set(dir);
 
     final File[] fileList = (new File(dir)).listFiles(File::isFile);
     if (!ArrayUtils.isEmpty(fileList)) {
@@ -742,7 +743,7 @@ public class CubicSplineManager implements PlugIn {
   private static void runLoadFromFile() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Load a spline model from file.");
-    gd.addFilenameField("Filename", filename.get());
+    gd.addFilenameField("Filename", FILENAME.get());
     gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-load-file"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -750,7 +751,7 @@ public class CubicSplineManager implements PlugIn {
     }
 
     final String file = gd.getNextString();
-    filename.set(file);
+    FILENAME.set(file);
 
     loadFromFileAndSaveResource(file);
   }

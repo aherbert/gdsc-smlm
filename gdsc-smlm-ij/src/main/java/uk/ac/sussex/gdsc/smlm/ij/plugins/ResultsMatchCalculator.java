@@ -72,8 +72,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 public class ResultsMatchCalculator implements PlugIn {
   private static final String TITLE = "Results Match Calculator";
 
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
-  private static AtomicReference<PairsTextWindow> pairsWindowRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
+  private static final AtomicReference<PairsTextWindow> PAIRS_WINDOW_REF = new AtomicReference<>();
 
   /** The write header flag used in headless mode to ensure the header is only written once. */
   private static final AtomicBoolean WRITE_HEADER = new AtomicBoolean(true);
@@ -853,14 +853,14 @@ public class ResultsMatchCalculator implements PlugIn {
 
   private static TextWindow createResultsWindow(boolean doIdAnalysis) {
     final String header = createResultsHeader(doIdAnalysis);
-    final TextWindow resultsWindow = ImageJUtils.refresh(resultsWindowRef,
+    final TextWindow resultsWindow = ImageJUtils.refresh(RESULTS_WINDOW_REF,
         () -> new TextWindow(TITLE + " Results", header, "", 900, 300));
     ImageJUtils.refreshHeadings(resultsWindow, header, true);
     return resultsWindow;
   }
 
   private static TextWindow createPairsWindow(TextWindow resultsWindow, ImageSource source) {
-    final PairsTextWindow tw = ImageJUtils.refresh(pairsWindowRef, () -> {
+    final PairsTextWindow tw = ImageJUtils.refresh(PAIRS_WINDOW_REF, () -> {
       final PairsTextWindow window =
           new PairsTextWindow(TITLE + " Pairs", createPairsHeader(), 900, 300);
       // Position relative to results window

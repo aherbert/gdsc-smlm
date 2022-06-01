@@ -68,7 +68,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XyzrResultProcedure;
 public class ClassificationMatchCalculator implements PlugIn {
   private static final String TITLE = "Classification Calculator";
 
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
 
   /** An empty coordinate array. */
   private static final Coordinate[] EMPTY_COORD_ARRAY = new Coordinate[0];
@@ -402,7 +402,7 @@ public class ClassificationMatchCalculator implements PlugIn {
     // Compare
     final RandIndex r = new RandIndex().compute(set1, set2);
 
-    final TextWindow resultsWindow = ImageJUtils.refresh(resultsWindowRef,
+    final TextWindow resultsWindow = ImageJUtils.refresh(RESULTS_WINDOW_REF,
         () -> new TextWindow(TITLE + " Results",
             "Results1\tResults2\tID\tCategory\tn1\tc1\tn2\tc2\tMatched\tRand Index\tAdjusted RI",
             "", 900, 300));

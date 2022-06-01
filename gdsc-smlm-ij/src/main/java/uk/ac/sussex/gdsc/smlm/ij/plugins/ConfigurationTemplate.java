@@ -83,9 +83,9 @@ public class ConfigurationTemplate implements PlugIn {
   private static final String TITLE = "Template Manager";
 
   /** A set of inline templates. These can be loaded. */
-  private static Map<String, Template> inlineTemplates;
+  private static final Map<String, Template> INLINE_TEMPLATES;
   /** The current set of templates that will be listed as loaded. */
-  private static Map<String, Template> templates;
+  private static final Map<String, Template> TEMPLATES;
 
   private String title;
   /** The image. */
@@ -102,8 +102,8 @@ public class ConfigurationTemplate implements PlugIn {
     final Map<String, Template> localInlineTemplates = createInlineTemplates();
 
     // Make maps synchronized
-    inlineTemplates = Collections.synchronizedMap(localInlineTemplates);
-    templates = Collections.synchronizedMap(restoreLoadedTemplates(localInlineTemplates));
+    INLINE_TEMPLATES = Collections.synchronizedMap(localInlineTemplates);
+    TEMPLATES = Collections.synchronizedMap(restoreLoadedTemplates(localInlineTemplates));
   }
 
   /**
@@ -306,7 +306,7 @@ public class ConfigurationTemplate implements PlugIn {
 
   private static String[] listInlineTemplates() {
     // Turn the keys into an array
-    return inlineTemplates.keySet().toArray(new String[0]);
+    return INLINE_TEMPLATES.keySet().toArray(new String[0]);
   }
 
   /**
@@ -507,7 +507,7 @@ public class ConfigurationTemplate implements PlugIn {
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     for (final TemplateResource template : templateResources) {
       // Skip those already done
-      if (templates.containsKey(template.name)) {
+      if (TEMPLATES.containsKey(template.name)) {
         continue;
       }
 
@@ -523,7 +523,7 @@ public class ConfigurationTemplate implements PlugIn {
         // SettingsManager.FLAG_SILENT
         )) {
           count++;
-          addTemplate(templates, template.name, builder.build(), TemplateType.RESOURCE, null,
+          addTemplate(TEMPLATES, template.name, builder.build(), TemplateType.RESOURCE, null,
               template.tifPath);
         }
       } catch (final IOException ignored) {
@@ -558,7 +558,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return The template
    */
   public static TemplateSettings getTemplate(String name) {
-    final Template template = templates.get(name);
+    final Template template = TEMPLATES.get(name);
     if (template == null) {
       return null;
     }
@@ -575,7 +575,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return the template file
    */
   public static File getTemplateFile(String name) {
-    final Template template = templates.get(name);
+    final Template template = TEMPLATES.get(name);
     if (template == null) {
       return null;
     }
@@ -589,7 +589,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return the template image
    */
   public static ImagePlus getTemplateImage(String name) {
-    final Template template = templates.get(name);
+    final Template template = TEMPLATES.get(name);
     if (template == null) {
       return null;
     }
@@ -600,7 +600,7 @@ public class ConfigurationTemplate implements PlugIn {
    * Clear templates. Used for testing so made package level.
    */
   static void clearTemplates() {
-    templates.clear();
+    TEMPLATES.clear();
   }
 
   /**
@@ -614,7 +614,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return true, if successful
    */
   public static boolean saveTemplate(String name, TemplateSettings settings, File file) {
-    Template template = templates.get(name);
+    Template template = TEMPLATES.get(name);
     if (template != null
         // Keep the file to allow it to be loaded on start-up
         && file == null) {
@@ -630,10 +630,10 @@ public class ConfigurationTemplate implements PlugIn {
     }
     if (result) {
       // Update the loaded templates
-      templates.put(name, template);
+      TEMPLATES.put(name, template);
       // If the template came from a file ensure it can be restored
       if (file != null) {
-        saveLoadedTemplates(templates);
+        saveLoadedTemplates(TEMPLATES);
       }
     }
     return result;
@@ -646,7 +646,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return True if a custom template
    */
   public static boolean isCustomTemplate(String name) {
-    final Template template = templates.get(name);
+    final Template template = TEMPLATES.get(name);
     return template != null && template.templateType == TemplateType.CUSTOM;
   }
 
@@ -666,11 +666,11 @@ public class ConfigurationTemplate implements PlugIn {
    * @return The template names
    */
   public static String[] getTemplateNames(boolean includeNone) {
-    final LocalList<String> names = new LocalList<>(templates.size() + 1);
+    final LocalList<String> names = new LocalList<>(TEMPLATES.size() + 1);
     if (includeNone) {
       names.add("[None]");
     }
-    names.addAll(templates.keySet());
+    names.addAll(TEMPLATES.keySet());
     return names.toArray(new String[0]);
   }
 
@@ -680,7 +680,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return The template names
    */
   private static List<String> getTemplateNamesAsList() {
-    return new LocalList<>(templates.keySet());
+    return new LocalList<>(TEMPLATES.keySet());
   }
 
   /**
@@ -689,7 +689,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return The template names
    */
   public static String[] getTemplateNamesWithImage() {
-    return templates.entrySet().stream().filter(e -> e.getValue().hasImage()).map(Map.Entry::getKey)
+    return TEMPLATES.entrySet().stream().filter(e -> e.getValue().hasImage()).map(Map.Entry::getKey)
         .toArray(String[]::new);
   }
 
@@ -758,7 +758,7 @@ public class ConfigurationTemplate implements PlugIn {
     title = "Template Manager";
     final GenericDialog gd = new GenericDialog(title);
     final String[] options = SettingsManager.getNames((Object[]) TemplateOption.values());
-    gd.addMessage("Current template count = " + templates.size());
+    gd.addMessage("Current template count = " + TEMPLATES.size());
     gd.addChoice("Option", options, options[settings.getOption()]);
     gd.addHelp(HelpUrls.getUrl("template-manager"));
     gd.showDialog();
@@ -825,17 +825,17 @@ public class ConfigurationTemplate implements PlugIn {
     settings.clearSelectedStandardTemplates();
     settings.addAllSelectedStandardTemplates(selected);
 
-    int count = templates.size();
+    int count = TEMPLATES.size();
 
     // Keep a hash of those not loaded from inline resources
     final HashSet<String> remaining = new HashSet<>(selected.size());
     for (final String name : selected) {
       // Try and get the template from inline resources
-      final Template t = inlineTemplates.get(name);
+      final Template t = INLINE_TEMPLATES.get(name);
       if (t == null) {
         remaining.add(name);
       } else {
-        templates.put(name, t);
+        TEMPLATES.put(name, t);
       }
     }
 
@@ -850,9 +850,9 @@ public class ConfigurationTemplate implements PlugIn {
       loadTemplateResources(list.toArray(new TemplateResource[0]));
     }
 
-    count = templates.size() - count;
+    count = TEMPLATES.size() - count;
     if (count > 0) {
-      saveLoadedTemplates(templates);
+      saveLoadedTemplates(TEMPLATES);
       IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(count, "new standard template"));
     }
   }
@@ -909,7 +909,7 @@ public class ConfigurationTemplate implements PlugIn {
     settings.clearSelectedCustomTemplates();
     settings.addAllSelectedCustomTemplates(selected);
 
-    int count = templates.size();
+    int count = TEMPLATES.size();
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     for (final String path : selected) {
       builder.clear();
@@ -917,22 +917,22 @@ public class ConfigurationTemplate implements PlugIn {
       if (SettingsManager.fromJson(file, builder, 0)) {
         final String name = FileUtils.removeExtension(file.getName());
         // Assume the tif image will be detected automatically
-        addTemplate(templates, name, builder.build(), TemplateType.CUSTOM, file, null);
+        addTemplate(TEMPLATES, name, builder.build(), TemplateType.CUSTOM, file, null);
       } else {
         ImageJPluginLoggerHelper.getDefaultLogger()
             .info(() -> "Failed to load template file: " + file);
       }
     }
 
-    count = templates.size() - count;
+    count = TEMPLATES.size() - count;
     if (count > 0) {
-      saveLoadedTemplates(templates);
+      saveLoadedTemplates(TEMPLATES);
       IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(count, "new custom template"));
     }
   }
 
   private void removeLoadedTemplates() {
-    if (templates.isEmpty()) {
+    if (TEMPLATES.isEmpty()) {
       IJ.error(title, "No templates are currently loaded");
       return;
     }
@@ -951,14 +951,14 @@ public class ConfigurationTemplate implements PlugIn {
       return;
     }
 
-    if (selected.size() == templates.size()) {
+    if (selected.size() == TEMPLATES.size()) {
       clearTemplates();
     } else {
       for (final String name : selected) {
-        templates.remove(name);
+        TEMPLATES.remove(name);
       }
     }
-    saveLoadedTemplates(templates);
+    saveLoadedTemplates(TEMPLATES);
   }
 
   /**
@@ -967,7 +967,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @param settings the settings
    */
   private void showTemplate(ConfigurationTemplateSettings.Builder settings) {
-    if (templates.isEmpty()) {
+    if (TEMPLATES.isEmpty()) {
       IJ.error(title, "No templates are currently loaded");
       return;
     }
@@ -1002,7 +1002,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @param name the name
    */
   private void showTemplate(String name) {
-    final Template template = templates.get(name);
+    final Template template = TEMPLATES.get(name);
     if (template == null) {
       IJ.error(title, "Failed to load template: " + name);
       return;

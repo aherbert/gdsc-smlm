@@ -65,9 +65,10 @@ public class TraceMatchCalculator implements PlugIn {
   private static final String TITLE = "Trace Match Calculator";
 
   private static AtomicBoolean writeHeader = new AtomicBoolean(true);
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
-  private static AtomicReference<WindowAndPainter> pairsWindowRef = new AtomicReference<>();
-  private static AtomicReference<WindowAndPainter> triplesWindowRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
+  private static final AtomicReference<WindowAndPainter> PAIRS_WINDOW_REF = new AtomicReference<>();
+  private static final AtomicReference<WindowAndPainter> TRIPLES_WINDOW_REF =
+      new AtomicReference<>();
 
   /** The plugin settings. */
   private Settings settings;
@@ -266,14 +267,14 @@ public class TraceMatchCalculator implements PlugIn {
     // Create output
     Consumer<String> resultsOutput;
     if (!java.awt.GraphicsEnvironment.isHeadless()) {
-      final TextWindow resultsWindow = ImageJUtils.refresh(resultsWindowRef,
+      final TextWindow resultsWindow = ImageJUtils.refresh(RESULTS_WINDOW_REF,
           () -> new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300));
       resultsOutput = resultsWindow::append;
 
       if (settings.showPairs) {
         if (p3 == null) {
           // Produce a pairs output
-          final WindowAndPainter wap = refresh(pairsWindowRef, true, resultsWindow, results1);
+          final WindowAndPainter wap = refresh(PAIRS_WINDOW_REF, true, resultsWindow, results1);
 
           // Add the unmatched points
           WindowManager.getIDList();
@@ -292,7 +293,7 @@ public class TraceMatchCalculator implements PlugIn {
           }
         } else {
           // Produce a triple output
-          final WindowAndPainter wap = refresh(triplesWindowRef, false, resultsWindow, results1);
+          final WindowAndPainter wap = refresh(TRIPLES_WINDOW_REF, false, resultsWindow, results1);
 
           final HashMap<Pulse, Triple> map = new HashMap<>();
           final ArrayList<Triple> triples = new ArrayList<>(pairs.size());
