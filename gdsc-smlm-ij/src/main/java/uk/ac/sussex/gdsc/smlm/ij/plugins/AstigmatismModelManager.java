@@ -1600,6 +1600,7 @@ public class AstigmatismModelManager implements PlugIn {
         });
         draw();
       }
+      gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-view"));
       gd.showDialog();
 
       writeAstigmatismModelManagerSettings(pluginSettings);
