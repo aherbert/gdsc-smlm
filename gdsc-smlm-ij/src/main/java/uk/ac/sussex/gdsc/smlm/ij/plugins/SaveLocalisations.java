@@ -34,7 +34,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
@@ -336,7 +338,7 @@ public class SaveLocalisations implements PlugIn {
     for (int i = 0; i < psf.getParametersCount(); i++) {
       final PSFParameter param = psf.getParameters(i);
       final int index = i + PeakResult.STANDARD_PARAMETERS;
-      put(fields, new FloatField("p" + i, param.getName(), UnitType.from(param.getUnit()),
+      put(fields, new FloatField("P" + i, param.getName(), UnitType.from(param.getUnit()),
           r -> r.getParameter(index)));
     }
     return fields;
@@ -412,7 +414,7 @@ public class SaveLocalisations implements PlugIn {
       return false;
     }
 
-    settings.setFormat(gd.getNextString());
+    settings.setFormat(gd.getNextString().toUpperCase(Locale.ROOT));
     settings.setDelimiter(unescapeDelimiter(gd.getNextString()));
     settings.setDirectory(gd.getNextString());
     settings.setFileSuffix(gd.getNextString());
@@ -438,7 +440,13 @@ public class SaveLocalisations implements PlugIn {
   }
 
   /**
-   * Escape the delimiter. This converts: <ul> <li>the tab character to {@code \t} </ul>
+   * Escape the delimiter. This converts:
+   *
+   * <ul>
+   *
+   * <li>the tab character to {@code \t}
+   *
+   * </ul>
    *
    * @param delimiter the delimiter
    * @return the string
@@ -448,7 +456,13 @@ public class SaveLocalisations implements PlugIn {
   }
 
   /**
-   * Unescape the delimiter. This converts: <ul> <li>{@code \t} to the tab character </ul>
+   * Unescape the delimiter. This converts:
+   *
+   * <ul>
+   *
+   * <li>{@code \t} to the tab character
+   *
+   * </ul>
    *
    * @param delimiter the delimiter
    * @return the string
@@ -508,8 +522,9 @@ public class SaveLocalisations implements PlugIn {
     if (cal.getDistanceUnitValue() > 0) {
       addConverter(output, UnitType.DISTANCE, cal.getDistanceConverter(settings.getDistanceUnit()));
       // Custom converter for precision (which is always in nm)
-      if (fields.containsKey("P")) {
-        fields.get("P").setConverter(UnitConverterUtils.createConverter(DistanceUnit.NM,
+      final Optional<Field> result = Arrays.stream(output).filter(x -> "P".equals(x.id)).findAny();
+      if (result.isPresent()) {
+        result.get().setConverter(UnitConverterUtils.createConverter(DistanceUnit.NM,
             settings.getDistanceUnit(), cal.getNmPerPixel()));
       }
     }
