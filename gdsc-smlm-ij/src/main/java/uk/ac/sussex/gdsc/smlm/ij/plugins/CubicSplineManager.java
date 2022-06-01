@@ -604,6 +604,7 @@ public class CubicSplineManager implements PlugIn {
         label = gd.getLastLabel();
         draw();
       }
+      gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-render"));
       gd.showDialog();
     }
 
