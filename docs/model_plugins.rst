@@ -1200,7 +1200,7 @@ Then all the localisations are processed. For each active fluorophore the total 
 
     \mathit{rate}_{i}=\mathit{rate}\ast {\frac{\mathit{tCorr}_{i}}{\sum^{N}\mathit{tCorr}_{i}/N}}
 
-If no correlation is used then the emission rate is the sampled from the configured distribution (either a fixed, uniform, Gamma or custom distribution) with the mean set to the input emission rate.
+If no correlation is used then the emission rate is sampled from the configured distribution (either a fixed, uniform, Gamma or custom distribution) with the mean set to the input emission rate.
 
 The emission rate for each fluorophore is constant. The mean number of photons emitted for each simulation step is calculated using the photon emission rate multiplied by the fraction of the step that the fluorophore was active. The number of photons is then sampled from the Poisson distribution with the given mean for the step. This models the photon shot noise at a per simulation step basis. The photons are then sampled onto the photo cells using a point spread function.
 
@@ -1217,7 +1217,7 @@ In cases where the EM-gain is below 1 the simulation is identical but omits any 
 Note: Accurate values for the read noise, gain and EM-gain for a camera can be obtained using the
 ``Mean-Variance Test``
 plugin (see section :numref:`%s <calibration_plugins:Mean-Variance Test>`) or the
-``EM-gain Analysis``
+``EM-Gain Analysis``
 plugin (see section :numref:`%s <calibration_plugins:EM-gain Analysis>`).
 
 
@@ -1332,28 +1332,18 @@ The following parameters can be used to control the simulation:
    * - Background
      - The background level in photons. This is subject to Poisson noise. Convert to actual ADU value by multiplying by the product of the camera gain, EM-gain and quantum efficiency.
 
-   * - EM gain
-     - The EM-gain of the simulated camera.
+   * - Camera type
+     - The type of camera. Options for the camera are set using the ``...`` button. This includes:
 
-   * - Camera gain
-     - The camera gain (in ADU/electron).
-
-   * - Quantum efficiency
-     - The efficiency converting photons to electrons in the camera.
-
-   * - Read noise
-     - The average Gaussian read noise to add to each pixel (in electrons).
-
-   * - Bias
-     - The bias offset to add to the image. Allows negative noise values to be displayed on unsigned 16-bit images.
+       * EM gain: The EM-gain of the simulated camera.
+       * Camera gain: The camera gain (in ADU/electron).
+       * Quantum efficiency: The efficiency converting photons to electrons in the camera.
+       * Read noise: The average Gaussian read noise to add to each pixel (in electrons).
+       * Bias: The bias offset to add to the image. Allows negative noise values to be displayed on unsigned 16-bit images.
+       * Camera Model Name: The name of the sCMOS camera model containing the per-pixel calibration.
 
    * - PSF Model
-     - Specify the PSF model to use. The ``Image PSF`` option is only available if a valid PSF image is open.
-
-   * - Enter width
-     - Select this option to enter the PSF width (in nm) for the Gaussian/Airy PSF. A second dialog will prompt the user for the PSF SD (Standard Deviation). For an Airy PSF the SD is converted to the Airy pattern width by dividing by 1.323.
-
-       If not selected a second dialog will prompt the user for the emission wavelength of the fluorophore and the numerical aperture of the microscope. These will be used to define the PSF width.
+     - Specify the PSF model to use. Options for the PSF model are set using the ``...`` button including setting the width of the Gaussian/Airy PSF, selecting the astigmatism model or the image PSF. The ``Image PSF`` option is only available if a valid PSF image is open.
 
    * - Distribution
      - The random distribution of the particles.
@@ -1367,8 +1357,12 @@ The following parameters can be used to control the simulation:
    * - Diffusion rate
      - The diffusion rate of the molecules.
 
-   * - Use grid walk
-     - Simulate diffusion using a grid walk. Otherwise use movement along a random vector (which is a slower computation).
+   * - Diffusion type
+     - The type of diffusion.
+
+       * ``Random Walk``: Use random steps sampled from a Gaussian distribution.
+       * ``Grid Walk``: Use random +/- steps on a grid. The standard deviation will match the expected Gaussian distribution for Brownian diffusion.
+       * ``Linear Walk``: Use random steps sampled from a Gaussian distribution in 1 dimension. The direction of the vector is chosen randomly.
 
    * - Fixed Fraction
      - The fraction of molecules that will not diffuse.
@@ -1436,12 +1430,12 @@ The following parameters can be used to control the simulation:
      - Show a dialog allowing the image to be saved as a file.
 
    * - Save image results
-     - Show a dialog allowing the image localisations to be saved as a PeakResults file. Note that this does not contain the molecule Z position.
+     - Show a dialog allowing the image localisations to be saved as a PeakResults file.
 
-   * - Save Fluorophores
+   * - Save fluorophores
      - Show a dialog allowing the fluorophores to be saved. The file contains the number of blinks and the on and off times for each fluorophore (to the thousandth of a second).
 
-   * - Save Localisations
+   * - Save localisations
      - Show a dialog allowing the localisations to be saved. The file contains the time and X,Y,Z positions of each fluorophore when it was in an on state.
 
    * - Show histograms
@@ -1451,13 +1445,16 @@ The following parameters can be used to control the simulation:
      - Set to **true** to allow the histograms to be selected, otherwise all histograms are shown.
 
    * - Histogram bins
-     - The number of bins in the histogram.
+     - The number of bins in the histogram. Set to zero to auto-calibrate.
 
    * - Remove outliers
      - Remove outliers before plotting histograms. Outliers are 1.5 times the interquartile range above/below the upper/lower quartiles. Outliers are always removed for the Precision data since low photon signals can produce extreme precision values.
 
    * - Density radius
      - Specify the radius (relative to the Half-Width at Half-Maxima, HWHM, of the PSF) to use when calculating the localisation density around each molecule. The average density is shown in the summary table. The density is the number of molecules within the specified radius.
+
+   * - Depth-of-field
+     - The depth-of-field used to summarise the in focus localisations.
 
 
 Data Summary
@@ -1475,6 +1472,12 @@ The ``Create Data`` plugin summarises the dataset when the image has been constr
    * - Dataset
      - The number of the dataset.
 
+   * - Camera
+     - The camera used for the simulation.
+
+   * - PSF
+     - The PSF used for the simulation.
+
    * - Molecules
      - The number of fluorophore molecules that activated during the simulation.
 
@@ -1483,6 +1486,15 @@ The ``Create Data`` plugin summarises the dataset when the image has been constr
 
    * - Localisations
      - Total number of localisations. Equals the number of spots drawn on the image.
+
+   * - nFrames
+     - The number of frames.
+
+   * - Area
+     - The area of the image.
+
+   * - Density
+     - The localisation density in the image.
 
    * - HWHM
      - The Half-Width at Half-Maxima (HWHM) of the PSF.
@@ -1541,6 +1553,12 @@ The ``Create Data`` plugin summarises the dataset when the image has been constr
    * - Precision
      - The average precision (in nm).
 
+   * - Precision
+     - The average precision (in nm) within the defined depth-of-field.
+
+   * - X/Y/Z
+     - The average x/y/z coordinate (in nm).
+
    * - Width
      - The average PSF width (in pixels).
 
@@ -1552,7 +1570,7 @@ Compound Molecules
 
 By default all the molecules are single particles. However it may be desirable to simulate a collection of compound molecules, for example dimers and hexamers. This is possible using the ``Compound molecules`` option. If this option is selected the plugin will show a second dialog where the user can input the molecule configuration using a `Google Protocol Buffers <https://developers.google.com/protocol-buffers>`_ specification.
 
-The specification is a list of all the compounds that should be simulated. Each compound has a fraction parameter. The compound will be represented using the fraction divided by the total sum of all fractions to indicate the proportion of the compound. Each compound also has a diffusion parameter. When using compound molecules the ``Diffusion`` parameter in the main plugin dialog is ignored. Note that the ``Fixed fraction`` parameter is still used to fix a fraction of the compounds. To gain more control over the moving molecules set the ``Fixed fraction`` parameter so zero. Then simulate a mixed population of diffusing molecules and fixed molecules by specifying the same compounds twice, one with a diffusion coefficient of zero and the other non-zero.
+The specification is a list of all the compounds that should be simulated. Each compound has a fraction parameter. The compound will be represented using the fraction divided by the total sum of all fractions to indicate the proportion of the compound. Each compound also has a diffusion parameter. When using compound molecules the ``Diffusion`` parameter in the main plugin dialog is ignored. Note that the ``Fixed fraction`` parameter is still used to fix a fraction of the compounds. To gain more control over the moving molecules set the ``Fixed fraction`` parameter to zero. Then simulate a mixed population of diffusing molecules and fixed molecules by specifying the same compounds twice, one with a diffusion coefficient of zero and the other non-zero.
 
 The remaining section of the compound specification is the list of atoms. These are fluorophore positions relative to the origin. The distances are specified in nanometres. The atom mass is used to weight the centre of mass for the compound. If omitted it is assumed all the atoms are the same.
 
@@ -1643,6 +1661,12 @@ The localisations that are created are stored as various results sets in memory.
    * - Localisation Data (Create Data Pulses)
      - A set of centroids, each centroid is composed of the collection of localisations from a single molecule that were continuously visible in consecutive frames of the image. The start and end frame of the pulse is stored.
 
+   * - Localisation Data (Create Data Fixed)
+     - The set of localisations which were fixed (no diffusion).
+
+   * - Localisation Data (Create Data Moving)
+     - The set of localisations which were moving (with diffusion).
+
    * - Localisation Data (Create Data No Density)
      - The set of localisations where there was no other localisation within the radius used to calculate the density.
 
@@ -1690,28 +1714,18 @@ The following parameters can be configured:
    * - Background
      - The background level in photons. This is subject to Poisson noise. Convert to actual ADU value by multiplying by the product of the camera gain, EM-gain and quantum efficiency.
 
-   * - EM gain
-     - The EM-gain of the simulated camera.
+   * - Camera type
+     - The type of camera. Options for the camera are set using the ``...`` button. This includes:
 
-   * - Camera gain
-     - The camera gain (in ADU/electron).
-
-   * - Quantum efficiency
-     - The efficiency converting photons to electrons in the camera.
-
-   * - Read noise
-     - The average Gaussian read noise to add to each pixel (in electrons).
-
-   * - Bias
-     - The bias offset to add to the image. Allows negative noise values to be displayed.
+       * EM gain: The EM-gain of the simulated camera.
+       * Camera gain: The camera gain (in ADU/electron).
+       * Quantum efficiency: The efficiency converting photons to electrons in the camera.
+       * Read noise: The average Gaussian read noise to add to each pixel (in electrons).
+       * Bias: The bias offset to add to the image. Allows negative noise values to be displayed on unsigned 16-bit images.
+       * Camera Model Name: The name of the sCMOS camera model containing the per-pixel calibration.
 
    * - PSF Model
-     - Specify the PSF model to use. The ``Image PSF`` option is only available if a valid PSF image is open.
-
-   * - Enter width
-     - Select this option to enter the PSF width (in nm) for the Gaussian/Airy PSF. A second dialog will prompt the user for the PSF SD (Standard Deviation). For an Airy PSF the SD is converted to the Airy pattern width by dividing by 1.323.
-
-       If not selected a second dialog will prompt the user for the emission wavelength of the fluorophore and the numerical aperture of the microscope. These will be used to define the PSF width.
+     - Specify the PSF model to use. Options for the PSF model are set using the ``...`` button including setting the width of the Gaussian/Airy PSF, selecting the astigmatism model or the image PSF. The ``Image PSF`` option is only available if a valid PSF image is open.
 
    * - Distribution
      - The random distribution of the particles.
@@ -1742,7 +1756,7 @@ The following parameters can be configured:
    * - Save image results
      - Show a dialog allowing the image localisations to be saved as a PeakResults file. Note that this does not contain the molecule Z position.
 
-   * - Save Localisations
+   * - Save localisations
      - Show a dialog allowing the localisations to be saved. The file contains the time and X,Y,Z positions of each fluorophore when it was in an on state.
 
    * - Show histograms
@@ -1752,13 +1766,32 @@ The following parameters can be configured:
      - Set to **true** to allow the histograms to be selected, otherwise all histograms are shown.
 
    * - Histogram bins
-     - The number of bins in the histogram.
+     - The number of bins in the histogram. Set to zero to auto-calibrate.
 
    * - Remove outliers
      - Remove outliers before plotting histograms. Outliers are 1.5 times the interquartile range above/below the upper/lower quartiles. Outliers are always removed for the Precision data since low photon signals can produce extreme precision values.
 
    * - Density radius
      - Specify the radius (relative to the Half-Width at Half-Maxima, HWHM, of the PSF) to use when calculating the localisation density around each molecule. The average density is shown in the summary table. The density is the number of molecules within the specified radius.
+
+   * - Depth-of-field
+     - The depth-of-field used to summarise the in focus localisations.
+
+
+.. index:: ! Create Track Data
+
+Create Track Data
+-----------------
+
+Creates an image by simulating single molecule localisations diffusing in tracks that do not overlap in time. This is the simplest simulation to test moving molecules.
+
+The ``Create Track Data`` plugin is a modification of the ``Create Data`` plugin to simplify the simulation of diffusing fluorophores. Each flourophore will have a fixed lifetime configured by the ``On time`` parameter. The simulation draws a single fluorophore that will diffuse using the configured parameters such as the diffusion rate and type, the fraction of fixed molecules, and the diffusion confinement. A single dark frame will be added to the image at the end of a flourophore lifetime before a new flourophore is created.
+
+The parameters are configured as for the ``Create Data`` plugin (see :numref:`{number}: {name} <model_plugins:Create Data>`). Some parameters have been removed as they are redundant as follows:
+
+ * The simulation duration (``Seconds``) has been removed. The duration of the simulation is defined by the ``On time`` and the number of ``Particles``.
+ * The correlation mode is removed from the available photon distributions as all fluorophores have the same lifetime.
+ * The additional parameters to configure the on-times, off-times, and distribution of the number of blinks has been removed since each flourophore has a single pulse of a fixed lifetime.
 
 
 .. index:: ! Create Benchmark Data
@@ -1792,28 +1825,18 @@ The following parameters can be configured:
    * - Background
      - The background level in photons. This is subject to Poisson noise. Convert to actual ADU value by multiplying by the product of the camera gain, EM-gain and quantum efficiency.
 
-   * - EM gain
-     - The EM-gain of the simulated camera.
+   * - Camera type
+     - The type of camera. Options for the camera are set using the ``...`` button. This includes:
 
-   * - Camera gain
-     - The camera gain (in ADU/electron).
-
-   * - Quantum efficiency
-     - The efficiency converting photons to electrons in the camera.
-
-   * - Read noise
-     - The average Gaussian read noise to add to each pixel (in electrons).
-
-   * - Bias
-     - The bias offset to add to the image. Allows negative noise values to be displayed.
+       * EM gain: The EM-gain of the simulated camera.
+       * Camera gain: The camera gain (in ADU/electron).
+       * Quantum efficiency: The efficiency converting photons to electrons in the camera.
+       * Read noise: The average Gaussian read noise to add to each pixel (in electrons).
+       * Bias: The bias offset to add to the image. Allows negative noise values to be displayed on unsigned 16-bit images.
+       * Camera Model Name: The name of the sCMOS camera model containing the per-pixel calibration.
 
    * - PSF Model
-     - Specify the PSF model to use. The ``Image PSF`` option is only available if a valid PSF image is open
-
-   * - Enter width
-     - Select this option to enter the PSF width (in nm) for the Gaussian/Airy PSF. A second dialog will prompt the user for the PSF SD (Standard Deviation). For an Airy PSF the SD is converted to the Airy pattern width by dividing by 1.323.
-
-       If not selected a second dialog will prompt the user for the emission wavelength of the fluorophore and the numerical aperture of the microscope. These will be used to define the PSF width.
+     - Specify the PSF model to use. Options for the PSF model are set using the ``...`` button including setting the width of the Gaussian/Airy PSF, selecting the astigmatism model or the image PSF. The ``Image PSF`` option is only available if a valid PSF image is open.
 
    * - Particles
      - The number of molecules to simulate.
@@ -1842,7 +1865,7 @@ The following parameters can be configured:
    * - Save image results
      - Show a dialog allowing the image localisations to be saved as a PeakResults file. Note that this does not contain the molecule Z position.
 
-   * - Save Localisations
+   * - Save localisations
      - Show a dialog allowing the localisations to be saved. The file contains the time and X,Y,Z positions of each fluorophore when it was in an on state.
 
    * - Show histograms
@@ -1852,13 +1875,16 @@ The following parameters can be configured:
      - Set to **true** to allow the histograms to be selected, otherwise all histograms are shown.
 
    * - Histogram bins
-     - The number of bins in the histogram.
+     - The number of bins in the histogram. Set to zero to auto-calibrate.
 
    * - Remove outliers
      - Remove outliers before plotting histograms. Outliers are 1.5 times the interquartile range above/below the upper/lower quartiles. Outliers are always removed for the Precision data since low photon signals can produce extreme precision values.
 
    * - Density radius
      - Specify the radius (relative to the Half-Width at Half-Maxima, HWHM, of the PSF) to use when calculating the localisation density around each molecule. The average density is shown in the summary table. The density is the number of molecules within the specified radius.
+
+   * - Depth-of-field
+     - The depth-of-field used to summarise the in focus localisations.
 
 
 .. index:: Fitting Limits
@@ -1871,22 +1897,6 @@ The ``Create Benchmark Data`` plugin will report the theoretical limit (precisio
 Note that these formulas are derived from modelling the point spread function (PSF) as a 2D Gaussian for both the simulation and the fitting. Given that the true data will have a PSF defined by the microscope parameters these formulas only approximate the precision that can be obtained on image data. However they are useful to allow demonstration that the fitting routines in the SMLM plugins can achieve the theoretical limit, i.e. they are working as well as can be expected.
 
 
-.. index:: ! Create Track Data
-
-Create Track Data
------------------
-
-Creates an image by simulating single molecule localisations diffusing in tracks that do not overlap in time. This is the simplest simulation to test moving molecules.
-
-The ``Create Track Data`` plugin is a modification of the ``Create Data`` plugin to simplify the simulation of diffusing fluorophores. Each flourophore will have a fixed lifetime configured by the ``On time`` parameter. The simulation draws a single fluorophore that will diffuse using the configured parameters such as the diffusion rate and type, the fraction of fixed molecules, and the diffusion confinement. A single dark frame will be added to the image at the end of a flourophore lifetime before a new flourophore is created.
-
-The parameters are configured as for the ``Create Data`` plugin (see :numref:`{number}: {name} <model_plugins:Create Data>`. Some parameters have been removed as they are redundant as follows:
-
- * The simulation duration (``Seconds``) has been removed. The duration of the simulation is defined by the ``On time`` and the number of ``Particles``.
- * The correlation mode is removed from the available photon distributions as all fluorophores have the same lifetime.
- * The additional parameters to configure the on-times, off-times, and distribution of the number of blinks has been removed since each flourophore has a single pulse of a fixed lifetime.
-
-
 .. index:: ! Fit Benchmark Data
 
 Fit Benchmark Data
@@ -1896,7 +1906,7 @@ Fit the image created by ``Create Benchmark Data`` and compute statistics on the
 
 The ``Fit Benchmark Data`` plugin will fit a stack image of localisations all created at the same coordinates. This image must be created by the ``Create Benchmark Data`` plugin as the parameters used to create the image are stored in memory and used in the analysis.
 
-The plugin allows the size of the fitting region around the localisation, the fitting method and the initial guess for the fit to be configured. The fitting process is performed and the fit rejected if the coordinates move outside the fitting region, the signal is negative or the fitted width deviates more than 2-fold from the initial estimate. All other results are stored for analysis.
+The plugin allows the size of the fitting region around the localisation, the fitting method and the initial guess for the fit to be configured. Fitting is initialised based on the configured origin. Random offsets can be used to ensure the fit does not start at the optimum. The fitting process is performed and the fit rejected if the coordinates move outside the fitting region, the signal is negative or the fitted width deviates more than 2-fold from the initial estimate. All other results are stored for analysis.
 
 The following parameters can be configured:
 
@@ -1910,36 +1920,39 @@ The following parameters can be configured:
    * - Region size
      - The size of the region around the localisation used for fitting. The actual region is a square of dimensions 2n+1.
 
-   * - PSF width
-     - The initial estimate for the 2D Gaussian.
+   * - PSF
+     - The PSF to use for fitting.
 
    * - Fit solver
      - The solver used for fitting.
 
        The plugin will show a second dialog allowing the fitting to be configured that is specific to the selected solver. Details of configuring each fit solver can be found in the section describing the ``Peak Fit`` plugin (section :numref:`%s <fitting_plugins:Peak Fit>`).
 
-   * - Fit function
-     - The function used for fitting.
+   * - Origin XY
+     - The XY origin used to initialise fitting.
 
-   * - Offset fit
-     - Select this to start fitting at a distance offset from the true localisation centre. The fitting repeated 4 times using the ``Start offset`` along each of the diagonals (1,1), (1,-1), (-1,1), (-1,-1).
+   * - Origin Z
+     - The Z origin used to initialise fitting (applicable to 3D PSF fitting).
 
-   * - Start offset
-     - The distance to offset the initial estimate.
+   * - Zero offset
+     - If ``true`` include a fit initialised at the origin.
 
-   * - Include CoM fit
-     - Perform fitting by starting at the centre-of-mass of the fit region.
+   * - Offset points
+     - The number of fits performed offset from the origin. The maximum distance in each dimension can be configured. The offset is sampled randomly from within the box created by the range. A range of zero will use the origin for the dimension.
 
    * - Background fitting
-     - Select this to fit the background. If false then fitting will fix the background parameter using the true background.
+     - Select this to fit the background. If ``false`` then fitting will fix the background parameter using the true background.
 
    * - Signal fitting
-     - Select this to fit the signal. If false then fitting will fix the signal parameter using the true signal.
+     - Select this to fit the signal. If ``false`` then fitting will fix the signal parameter using the true signal.
 
    * - Show histograms
      - Show histograms of the results (the difference between the fit results and the true answer).
 
        If selected a second dialog is shown allowing the user to choose which histograms to display.
+
+   * - Save raw data
+     - Save the raw results data (the difference between the fit results and the true answer) to a directory. This is the data that can be plotted in the histograms.
 
 
 Data Summary
