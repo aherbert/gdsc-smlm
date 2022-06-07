@@ -1991,16 +1991,16 @@ true answer for each parameter that was fitted. Histograms of the differences ca
    * - Y
      - The Y position of the localisations, relative to the centre of the image.
 
-   * - Gain
-     - The total gain of the simulation.
+   * - Z
+     - The Z position of the localisations, relative to the centre of the image.
 
-   * - ReadNoise
-     - The read noise of the simulation.
+   * - Camera model
+     - The camera model used for the simulation.
 
    * - B
      - The background number of photons.
 
-   * - b\ :sup:`2`
+   * - Noise
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
@@ -2039,20 +2039,23 @@ true answer for each parameter that was fitted. Histograms of the differences ca
    * - dSignal & +/-
      - The average and standard deviation of the difference of the fit to the average signal.
 
-   * - dAngle & +/-
-     - The average and standard deviation of the difference of the fit to the angle. All simulations will use a circular PSF so the actual angle is assumed to be zero. This is only reported for the ``Free`` fit function.
-
    * - dX & +/-
      - The average and standard deviation of the difference of the fit to the actual X position.
 
    * - dY & +/-
      - The average and standard deviation of the difference of the fit to the actual Y position.
 
+   * - dZ & +/-
+     - The average and standard deviation of the difference of the fit to the actual Z position. This is only reported for the ``Astigmatic`` fit functions.
+
    * - dSx & +/-
      - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the X dimension.
 
    * - dSy & +/-
-     - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the Y dimension. This is only reported for the ``Free`` and ``Free circular`` fit functions.
+     - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the Y dimension. This is only reported for the ``Elliptical`` and ``Rotating Elliptical`` fit functions.
+
+   * - dAngle & +/-
+     - The average and standard deviation of the difference of the fit to the angle. All simulations will use a circular PSF so the actual angle is assumed to be zero. This is only reported for the ``Rotating Elliptical`` fit function.
 
    * - Time & +/-
      - The average and standard deviation of the time for fitting per localisation.
@@ -2063,8 +2066,8 @@ true answer for each parameter that was fitted. Histograms of the differences ca
    * - dSax & +/-
      - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the X dimension, adjusted for square pixels.
 
-   * - dSax & +/-
-     - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the Y dimension, adjusted for square pixels. This is only reported for the ``Free`` and ``Free circular`` fit functions.
+   * - dSay & +/-
+     - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the Y dimension, adjusted for square pixels. This is only reported for the ``Elliptical`` and ``Rotating Elliptical`` fit functions.
 
 
 .. index:: ! Benchmark Analysis
@@ -2080,7 +2083,7 @@ It should be noted that if the ``Fit Benchmark Data`` plugin is run for multiple
 
 A fair comparison between fitting methods is to store all the fitting results in memory. Then when several different fitting methods have been run the average and standard deviation statistics are recomputed only for those localisations that were successfully fit by **every** method.
 
-The ``Benchmark Analysis`` plugin requires that the ``Fit Benchmark Data`` plugin has been run at least twice for a given set of benchmark data producing at least two results sets. The plugin will analyse the data for all localisations successfully fit by each method and produce a summary table as per the ``Fit Benchmark Data`` plugin. The only difference is an additional column after the ``Recall`` column that provides the original recall (``OrigRecall``). The recall column will be the same for each fitting method as the analysis uses a common subset of results. In some cases it may be much lower than the original recall indicating that some of the fitting methods have performed much worse than others. It is now possible to judge the accuracy and precision of each method in a fair comparison on an equivalent dataset.
+The ``Benchmark Analysis`` plugin requires that the ``Fit Benchmark Data`` plugin has been run at least twice with different fitting parameters for a given set of benchmark data producing at least two results sets. The plugin will analyse the data for all localisations successfully fit by each method and produce a summary table as per the ``Fit Benchmark Data`` plugin. The only difference is an additional column after the ``Recall`` column that provides the original recall (``OrigRecall``). The recall column will be the same for each fitting method as the analysis uses a common subset of results. In some cases it may be much lower than the original recall indicating that some of the fitting methods have performed much worse than others. It is now possible to judge the accuracy and precision of each method in a fair comparison on an equivalent dataset.
 
 Note: If a new set of benchmark data is created (e.g. using ``Create Benchmark Data``) then any results in memory from ``Fit Benchmark Data`` will be discarded as they no longer apply to the new data.
 
