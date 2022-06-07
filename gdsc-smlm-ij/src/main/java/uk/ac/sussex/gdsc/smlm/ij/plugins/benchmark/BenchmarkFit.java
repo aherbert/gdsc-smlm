@@ -44,7 +44,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.random.HaltonSequenceGenerator;
+import org.apache.commons.rng.sampling.shape.BoxSampler;
+import org.apache.commons.rng.simple.RandomSource;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -1172,15 +1173,15 @@ public class BenchmarkFit implements PlugIn {
 
     if (settings.offsetPoints > 0 && ((settings.offsetRangeX > 0 || settings.offsetRangeY > 0)
         || is3D && settings.offsetRangeZ > 0)) {
-      final double[] min = {-Math.max(0, settings.offsetRangeX),
-          -Math.max(0, settings.offsetRangeY), -Math.max(0, settings.offsetRangeZ)};
-      final double[] range = {2 * min[0], 2 * min[1], 2 * min[2]};
-      final HaltonSequenceGenerator halton = new HaltonSequenceGenerator((is3D) ? 3 : 2);
+      final double[] max = {Math.max(0, settings.offsetRangeX), Math.max(0, settings.offsetRangeY),
+          Math.max(0, settings.offsetRangeZ)};
+      final double[] min = {0 - max[0], 0 - max[1], 0 - max[2]};
+      final BoxSampler sampler = BoxSampler.of(RandomSource.XO_SHI_RO_256_PP.create(), min, max);
       for (int i = 0; i < settings.offsetPoints; i++) {
         final double[] offset = origin.clone();
-        final double[] v = halton.nextVector();
+        final double[] v = sampler.sample();
         for (int j = 0; j < v.length; j++) {
-          offset[j] += v[j] * range[j] + min[j];
+          offset[j] += v[j];
         }
         list.add(offset);
       }
