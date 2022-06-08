@@ -5915,7 +5915,7 @@ public class BenchmarkFilterAnalysis
 
   private void saveFilter(DirectFilter filter) {
     // Save the filter to file
-    final String filename = getFilename("Best_Filter_File", settings.filterFilename);
+    final String filename = getFilename("Best_Filter_File", settings.filterFilename, ".xml");
     if (filename != null) {
       settings.filterFilename = filename;
       Prefs.set(Settings.KEY_FILTER_FILENAME, filename);
@@ -5928,17 +5928,18 @@ public class BenchmarkFilterAnalysis
   }
 
   /**
-   * Gets the filename (with a .json extension).
+   * Gets the filename with the specified extension.
    *
    * @param title the title
    * @param filename the filename
+   * @param extension the extension
    * @return the filename
    */
-  static String getFilename(String title, String filename) {
+  static String getFilename(String title, String filename, String extension) {
     filename = ImageJUtils.getFilename(title, filename);
-    // Use JSON extension
+    // Use extension
     if (filename != null) {
-      filename = FileUtils.replaceExtension(filename, ".json");
+      filename = FileUtils.replaceExtension(filename, extension);
     }
     return filename;
   }
@@ -5968,7 +5969,7 @@ public class BenchmarkFilterAnalysis
     pauseFilterTimer();
 
     if (interactive) {
-      final String filename = getFilename("Filter_set_" + setNumber, settings.filterSetFilename);
+      final String filename = getFilename("Filter_set_" + setNumber, settings.filterSetFilename, ".xml");
       if (filename != null) {
         settings.filterSetFilename = filename;
         Prefs.set(Settings.KEY_FILTERSET_FILENAME, filename);
@@ -6003,7 +6004,7 @@ public class BenchmarkFilterAnalysis
     if (localSaveTemplateIsSet) {
       filename = settings.templateFilename;
     } else {
-      filename = getFilename("Template_File", settings.templateFilename);
+      filename = getFilename("Template_File", settings.templateFilename, ".json");
       saveTemplateIsSet = true;
     }
     if (filename != null) {
