@@ -2737,7 +2737,7 @@ Analysis
 ~~~~~~~~
 
 The ``Fit Spot Data`` plugin fits each candidate spot identified in the benchmark image by the
-``Filter Spot Data`` plugin. The spot candidates are identified in each frame in the image and ranked by the filter, for example by estimated intensity. However there will be many candidates that are not valid spots since the ``Create Simple Data`` or ``Create Spot Data`` plugin generates an image with noise which may be identified as a spot candidate. Thus it is usually possible to stop processing candidates when a successive number of candidates fail. This is the method employed by the main ``Peak Fit`` plugin when processing single-molecule localisation images.
+``Filter Spot Data`` plugin. The spot candidates are identified in each frame in the image and ranked by the filter, for example by estimated intensity. However there will be many candidates that are not valid spots since the simulated image contains noise which may be identified as a spot candidate. Thus it is usually possible to stop processing candidates when a successive number of candidates fail. This is the method employed by the main ``Peak Fit`` plugin when processing single-molecule localisation images.
 
 For the purpose of benchmarking it is possible to speed up processing by ignoring many of the candidates. Since the spots were simulated it is known which candidates are correct (positives) and which are incorrect (negatives). The ``Fit Spot Data`` plugin allows the user to specify the fraction of positives in each frame that will be processed. This sets a target limit for the positives. When this target has been reached the plugin will continue processing candidates until: (1) a set fraction of the total number of candidates processed are negatives; and (2) a minimum number of negatives after the positive target have been processed. The rest of the candidates are then ignored and marked as not-fitted.
 
@@ -2749,7 +2749,7 @@ When all the fitting has been done the fitted coordinates and any candidates coo
 
     \mathit{sf}= |\log_2(s_1 / s_2)|
 
-where :math:`\log_2` is the logarithm with base 2. The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``. Any distance below the ``Lower distance`` is 1. Anything above the ``Match distance`` is 0. In between uses a ramp to set the score. The ramp is not linear but uses a cosine function. This smooths the transition at the ends of the range to make selection of the end points for assessment less critical; the ramp is linear in the exact centre of the range. Thus the ideal end points should be above and below the ideal scoring threshold.
+where :math:`\log_2` is the logarithm with base 2. The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``. Any distance below the ``Lower distance`` is 1. Anything above the ``Match distance`` is 0. In between uses a ramp to set the score. The ramp is not linear but uses a sigmoid-like `smoother step <https://en.wikipedia.org/wiki/Smoothstep>`_ function. This smoothes the transition at the ends of the range to make selection of the end points for assessment less critical; the ramp is linear in the exact centre of the range. Thus the ideal end points should be above and below the ideal scoring threshold.
 
 If using a signal factor a similar ramp is applied to produce a signal score and the final score computed as a product of the two. The match score is then used to accumulate a score for how accurate the fitting was performed.
 
@@ -2757,7 +2757,7 @@ If the match is between a fitted candidate and a true localisation then the scor
 
 The TP and FP totals thus represent the score that can be achieved for a perfect results filter that is able to correctly allow any fit results that are within the match distance, and optionally signal factor, of a true localisation and reject all other fit results. If a candidate fails to be fitted but is close to a true localisation it will not be included in the TP/FP assessment scores. However the original number of localisations that were simulated is known and this can be used to produce a False Negative (FN) score as the number of localisations minus the TP, i.e. how many spots were missed.
 
-Note that the use of a ramped score function based on distance and signal allows the comparison of scores between different fitting algorithms, since some algorithms may fit the spots closer to the true localisation. Also note that if it is not clear at what level to set the scoring thresholds then using a ramped distance score will produce the same results as repeating the analysis with multiple thresholds and averaging the score (with the same weighting applied by the ramp).
+Note that the use of a ramped score function based on distance (and signal factor) allows the comparison of scores between different fitting algorithms, since some algorithms may fit the spots closer to the true localisation. Also note that if it is not clear at what level to set the match distance and signal factor then using a ramped score will produce similar results as repeating the analysis with multiple thresholds and averaging the score with the same ramped weighting for each scoring threshold.
 
 
 Parameters
@@ -2799,8 +2799,10 @@ The following parameters can be configured:
 
        Set to the same as the ``Match signal`` to ignore the ramped scoring function.
 
-   * - Initial StdDev
-     - The initial 2D Gaussian standard deviation for fitting. The width is expressed in pixels. By default it is set using the configured width of the PSF used to generate the data and should not need adjusting (unless it is intended to benchmark an incorrectly calibrated fitting algorithm).
+   * - PSF
+     - The PSF for fitting. The width is expressed in pixels. By default it is set using the configured width of the PSF used to generate the data and should not need adjusting (unless it is intended to benchmark an incorrectly calibrated fitting algorithm).
+
+       See section :numref:`{number}: {name} <fitting_plugins:Fitting Parameters>`.
 
    * - Fitting width
      - Define the size of the region around a candidate to use for fitting. The region size in pixels is set using the ``Fitting width`` multiplied by the ``Initial StdDev``.
@@ -2810,10 +2812,11 @@ The following parameters can be configured:
 
        See section :numref:`{number}: {name} <fitting_plugins:Fitting Parameters>`.
 
-   * - Fit function
-     - The fit function.
+   * - Multi-path filter
+     - The filter used to select results during fitting. Note that although all configured candidate are fit, the results from early fits can influence later fits as they can be included as neighbours with known parameters.
 
-       See section :numref:`{number}: {name} <fitting_plugins:Fitting Parameters>`.
+   * - Fail limit
+     - The fail limit used to stop storing results during fitting. This only affects the scoring analysis of the localisation dataset created using the configured multi-path filter and fail limit.
 
    * - Include neighbours
      - See section :numref:`{number}: {name} <fitting_plugins:Multiple Peak Fitting Parameters>`.
@@ -2854,9 +2857,9 @@ A scatter plot of the spot intensity against the true spot intensity is shown fo
 
 For all of the candidates that were fit the system compiles histograms of each of the common metrics used to assess the fit of the 2D Gaussian to the data (Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidian Shift, and Precision). Three histograms are computed for: all the fitting results; only the matches; and the non-matched results. The histogram are then used to produce an estimate for the range that should be used for each metric as a filter to separate good fits from bad fits. This is done by comparing the values in the matches histogram with the values in the non-matches histogram, for example using the largest separation between the cumulative histograms for each. This may for example produce an estimate that a SNR filter should be in the range of 25 to 300. These ranges are reported to the results table and can optionally be saved to a file for use in the ``Benchmark Filter Analysis`` plugin.
 
-The results of match scoring are used to compute the match statistics Recall, Precision, Jaccard and F1-score. See setc :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>` for more details. The first set of statistics are for the raw candidates (before fitting). These show how effective the filter was at identifying candidates that were processed and sets an upper limit on the performance of the fitted results. The second set summarise the performance of the fitted results. Note that the table does not show the False Negative score since this is equal to the number of simulated molecules minus the True Positives.
+The results of match scoring are used to compute the match statistics Recall, Precision, Jaccard and F1-score. See section :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>` for more details. The first set of statistics are for the raw candidates (before fitting). These show how effective the filter was at identifying candidates that were processed and sets an upper limit on the performance of the fitted results. The second set summarise the performance of the fitted results. Note that the table does not show the False Negative score since this is equal to the number of simulated molecules minus the True Positives.
 
-The analysis results are then reported in a summary table
+The analysis results are then reported in a summary table:
 
 .. list-table::
    :widths: 20 80
@@ -2895,8 +2898,11 @@ The analysis results are then reported in a summary table
    * - Fixed
      - True if the simulation used a fixed depth.
 
-   * - Camera
-     - The camera model used for the simulation.
+   * - Gain
+     - The total gain of the simulation.
+
+   * - ReadNoise
+     - The read noise of the simulation.
 
    * - B
      - The background number of photons.
