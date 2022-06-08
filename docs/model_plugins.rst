@@ -2399,7 +2399,7 @@ The same data can be plot using the ``Plot rank by intensity`` option (:numref:`
 
 Since the spot filter will identify many false positives the overall precision score is very low. Thus the plugin also reports the precision at a fraction of the maximum recall. This fraction can be configured and is shown on the plot using a magenta line. In :numref:`Figure %s <fig_filter_spot_data_score_vs_rank>` the line is drawn at 98% of the maximum recall.
 
-In addition the precision can be plotted directly against the recall (:numref:`Figure %s <fig_filter_spot_data_auc>`). The **A**\ rea **U**\ nder the precision-recall **C**\ urve (AUC) is the average precision at each possible recall value. This provides a single score on how good the filter is at finding and ranking spot candidates. An example precision-recall chart is shown below. The AUC2 score is computed using a modified precision curve that uses the highest precision at that recall or above. This smooths a noisy curve that may occur at low recall values. The AUC2 score is always above the AUC score.
+In addition the precision can be plotted directly against the recall (:numref:`Figure %s <fig_filter_spot_data_auc>`). The **A**\ rea **U**\ nder the precision-recall **C**\ urve (AUC) is the average precision at each possible recall value. This provides a single score on how good the filter is at finding and ranking spot candidates. The AUC2 score is computed using a modified precision curve that uses the highest precision at that recall or above. This smooths a noisy curve that may occur at low recall values. The AUC2 score is always above the AUC score.
 
 .. _fig_filter_spot_data_auc:
 .. figure:: images/filter_spot_data_auc.jpg
@@ -2463,16 +2463,13 @@ The analysis results are then reported in a summary table:
    * - Fixed
      - True if the simulation used a fixed depth.
 
-   * - Gain
-     - The total gain of the simulation.
-
-   * - ReadNoise
-     - The read noise of the simulation.
+   * - Camera
+     - The camera model used for the simulation.
 
    * - B
      - The background number of photons.
 
-   * - b\ :sup:`2`
+   * - Noise
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
@@ -2498,8 +2495,11 @@ The analysis results are then reported in a summary table:
    * - Filter
      - The name of the first filter.
 
-   * - Param
-     - The parameter of the first filter.
+   * - Abs.Param
+     - The parameter of the first filter in pixel units.
+
+   * - Rel.Param
+     - The parameter of the first filter relative to the PSF width.
 
    * - Description
      - The full description of the filter. For a ``Difference`` or ``Jury`` filter the full set of filters will be listed.
@@ -2507,8 +2507,8 @@ The analysis results are then reported in a summary table:
    * - A.Border
      - The analysis border.
 
-   * - Multi
-     - True if multiple matches were allowed.
+   * - Matching
+     - The matching stragety.
 
    * - Ranked
      - True if matching was performed using the candidate in their ranked order, i.e. higher ranked candidates are matched to true results first. The default is to use nearest neighbour matching, irrespective of the candidate ranking.
@@ -2580,7 +2580,7 @@ The analysis results are then reported in a summary table:
      - The maximum Jaccard score.
 
    * - R
-     - The overall correlation between the candidate intensity and the intensity of matching localisations at the maximum Jaccard score.
+     - The correlation between the candidate intensity and the intensity of matching localisations at the maximum Jaccard score.
 
    * - Time
      - The total run-time for filtering the image and ranking the candidates.
@@ -2674,7 +2674,7 @@ The following options can be selected:
        If **false** only the most recently selected filter results will be displayed. Use this option to show plots only with the configured filters.
 
    * - AUC
-     - Display the Area Under precision-recall Curve (AUC) for each filter against the width of the filter. See :numref:`Figure %s <fig_filter_spot_data_performance_auc>` for an example of AUC score against filter width.
+     - Display the Area Under precision-recall Curve (AUC) score for each filter against the width of the filter. See :numref:`Figure %s <fig_filter_spot_data_performance_auc>` for an example of AUC score against filter width.
 
    * - Max Jaccard
      - Display the maximum Jaccard score for each filter against the width of the filter.
@@ -2722,7 +2722,7 @@ The following options can be selected:
     :align: center
     :figwidth: 80%
 
-    Plot of the Area Under precision-recall Curve score against the filter width for various filters. The filter width is relative to the PSF width of the image data. All filters are single filters using a search width of 1.
+    Plot of the Area Under precision-recall Curve (AUC) score against the filter width for various filters. The filter width is relative to the PSF width of the image data. All filters are single filters using a search width of 1.
 
 
 .. index:: ! Fit Spot Data
@@ -2895,16 +2895,13 @@ The analysis results are then reported in a summary table
    * - Fixed
      - True if the simulation used a fixed depth.
 
-   * - Gain
-     - The total gain of the simulation.
-
-   * - ReadNoise
-     - The read noise of the simulation.
+   * - Camera
+     - The camera model used for the simulation.
 
    * - B
      - The background number of photons.
 
-   * - b\ :sup:`2`
+   * - Noise
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
@@ -3591,7 +3588,7 @@ If the ``Show table`` or ``Show summary`` options are selected the plugin will d
    * - B
      - The background number of photons.
 
-   * - b\ :sup:`2`
+   * - Noise
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
