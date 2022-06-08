@@ -3813,9 +3813,9 @@ The plugin results are presented as per the ``Benchmark Filter Analysis`` plugin
 Iterate Filter Analysis
 -----------------------
 
-Run different filter parameters on a set of benchmark fitting results produced by ``Fit Spot Data`` outputting performance statistics on the success. If these results are not available an error will be displayed when running the plugin.
+The ``Iterate Filter Analysis`` plugin runs fitting and filter parameters on a set of benchmark spot candidates produced by ``Filter Spot Data`` and outputs performance statistics on each parameter set. If these results are not available an error will be displayed when running the plugin.
 
-The ``Iterate Filter Analysis`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
+The ``Iterate Filter Analysis`` plugin is designed to test the results fitting and filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` plugin. The results can then be fit and subjected to different filters to determine the best configuration.
 
 Searching all parameters that control fitting and filtering of fitting results is computationally intractable. This plugin alternates the ``Fit Spot Data``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins until convergence. This can be performed within a reasonable time on a standard desktop machine making optimisation of fitting parameters available to computationally resource limited audiences.
 
@@ -3889,7 +3889,7 @@ The plugin requires that ``Fit Spot Data`` has been run to initialise the fit se
 
 The plugin then shows a dialog to obtain options for ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters``. These plugins are very similar and a single dialog can collect the parameters for both plugins.
 
-The plugin then iterates the optimisation of the result filter given the same filter control parameters, and the optimisation of the filter control parameters given a single result filter and repeats fitting of the spot data with the optimal filter until convergence.
+Once configured the plugin iterates the optimisation of the result filter given the same filter control parameters, and the optimisation of the filter control parameters given a single result filter and repeats fitting of the spot data with the optimal filter until convergence.
 
 Results
 ~~~~~~~
