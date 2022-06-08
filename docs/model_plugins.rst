@@ -3495,6 +3495,8 @@ The following parameters can be adjusted:
 
        This option only applies when re-running the plugin where the same ``Evolve`` option was previously used. In this case it may not be desired to reuse the cached results as the ``Evolve`` options are to be changed. Selecting ``Repeat evolve`` will proceed with a new analysis where the ``Evolve`` option settings can be configured in a subsequent dialog.
 
+       This option is useful to experiment with different ``Evolve`` settings for the same input results and filter settings.
+
    * - Title
      - Add a title for the analysis to the results tables. This can be used when running multiple repeats of the plugin with results from different filters and fitting algorithms.
 
@@ -3738,7 +3740,7 @@ The summary table contains the same fields as the results table. The following a
 Benchmark Filter Parameters
 ---------------------------
 
-Run different filter parameters on a set of benchmark fitting results produced by ``Fit Spot Data`` outputting performance statistics on the success. If these results are not available an error will be displayed when running the plugin.
+The ``Benchmark Filter Parameters`` plugin runs different filter parameters on a set of benchmark fitting results produced by ``Fit Spot Data`` and outputs performance statistics on each configuration. If these results are not available an error will be displayed when running the plugin.
 
 The ``Benchmark Filter Parameters`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
 
@@ -3747,7 +3749,7 @@ This plugin is similar to the ``Benchmark Filter Analysis`` plugin. Searching al
 The following parameters are used by every single filter:
 
 *  Fail count
-*  Residuals Threshold
+*  Residuals Threshold (applies to doublet fits)
 *  Duplicate distance
 
 The ``Benchmark Filter Parameters`` plugin uses the top scoring filter from the ``Benchmark Filter Analysis`` plugin and searches for the best filter control parameters. The search algorithms are similar to those described in section :numref:`{number}: {name} <model_plugins:Filter Optimisation>` and the filters are scored using the same metrics. Due to the low number of parameters and the expected bounds for each parameter the number of combinations is expected to be small. Thus the genetic algorithm has been removed and a new algorithm has been added that allows enumeration of the entire range in appropriate step increments.
@@ -3797,9 +3799,9 @@ In the the ``Benchmark Filter Analysis`` plugin the range for the parameter opti
        - ``Enumerate``: Enumerate the parameter range. The increment used to enumerate the range for the parameters are: Fail count = 1; Residuals threshold = 0.05; and Duplicate distance = 0.5.
 
    * - Repeat search
-     - Set to **true** to repeat the optimisation performed by the ``Search`` setting when re-running the plugin with identical input. If **false** the plugin will allow configuration of the output display options for the previous results cached for the specified settings.
+     - Set to **true** to repeat the optimisation performed by the ``Search`` setting when re-running the plugin with identical input and the same basic settings. If **false** the plugin will allow configuration of the output display options for the previous results cached for the specified settings.
 
-       This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the search setting was used as the optimisation is randomly seeded.
+       This option only applies when re-running the plugin where the same ``Search`` option was previously used. In this case it may not be desired to reuse the cached results as the ``Search`` options are to be changed. Selecting ``Repeat search`` will proceed with a new analysis where the ``Search`` option settings can be configured in a subsequent dialog.
 
        This option is useful to experiment with different ``Search`` settings for the same input results and filter settings.
 
