@@ -1935,16 +1935,16 @@ The following parameters can be configured:
      - The Z origin used to initialise fitting (applicable to 3D PSF fitting).
 
    * - Zero offset
-     - If ``true`` include a fit initialised at the origin.
+     - If **true** include a fit initialised at the origin.
 
    * - Offset points
      - The number of fits performed offset from the origin. The maximum distance in each dimension can be configured. The offset is sampled randomly from within the box created by the range. A range of zero will use the origin for the dimension.
 
    * - Background fitting
-     - Select this to fit the background. If ``false`` then fitting will fix the background parameter using the true background.
+     - Select this to fit the background. If **false** then fitting will fix the background parameter using the true background.
 
    * - Signal fitting
-     - Select this to fit the signal. If ``false`` then fitting will fix the signal parameter using the true signal.
+     - Select this to fit the signal. If **false** then fitting will fix the signal parameter using the true signal.
 
    * - Show histograms
      - Show histograms of the results (the difference between the fit results and the true answer).
@@ -2182,7 +2182,7 @@ Load Benchmark Data
 
 Load benchmark data using an open image and a localisations text file. The benchmark data should be representative of single molecule localisation images that will be processed by the ``Peak Fit`` plugin. It can be used with the benchmark plugins to find the optimal settings for the ``Peak Fit`` plugin to identify localisations. Loading external benchmarking data allows the image simulation to be performed using any suitable software.
 
-The benchmark data will be used exactly as if the image was simulated using the ``Create Data`` plugin under certain assumptions. The benchmark system requires that the data be well approximated as a 2D Gaussian PSF. If the input data contains widths for the x and optionally y deviations then the PSF will be auto-configured as a one-axis or two-axis Gaussian PSF. If no width data is loaded then a standard width for an approximate Gaussian 2D is added to the localisation data. This width is configured in simulation settings dialog. This allows the input data to be used in the benchmarking plugins.
+The benchmark data will be used exactly as if the image was simulated using the ``Create Data`` plugin under certain assumptions. The benchmark system requires that the data be well approximated as a 2D Gaussian PSF. If the input data contains widths for the x and optionally y deviations then the PSF will be auto-configured as a one-axis or two-axis Gaussian PSF. If no width data is loaded then a standard width for an approximate Gaussian 2D is added to the localisation data. This width is configured in a simulation settings dialog. This allows the input data to be used in the benchmarking plugins.
 
 When the plugin runs the input data must be selected:
 
@@ -2216,7 +2216,7 @@ Once the data has been loaded the settings for the simulation are configured:
      - Description
 
    * - Flourophore simulation
-     - Set to **true** if this is a simulation with the same fluorophores occurring in multiple frames. Set to *false* if using single random localisations per frame.
+     - Set to **true** if this is a simulation with the same fluorophores occurring in multiple frames. Set to **false** if using single random localisations per frame.
 
    * - Gaussian SD
      - The standard deviation of a 2D Gaussian that approximates the PSF of the localisation data. This value will be used as the reference for the image PSF. An appropriate value can be obtained using the ``PSF Calculator`` plugin (see section :numref:`%s<calibration_plugins:PSF Calculator>`).
@@ -2239,15 +2239,15 @@ Once the data has been loaded the settings for the simulation are configured:
 Filter Spot Data
 ----------------
 
-Filter the image created by ``Create Simple Data`` or ``Create Spot Data`` and compute statistics on the accuracy and precision of identifying spot candidates. If these results are not available an error will be displayed.
+Filter a simulated image with associated ground-truth localisations and compute statistics on the accuracy and precision of identifying spot candidates. If a simulation is not available an error will be displayed.
 
 
 Analysis
 ~~~~~~~~
 
-The ``Filter Spot data`` plugin will filter a stack image of localisations to identify candidates for fitting. This image must be created by the ``Create Simple Data`` or ``Create Spot Data`` plugin as the parameters used to create the image are stored in memory and used in the analysis.
+The ``Filter Spot data`` plugin will filter a stack image of localisations to identify candidates for fitting. This image can be created by the ``Create Data`` plugin or a variant such as ``Create Simple Data`` or ``Create Spot Data`` plugins. These store the simulation parameters and ground-truth localisations in memory. Alternatively the ``Load Benchmark Data`` plugin can load a set of ground-truth localisations and the simulation settings and associate them with a simulated image.
 
-The plugin allows the spot filter and the analysis settings to be configured. The filtering is then performed on each frame in the image, candidates in the configured border are ignored and the combined list of spot candidates ranked. This ranking depends on the filter but is usually done using the pixel value in the filtered image at the spot candidate position. The ranking will be the same as that used when performing fitting within the ``Peak Fit`` plugin, only on all the candidates at the same time and not on the candidates per frame (since ``Peak Fit`` processes and fits frames individually). The ranked spot candidates are then analysed to produce scoring metrics of the filter performance by comparison to the simulated spot positions.
+The plugin allows the spot filter and the analysis settings to be configured. The filtering is then performed on each frame in the image, candidates in the configured border are ignored and the combined list of spot candidates ranked. This ranking depends on the filter but is usually done using the pixel value in the filtered image at the spot candidate position. The ranking will be the same as that used when performing fitting within the ``Peak Fit`` plugin, however it can be performed on all the candidates at the same time and not on the candidates per frame (since ``Peak Fit`` processes and fits frames individually). The ranked spot candidates are then analysed to produce scoring metrics of the filter performance by comparison to the simulated spot positions.
 
 The two sets of coordinates are assigned as matches if they are within a configured distance.
 By default matching is performed using a nearest-neighbour algorithm assigning the closest pairs. This can be changed to process the candidates in order, attempting to find a free localisation that is within the match distance to the candidate. This simulates the way the candidates will be used during fitting with the highest ranked candidates being processed first, thus they will be likely to be fit to a localisation, even if it has a closer candidate (as that will be processed later). Optionally multiple matching can be used where a candidate can be matched to more than one localisation. This is useful when simulating high density data with overlapping localisations.
@@ -2260,7 +2260,7 @@ In addition the spot candidates can be assessed as matches if they are within a 
 
 where :math:`\log_2` is the logarithm using base 2. The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``.
 
-Any distance below the ``Lower distance`` is 1. Anything above the ``Match distance`` is 0. In between uses a ramp to set the score. The ramp is not linear but uses a cosine function. This smooths the transition at the ends of the range to make selection of the end points for assessment less critical; the ramp is linear in the exact centre of the range. Thus the ideal end points should be above and below the ideal scoring threshold.
+Any distance below the ``Lower distance`` is 1. Anything above the ``Match distance`` is 0. In between uses a ramp to set the score. The ramp is not linear but uses a sigmoid-like `smoother step <https://en.wikipedia.org/wiki/Smoothstep>`_ function. This smooths the transition at the ends of the range to make selection of the end points for assessment less critical; the ramp is linear in the exact centre of the range. Thus the ideal end points should be above and below the ideal scoring threshold.
 
 If matches are also using a signal factor a similar ramp is applied to produce a signal score and the final score computed as a product of the two. The match score is then used to accumulate a score for the spot filter.
 
@@ -2276,7 +2276,7 @@ The performance is then calculated by summing:
 
 The TP, FP and FN totals can be used to produced scoring metrics to assess the filters.
 
-Note that the use of a ramped score function based on distance (and signal factor) allows the comparison of scores between different filters, since some algorithms may identify spot candidates closer to the true localisation. Also note that if it is not clear at what level to set the match distance and signal factor then using a ramped score will produce the same results as repeating the analysis with multiple thresholds and averaging the score with the same ramped weighting for each scoring threshold.
+Note that the use of a ramped score function based on distance (and signal factor) allows the comparison of scores between different filters, since some algorithms may identify spot candidates closer to the true localisation. Also note that if it is not clear at what level to set the match distance and signal factor then using a ramped score will produce similar results as repeating the analysis with multiple thresholds and averaging the score with the same ramped weighting for each scoring threshold.
 
 
 Parameters
