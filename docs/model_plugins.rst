@@ -2824,6 +2824,11 @@ The following parameters can be configured:
    * - Neighbour height
      - See section :numref:`{number}: {name} <fitting_plugins:Multiple Peak Fitting Parameters>`.
 
+   * - Compute doublets
+     - Set to **true** to compute doublet (two spot) fits for all candidates successfully fit as a single spot.
+
+       See section :numref:`{number}: {name} <fitting_plugins:Multiple Peak Fitting Parameters>`.
+
    * - Duplicate distance
      - See section :numref:`{number}: {name} <fitting_plugins:Multiple Peak Fitting Parameters>`.
 
@@ -3057,7 +3062,7 @@ Note: The lower and upper bounds are set using a variety of measures suitable fo
 Benchmark Filter Analysis
 -------------------------
 
-Run different filtering methods on a set of benchmark fitting results produced by ``Fit Spot Data`` outputting performance statistics on the success of the filter. If these results are not available an error will be displayed when running the plugin.
+The ``Benchmark Filter Analysis`` plugin runs different filtering methods on a set of benchmark fitting results produced by ``Fit Spot Data`` and outputs performance statistics on each filter. If these results are not available an error will be displayed when running the plugin.
 
 The ``Benchmark Filter Analysis`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
 
@@ -3079,7 +3084,7 @@ Expanding Filter Sets
 
 Note that the plugin will detect if a filter set only contains 3 filters and determine if it can be expanded. The criteria for expansion are that the second filter has a value for each parameter equal or above the first filter. The first filter then forms the minimum value and the second filter the maximum value. The third filter must then have a value that is positive for each parameter where the second filter value was above the first filter value. The third filter then forms the increment for the parameters. Note that if the increment is infinity then it is ignored. This means that it is possible to create a series of values from minimum to maximum using the increment. Note that the increment does not have to be an exact factor of the range. The value is just incremented from the minimum until the maximum is reached (or exceeded).
 
-Note that a filter set file can be created using suitable ranges for the current fit results by the ``Fit Spot Data`` plugin using the ``Save filter range`` option. To avoid testing filters that assess similar properties the ``Fit Spot Data`` plugin disables certain filters. Currently EShift and Signal filtering are disabled as they are similar to Shift and SNR. They can be renabled by changing the third filter value from Infinity to a suitable increment. The Z depth filtering is also disabled as 3D fitting using astigmatism is experimental and not supported in the benchmarking plugins. If a filter set file is saved using ``Fit Spot Data`` then the file will be pre-selected in the dialog for convenience.
+Note that a filter set file can be created using suitable ranges for the current fit results by the ``Fit Spot Data`` plugin using the ``Save filter range`` option. To avoid testing filters that assess similar properties the ``Fit Spot Data`` plugin disables certain filters. Currently EShift and Signal filtering are disabled as they are similar to Shift and SNR. They can be renabled by editing the filter file and changing the third filter value from Infinity to a suitable increment. The Z depth filtering is also disabled as 3D fitting using astigmatism is experimental and not supported in the benchmarking plugins. If a filter set file was saved using ``Fit Spot Data`` then the file will be pre-selected in the dialog for convenience.
 
 If the filter set can be expanded the plugin will compute the number of combinations that will be created after expansion. It will then ask the user if they would like to expand the filters.
 
@@ -3154,7 +3159,7 @@ The scoring scheme is shown in :numref:`Figure %s <fig_filter_analysis_scoring_s
            A spot candidate that was fitted and rejected by the filter and does not match a localisation.
 
 
-Classically a match is assigned if a predicted result and a localisation are within a distance threshold. This makes the choice of distance threshold critical. It also means that methods that get very close to the answer are not scored better than methods that get just close enough to the answer. This can be overcome by repeating the analysis multiple times with different distance thresholds and averaging the scores. An alternative is to use a ramped scoring function where the degree of match can be varied from 0 to 1. When using ramped scoring functions the fractional allocation of scores is performed, i.e. candidates are treated as if they both match and unmatch and the scores accumulated using fractional counts. This results in an equivalent to multiple analysis using different thresholds and averaging of the scores, but it can be performed in one iteration.
+Classically a match is assigned if a predicted result and a localisation are within a distance threshold. This makes the choice of distance threshold critical. It also means that methods that get very close to the answer are not scored better than methods that get just close enough to the answer. This can be overcome by repeating the analysis multiple times with different distance thresholds and averaging the scores. An alternative is to use a ramped scoring function where the degree of match can be varied from 0 to 1. When using ramped scoring functions the fractional allocation of scores is performed, i.e. candidates are treated as if they both match and unmatch and the scores accumulated using fractional counts. This results in a similar analysis as using multiple different thresholds and averaging of the scores, but it can be performed in one iteration.
 
 The choice of the distance thresholds for benchmarking a microscope setup can be made using the wavelength of light (:math:`\lambda`) and the expected number of photons. The upper threshold can be set using the Abbe limit:
 
@@ -3392,6 +3397,8 @@ The following parameters can be adjusted:
    * - Residuals Threshold
      - The threshold for the residuals analysis where a single spot would be fit again as a double spot. The residuals are a measure of how elliptical the Gaussian data is compared to the Gaussian spot; this elliptical shape is assumed to be due to two overlapping spots. A lower threshold will attempt a doublet fit for more candidates. Set to 1.0 to disable.
 
+       This option is only available if the ``Compute doublets`` option was used during fitting.
+
    * - Duplicate distance
      - The distance where two spots are considered equal. This is used to filter later spot fit results where a candidate has drifted to fit another previously identified spot.
 
@@ -3453,7 +3460,7 @@ The following parameters can be adjusted:
    * - Partial signal factor
      - The signal factor defining the maximum score for a match between a fitted localisation and the true localisation. The value is expressed relative to the signal factor used with the ``Fit Spot Data`` plugin (since the matches of results to localisations are computed within that program).
 
-       Set to the same as the ``Upper signal distance`` to ignore the ramped scoring function. Otherwise matches with a signal-factor ``Partial`` and ``Upper signal factor`` will have a score between 0 and 1.
+       Set to the same as the ``Upper signal factor`` to ignore the ramped scoring function. Otherwise matches with a signal-factor between ``Partial`` and ``Upper signal factor`` will have a score between 0 and 1.
 
    * - Depth recall analysis
      - Produce a histogram of the recall verses z-depth of the original localisations.
@@ -3484,11 +3491,9 @@ The following parameters can be adjusted:
        - ``Step Search``: Search using the parameter range of the input filters with a configured number of steps.
 
    * - Repeat evolve
-     - Set to **true** to repeat the optimisation performed by the ``Evolve`` setting when re-running the plugin with identical input. If **false** the plugin will allow configuration of the output display options for the previous results cached for the specified settings.
+     - Set to **true** to repeat the optimisation performed by the ``Evolve`` setting when re-running the plugin with identical input and the same basic settings. If **false** the plugin will allow configuration of the output display options for the previous results cached for the specified settings.
 
-       This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the evolve setting was used as the optimisation is randomly seeded.
-
-       This option is useful to experiment with different ``Evolve`` settings for the same input results and filter settings.
+       This option only applies when re-running the plugin where the same ``Evolve`` option was previously used. In this case it may not be desired to reuse the cached results as the ``Evolve`` options are to be changed. Selecting ``Repeat evolve`` will proceed with a new analysis where the ``Evolve`` option settings can be configured in a subsequent dialog.
 
    * - Title
      - Add a title for the analysis to the results tables. This can be used when running multiple repeats of the plugin with results from different filters and fitting algorithms.
