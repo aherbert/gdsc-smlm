@@ -2125,34 +2125,21 @@ The following parameters can be configured:
    * - Background
      - The background level in photons. This is subject to Poisson noise. Convert to actual ADU value by multiplying by the product of the camera gain, EM-gain and quantum efficiency.
 
-   * - EM gain
-     - The EM-gain of the simulated camera.
+   * - Camera type
+     - The type of camera. Options for the camera are set using the ``...`` button. This includes:
 
-   * - Camera gain
-     - The camera gain (in ADU/electron).
-
-   * - Quantum efficiency
-     - The efficiency converting photons to electrons in the camera.
-
-   * - Read noise
-     - The average Gaussian read noise to add to each pixel (in electrons).
-
-   * - Bias
-     - The bias offset to add to the image. Allows negative noise values to be displayed.
+       * EM gain: The EM-gain of the simulated camera.
+       * Camera gain: The camera gain (in ADU/electron).
+       * Quantum efficiency: The efficiency converting photons to electrons in the camera.
+       * Read noise: The average Gaussian read noise to add to each pixel (in electrons).
+       * Bias: The bias offset to add to the image. Allows negative noise values to be displayed on unsigned 16-bit images.
+       * Camera Model Name: The name of the sCMOS camera model containing the per-pixel calibration.
 
    * - PSF Model
-     - Specify the PSF model to use. The ``Image PSF`` option is only available if a valid PSF image is open.
-
-   * - Enter width
-     - Select this option to enter the PSF width (in nm) for the Gaussian/Airy PSF. A second dialog will prompt the user for the PSF SD (Standard Deviation). For an Airy PSF the SD is converted to the Airy pattern width by dividing by 1.323.
-
-       If not selected a second dialog will prompt the user for the emission wavelength of the fluorophore and the numerical aperture of the microscope. These will be used to define the PSF width.
+     - Specify the PSF model to use. Options for the PSF model are set using the ``...`` button including setting the width of the Gaussian/Airy PSF, selecting the astigmatism model or the image PSF. The ``Image PSF`` option is only available if a valid PSF image is open.
 
    * - Particles
      - The number of molecules to simulate.
-
-   * - Density
-     - The density of the molecules in squared micrometres.
 
    * - Min photons
      - The minimum number of photons for a localisation.
@@ -2179,10 +2166,13 @@ The following parameters can be configured:
      - Set to **true** to allow the histograms to be selected, otherwise all histograms are shown.
 
    * - Histogram bins
-     - The number of bins in the histogram.
+     - The number of bins in the histogram. Set to zero to auto-calibrate.
 
    * - Remove outliers
      - Remove outliers before plotting histograms. Outliers are 1.5 times the interquartile range above/below the upper/lower quartiles. Outliers are always removed for the Precision data since low photon signals can produce extreme precision values.
+
+   * - Depth-of-field
+     - The depth-of-field used to summarise the in focus localisations.
 
 
 .. index:: ! Load Benchmark Data
