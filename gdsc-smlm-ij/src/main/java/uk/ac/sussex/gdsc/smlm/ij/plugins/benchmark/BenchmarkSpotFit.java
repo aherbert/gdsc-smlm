@@ -2851,11 +2851,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private static String createHeader() {
     final StringBuilder sb = new StringBuilder(512);
 
-    sb.append(TABLE_PREFIX).append(
-        "\t% nP\t\t% nN\t\tTotal\t\tcTP\t\tcFP\t" + "cRecall\t\tcPrecision\t\tcF1\t\tcJaccard\t"
-            + "Fail cTP\t\tFail cFP\t\tTP\t\tFP\t\tRecall\t\tPrecision\t\tF1\t\tJaccard\t"
-            + "pF1\t\tpJaccard\t"
-            + "Med.Distance (nm)\t\tMed.Depth (nm)\t\tCorrelation\t\tRanked\t\tSlope\t");
+    sb.append(TABLE_PREFIX)
+        .append("\t% nP\t% nN\tTotal\tcTP\tcFP\t" + "cRecall\tcPrecision\tcF1\tcJaccard\t"
+            + "Fail cTP\tFail cFP\tTP\tFP\tRecall\tPrecision\tF1\tJaccard\tpF1\tpJaccard\t"
+            + "Med.Distance (nm)\tMed.Depth (nm)\tCorrelation\tRanked\tSlope\t");
 
     createFilterCriteria();
     for (final FilterCriteria f : filterCriteria) {
