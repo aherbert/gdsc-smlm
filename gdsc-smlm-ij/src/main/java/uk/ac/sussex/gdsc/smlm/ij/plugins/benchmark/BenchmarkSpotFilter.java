@@ -1709,9 +1709,10 @@ public class BenchmarkSpotFilter implements PlugIn {
     final double s = simulationParameters.sd / simulationParameters.pixelPitch;
     final double sa = getSa() / simulationParameters.pixelPitch;
     final StringBuilder sb = new StringBuilder(512);
-    sb.append("Finds spots in the benchmark image created by CreateData plugin.\nPSF width = ")
-        .append(MathUtils.rounded(s)).append(" px (sa = ").append(MathUtils.rounded(sa))
-        .append(" px). HWHM = ").append(MathUtils.rounded(s * Gaussian2DFunction.SD_TO_HWHM_FACTOR))
+    sb.append("Finds spots in the benchmark image created by the " + CreateData.TITLE
+        + " plugin.\nPSF width = ").append(MathUtils.rounded(s)).append(" px (sa = ")
+        .append(MathUtils.rounded(sa)).append(" px). HWHM = ")
+        .append(MathUtils.rounded(s * Gaussian2DFunction.SD_TO_HWHM_FACTOR))
         .append(" px\nSimulation depth = ").append(MathUtils.rounded(simulationParameters.depth))
         .append(" nm");
     if (simulationParameters.fixedDepth) {
