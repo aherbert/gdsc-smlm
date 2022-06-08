@@ -170,6 +170,7 @@ public class BenchmarkFit implements PlugIn {
     double offsetRangeX;
     double offsetRangeY;
     double offsetRangeZ;
+    long seed;
 
     boolean backgroundFitting;
     boolean estimateBackground;
@@ -187,6 +188,7 @@ public class BenchmarkFit implements PlugIn {
       offsetRangeX = 0.5;
       offsetRangeY = 0.5;
       offsetRangeZ = 0.5;
+      seed = RandomSource.createLong();
       backgroundFitting = true;
       estimateBackground = true;
       signalFitting = true;
@@ -208,6 +210,7 @@ public class BenchmarkFit implements PlugIn {
       offsetRangeX = source.offsetRangeX;
       offsetRangeY = source.offsetRangeY;
       offsetRangeZ = source.offsetRangeZ;
+      seed = source.seed;
       backgroundFitting = source.backgroundFitting;
       estimateBackground = source.estimateBackground;
       signalFitting = source.signalFitting;
@@ -777,6 +780,7 @@ public class BenchmarkFit implements PlugIn {
         egd.addSlider("Offset_range_x", 0, 2.5, settings.offsetRangeX);
         egd.addSlider("Offset_range_y", 0, 2.5, settings.offsetRangeY);
         egd.addSlider("Offset_range_z", 0, 2.5, settings.offsetRangeZ);
+        egd.addStringField("Seed", Long.toString(settings.seed), 20);
         egd.setSilent(silent);
         egd.showDialog(true, gd);
         if (egd.wasCanceled()) {
@@ -785,6 +789,11 @@ public class BenchmarkFit implements PlugIn {
         settings.offsetRangeX = Math.max(0, egd.getNextNumber());
         settings.offsetRangeY = Math.max(0, egd.getNextNumber());
         settings.offsetRangeZ = Math.max(0, egd.getNextNumber());
+        try {
+          settings.seed = Long.parseLong(egd.getNextString());
+        } catch (NumberFormatException ignore) {
+          // Do not change the seed
+        }
         return true;
       }
     });
@@ -1176,7 +1185,8 @@ public class BenchmarkFit implements PlugIn {
       final double[] max = {Math.max(0, settings.offsetRangeX), Math.max(0, settings.offsetRangeY),
           Math.max(0, settings.offsetRangeZ)};
       final double[] min = {0 - max[0], 0 - max[1], 0 - max[2]};
-      final BoxSampler sampler = BoxSampler.of(RandomSource.XO_SHI_RO_256_PP.create(), min, max);
+      final BoxSampler sampler =
+          BoxSampler.of(RandomSource.XO_SHI_RO_256_PP.create(settings.seed), min, max);
       for (int i = 0; i < settings.offsetPoints; i++) {
         final double[] offset = origin.clone();
         final double[] v = sampler.sample();
