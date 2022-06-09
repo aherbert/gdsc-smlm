@@ -416,7 +416,7 @@ Model Plugins
      - Scores a filter against a set of benchmark fitting results.
 
    * - :ref:`model_plugins:Doublet Analysis`
-     - Fits candidate spots identified by the ``Filter Spot Data`` plugin as a single or double spot (doublet) and scores the results.
+     - Fits candidates in a benchmark localisation image as a single or double spot (doublet) and scores the results.
 
    * - :ref:`model_plugins:Doublet Filter Analysis`
      - Filters all the fit results produced by the ``Doublet Analysis`` plugin using the specified filter settings and scores the results.
