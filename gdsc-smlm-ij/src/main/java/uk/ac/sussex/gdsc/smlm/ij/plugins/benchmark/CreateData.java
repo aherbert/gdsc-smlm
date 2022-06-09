@@ -1205,8 +1205,11 @@ public class CreateData implements PlugIn {
 
       final List<LocalisationModel> localisations =
           imageModel.createImage(molecules, settings.getFixedFraction(), totalSteps,
-              settings.getPhotonsPerSecond() / settings.getStepsPerSecond(), correlation,
-              settings.getRotateDuringSimulation());
+              // Assume the photons per second max is equal to the photons per second
+              // when not using a uniform distribution
+              0.5 * (settings.getPhotonsPerSecond() + settings.getPhotonsPerSecondMaximum())
+                  / settings.getStepsPerSecond(),
+              correlation, settings.getRotateDuringSimulation());
 
       // Re-adjust the fluorophores to the correct time
       if (settings.getStepsPerSecond() != 1) {
@@ -2030,8 +2033,7 @@ public class CreateData implements PlugIn {
   /**
    * Creates the photon distribution.
    *
-   * @return A photon distribution loaded from a file of floating-point values with the specified
-   *         population mean.
+   * @return A photon distribution.
    */
   private RealDistribution createPhotonDistribution() {
     if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution())) {
