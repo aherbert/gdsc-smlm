@@ -246,8 +246,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     static final String[] MATCHING_METHODS = {"Simple", "By residuals", "By candidate"};
     static final String[] SELECTION_CRITERIAS = {"R2", "AIC", "BIC", "ML AIC", "ML BIC"};
     static final String[] NAMES = {"Candidate:N results in candidate",
-        "Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
-        "Multiples:Neighbours", "Singles:Almost", "Doublets:Almost", "Multiples:Almost"
+        "Assigned Result:N results in assigned spot", "Singles Neighbours:Neighbours",
+        "Doublets Neighbours:Neighbours", "Multiples Neighbours:Neighbours",
+        "Singles Almost:Almost", "Doublets Almost:Almost", "Multiples Almost:Almost"
 
     };
     static final String[] NAMES2 =
@@ -1691,7 +1692,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     final double sa = getSa();
     ImageJUtils.addMessage(gd,
-        "Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
+        "Fits the benchmark image created by the " + CreateData.TITLE
+            + " plugin.\nPSF width = %s, adjusted = %s",
         MathUtils.rounded(simulationParameters.sd / simulationParameters.pixelPitch),
         MathUtils.rounded(sa));
 
@@ -1711,9 +1713,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       cal.setReadNoise(simulationParameters.readNoise);
       cal.setBias(simulationParameters.bias);
       cal.setCameraType(simulationParameters.cameraType);
-      fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
-
+      // Setting a new calibration will invalidate the camera model
       fitConfig.setCalibration(cal.getCalibration());
+      fitConfig.setCameraModelName(simulationParameters.cameraModelName);
+      fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
     }
 
     // Support for using templates
@@ -2143,10 +2146,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       .append(MathUtils.rounded(simulationParameters.averageSignal)).append('\t')
       .append(MathUtils.rounded(simulationParameters.sd)).append('\t')
       .append(MathUtils.rounded(simulationParameters.pixelPitch)).append('\t')
-      .append(MathUtils.rounded(getSa() * simulationParameters.pixelPitch)).append('\t')
-      .append(MathUtils.rounded(simulationParameters.gain)).append('\t')
-      .append(MathUtils.rounded(simulationParameters.readNoise)).append('\t')
-      .append(MathUtils.rounded(simulationParameters.background)).append('\t')
+      .append(MathUtils.rounded(getSa() * simulationParameters.pixelPitch)).append('\t');
+    // @formatter:on
+
+    // Camera specific
+    CreateData.addCameraDescription(sb, simulationParameters).append('\t');
+
+    sb.append(MathUtils.rounded(simulationParameters.background)).append('\t')
+    // @formatter:off
       .append(MathUtils.rounded(simulationParameters.noise)).append('\t')
       .append(MathUtils.rounded(simulationParameters.averageSignal / simulationParameters.noise))
         .append('\t')
@@ -2479,8 +2486,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    */
   private static String createSummaryHeader() {
     final StringBuilder sb = new StringBuilder(512);
-    sb.append("Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\t"
-        + "ReadNoise (ADUs)\tB (photons)\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
+    sb.append("Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\t"
+        + "Camera\tB (photons)\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
     for (final String name : Settings.NAMES2) {
       sb.append(name).append('\t');
     }
@@ -2868,7 +2875,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     config.setResidualsThreshold(residualsScore.bestResiduals[2]);
 
     final String filename =
-        BenchmarkFilterAnalysis.getFilename("Template_File", settings.templateFilename);
+        BenchmarkFilterAnalysis.getFilename("Template_File", settings.templateFilename, ".json");
     if (filename != null) {
       settings.templateFilename = filename;
       final TemplateSettings.Builder settings = TemplateSettings.newBuilder();
