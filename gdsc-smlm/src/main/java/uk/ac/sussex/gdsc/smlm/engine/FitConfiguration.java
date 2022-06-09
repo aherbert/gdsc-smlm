@@ -332,6 +332,8 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   /**
    * Merge the calibration.
    *
+   * <p>Note: Setting the calibration will invalidate the camera model.
+   *
    * @param calibration the new calibration
    */
   public void mergeCalibration(Calibration calibration) {
@@ -342,6 +344,8 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
 
   /**
    * Sets the calibration.
+   *
+   * <p>Note: Setting the calibration will invalidate the camera model.
    *
    * @param calibration the new calibration
    */
@@ -1692,6 +1696,8 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   /**
    * Sets the camera gain to use when evaluating a fitted peak's localisation precision.
    *
+   * <p>Note: Setting the gain will invalidate the camera model.
+   *
    * @param gain the camera gain to use when evaluating a fitted peak's localisation precision.
    */
   public void setGain(double gain) {
@@ -1707,6 +1713,8 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    *
    * <p>Specifying a CCD camera is relevant when validating results using the localisation
    * precision.
+   *
+   * <p>Note: Setting a camera type will invalidate the camera model.
    *
    * @param cameraType the new camera type
    */
@@ -1759,6 +1767,8 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    * Sets the bias (used for maximum likelihood estimation to evaluate the correct value of the
    * observed count).
    *
+   * <p>Note: Setting the bias will invalidate the camera model.
+   *
    * @param bias the camera bias
    */
   public void setBias(double bias) {
@@ -1768,6 +1778,8 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
 
   /**
    * Sets the camera read noise (used for maximum likelihood estimation).
+   *
+   * <p>Note: Setting the read noise will invalidate the camera model.
    *
    * @param readNoise the camera read noise (used for maximum likelihood estimation)
    */
