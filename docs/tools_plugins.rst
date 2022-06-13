@@ -406,6 +406,8 @@ The ``Overlay Image`` plugin must be run after selecting the image to overlay. T
    * - Replace overlay
      - Select this to replace the current overlay. Uncheck this to add to the current overlay (i.e. combine overlays).
 
+Clear an overlay using the ``Image > Overlay > Remove Overlay`` command.
+
 
 .. index:: ! Image Kernel Filter
 
@@ -505,3 +507,4 @@ The following parameters can be specified:
 
        The files option can be used to extract the image frames into small stack images. The number of slices per image and the output directory can be configured using the ``...`` button. This option is useful if the original input image is too large to read in ImageJ, for example if it is a BIG-TIFF with a size over 4GB.
 
+       Saving to a series of files can be stopped using the ``Escape`` key. 
