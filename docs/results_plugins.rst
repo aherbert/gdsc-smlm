@@ -2149,7 +2149,7 @@ The following parameters can be configured:
      - If **true** the image will be square and may contain more than one cell. Otherwise a single cell is created.
 
    * - Border
-     - The number of extra pixels to use between the cell and the edge of the image, or other cells. A border of 1 is always used to allow the cells to be distinct.
+     - The number of *extra* pixels to use between the cell and the edge of the image, or other cells. A border of 1 is always used to allow the cells to be distinct.
 
    * - 2D
      - If **true** the output will be a 2D image of the central slice through the cell. Othewise a 3D image is created.
