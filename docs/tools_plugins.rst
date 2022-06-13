@@ -24,7 +24,7 @@ Provides a filter plugin for smoothing an image (see :numref:`Table %s <table_sm
     * - (A) Standard smoothing for a 16-bit image.
 
         |smooth_image_standard_png|
-    * - (B) Difference-of-smoothing for a 32-bit image.
+    * - (B) Difference-of-smoothing for a 16-bit image.
 
         |smooth_image_difference_png|
 
@@ -59,6 +59,25 @@ The following algorithms are available:
 
    * - Median
      - Compute the median in a square region. The region is rounded to integer pixels.
+
+The following additional parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Auto adjust contrast
+     - Adjust the contrast of the preview using the min and max value of the smoothed image.
+
+   * - Allow inversion
+     - Allow the second smoothing parameter of a difference filter to be smaller that the first. This will create an inverted image where bright spots are dark and possibly surrounded by a ring. If not enabled the plugin raises an error and will disable an active current preview.
+
+   * - Preview
+     - If **true** show a live preview of the smoothing filter.
+
 
 Use the ``Preview`` button to see the effect of smoothing. If you click ``OK`` the plugin will perform smoothing on the entire stack or optionally just the current frame.
 
