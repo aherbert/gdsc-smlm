@@ -463,7 +463,7 @@ public class MedianFilter implements PlugInFilter {
     final long nanoseconds = System.nanoTime() - start;
     ImageJUtils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame",
         settings.radius, settings.interval, settings.blockSize,
-        TextUtils.millisToString(nanoseconds),
+        TextUtils.millisToString(TimeUnit.NANOSECONDS.toMillis(nanoseconds)),
         TextUtils.nanosToString(Math.round(nanoseconds / (double) imp.getStackSize())));
   }
 
