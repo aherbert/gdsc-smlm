@@ -656,6 +656,12 @@ The fields must be defined so the plugin knows how to read the data. Note that t
      -
      - NaN
 
+   * - Precision method
+     - The method used to estimate the localisation precision.
+     - Enumeration
+     -
+     - NA
+
 If any field does not exist then it will be set to the default value. Note that the GDSC SMLM localisation model is based around approximating the point spread function (PSF) of a microscope using a 2D Gaussian. If the localisation results have been produced using another PSF model then either the ``Sx`` and ``Sy`` fields can be omitted or the PSF data should be converted to a Gaussian approximation before loading the data.
 
 
