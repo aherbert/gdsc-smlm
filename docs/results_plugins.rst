@@ -376,7 +376,7 @@ The following options are then available:
      - The exposure time for a single frame in milliseconds.
 
 
-Note that not all the calibration parameters have to be configured. Not all the plugins require every parameter. The most common parameters used for analysis are ``Calibration`` and ``Exposure time``.
+Note that not all the calibration parameters have to be configured to allow the dataset to be used in analysis. The most common parameters used for analysis are ``Calibration`` and ``Exposure time``. If an analysis plugin requires some additional calibration then it should provide a warning message stating the missing calibration. This can be added using the ``Calibrate Results`` plugin.
 
 
 .. index:: ! Update Results Bounds
