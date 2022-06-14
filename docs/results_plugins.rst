@@ -1086,7 +1086,7 @@ The following parameters are available:
      - The border used to reduce the current data bounds. Set to zero to ignore.
 
    * - Select region
-     - Select this option to construct a region.
+     - Select this option to construct a region using XY origin and the width and height.
 
    * - X
      - The region X origin.
