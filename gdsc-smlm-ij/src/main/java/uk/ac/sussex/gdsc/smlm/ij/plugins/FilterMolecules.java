@@ -246,6 +246,11 @@ public class FilterMolecules implements PlugIn {
       results.forEach(this::processTrackLength);
       store(); // For the final track
 
+      if (msdList.size() <= 1) {
+        IJ.error(TITLE, "Cannot filter a single track");
+        return;
+      }
+
       // Create histogram of D and lengths
       // Add sliders for the thresholds.
       // Dynamically put ROI onto the histograms for the thresholds.
@@ -278,11 +283,17 @@ public class FilterMolecules implements PlugIn {
       final double diffusionCoefficientMax = MathUtils.max(msds);
       final String msg = String.format("Average D per track = %s um^2/s. Max = %s um^2/s",
           MathUtils.rounded(diffusionCoefficientMean), MathUtils.rounded(diffusionCoefficientMax));
-      final HistogramPlot diffusionCoefficientHistogramPlot =
-          new HistogramPlotBuilder("Trace Diffusion Coefficient", StoredData.create(msds),
-              "D (um^2/s)").setRemoveOutliersOption(1).setPlotLabel(msg).build();
-      diffusionCoefficientHistogramPlot.show(wo);
+      final HistogramPlotBuilder builder = new HistogramPlotBuilder("Trace Diffusion Coefficient",
+          StoredData.create(msds), "D (um^2/s)").setRemoveOutliersOption(1).setPlotLabel(msg);
+      HistogramPlot diffusionCoefficientHistogramPlot = builder.build();
+      diffusionCoefficientHistogramPlot.draw();
+      final double[] limits = diffusionCoefficientHistogramPlot.getLimits();
+      if (limits[0] == limits[1]) {
+        diffusionCoefficientHistogramPlot = builder.setRemoveOutliersOption(0).build();
+      }
+
       final Plot diffusionCoefficientPlot = diffusionCoefficientHistogramPlot.getPlot();
+      ImageJUtils.display(diffusionCoefficientPlot.getTitle(), diffusionCoefficientPlot, 0, wo);
 
       // Histogram the lengths
       final HistogramPlot lengthHistogramPlot =
@@ -303,8 +314,10 @@ public class FilterMolecules implements PlugIn {
       double min = xvalues[0];
       double max = xvalues[xvalues.length - 1];
       maxDiffusionCoefficientHistogram = diffusionCoefficientHistogramPlot.getPlotMaxY();
-      if (max - min < 5) {
-        // Because sliders are used when the range is <5 and floating point
+      if ((max - min) < 5 && (max - min) > 0.1) {
+        // Because sliders are used when the range is <5 and floating point.
+        // If the range is too small then the default scaling of 50 will not create a useful
+        // slider.
         gd.addSlider("Lower_D_threshold", min, max, settings.lowerDThreshold);
         gd.addSlider("Upper_D_threshold", min, max, settings.upperDThreshold);
       } else {
@@ -561,9 +574,6 @@ public class FilterMolecules implements PlugIn {
     MemoryPeakResults.addResults(out);
     return out;
   }
-
-  // TODO - improve this to have suffix or full name options.
-  // Update the docs for the plugin.
 
   /**
    * Creates the results name.
