@@ -398,7 +398,7 @@ The plugin then presents a dialog where the bounds can be updated. The auto-boun
 Convert Results
 ---------------
 
-Allows results held in memory to be converted to different units. For example this can be used to correct data loaded from file. It is not possible to convert results that do not have a calibration.
+Allows results held in memory to be converted to different units. For example this can be used to correct data loaded from file to the units required by an analysis plugin (e.g. pixel units). It is not possible to convert results that do not have a calibration.
 
 When the plugin is run it presents a selection of the current results that are held in memory. If no results are available then an error is displayed. The user must select the results to update.
 
