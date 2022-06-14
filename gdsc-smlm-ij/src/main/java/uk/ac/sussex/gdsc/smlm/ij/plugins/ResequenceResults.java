@@ -168,51 +168,47 @@ public class ResequenceResults implements PlugIn {
    * Procedure to resequence the results.
    */
   private static class ResequencePeakResultProcedure implements PeakResultProcedure {
-    final int start;
     final TrackProgress tracker;
     final int block;
     final int skip;
+    /** The current frame in the results. */
+    int time;
+    /** The mapped frame in the results. */
+    int mapped;
+    /** The remaining count of positions in the block. */
+    int remaining;
 
     ResequencePeakResultProcedure(int start, TrackProgress tracker, int block, int skip) {
-      this.start = start;
+      // Since time = 0 the first frame of 1 requires an increment to mapped
+      this.mapped = start - 1;
       this.tracker = tracker;
       this.block = block;
       this.skip = skip;
+      remaining = block;
     }
 
     @Override
     public void execute(PeakResult result) {
-      int time = 1; // The current frame in the results
-      int mapped = start; // The mapped frame in the results
-      int blockSize = 1; // The current block size
-
-      boolean print = (tracker != null);
-
       if (time != result.getFrame()) {
         // Update the mapped position
         while (time < result.getFrame()) {
           // Move to the next position
+          time++;
           mapped++;
 
           // Check if this move will make the current block too large
-          if (++blockSize > block) {
+          if (--remaining < 0) {
             // Skip
             mapped += skip;
-            blockSize = 1;
+            remaining += block;
           }
-
-          time++;
         }
 
-        time = result.getFrame();
-        print = (tracker != null);
+        if (tracker != null) {
+          tracker.log("Map %d -> %d", time, mapped);
+        }
       }
-
       result.setFrame(mapped);
-
-      if (print) {
-        tracker.log("Map %d -> %d", time, mapped);
-      }
     }
   }
 
