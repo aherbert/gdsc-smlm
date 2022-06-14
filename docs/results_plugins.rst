@@ -2077,9 +2077,9 @@ The ``Spot Inspector`` plugin allows visualisation of the fitted spots from a re
 
 The ``Spot Inspector`` orders the results using a user-selected score. Then the pixels surrounding each spot centre are extracted into an image stack in the rank order.
 
-The plugin creates a results table containing all the results in their rank order. If a line on the table is double-clicked using the mouse then the appropriate slice of the spot image stack is selected, and if open the results source image stack with the spot selected using an overlay.
+The plugin creates a results table containing all the results in their rank order. If a line on the table is double-clicked using the mouse then the appropriate slice of the spot image is selected; if the results source image is open the spot is selected using an overlay.
 
-If the ``Shift`` key is held down when clicking the results table any spot from the entire results set will be shown on the spot image using a multi-point ROI. This can produce many labels on the image which can be dismissed by clicking on the image or using ``Edit > Selection > Select None`` (``Ctrl+Shift+A``).
+If the ``Shift`` key is held down when double-clicking the results table all spots from the entire results set will be shown on the spot image using a multi-point ROI. This option is used to show if the selected localisation has any other localisations in the displayed region, for example if there is local structure. This can produce many labels on the image which can be dismissed by clicking on the image or using ``Edit > Selection > Select None`` (``Ctrl+Shift+A``).
 
 The following parameters can be configured:
 
