@@ -181,6 +181,9 @@ public class LoadLocalisations implements PlugIn {
       // Convert precision to nm
       final TypeConverter<DistanceUnit> distanceConverter =
           calibrationWriter.getDistanceConverter(DistanceUnit.NM);
+      // Convert XY to pixels for original coordinates
+      final TypeConverter<DistanceUnit> pixelConverter =
+          calibrationWriter.getDistanceConverter(DistanceUnit.PIXEL);
 
       final MemoryPeakResults results = new MemoryPeakResults();
       results.setName(name);
@@ -204,9 +207,9 @@ public class LoadLocalisations implements PlugIn {
         for (int i = 0; i < size(); i++) {
           loc = get(i);
           final float intensity = (loc.intensity <= 0) ? 1 : (float) (loc.intensity);
-          final float x = (loc.x);
-          final float y = (loc.y);
-          final float z = (loc.z);
+          final float x = loc.x;
+          final float y = loc.y;
+          final float z = loc.z;
 
           float[] params;
           switch (psfType) {
@@ -224,8 +227,10 @@ public class LoadLocalisations implements PlugIn {
             default:
               throw new NotImplementedException("Unsupported PSF type: " + psfType);
           }
+          final int origX = (int) pixelConverter.convert(x);
+          final int origY = (int) pixelConverter.convert(y);
           final AttributePeakResult peakResult =
-              new AttributePeakResult(loc.time, (int) x, (int) y, 0, 0, 0, 0, params, null);
+              new AttributePeakResult(loc.time, origX, origY, 0, 0, 0, 0, params, null);
           peakResult.setId(loc.id);
           peakResult.setCategory(loc.category);
           if (loc.precision > 0) {
