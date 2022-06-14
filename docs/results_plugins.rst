@@ -1389,7 +1389,7 @@ The following parameters can be set:
 Analysis
 ~~~~~~~~
 
-The selected object mask is analysed for objects. An object is assigned using contiguous pixels with the same value. Object pixels are be joined using 4-connected edges, not 8-connected neighbours. This allows a single line of diagonal pixels to divide two objects.
+The selected object mask is analysed for objects. An object is assigned using contiguous pixels with the same value. Object pixels are joined using 4-connected edges, not 8-connected neighbours. This allows a single line of diagonal pixels to divide two objects.
 
 The 2D dimensions from the bounds of the results set are then mapped onto the object mask dimensions to create scaling factors. For example a results set with dimensions 512x512 can be mapped to a mask of 1024x1024 with a scaling factor of 2. The mapping is performed in each dimension allowing use of an object mask that does not match the original rectangle ratio of the results set. (Note that the dimensions of the results set can be displayed using the ``Summarise Results`` plugin.) However it is normal for a mask to be created using an image taken on the same camera as the source image for the super-resolution dataset to allow masking image objects, for example cells.
 
