@@ -261,8 +261,9 @@ public class TraceMatchCalculator implements PlugIn {
 
     final MatchResult result =
         MatchCalculator.analyseResults2D(p1, p2, distanceThreshold, tp, fp, fn, pairs);
-    final MatchResult result2 =
-        MatchCalculator.analyseResults2D(p1, p3, distanceThreshold, tp2, fp2, fn2, pairs2);
+    final MatchResult result2 = p3 != null
+        ? MatchCalculator.analyseResults2D(p1, p3, distanceThreshold, tp2, fp2, fn2, pairs2)
+        : null;
 
     // Create output
     Consumer<String> resultsOutput;
@@ -348,7 +349,7 @@ public class TraceMatchCalculator implements PlugIn {
     final StringBuilder sb = new StringBuilder();
     addResult(resultsOutput, sb, settings.inputOption1, settings.inputOption2, distanceThreshold,
         result);
-    if (p3 != null) {
+    if (result2 != null) {
       addResult(resultsOutput, sb, settings.inputOption1, settings.inputOption3, distanceThreshold,
           result2);
     }
