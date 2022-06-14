@@ -113,7 +113,7 @@ public class CropResults implements PlugIn {
     settings = SettingsManager.readCropResultsSettings(0).toBuilder();
 
     // Show a dialog allowing the results set to be filtered
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    final ExtendedGenericDialog gd = createDialog(roiMode);
     gd.addMessage("Select a dataset to crop");
     ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
     gd.showDialog();
@@ -150,8 +150,7 @@ public class CropResults implements PlugIn {
   }
 
   private boolean showCropDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(HelpUrls.getUrl("crop-results"));
+    final ExtendedGenericDialog gd = createDialog(false);
 
     final Rectangle bounds = results.getBounds(true);
     results.is3D();
@@ -437,8 +436,7 @@ public class CropResults implements PlugIn {
   }
 
   private boolean showRoiCropDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(HelpUrls.getUrl("roi-crop-results"));
+    final ExtendedGenericDialog gd = createDialog(true);
 
     final String[] items = titles.toArray(new String[0]);
     gd.addMessage("Use ROI from ...");
@@ -457,6 +455,12 @@ public class CropResults implements PlugIn {
     gd.collectOptions();
 
     return validateOutputName();
+  }
+
+  private static ExtendedGenericDialog createDialog(boolean roiMode) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addHelp(HelpUrls.getUrl(roiMode ? "roi-crop-results" : "crop-results"));
+    return gd;
   }
 
   private void roiCropResults() {
