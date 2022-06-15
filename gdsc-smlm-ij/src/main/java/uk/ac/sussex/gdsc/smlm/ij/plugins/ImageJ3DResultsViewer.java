@@ -1405,11 +1405,18 @@ public class ImageJ3DResultsViewer implements PlugIn {
         return;
       }
 
+      // This settings (true by default) allows the selection outline (which is a custom switch
+      // rendered before the standard content) to be rendered correctly. Otherwise when transparent
+      // but not dynamic transparent, all selection outlines are rendered first and then the
+      // standard content is on top.
+      univ.getViewer().getView().setDepthBufferFreezeTransparent(false);
+
       if (settings.getEnableDynamicTransparency()) {
         final long total = points.size() + getTotalTransparentObjects(univ, name);
         activateDynamicTransparency(univ, total, settings.getEnableDynamicTransparency());
       } else {
-        activateDynamicTransparency(univ, 0, settings.getEnableDynamicTransparency());
+        // Use 1 for the size to skip the log message about no transparent objects
+        activateDynamicTransparency(univ, 1, settings.getEnableDynamicTransparency());
       }
 
       contentNode = new ItemGroupNode(pointGroup);
@@ -2521,8 +2528,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
       IJ.log("Enabled dynamic transparency");
-      // Q. I am not sure if this is required if objects are sorted?
-      // view.setDepthBufferFreezeTransparent(false)
     } else {
       view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_NONE);
       IJ.log("Disabled dynamic transparency");
