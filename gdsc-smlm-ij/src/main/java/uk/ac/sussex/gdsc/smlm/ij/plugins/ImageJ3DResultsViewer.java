@@ -615,7 +615,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       // Enlarge the outline
       if (rendering != Rendering.POINT) {
-        final Vector3d scale = new Vector3d((sizes.length == 0) ? sizes[0] : sizes[index]);
+        final Vector3d scale = new Vector3d((sizes.length == 1) ? sizes[0] : sizes[index]);
         scale.scale(1.1);
         t.setScale(scale);
       }
