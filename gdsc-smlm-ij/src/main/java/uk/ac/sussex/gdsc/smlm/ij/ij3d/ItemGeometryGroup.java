@@ -46,7 +46,7 @@ import org.scijava.vecmath.Vector3f;
 
 /**
  * This class represents a list as a number of repeated shapes in the universe. Each item has its
- * own Java 3D Shape3D Shape3D * object added to the group. The shape is defined using a geometry
+ * own Java 3D Shape3D object added to the group. The shape is defined using a geometry
  * array. Colouring is assumed to be done using the material diffuse colour. If the geometry has per
  * vertex colours then this class will not work.
  *
