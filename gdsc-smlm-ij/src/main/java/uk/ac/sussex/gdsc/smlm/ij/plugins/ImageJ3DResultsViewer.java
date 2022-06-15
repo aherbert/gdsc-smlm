@@ -2379,7 +2379,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
           // All shapes have the index as the user data
           final Object o = pair.getValue().getGeometry().getUserData();
           if (o instanceof Integer) {
-            index = (Integer) pair.getValue().getGeometry().getUserData();
+            index = (Integer) o;
           }
         }
         if (index == -1) {
