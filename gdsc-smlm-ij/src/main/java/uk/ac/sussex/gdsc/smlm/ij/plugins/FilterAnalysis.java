@@ -350,14 +350,13 @@ public class FilterAnalysis implements PlugIn {
     final GUIFilterSettings.Builder filterSettings =
         SettingsManager.readGuiFilterSettings(0).toBuilder();
 
-    final String[] path = ImageJUtils.decodePath(filterSettings.getFilterSetFilename());
-    final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
+    final String filename =
+        ImageJUtils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
+    if (filename != null) {
       IJ.showStatus("Reading filters ...");
-      filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
+      filterSettings.setFilterSetFilename(filename);
 
-      try (BufferedReader input =
-          Files.newBufferedReader(Paths.get(filterSettings.getFilterSetFilename()))) {
+      try (BufferedReader input = Files.newBufferedReader(Paths.get(filename))) {
         // Use the instance so we can catch the exception
         final Object o = FilterXStreamUtils.getXStreamInstance().fromXML(input);
         if (o instanceof List<?>) {
@@ -379,12 +378,11 @@ public class FilterAnalysis implements PlugIn {
     final GUIFilterSettings.Builder filterSettings =
         SettingsManager.readGuiFilterSettings(0).toBuilder();
 
-    final String[] path = ImageJUtils.decodePath(filterSettings.getFilterSetFilename());
-    final OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
-      filterSettings.setFilterSetFilename(chooser.getDirectory() + chooser.getFileName());
-      try (BufferedWriter out =
-          Files.newBufferedWriter(Paths.get(filterSettings.getFilterSetFilename()))) {
+    final String filename =
+        ImageJUtils.getFilename("Filter_File", filterSettings.getFilterSetFilename());
+    if (filename != null) {
+      filterSettings.setFilterSetFilename(filename);
+      try (BufferedWriter out = Files.newBufferedWriter(Paths.get(filename))) {
         // Use the instance so we can catch the exception
         FilterXStreamUtils.getXStreamInstance().toXML(filterSets, out);
         SettingsManager.writeSettings(filterSettings.build());

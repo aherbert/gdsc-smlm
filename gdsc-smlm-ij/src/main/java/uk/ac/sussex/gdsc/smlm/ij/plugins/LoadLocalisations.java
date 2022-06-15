@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import java.awt.Font;
 import java.awt.TextArea;
@@ -284,13 +283,13 @@ public class LoadLocalisations implements PlugIn {
     final LoadLocalisationsSettings.Builder settings =
         SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 
-    final String[] path = ImageJUtils.decodePath(settings.getLocalisationsFilename());
-    final OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
-    if (chooser.getFileName() == null) {
+    final String filename =
+        ImageJUtils.getFilename("Localisations_File", settings.getLocalisationsFilename());
+    if (filename == null) {
       return;
     }
 
-    settings.setLocalisationsFilename(chooser.getDirectory() + chooser.getFileName());
+    settings.setLocalisationsFilename(filename);
 
     final LocalisationList localisations = loadLocalisations(settings);
 

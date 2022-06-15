@@ -25,12 +25,12 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -122,17 +122,11 @@ public class NeighbourAnalysis implements PlugIn {
   }
 
   private void saveTraces(Trace[] traces) {
-    final String[] path = ImageJUtils.decodePath(settings.filename);
-    final OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
-      settings.filename = chooser.getDirectory() + chooser.getFileName();
-
+    final String filename =
+        ImageJUtils.getFilename("Traces_File", settings.filename);
+    if (filename != null) {
       // Remove extension and replace with .xls
-      final int index = settings.filename.lastIndexOf('.');
-      if (index > 0) {
-        settings.filename = settings.filename.substring(0, index);
-      }
-      settings.filename += ".xls";
+      settings.filename = FileUtils.replaceExtension(filename, ".xls");
 
       final boolean showDeviations = results.hasDeviations();
       final TextFilePeakResults traceResults =

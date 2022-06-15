@@ -32,7 +32,6 @@ import ij.WindowManager;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.gui.Roi;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
 import ij.process.Blitter;
@@ -1258,13 +1257,11 @@ public class DriftCalculator implements PlugIn {
   }
 
   private boolean getDriftFilename() {
-    final String[] path = ImageJUtils.decodePath(settings.driftFilename);
-    final OpenDialog chooser = new OpenDialog("Drift_file", path[0], path[1]);
-    if (chooser.getFileName() == null) {
+    final String filename = ImageJUtils.getFilename("Drift_file", settings.driftFilename);
+    if (filename == null) {
       return false;
     }
-    settings.driftFilename = chooser.getDirectory() + chooser.getFileName();
-    FileUtils.replaceExtension(settings.driftFilename, "tsv");
+    settings.driftFilename = FileUtils.replaceExtension(filename, "tsv");
     return true;
   }
 

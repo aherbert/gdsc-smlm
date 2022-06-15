@@ -32,7 +32,6 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -3963,11 +3962,9 @@ public class CreateData implements PlugIn {
     if (!settings.getSaveImage()) {
       return;
     }
-    final String[] path = ImageJUtils.decodePath(settings.getImageFilename());
-    final OpenDialog chooser = new OpenDialog("Image_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
-      settings.setImageFilename(chooser.getDirectory() + chooser.getFileName());
-      settings.setImageFilename(FileUtils.replaceExtension(settings.getImageFilename(), "tiff"));
+    final String filename = ImageJUtils.getFilename("Image_File", settings.getImageFilename());
+    if (filename != null) {
+      settings.setImageFilename(FileUtils.replaceExtension(filename, "tiff"));
 
       final FileSaver fs = new FileSaver(imp);
       boolean ok;
@@ -3989,12 +3986,10 @@ public class CreateData implements PlugIn {
     if (!settings.getSaveImageResults()) {
       return;
     }
-    final String[] path = ImageJUtils.decodePath(settings.getImageResultsFilename());
-    final OpenDialog chooser = new OpenDialog("Image_Results_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
-      settings.setImageResultsFilename(chooser.getDirectory() + chooser.getFileName());
-      settings.setImageResultsFilename(
-          FileUtils.replaceExtension(settings.getImageResultsFilename(), "xls"));
+    final String filename =
+        ImageJUtils.getFilename("Image_Results_File", settings.getImageResultsFilename());
+    if (filename != null) {
+      settings.setImageResultsFilename(FileUtils.replaceExtension(filename, "xls"));
 
       final TextFilePeakResults r =
           new TextFilePeakResults(settings.getImageResultsFilename(), false);
@@ -4172,12 +4167,10 @@ public class CreateData implements PlugIn {
       return;
     }
 
-    final String[] path = ImageJUtils.decodePath(settings.getFluorophoresFilename());
-    final OpenDialog chooser = new OpenDialog("Fluorophores_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
-      settings.setFluorophoresFilename(chooser.getDirectory() + chooser.getFileName());
-      settings.setFluorophoresFilename(
-          FileUtils.replaceExtension(settings.getFluorophoresFilename(), "xls"));
+    final String filename =
+        ImageJUtils.getFilename("Fluorophores_File", settings.getFluorophoresFilename());
+    if (filename != null) {
+      settings.setFluorophoresFilename(FileUtils.replaceExtension(filename, "xls"));
 
       try (BufferedWriter output =
           Files.newBufferedWriter(Paths.get(settings.getFluorophoresFilename()))) {
@@ -4236,11 +4229,10 @@ public class CreateData implements PlugIn {
     final LoadLocalisationsSettings.Builder settings =
         SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
 
-    final String[] path = ImageJUtils.decodePath(settings.getLocalisationsFilename());
-    final OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
-      settings.setLocalisationsFilename(
-          FileUtils.replaceExtension(chooser.getDirectory() + chooser.getFileName(), "xls"));
+    final String filename =
+        ImageJUtils.getFilename("Localisations_File", settings.getLocalisationsFilename());
+    if (filename != null) {
+      settings.setLocalisationsFilename(FileUtils.replaceExtension(filename, "xls"));
       SettingsManager.writeSettings(settings.build());
 
       try (BufferedWriter output =
