@@ -1615,7 +1615,7 @@ More surfaces will slow down rendering. If a large number of surfaces will be cr
      - Triangles
 
    * - Point
-     - Circles of a given pixel radius.
+     - Circles of a given pixel radius
      - N/A
 
    * - Square
@@ -1676,7 +1676,7 @@ Additional features have been added for the ``3D Results Viewer``. If an ROI too
 
 If the ``Ctrl`` button is held the mouse can be used to select localisations. A single mouse-click will select the localisation; the selection is marked with a configurable outline. A double mouse-click will centre the view rotation on the localisation. This can be reset using ``View > Center > Universe``.
 
-Selected data is added to an interactive table to display the localisation data (see section :numref:`%s <results_plugins:Table Output>`). Rows selected in the table will be selected in any ``3D Results Viewer`` created with the same dataset. This allows multiple views to be open for the same results set and the selection is synchronised. Note that tables opened by the ``Results Manager`` are not associated with ``3D Results Viewer`` windows; the table must be opened by the ``3D Results Viewer``.
+Selected localisations are added to an interactive table to display the localisation data (see section :numref:`%s <results_plugins:Table Output>`). Rows selected in the table will be selected in any ``3D Results Viewer`` created with the same dataset. This allows multiple views to be open for the same results set and the selection is synchronised. Note that tables opened by the ``Results Manager`` are not associated with ``3D Results Viewer`` windows; the table must be opened by the ``3D Results Viewer``.
 
 The following menu options are useful:
 
@@ -1818,10 +1818,10 @@ Several of the options in the ``3D Results Viewer`` are controlled by settings. 
      - Specify the highlight colour used to outline selected localisations.
 
    * - Add to selection
-     - If **true** selecting a localisation by ``Shift`` click will add to the selection. Otherwise the previously selected localisations are deselected.
+     - If **true** selecting a localisation by ``Ctrl`` click will add to the selection. Otherwise the previously selected localisations are deselected.
 
    * - Show results table
-     - If **true** selecting a localisation by ``Shift`` click will show a results table with the localisation data. The default data displayed in the table can be configured using the ``...`` button.
+     - If **true** selecting a localisation by ``Ctrl`` click will show a results table with the localisation data. The default data displayed in the table can be configured using the ``...`` button.
 
    * - Save eye point
      - If **true** the ``Find eye point`` command will be saved to settings. This is available for various options when showing a new dataset.
