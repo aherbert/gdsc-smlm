@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntToDoubleFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -649,7 +650,7 @@ public class PcPalmMolecules implements PlugIn {
 
     // Follow the PC-PALM protocol
     log("Fitting localisation precision...");
-    final List<Molecule> localisations = extractLocalisations(settings.results);
+    final List<Molecule> localisations = extractLocalisations(settings.results, true);
     final double sigmaRaw = calculateAveragePrecision(localisations, "Localisations");
     log("%d localisations with an average precision of %.2f", settings.results.size(), sigmaRaw);
 
@@ -720,27 +721,36 @@ public class PcPalmMolecules implements PlugIn {
 
   /**
    * Extract molecules for the PC-PALM analysis.
-   *
+   * 
    * <p>Estimate the localisation uncertainty (precision) of each molecule using the formula of
    * Mortensen, et al (2010), Nature Methods 7, 377-381. Store distance in nm and signal in photons
    * using the calibration.
    *
    * @param results the results
+   * @param extractPrecision if true extract the precision
    * @return the array list
    * @throws DataException If conversion to nm and photons with computed precision is not possible
    */
-  public List<Molecule> extractLocalisations(MemoryPeakResults results) {
+  public List<Molecule> extractLocalisations(MemoryPeakResults results, boolean extractPrecision) {
     final ArrayList<Molecule> list = new ArrayList<>(results.size());
 
     // Access calibrated data
     final StandardResultProcedure sp =
         new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
     sp.getIxy();
-    final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
-    pp.getPrecision();
 
-    for (int i = 0, size = pp.size(); i < size; i++) {
-      list.add(new Molecule(sp.x[i], sp.y[i], pp.precisions[i], sp.intensity[i]));
+    // Optional precision
+    IntToDoubleFunction p;
+    if (extractPrecision) {
+      final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+      pp.getPrecision();
+      p = i -> pp.precisions[i];
+    } else {
+      p = i -> 0;
+    }
+
+    for (int i = 0, size = sp.size(); i < size; i++) {
+      list.add(new Molecule(sp.x[i], sp.y[i], p.applyAsDouble(i), sp.intensity[i]));
     }
     return list;
   }
@@ -1149,7 +1159,7 @@ public class PcPalmMolecules implements PlugIn {
 
   private void runInMemoryResults() {
     startLog();
-    settings.molecules = extractLocalisations(settings.results);
+    settings.molecules = extractLocalisations(settings.results, false);
   }
 
   private void runSimulation(boolean resultsAvailable) {

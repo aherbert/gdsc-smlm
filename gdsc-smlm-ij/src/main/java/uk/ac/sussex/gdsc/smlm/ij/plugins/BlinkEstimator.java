@@ -457,7 +457,7 @@ public class BlinkEstimator implements PlugIn {
 
     try {
       final PcPalmMolecules fitter = new PcPalmMolecules();
-      final List<Molecule> molecules = fitter.extractLocalisations(results);
+      final List<Molecule> molecules = fitter.extractLocalisations(results, true);
       final String title = (verbose) ? TITLE + " Localisation Precision" : null;
 
       fittedAverage =
