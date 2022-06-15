@@ -523,7 +523,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         outlineRendering = Rendering.LOW_RES_SPHERE;
       }
       this.rendering = outlineRendering;
-      highlightColourUpdated();
+      this.highlightColor = ImageJ3DResultsViewer.HIGHLIGHT_COLOR.get();
     }
 
     void createClickSelectionNode(CustomContentInstant contentInstance) {
@@ -538,6 +538,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       this.contentInstance = contentInstance;
       outline = createOutline();
+      outline.setColor(highlightColor);
     }
 
     /**
