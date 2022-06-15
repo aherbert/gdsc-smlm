@@ -1457,9 +1457,11 @@ Show an interactive 3D view of the localisations in a dataset using graphics car
 Stability Issues
 ~~~~~~~~~~~~~~~~
 
-It is possible that the ``3D Results Viewer`` unexpectedly stops working. This can cause all of ``ImageJ`` to become unresponsive forcing a restart.
+.. note::
 
-The reasons for the stability problems are unknown. It is more likely to happen when using 3D scenes with many objects indicating it could be due to overload of the underlying ``Java 3D`` library.
+    It is possible that the ``3D Results Viewer`` unexpectedly stops working. This can cause all of ``ImageJ`` to become unresponsive forcing a restart.
+
+The reasons for the stability problems are unknown. It is more likely to happen when using 3D scenes with many objects indicating it could be due to overload of the underlying ``Java 3D`` library and/or the GPU hardware.
 
 It is recommended to:
 
@@ -1475,11 +1477,11 @@ The ``3D Results Viewer`` supports interactive cropping allow easy selection of 
 Overview
 ~~~~~~~~
 
-The ``3D Results Viewer`` is built on top of the ``ImageJ 3D Viewer`` (see `3D Viewer <https://imagej.net/3D_Viewer>`_). The ``ImageJ 3D Viewer`` can render image stacks as texture-based volume renderings, surfaces or orthoslices. It offers functionality to manipulate the image view and change rendering options. The ``3D Results Viewer`` uses this functionality to view the XYZ coordinates of a localisation results set. An additional ``GDSC SMLM`` menu has been added to the standard window to add functionality specific to rendering localisations.
+The ``3D Results Viewer`` is built on top of the ``ImageJ 3D Viewer`` (see `3D Viewer <https://imagej.net/plugins/3d-viewer>`_). The ``ImageJ 3D Viewer`` can render image stacks as texture-based volume renderings, surfaces or orthoslices. It offers functionality to manipulate the image view and change rendering options. The GDSC SMLM ``3D Results Viewer`` uses this functionality to view the XYZ coordinates of a localisation results set. An additional ``GDSC SMLM`` menu has been added to the standard window to add functionality specific to rendering localisations.
 
 A 3D view is created by constructing surfaces, shining a light on the surfaces and then capturing the scene from a viewing position and angle. Thus the localisation XYZ points have to be represented as shapes. The more complex the shape the slower the rendering of the view. The ``3D Results Viewer`` offers shapes as simple as flat dots for rendering millions of localisation to high resolution spheres for smaller datasets. The fastest rendering ignores shapes that are behind others, i.e. the shapes are opaque. A more useful rendering is to use transparency so that you can see through shapes to those behind. This requires additional work from the rendering engine and is slower.
 
-Transparency has an additional caveat. The graphics engine constructs each surface sequentially and models the light reflecting on the surface. When an object is transparent the light of those object that are behind it is used in the rendering. Due to the implementation of the underlying graphics libraries a transparent object can only pass light through from objects that are *already part of the scene*. Thus true transparency requires that the objects are sorted and processed in depth first order. This is very intense and can be prohibitively slow. The ``3D Results Viewer`` supports the dynamic transparency mode of the ``Java 3D`` library. It also offers the ability to enable and disable object transparency and dynamic transparency (object sorting) in the view. Thus the view can be positioned with transparency off and then it can be enabled once the view position is set as desired.
+Transparency has an additional caveat. The graphics engine constructs each surface sequentially and models the light reflecting on the surface. When an object is transparent the light of the objects that are behind it is used in the rendering. Due to the implementation of the underlying graphics libraries a transparent object can only pass light through from objects that are *already part of the scene*. Thus true transparency requires that the objects are sorted and processed in depth first order. This is very intense and can be prohibitively slow. The ``3D Results Viewer`` supports the dynamic transparency mode of the ``Java 3D`` library. It also offers the ability to enable and disable object transparency and dynamic transparency (object sorting) in the view. Thus the view can be positioned with transparency off and then it can be enabled once the view position is set as desired.
 
 Dynamic transparency may be prohibitively slow as objects are sorted for every change in the view. A compromise is to turn-off dynamic transparency and only sort objects from back to front when the view is correct. This is an available option but must be chosen when the dataset is added to the view. It cannot later be changed as the type of graphics object created is different. Menu options with mapped shortcut keys are available to sort the objects once the view is correctly positioned.
 
@@ -1738,13 +1740,13 @@ The ``ImageJ 3D Viewer`` window has a ``GDSC SMLM`` menu added with features for
      - Description
 
    * - Reset global rotation
-     - Resets the rotation (but not the translation or zoom)
+     - Resets the rotation (but not the translation or zoom).
 
    * - Reset global translation
-     - Resets the translation (but not the rotation or zoom)
+     - Resets the translation (but not the rotation or zoom).
 
    * - Reset global zoom
-     - Resets the zoom (but not the rotation or translation)
+     - Resets the zoom (but not the rotation or translation).
 
    * - Reset all transformations
      - Resets the view and any transformations that have been applied to results objects.
