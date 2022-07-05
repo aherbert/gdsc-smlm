@@ -117,6 +117,7 @@ public class DensityImage implements PlugIn {
     int scoreMethodIndex;
 
     boolean lplotUseSquareApproximation;
+    boolean lplotAdjustForBorder;
     int lplotScoreMethodIndex;
 
     boolean filterLocalisations;
@@ -159,6 +160,7 @@ public class DensityImage implements PlugIn {
       resolution = source.resolution;
       scoreMethodIndex = source.scoreMethodIndex;
       lplotUseSquareApproximation = source.lplotUseSquareApproximation;
+      lplotAdjustForBorder = source.lplotAdjustForBorder;
       lplotScoreMethodIndex = source.lplotScoreMethodIndex;
       filterLocalisations = source.filterLocalisations;
       filterThreshold = source.filterThreshold;
@@ -268,7 +270,7 @@ public class DensityImage implements PlugIn {
 
     final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
     sp.getXy();
-    final Rectangle bounds = results.getBounds();
+    final Rectangle bounds = results.getBounds(true);
     final double area = (double) bounds.width * bounds.height;
     final DensityManager dm = new DensityManager(sp.x, sp.y, area);
     dm.setTracker(SimpleImageJTrackProgress.getInstance());
@@ -810,6 +812,7 @@ public class DensityImage implements PlugIn {
         unitName);
     gd.addCheckbox("Confidence_intervals", settings.confidenceIntervals);
     gd.addCheckbox("L-plot_use_square_approx", settings.lplotUseSquareApproximation);
+    gd.addCheckbox("L-plot_adjust_for_border", settings.lplotAdjustForBorder);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -821,6 +824,7 @@ public class DensityImage implements PlugIn {
     settings.incrementR = distanceConverter.convert(gd.getNextNumber());
     settings.confidenceIntervals = gd.getNextBoolean();
     settings.lplotUseSquareApproximation = gd.getNextBoolean();
+    settings.lplotAdjustForBorder = gd.getNextBoolean();
 
     if (settings.minR > settings.maxR || settings.incrementR <= 0
         || (settings.maxR - settings.minR) / settings.incrementR > 10000 || gd.invalidNumber()) {
@@ -833,7 +837,7 @@ public class DensityImage implements PlugIn {
     final DensityManager dm = createDensityManager(results);
     dm.setTracker(null);
     final double[] y = calculateLScores(dm, radii, true, settings.lplotUseSquareApproximation,
-        settings.lplotScoreMethodIndex);
+        settings.lplotAdjustForBorder, settings.lplotScoreMethodIndex);
     final double[] x = radii.clone();
     SimpleArrayUtils.apply(x, distanceConverter::convertBack);
 
@@ -871,7 +875,8 @@ public class DensityImage implements PlugIn {
             yy[j] = (float) (rng.nextDouble() * bounds.height);
           }
           final double[] scores = calculateLScores(new DensityManager(xx, yy, area), radii, false,
-              settings.lplotUseSquareApproximation, settings.lplotScoreMethodIndex);
+              settings.lplotUseSquareApproximation, settings.lplotAdjustForBorder,
+              settings.lplotScoreMethodIndex);
           ticker.tick();
           return scores;
         }));
@@ -940,7 +945,7 @@ public class DensityImage implements PlugIn {
   }
 
   private static double[] calculateLScores(DensityManager dm, double[] radii, boolean progress,
-      boolean useSquareApproximation, int scoreMethodIndex) {
+      boolean useSquareApproximation, boolean adjustForBorder, int scoreMethodIndex) {
     final double[] scores = new double[radii.length];
     final int start = radii[0] == 0 ? 1 : 0;
 
@@ -953,14 +958,20 @@ public class DensityImage implements PlugIn {
     DoubleUnaryOperator scoreFunction;
     if (useSquareApproximation) {
       final int resolution = 10;
-      final boolean adjustForBorder = true;
       scoreFunction = r -> {
         final int[] d = dm.calculateSquareDensity((float) r, resolution, adjustForBorder);
         // Scale square density to circle:
-        return normaliseFunction.applyAsDouble(((dm.ripleysLFunction(d, r) * Math.PI / 4) - r), r);
+        return normaliseFunction.applyAsDouble((dm.ripleysLFunction(d, r) * Math.PI / 4) - r, r);
       };
     } else {
-      scoreFunction = r -> normaliseFunction.applyAsDouble(dm.ripleysLFunction(r) - r, r);
+      if (adjustForBorder) {
+        scoreFunction = r -> {
+          final int[] d = dm.calculateDensity((float) r, adjustForBorder);
+          return normaliseFunction.applyAsDouble(dm.ripleysLFunction(d, r) - r, r);
+        };
+      } else {
+        scoreFunction = r -> normaliseFunction.applyAsDouble(dm.ripleysLFunction(r) - r, r);
+      }
     }
 
     if (progress) {
