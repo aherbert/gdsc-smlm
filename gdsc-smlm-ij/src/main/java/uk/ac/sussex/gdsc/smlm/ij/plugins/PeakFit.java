@@ -2316,7 +2316,10 @@ public class PeakFit implements PlugInFilter {
       return false;
     }
     calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
-    if (!calibration.isCcdCamera()) {
+    if (!calibration.isCcdCamera()
+        // Allow NA. This will require LSE fitting.
+        && calibration.getCameraType() != CameraType.CAMERA_TYPE_NA) {
+
       // TODO - Support sCMOS camera
 
       IJ.error("Unsupported camera type "
@@ -2343,6 +2346,12 @@ public class PeakFit implements PlugInFilter {
   }
 
   private static boolean getGain(CalibrationWriter calibration) {
+    // Allow uncalibrated fitting
+    if (calibration.getCameraType() == CameraType.CAMERA_TYPE_NA ) {
+      calibration.setBias(0);
+      calibration.setCountPerPhoton(1);
+      return true;
+    }
     final ExtendedGenericDialog gd = newWizardDialog("Enter the bias and total gain.",
         "This is usually supplied with your camera certificate. The bias is a fixed offset added "
             + "to the camera counts. The gain indicates how many Analogue-to-Digital-Units (counts)"
