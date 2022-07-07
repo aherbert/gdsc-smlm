@@ -810,17 +810,19 @@ public class ResultsManager implements PlugIn {
     try {
       final ResultsImageSettings.Builder imageSettings =
           resultsSettings.getResultsImageSettingsBuilder();
-      if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION
-          || imageSettings
-              .getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION) {
-        ParameterUtils.isAboveZero("Image precision", imageSettings.getAveragePrecision());
-      }
-      if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.SCALED) {
-        ParameterUtils.isAboveZero("Image scale", imageSettings.getScale());
-      } else if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.IMAGE_SIZE) {
-        ParameterUtils.isAboveZero("Image size", imageSettings.getImageSize());
-      } else if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.PIXEL_SIZE) {
-        ParameterUtils.isAboveZero("Image pixel size", imageSettings.getPixelSize());
+      if (imageSettings.getImageTypeValue() > 0) {
+        if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION
+            || imageSettings
+                .getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION) {
+          ParameterUtils.isAboveZero("Image precision", imageSettings.getAveragePrecision());
+        }
+        if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.SCALED) {
+          ParameterUtils.isAboveZero("Image scale", imageSettings.getScale());
+        } else if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.IMAGE_SIZE) {
+          ParameterUtils.isAboveZero("Image size", imageSettings.getImageSize());
+        } else if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.PIXEL_SIZE) {
+          ParameterUtils.isAboveZero("Image pixel size", imageSettings.getPixelSize());
+        }
       }
       if (extraOptions) {
         ParameterUtils.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
