@@ -2099,7 +2099,10 @@ public class PeakFit implements PlugInFilter {
   }
 
   private int showSimpleDialog() {
-    // Just support circular fitting
+    // Get the current width. This is set to zero if the calibration wizard is executed
+    // (which will create a new value).
+    double sd = fitConfig.getInitialXSd();
+    // Just support circular fitting. Setting the PSF will reset the width to the default.
     fitConfig.setPsf(PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE);
     fitConfig.setFixedPsf(false);
 
@@ -2108,8 +2111,11 @@ public class PeakFit implements PlugInFilter {
 
     final CalibrationWriter calibration = fitConfig.getCalibrationWriter();
     final boolean requireCalibration = requireCalibration(calibration);
-    if (requireCalibration && !showCalibrationWizard(calibration, true)) {
-      return DONE;
+    if (requireCalibration) {
+      sd = 0;
+      if (!showCalibrationWizard(calibration, true)) {
+        return DONE;
+      }
     }
 
     // Present dialog with simple output options: Image, Table
@@ -2136,12 +2142,18 @@ public class PeakFit implements PlugInFilter {
     settings.showImage = gd.getNextBoolean();
     settings.save();
 
-    if (!useCurrentCalibration && !showCalibrationWizard(calibration, false)) {
-      return DONE;
+    if (!useCurrentCalibration) {
+      sd = 0;
+      if (!showCalibrationWizard(calibration, false)) {
+        return DONE;
+      }
     }
 
-    // Restore fitting to default settings but maintain the calibrated width
-    final double sd = fitConfig.getInitialXSd();
+    // Restore fitting to default settings but maintain the original calibrated width
+    // if the calibration wizard was not executed.
+    if (sd == 0) {
+      sd = fitConfig.getInitialXSd();
+    }
     config = FitEngineConfiguration.create();
     fitConfig = config.getFitConfiguration();
     fitConfig.setInitialPeakStdDev(sd);
@@ -2164,7 +2176,8 @@ public class PeakFit implements PlugInFilter {
       imageSettings.setImageSize(1024);
       imageSettings.setWeighted(true);
       imageSettings.setEqualised(true);
-      imageSettings.setLutName(DefaultResultsSettings.INSTANCE.getResultsImageSettings().getLutName());
+      imageSettings
+          .setLutName(DefaultResultsSettings.INSTANCE.getResultsImageSettings().getLutName());
     }
 
     // Log the settings we care about:
