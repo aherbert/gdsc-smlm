@@ -2258,6 +2258,8 @@ public class PeakFit implements PlugInFilter {
       }
     }
 
+    resetWizardSettings();
+
     if (!getCameraType(calibration)) {
       return false;
     }
@@ -2287,6 +2289,11 @@ public class PeakFit implements PlugInFilter {
     }
 
     return true;
+  }
+
+  private static void resetWizardSettings() {
+    // Reset any wizard settings.
+    calculatorSettings = null;
   }
 
   private static ExtendedGenericDialog newWizardDialog(String... messages) {
@@ -2384,18 +2391,22 @@ public class PeakFit implements PlugInFilter {
     gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSd(), 3);
     // Add ability to run the PSF Calculator to get the width
     if (ImageJUtils.isShowGenericDialog()) {
-      if (calculatorSettings == null) {
-        calculatorSettings = GuiSettings.DefaultPsfCalculatorSettings.INSTANCE;
+      // Re-use the same settings within this instance of the wizard.
+      // This is only saved if the calculator value is used.
+      PSFCalculatorSettings s = calculatorSettings;
+      if (s == null) {
+        s = GuiSettings.DefaultPsfCalculatorSettings.INSTANCE;
       }
+      final PSFCalculatorSettings.Builder settings =
+          s.toBuilder().setPixelPitch(calibration.getNmPerPixel() / 1000.0).setMagnification(1)
+              .setBeamExpander(1);
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
       gd.addAndGetButton("Run PSF calculator", event -> {
         // Run the PSF Calculator
-        calculatorSettings =
-            calculatorSettings.toBuilder().setPixelPitch(calibration.getNmPerPixel() / 1000.0)
-                .setMagnification(1).setBeamExpander(1).build();
-        final double sd = new PsfCalculator().calculate(calculatorSettings, true);
+        final double sd = new PsfCalculator().calculate(settings, true);
         if (sd > 0) {
           textInitialPeakStdDev0.setText(MathUtils.rounded(sd));
+          calculatorSettings = settings.build();
         }
       });
     }

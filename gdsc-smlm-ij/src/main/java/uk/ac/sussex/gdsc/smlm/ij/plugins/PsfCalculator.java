@@ -105,10 +105,22 @@ public class PsfCalculator implements PlugIn, DialogListener {
    * @return the PSF standard deviation
    */
   public double calculate(PSFCalculatorSettings settings, boolean simpleMode) {
+    return calculate(settings.toBuilder(), simpleMode);
+  }
+
+  /**
+   * Present an interactive dialog that allows the user to calculate the Gaussian PSF standard
+   * deviation using the provided settings.
+   *
+   * @param settings the settings
+   * @param simpleMode Only present a wavelength, NA and proportionality factor fields.
+   * @return the PSF standard deviation
+   */
+  double calculate(PSFCalculatorSettings.Builder settings, boolean simpleMode) {
     gd = new GenericDialog(TITLE);
     gd.addHelp(HelpUrls.getUrl("psf-calculator"));
 
-    this.settingsBuilder = settings.toBuilder();
+    this.settingsBuilder = settings;
 
     if (!simpleMode) {
       gd.addNumericField("Pixel_pitch (um)", settings.getPixelPitch(), 2);
@@ -180,10 +192,10 @@ public class PsfCalculator implements PlugIn, DialogListener {
       return -1;
     }
 
-    return calculateStdDev(settingsBuilder.getPixelPitch(),
-        settingsBuilder.getMagnification() * settingsBuilder.getBeamExpander(),
-        settingsBuilder.getWavelength(), settingsBuilder.getNumericalAperture(),
-        settingsBuilder.getProportionalityFactor(), settingsBuilder.getAdjustForSquarePixels());
+    return calculateStdDev(settings.getPixelPitch(),
+        settings.getMagnification() * settings.getBeamExpander(), settings.getWavelength(),
+        settings.getNumericalAperture(), settings.getProportionalityFactor(),
+        settings.getAdjustForSquarePixels());
   }
 
   private static void disableEditing(TextField textField) {
