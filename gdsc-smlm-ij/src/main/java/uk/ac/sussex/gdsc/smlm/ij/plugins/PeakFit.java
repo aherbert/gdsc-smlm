@@ -105,6 +105,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtosHelper.DefaultResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
@@ -2133,6 +2134,7 @@ public class PeakFit implements PlugInFilter {
     }
     settings.showTable = gd.getNextBoolean();
     settings.showImage = gd.getNextBoolean();
+    settings.save();
 
     if (!useCurrentCalibration && !showCalibrationWizard(calibration, false)) {
       return DONE;
@@ -2162,6 +2164,7 @@ public class PeakFit implements PlugInFilter {
       imageSettings.setImageSize(1024);
       imageSettings.setWeighted(true);
       imageSettings.setEqualised(true);
+      imageSettings.setLutName(DefaultResultsSettings.INSTANCE.getResultsImageSettings().getLutName());
     }
 
     // Log the settings we care about:
@@ -2472,6 +2475,7 @@ public class PeakFit implements PlugInFilter {
     // Save to allow dialog state to be maintained even with invalid parameters
     saveFitEngineSettings();
     SettingsManager.writeSettings(resultsSettings.build());
+    settings.save();
 
     if (gd.invalidNumber()) {
       return false;
