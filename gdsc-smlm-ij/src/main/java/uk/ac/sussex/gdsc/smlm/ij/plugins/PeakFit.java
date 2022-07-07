@@ -2337,8 +2337,8 @@ public class PeakFit implements PlugInFilter {
 
   private static boolean getGain(CalibrationWriter calibration) {
     final ExtendedGenericDialog gd = newWizardDialog("Enter the bias and total gain.",
-        "This is usually supplied with your camera certificate. The bias is a fixed offset added"
-            + " to the camera counts. The gain indicates how many Analogue-to-Digital-Units (Count)"
+        "This is usually supplied with your camera certificate. The bias is a fixed offset added "
+            + "to the camera counts. The gain indicates how many Analogue-to-Digital-Units (counts)"
             + " are recorded at the pixel for each photon registered on the sensor.",
         "The gain is usually expressed using the product of the EM-gain (if applicable), the"
             + " camera gain and the sensor quantum efficiency.",
@@ -2357,8 +2357,8 @@ public class PeakFit implements PlugInFilter {
 
   private static boolean getExposureTime(CalibrationWriter calibration) {
     final ExtendedGenericDialog gd = newWizardDialog(
-        "Enter the exposure time. Calibration of the exposure time allows correct reporting of on"
-            + " and off times.",
+        "Enter the exposure time. Calibration of the exposure time allows correct reporting of"
+            + " fluorophore on and off times.",
         "This is the length of time for each frame in the image.");
     gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
     gd.showDialog();
