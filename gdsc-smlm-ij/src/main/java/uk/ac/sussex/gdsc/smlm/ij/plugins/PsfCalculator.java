@@ -180,10 +180,10 @@ public class PsfCalculator implements PlugIn, DialogListener {
       return -1;
     }
 
-    return calculateStdDev(settings.getPixelPitch(),
-        settings.getMagnification() * settings.getBeamExpander(), settings.getWavelength(),
-        settings.getNumericalAperture(), settings.getProportionalityFactor(),
-        settings.getAdjustForSquarePixels());
+    return calculateStdDev(settingsBuilder.getPixelPitch(),
+        settingsBuilder.getMagnification() * settingsBuilder.getBeamExpander(),
+        settingsBuilder.getWavelength(), settingsBuilder.getNumericalAperture(),
+        settingsBuilder.getProportionalityFactor(), settingsBuilder.getAdjustForSquarePixels());
   }
 
   private static void disableEditing(TextField textField) {
