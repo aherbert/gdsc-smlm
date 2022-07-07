@@ -1527,8 +1527,11 @@ public class PeakFit implements PlugInFilter {
                     "electron/photon");
               }
             } else {
-              IJ.error("Unsupported camera type "
-                  + CalibrationProtosHelper.getName(calibration.getCameraType()));
+              // Only warn about invalid cameras. NA is allowed as it can be fit using LSE.
+              if (calibration.getCameraType() != CameraType.CAMERA_TYPE_NA) {
+                IJ.error("Unsupported camera type "
+                    + CalibrationProtosHelper.getName(calibration.getCameraType()));
+              }
               return false;
             }
             egd.setSilent(silent);
@@ -1568,6 +1571,7 @@ public class PeakFit implements PlugInFilter {
         });
   }
 
+
   /**
    * Allow the latest fitEngineConfiguration to be provided for update.
    */
@@ -1581,6 +1585,7 @@ public class PeakFit implements PlugInFilter {
     FitEngineConfiguration getFitEngineConfiguration();
   }
 
+
   /**
    * Allow the latest fitConfiguration to be provided for update.
    */
@@ -1593,6 +1598,7 @@ public class PeakFit implements PlugInFilter {
      */
     FitConfiguration getFitConfiguration();
   }
+
 
   /**
    * Simple implementation of {@link FitEngineConfigurationProvider}.
@@ -1617,6 +1623,7 @@ public class PeakFit implements PlugInFilter {
     }
   }
 
+
   /**
    * Simple implementation of {@link FitConfigurationProvider}.
    */
@@ -1637,6 +1644,7 @@ public class PeakFit implements PlugInFilter {
     public FitConfiguration getFitConfiguration() {
       return fitConfig;
     }
+
   }
 
   /**
@@ -2347,7 +2355,7 @@ public class PeakFit implements PlugInFilter {
 
   private static boolean getGain(CalibrationWriter calibration) {
     // Allow uncalibrated fitting
-    if (calibration.getCameraType() == CameraType.CAMERA_TYPE_NA ) {
+    if (calibration.getCameraType() == CameraType.CAMERA_TYPE_NA) {
       calibration.setBias(0);
       calibration.setCountPerPhoton(1);
       return true;
