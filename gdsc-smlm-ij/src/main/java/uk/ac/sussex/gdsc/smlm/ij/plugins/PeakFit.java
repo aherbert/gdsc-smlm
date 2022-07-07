@@ -2395,7 +2395,7 @@ public class PeakFit implements PlugInFilter {
                 .setMagnification(1).setBeamExpander(1).build();
         final double sd = new PsfCalculator().calculate(calculatorSettings, true);
         if (sd > 0) {
-          textInitialPeakStdDev0.setText(Double.toString(sd));
+          textInitialPeakStdDev0.setText(MathUtils.rounded(sd));
         }
       });
     }
