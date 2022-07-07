@@ -101,6 +101,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
@@ -2156,8 +2157,9 @@ public class PeakFit implements PlugInFilter {
     if (settings.showImage) {
       final ResultsImageSettings.Builder imageSettings =
           resultsSettings.getResultsImageSettingsBuilder();
-      imageSettings.setImageType(ResultsImageType.DRAW_INTENSITY);
-      imageSettings.setScale(Math.ceil(1024.0 / Math.max(bounds.width, bounds.height)));
+      imageSettings.setImageTypeValue(ResultsImageType.DRAW_INTENSITY_VALUE);
+      imageSettings.setImageSizeModeValue(ResultsImageSizeMode.IMAGE_SIZE_VALUE);
+      imageSettings.setImageSize(1024);
       imageSettings.setWeighted(true);
       imageSettings.setEqualised(true);
     }
@@ -2533,7 +2535,13 @@ public class PeakFit implements PlugInFilter {
               .getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION) {
         ParameterUtils.isAboveZero("Image precision", imageSettings.getAveragePrecision());
       }
-      ParameterUtils.isAboveZero("Image scale", imageSettings.getScale());
+      if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.SCALED) {
+        ParameterUtils.isAboveZero("Image scale", imageSettings.getScale());
+      } else if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.IMAGE_SIZE) {
+        ParameterUtils.isAboveZero("Image size", imageSettings.getImageSize());
+      } else if (imageSettings.getImageSizeMode() == ResultsImageSizeMode.PIXEL_SIZE) {
+        ParameterUtils.isAboveZero("Image pixel size", imageSettings.getPixelSize());
+      }
       if (extraOptions) {
         ParameterUtils.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
       }
