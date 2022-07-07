@@ -280,7 +280,7 @@ Note that the dialog contains many settings and a scroll bar is used to fit the 
 
 The plugin will initialise using the previously selected settings or if absent a default set of settings will be created. Settings are saved when a dialog is accepted using the ``OK`` button. If a dialog is cancelled then the settings for that dialog are not saved.
 
-If different settings will be regularly reused the plugin supports templates. These are managed using the ``Template Manager`` plugin (section :numref:`%s <fitting_plugins:Template Manager>`) and can be configured and saved using the ``Fit Configuration`` plugin (section :numref:`%s <fitting_plugins:Fit Configuration>`).
+Templates can be created for regularly used settings. These are managed using the ``Template Manager`` plugin (section :numref:`%s <fitting_plugins:Template Manager>`) and can be configured and saved using the ``Fit Configuration`` plugin (section :numref:`%s <fitting_plugins:Fit Configuration>`).
 
 The dialog contains settings for the imaging conditions and then various parts of the fitting algorithm:
 
@@ -325,9 +325,6 @@ The imaging parameters describe the conditions used to acquire the image. The pi
 
    * - Exposure time (ms)
      - This is the length of time captured by each frame in milliseconds.
-
-   * - Gain
-     - The total gain. Used to convert the camera ADUs to photons.
 
 
 .. index:: Camera Type
