@@ -666,9 +666,7 @@ public class AstigmatismModelManager implements PlugIn {
     if (!PeakFit.configureSmartFilter(config, flags)) {
       return false;
     }
-    PeakFit.configureFitSolver(config, null, null, flags);
-
-    return true;
+    return PeakFit.configureFitSolver(config, null, null, flags);
   }
 
   private boolean findFitRegion() {

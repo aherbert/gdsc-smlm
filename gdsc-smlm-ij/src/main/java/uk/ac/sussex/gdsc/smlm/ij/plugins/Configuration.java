@@ -352,7 +352,9 @@ public class Configuration implements PlugIn {
     if (!PeakFit.configureDataFilter(config, flags)) {
       return false;
     }
-    PeakFit.configureFitSolver(config, null, null, flags);
+    if (!PeakFit.configureFitSolver(config, null, null, flags)) {
+      return false;
+    }
 
     if (save) {
       final boolean saveToFile = !gd.wasOKed();
