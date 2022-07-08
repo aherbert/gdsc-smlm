@@ -2059,7 +2059,7 @@ The following parameters are available:
    * - Smoothing
      - The size of the smoothing window.
 
-   * - Box Size
+   * - Box size
      - Identify maxima within a 2n+1 box.
 
    * - Background
@@ -2073,6 +2073,9 @@ The following parameters are available:
 
    * - Min width
      - The minimum peak-width at half-maxima (PWHM).
+
+   * - Top N
+     - Only fit the top ``N`` identified maxima. Set to zero to disable and fit all maxima.
 
    * - Block find algorithm
      - Use the block-find algorithm for non-maximal suppression [Neubeck and Van Gool, 2006].
