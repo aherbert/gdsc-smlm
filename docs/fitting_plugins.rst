@@ -2447,7 +2447,7 @@ The ``Spot Fit Tool`` plugin requires no calibration parameters and the least-sq
 
 When the plugin is run it displays a dialog allowing the current tool options to be configured. A tool is then installed in the ``ImageJ`` toolbar and selected as the active tool. A double-click on the tool icon will open the tool options dialog.
 
-When the tool is active any mouse-click on an image will run the fitting process. A region is searched around the clicked location for a local maxima. A region around the local maxima is then fit using a Gaussian 2D function. Fits are performed using the default fit configuration and the spot width is estimated from the data using the peak width at half maxima. If fitting converges then the spot is filtered using a signal-to-noise ratio (SNR) threshold. The signal uses half the fitted signal divided by the area covered by the central part of the Gaussian containing half the intensity. The noise is obtained using the standard deviation of the fit region residuals. Successful fits are marked on the image and added to a results table. The point is marked on the image using an overlay which can optionally be attached to the image slice.
+When the tool is active any mouse-click on an image will run the fitting process. A region is searched around the clicked location for a local maxima. A region around the local maxima is then fit using a Gaussian 2D function. Fits are performed using the default fit configuration and the spot width is estimated from the data using the peak width at half maxima. If fitting converges then the spot is filtered using a signal-to-noise ratio (SNR) threshold. The mean signal is computed using half the fitted signal divided by the area covered by the central part of the Gaussian containing half the intensity. The noise is obtained using the standard deviation of the fit region residuals. Successful fits are marked on the image and added to a results table. The point is marked on the image using an overlay which can optionally be attached to the image slice.
 
 If the ``Alt``, ``Shift`` or ``Control`` key is held down the tool operates in ``Remove`` mode. Any existing points within the search region are removed from the image and the results table.
 
@@ -2467,7 +2467,7 @@ The following option parameters are available:
      - Identify local maxima within a 2n+1 box.
 
    * - Fit Radius
-     - Identify local maxima within a 2n+1 box.
+     - Fit local maxima within a 2n+1 box.
 
    * - SNR Threshold
      - The SNR threshold used to filter bad spots.
@@ -2490,6 +2490,11 @@ The following option parameters are available:
 
    * - Comparison channel
      - Show information about a second channel in the same region. If the channel exists a background and signal intensity estimate is made for the second channel. The background uses the minimum average value of the four edges of the fit region. The intensity uses a weighted mean of the fit region above the background. The weights use the normalised Gaussian function of the fitted spot.
+
+       The comparison computes a correlation between the two channels in a 2n+1 box. The mean of all pixels within a circle of the analysis radius is computed and also the radial mean at pixel increments, i.e. rings around the spot centre.
+
+   * - Analysis Radius
+     - The radius for analysis in the second channel.
 
 
 .. index:: Advanced Spot Fit Settings
