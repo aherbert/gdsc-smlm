@@ -491,14 +491,14 @@ public class FailCountManager implements PlugIn {
       return size;
     }
 
-    void fill(int from, int to, byte value) {
-      if (to - data.length > 0) {
+    void append(int length, byte value) {
+      if (data.length - size < length) {
         // Resize required
-        final int newCapacity = MemoryUtils.createNewCapacity(to, data.length);
+        final int newCapacity = MemoryUtils.createNewCapacity(size + length, data.length);
         data = Arrays.copyOf(data, newCapacity);
       }
-      Arrays.fill(data, from, to, value);
-      size += from - to;
+      Arrays.fill(data, size, size + length, value);
+      size += length;
     }
 
     byte[] toArray() {
@@ -1129,7 +1129,7 @@ public class FailCountManager implements PlugIn {
   private static void fill(ByteArrayList type, LocalList<FailCounter> counters, int value) {
     final int n = counters.size() - type.size();
     ImageJUtils.log("Type %d = %d", value, n);
-    type.fill(type.size(), counters.size(), (byte) value);
+    type.append(n, (byte) value);
   }
 
   private static CounterStatus checkCounters(LocalList<FailCounter> counters) {
