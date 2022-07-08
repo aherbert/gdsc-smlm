@@ -1761,7 +1761,7 @@ The plugin has two output options:
    * - Save
      - Save to the current fit settings overwriting the existing settings.
 
-   * - Save Template
+   * - Save template
      - Save to a specified template file.
 
        A dialog is shown where the file can be saved. The suffix will be replaced with ``.txt``.
