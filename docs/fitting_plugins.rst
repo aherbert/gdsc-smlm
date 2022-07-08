@@ -1668,16 +1668,16 @@ When the ``Template Manager`` plugin is run a dialog allows a choice from the fo
    * - Option
      - Description
 
-   * - Load Standard Templates
+   * - Load standard templates
      - Allows selection of standard templates. These are templates built in to the SMLM jar file.
 
-   * - Load Custom Templates
+   * - Load custom templates
      - Allows selection of custom templates. These are templates loaded from files in a directory.
 
-   * - Remove Loaded Templates
+   * - Remove loaded templates
      - Allows removal of previously loaded templates.
 
-   * - View Template
+   * - View template
      - Allows a template to be viewed.
 
    * - View image example for template
