@@ -914,7 +914,7 @@ public class ConfigurationTemplate implements PlugIn {
     for (final String path : selected) {
       builder.clear();
       final File file = new File(path);
-      if (SettingsManager.fromJson(file, builder, 0)) {
+      if (SettingsManager.fromJson(file, builder, SettingsManager.FLAG_SILENT)) {
         final String name = FileUtils.removeExtension(file.getName());
         // Assume the tif image will be detected automatically
         addTemplate(TEMPLATES, name, builder.build(), TemplateType.CUSTOM, file, null);
