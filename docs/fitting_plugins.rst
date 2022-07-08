@@ -2166,7 +2166,7 @@ Click ``OK`` to start the fitting. The fit uses a non-linear least squares routi
 Fail Count Manager
 ------------------
 
-The ``Fail Count Manager`` provides analysis of the fail count settings used in the ``Peak Fit`` plugin. The ``Fail Count`` is the number of fitting failures for the current frame. When fitting spot candidates is is normal that a large number of candidates are noise. Thus it is sensible to not fit all the candidates and to stop fitting when certain conditions are met, e.g. number of total failures, number of consecutive failures, fraction of failures. The ``Fail Count Manager`` is able to run fitting on an example image and store the pass/fail status of each consecutive candidate. It then provides options to analyse the best settings to use for stopping fitting with the aim of fitting the most good candidates while eliminating wasted time fitting low quality candidates.
+The ``Fail Count Manager`` provides analysis of the fail count settings used in the ``Peak Fit`` plugin. The ``Fail Count`` is the number of fitting failures for the current frame. When fitting spot candidates it is normal that a large number of candidates are noise. Thus it is sensible to not fit all the candidates and to stop fitting when certain conditions are met, e.g. number of total failures, number of consecutive failures, fraction of failures. The ``Fail Count Manager`` is able to run fitting on an example image and store the pass/fail status of each consecutive candidate. It then provides options to analyse the best settings to use for stopping fitting with the aim of fitting the most good candidates while eliminating wasted time fitting low quality candidates.
 
 When the plugin is run a dialog allows a choice from the following options:
 
@@ -2198,7 +2198,7 @@ When the plugin is run a dialog allows a choice from the following options:
 Create Fail Count Data
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Run the fitting engine on the current image to generate pass/fail data for sequential candidates in each frame. When this option is a dialog is shown to configure the collection of fail count data. The following parameters are available:
+Run the fitting engine on the current image to generate pass/fail data for sequential candidates in each frame. A dialog is shown to configure the collection of fail count data. The following parameters are available:
 
 .. list-table::
    :widths: 20 80
@@ -2216,7 +2216,7 @@ Run the fitting engine on the current image to generate pass/fail data for seque
    * - Save
      - If **true** the fail count data will be saved to file.
 
-When the options are configured a dialog to configured the fit engine is shown. This uses the same options as the ``Peak Fit`` plugin (see section :numref:`%s <fitting_plugins:Peak Fit>`).
+When the options are selected a second dialog is shown to configure the fit engine. This uses the same options as the ``Peak Fit`` plugin (see section :numref:`%s <fitting_plugins:Peak Fit>`).
 
 The fitting engine will be run on the selected frames from the image and the fail count data saved to memory. If ``Save`` was enabled then a dialog will be present to save the data to file.
 
@@ -2250,7 +2250,7 @@ where ``ID`` is the frame, ``Candidate`` is the candidate ID in the frame, and `
 Plot Fail Count Data
 ~~~~~~~~~~~~~~~~~~~~
 
-Produce various plots of the fail count data. When this option is run the currently selected item ID in the fail count data is plotted. An interactive dialog is shown where the plot settings can be configured.
+Produce various plots of the fail count data. When this option is run the currently selected item (frame) ID in the fail count data is plotted. An interactive dialog is shown where the plot settings can be configured.
 
 The following plots are constructed:
 
@@ -2296,7 +2296,7 @@ The following plot parameters can be specified:
      - Description
 
    * - Item
-     - The ID to plot.
+     - The item (frame) ID to plot.
 
    * - Fixed x axis
      - If **true** the x-axis on the plot will be scaled to the maximum candidate ID in the entire fail count data. If **false** the x-axis is scaled to the current data.
