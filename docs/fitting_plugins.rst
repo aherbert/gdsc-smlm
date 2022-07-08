@@ -443,7 +443,7 @@ The following PSF models can be selected.
    * - Elliptical
      - Use a separate width for the X and Y dimensions.
 
-   * - Rotating
+   * - Rotating Elliptical
      - Use a separate width for the X and Y dimensions and allow the orientation to rotate.
 
    * - Astigmatic
@@ -505,19 +505,19 @@ The maxima identification parameters control the search for local maxima in the 
 
        Filtering can be disabled using a ``Smoothing`` value of 0.
 
-   * - Search Width
+   * - Search width
      - Controls the size of the region used for finding local maxima:
 
        :math:`\mathit{Width} = \lfloor{\mathit{Initial\:StdDev} \times \mathit{Search\:Width}}\rfloor`
 
        Note: Ideally localisation spots should be well separated (over 5 pixels) and so increasing this parameter will reduce the number of false maxima identified as spot candidates by eliminating noisy pixels.
 
-   * - Border
+   * - Border width
      - Define the number of border pixels to ignore. No maxima are allowed in the border.
 
        :math:`\mathit{Width} = \lfloor{\mathit{Initial\:StdDev} \times \mathit{Border}}\rfloor`
 
-   * - Fitting Width
+   * - Fitting width
      - Controls the size of the region used for fitting each peak.
 
        :math:`\mathit{Width} = \lfloor{\mathit{Initial\:StdDev} \times \mathit{Fitting\:Width}}\rfloor`
@@ -744,7 +744,7 @@ There are various fit solvers available in ``Peak Fit``. Each solver aims to fin
 
        Set to ``0`` to disable.
 
-   * - Max Iterations
+   * - Max iterations
      - Stop the fit when this is reached and return a failure.
 
 Note that if no termination conditions for the solver exist (all have been disabled) then an error is shown.
@@ -995,7 +995,7 @@ The Maximum Likelihood Estimator requires the following additional parameters:
    * - Parameter
      - Description
 
-   * - Camera Bias
+   * - Camera bias
      - The value added to all pixels by the camera.
 
    * - Model camera noise
@@ -1224,20 +1224,20 @@ The following multi-peak parameters can be configured:
    * - Parameter
      - Description
 
-   * - Include Neighbours
+   * - Include neighbours
      - Set to **true** to include neighbour peaks within the fitting region in the fit (multiple peak fitting).
 
-   * - Neighbour Height
+   * - Neighbour height
      - Define the height for a neighbour peak to be included expressed as a fraction of the candidate peak. The height is taken relative to an estimate of the local background value of the image.
 
        Neighbours that are higher than the candidate maxima may cause the fit procedure to drift to a different position (since the candidate location parameters are unconstrained). Use the ``Neighbour Height`` setting to allow higher peaks to be included and lower neighbour peaks to be ignored. A value of 1 will only include peaks higher than the candidate peak. A value of 0 will include all neighbours. The default of 0.3 allows some lower neighbours.
 
-   * - Residuals Threshold
+   * - Residuals threshold
      - Set a threshold for refitting a single peak as a double peak. A value of 1 disables this feature.
 
        Note the residuals threshold only controls when doublet fitting is performed and not the selection of a doublet over a single. Lowering the threshold will increase computation time.
 
-   * - Duplicate Distance
+   * - Duplicate distance
      - Each new fit is compared to the current results for the frame. If any existing fits are within this distance then the fit is discarded. This avoids duplicate results when multiple peak fitting has refit an existing result peak.
 
        Note that doublets are allowed to be closer than this distance since the results of the latest fitting are only compared to all existing results.
@@ -1276,10 +1276,10 @@ The following filtering parameters can be configured:
    * - Disable simple filter
      - Set to **true** to disable the simple filters. Only the smart filter will be used.
 
-   * - Shift Factor
+   * - Shift factor
      - Any peak that shifts more than a factor of the initial peak standard deviation is discarded.
 
-   * - Signal Strength
+   * - Signal strength
      - Any peak with a signal/noise below this level is discarded. This is a signal-to-noise ratio (SNR) filter created using the mean signal divided by the mean noise.
 
        :math:`\mathit{SNR} = \frac{\mathit{Signal}}{\mathit{Noise}}`
@@ -1296,7 +1296,7 @@ The following filtering parameters can be configured:
    * - Min width factor
      - Any peak whose final fitted width is a factor smaller than the start width is discarded (e.g. 0.5x fold).
 
-   * - Max width Factor
+   * - Max width factor
      - Any peak whose final fitted width is a factor larger than the start width is discarded (e.g. 2x fold).
 
    * - Precision
@@ -1418,27 +1418,27 @@ The results parameters control where the list of localisations will be recorded.
    * - Equalised
      - Use histogram equalisation on the image to enhance contrast. Allows viewing large dynamic range images.
 
-   * - Image Precision
+   * - Image precision
      - The Gaussian standard deviation to use for the average precision plotting options (in pixels).
 
-   * - Image Size mode
+   * - Image size mode
      - The mode used to create the output image size.
 
        * ``Scaled``: Scale the results using a scaling factor.
        * ``Image size``: Create a fixed output image size (in pixels).
        * ``Pixel size``: Create a fixed output pixel size (in nm).
 
-   * - Image Scale
+   * - Image scale
      - The factor used to enlarge the image for ``Scaled`` mode.
 
        The image will be rendered using the original fit bounds multiplied by the scale, e.g. a 64x64 image with a scale of 8 will draw a 512x512 super resolution image.
 
-   * - Image Size
+   * - Image size
      - The size of the image for ``Image size`` mode (in pixels).
 
        The size refers to the maximum of the width or height required to display the results given the known bounds, e.g. a 64x100 image with an image size of 300 will draw a 192x300 super resolution image (with an effective scale of 3).
 
-   * - Pixel Size
+   * - Pixel size
      - The size of the pixels for ``Pixel size`` mode (in nm).
 
        Creates a scale using the results pixel size divided by the output pixel size, e.g. a 64x100 image with a calibration of 100nm/pixel and an output pixel size of 10nm will draw a 640x1000 super resolution image (with an effective scale of 10).
@@ -1590,7 +1590,7 @@ The standard ``Peak Fit`` plugin allows the user to set all the parameters that 
      - Image output options
      - Applies to output images.
 
-       The ``Image Window`` specifies the number of consecutive frames from the results that should be plotted on a single ``ImageJ`` stack frame.
+       The ``Image window`` specifies the number of consecutive frames from the results that should be plotted on a single ``ImageJ`` stack frame.
 
        By default this parameter is zero. All localisations are plotted on the same output frame.
 

@@ -1023,9 +1023,9 @@ public class ResultsManager implements PlugIn {
             }
             egd.addCheckbox("Equalised", imageSettings.getEqualised());
             if (requirePrecision.contains(resultsImage)) {
-              egd.addSlider("Image_Precision (nm)", 5, 30, imageSettings.getAveragePrecision());
+              egd.addSlider("Image_precision (nm)", 5, 30, imageSettings.getAveragePrecision());
             }
-            egd.addChoice("Image_Size_mode", SettingsManager.getResultsImageSizeModeNames(),
+            egd.addChoice("Image_size_mode", SettingsManager.getResultsImageSizeModeNames(),
                 imageSettings.getImageSizeModeValue());
             final Choice choice = egd.getLastChoice();
 
@@ -1033,15 +1033,15 @@ public class ResultsManager implements PlugIn {
             final Label[] labels = new Label[3];
             final Panel[] panels = new Panel[3];
             // Adds a Label and Panel
-            egd.addSlider("Image_Scale", 1, 15, imageSettings.getScale());
+            egd.addSlider("Image_scale", 1, 15, imageSettings.getScale());
             labels[0] = egd.getLabel();
             panels[0] = egd.getLastPanel();
             // Adds a Label and Panel (panel contains a label)
-            egd.addNumericField("Image_Size", imageSettings.getImageSize(), 0, 6, "px");
+            egd.addNumericField("Image_size", imageSettings.getImageSize(), 0, 6, "px");
             labels[1] = egd.getLabel();
             panels[1] = egd.getLastPanel();
             // Adds a Label and Panel
-            egd.addSlider("Image_Pixel_size (nm)", 5, 30, imageSettings.getPixelSize());
+            egd.addSlider("Image_pixel_size (nm)", 5, 30, imageSettings.getPixelSize());
             labels[2] = egd.getLabel();
             panels[2] = egd.getLastPanel();
 
@@ -1067,7 +1067,7 @@ public class ResultsManager implements PlugIn {
             choice.addItemListener(l);
 
             if (isExtraOptions) {
-              egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
+              egd.addNumericField("Image_window", imageSettings.getRollingWindowSize(), 0);
             }
             if (BitFlagUtils.anyNotSet(flags, FLAG_IMAGE_NO_LUT)) {
               egd.addChoice("LUT", LutHelper.getLutNames(), imageSettings.getLutName());

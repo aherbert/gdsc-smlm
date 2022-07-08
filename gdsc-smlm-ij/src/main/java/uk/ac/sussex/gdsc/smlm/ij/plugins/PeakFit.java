@@ -1956,7 +1956,7 @@ public class PeakFit implements PlugInFilter {
    */
   public static void addSearchOptions(final ExtendedGenericDialog gd,
       final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
-    addRelativeParameterOptions(gd, new RelativeParameterProvider(0.5, 2.5, "Search Width",
+    addRelativeParameterOptions(gd, new RelativeParameterProvider(0.5, 2.5, "Search width",
         fitEngineConfigurationProvider, true) {
       @Override
       void setAbsolute(boolean absolute) {
@@ -1983,7 +1983,7 @@ public class PeakFit implements PlugInFilter {
    */
   public static void addBorderOptions(final ExtendedGenericDialog gd,
       final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
-    addRelativeParameterOptions(gd, new RelativeParameterProvider(0.5, 2.5, "Border Width",
+    addRelativeParameterOptions(gd, new RelativeParameterProvider(0.5, 2.5, "Border width",
         fitEngineConfigurationProvider, true) {
       @Override
       void setAbsolute(boolean absolute) {
@@ -2011,7 +2011,7 @@ public class PeakFit implements PlugInFilter {
   public static void addFittingOptions(final ExtendedGenericDialog gd,
       final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
     // For this we allow the slider range to increase as the user may have a large fit width
-    addRelativeParameterOptions(gd, new RelativeParameterProvider(2, 4.5, "Fitting Width",
+    addRelativeParameterOptions(gd, new RelativeParameterProvider(2, 4.5, "Fitting width",
         fitEngineConfigurationProvider, true) {
       @Override
       void setAbsolute(boolean absolute) {
@@ -2039,7 +2039,7 @@ public class PeakFit implements PlugInFilter {
    */
   public static void addDuplicateDistanceOptions(final ExtendedGenericDialog gd,
       final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
-    addRelativeParameterOptions(gd, new RelativeParameterProvider(0, 1.5, "Duplicate Distance",
+    addRelativeParameterOptions(gd, new RelativeParameterProvider(0, 1.5, "Duplicate distance",
         fitEngineConfigurationProvider) {
       @Override
       void setAbsolute(boolean absolute) {
