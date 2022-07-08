@@ -1745,7 +1745,7 @@ Fit Configuration
 
 This plugin allows the fitting engine to be configured without running ``Peak Fit`` on an image. The plugin dialog has several sections controlling different parts of the fitting algorithm. These settings are the same as the ``Peak Fit`` plugin and are described in section :numref:`{number}: {name} <fitting_plugins:Peak Fit>`.
 
-As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exists then a default set of settings will be created.
+As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exist then a default set of settings will be created.
 
 The ``Fit Configuration`` plugin allows the configuration to be viewed and updated without the need to have an image open. Since all plugins can be called from ``ImageJ`` scripts this also allows creation of a batch macro to change the fit configuration settings.
 
@@ -1833,7 +1833,7 @@ Finds all the candidate maxima in an image.
 
 This plugin uses the same algorithm as the ``Peak Fit`` plugin to identify maxima. However all the candidates are saved to the output. No 2D Gaussian fitting or peak filtering is performed.
 
-The fit configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exists then a default set of settings will be created.
+The fit configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exist then a default set of settings will be created.
 
 When the plugin runs all the settings will be saved to the existing settings.
 
@@ -1857,7 +1857,7 @@ Spot Finder (Preview)
 
 The ``Spot Finder (Preview)`` plugin allows an interactive view of the candidates that will be identified in an image using the configured spot filter.
 
-This plugin uses the same algorithm as the ``Peak Fit`` plugin to identify maxima. The configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exists then a default set of settings will be created.
+This plugin uses the same algorithm as the ``Peak Fit`` plugin to identify maxima. The configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exist then a default set of settings will be created.
 
 The plugin presents a non-blocking dialog allowing other windows in ``ImageJ`` to be used. In contrast to the ``Peak Fit`` plugin the dialog allows the second filter settings used in a ``Difference`` filter to be configured without additional dialogs. This is for convenience. A ``Jury`` filter still requires additional dialogs.
 
@@ -1998,9 +1998,9 @@ Fits a 2D Gaussian to identified maxima.
 
 This plugin uses the same algorithm as the ``Peak Fit`` plugin to fit maxima. Candidates are taken from any results set held in memory with a valid image source (i.e. fitting a list of selected maxima can be performed on the original data). Candidates are collated per time frame and processed in ranked order until a number of successive fits fails or no candidates remain.
 
-Candidates can be identified using the ``Spot Finder`` plugin (see section :numref:`%s <fitting_plugins:Spot Finder>`). Running the ``Spot Finder`` and ``Fit Maxima`` plugins will produce the same results as using the ``Peak Fit`` plugin. However separating the two steps allows processing to be performed on the candidates. For example the ``Trace Molecules`` plugin can be used to join up candidates in successive frames and fit the combined stack. These are identified internally as spanning multiple frames by tagging an end frame onto the result. The ``Fit Maxima`` plugin will not fit any results that span multiple frames; these will be send directly through to the result output.
+Candidates can be identified using the ``Spot Finder`` plugin (see section :numref:`%s <fitting_plugins:Spot Finder>`). Running the ``Spot Finder`` and ``Fit Maxima`` plugins will produce the same results as using the ``Peak Fit`` plugin. However separating the two steps allows processing to be performed on the candidates. For example the ``Trace Molecules`` plugin can be used to join up candidates in successive frames and fit the combined stack. These are identified internally as spanning multiple frames by tagging an end frame onto the result. The ``Fit Maxima`` plugin will not fit any results that span multiple frames; these will be sent directly through to the result output.
 
-The fit configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exists then a default set of settings will be created.
+The fit configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exist then a default set of settings will be created.
 
 When the plugin runs all the settings will be saved to the existing settings.
 
