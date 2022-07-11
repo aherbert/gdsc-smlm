@@ -1055,9 +1055,9 @@ public class DriftCalculator implements PlugIn {
     }
 
     // Store the pure drift values for plotting
-    calculatedTimepoints = Arrays.copyOf(weights, weights.length);
-    lastdx = Arrays.copyOf(newDx, newDx.length);
-    lastdy = Arrays.copyOf(newDy, newDy.length);
+    calculatedTimepoints = weights.clone();
+    lastdx = newDx.clone();
+    lastdy = newDy.clone();
 
     // Perform smoothing
     if (smoothing > 0 && !smooth(newDx, newDy, weights, smoothing, iterations)) {
@@ -1239,8 +1239,8 @@ public class DriftCalculator implements PlugIn {
       return null;
     }
 
-    final double[] dx = Arrays.copyOf(lastdx, lastdx.length);
-    final double[] dy = Arrays.copyOf(lastdy, lastdy.length);
+    final double[] dx = lastdx.clone();
+    final double[] dy = lastdy.clone();
 
     final double smoothing = updateSmoothingParameter(calculatedTimepoints);
 
@@ -1534,8 +1534,7 @@ public class DriftCalculator implements PlugIn {
     tracker.progress(1);
 
     // Used to flag when an alignment has failed
-    originalDriftTimePoints =
-        Arrays.copyOf(originalDriftTimePoints, originalDriftTimePoints.length);
+    originalDriftTimePoints = originalDriftTimePoints.clone();
     final double[] newDx = new double[dx.length];
     final double[] newDy = new double[dy.length];
     int ok = 0;
@@ -1564,9 +1563,9 @@ public class DriftCalculator implements PlugIn {
     }
 
     // Store the pure drift values for plotting
-    calculatedTimepoints = Arrays.copyOf(originalDriftTimePoints, originalDriftTimePoints.length);
-    lastdx = Arrays.copyOf(newDx, newDx.length);
-    lastdy = Arrays.copyOf(newDy, newDy.length);
+    calculatedTimepoints = originalDriftTimePoints.clone();
+    lastdx = newDx.clone();
+    lastdy = newDy.clone();
 
     // Perform smoothing
     if (smoothing > 0) {
