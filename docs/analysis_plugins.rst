@@ -42,7 +42,7 @@ Further details of the methods are shown in the sections below.
 
 Each method will produce an X and Y offset (drift) for specified frames. (Not all frames must have a drift value.) The calculated values are smoothed using LOESS smoothing (a local regression of the points around each value). The drift error is calculated as the total sum of the drift per frame. The current drift is applied to the results and the drift calculation repeated. This process is iterated until the drift has converged (shown by a small relative change in the drift error). In the case of loading the curve from file, no iteration is performed but the drift points may be smoothed.
 
-The calculated drift curve is interpolated to assign values for any frames without a drift value. Any frames outside the range of frames with drift values cannot be interpolated. These are assigned the same drift as the closest frame with a known drift value (i.e. no extrapolation of the drift curve is performed to avoid errors from poor data at the ends of the analysis range).
+The calculated drift curve is interpolated to assign values for any frames without a drift value. Any frames outside the range of frames with drift values can be extrapolated using different options.
 
 The plugin requires the following parameters:
 
@@ -81,6 +81,13 @@ The plugin requires the following parameters:
 
    * - Smoothing iterations
      - The number of iterations for LOESS smoothing. 1 is usually fine.
+
+   * - Extrapolation
+     - The method to extrapolate the curve beyond the end points.
+
+       * ``None``: Assign points the same drift as the closest known drift value (i.e. no extrapolation).
+       * ``Zero``: Assign the start and end points the same drift as the closest known drift value and interpolate between (effectively continues the curve back to the known drift value).
+       * ``Extend``: Assign the start and end points an extrapolated value using the drift from the closest two frames with a known drift value and interpolate between (effectively extends the curve in the current direction).
 
    * - Plot drift
      - Produce an output of the drift for the X and Y shifts. Shows the raw drift correction for each frame and the smoothed correction (see :numref:`Figure %s <fig_drift_calculator_drift_curve>`).

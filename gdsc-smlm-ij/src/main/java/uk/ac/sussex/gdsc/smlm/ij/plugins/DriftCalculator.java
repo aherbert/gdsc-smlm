@@ -130,6 +130,9 @@ public class DriftCalculator implements PlugIn {
     static final int UPDATE_METHODS_NONE = 0;
     static final int UPDATE_METHODS_UPDATE = 1;
     static final int UPDATE_METHODS_NEW_TRUNCATED = 3;
+    static final String[] EXTRAPOLATION_METHODS = {"None", "Zero", "Extend"};
+    static final int EXTRAPOLATION_METHODS_ZERO = 1;
+    static final int EXTRAPOLATION_METHODS_EXTEND = 2;
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
@@ -146,6 +149,7 @@ public class DriftCalculator implements PlugIn {
     int minSmoothingPoints;
     int maxSmoothingPoints;
     int iterations;
+    int extrapolation;
     boolean plotDrift;
     boolean saveDrift;
 
@@ -170,6 +174,7 @@ public class DriftCalculator implements PlugIn {
       limitSmoothing = true;
       minSmoothingPoints = 10;
       maxSmoothingPoints = 50;
+      extrapolation = 1;
       iterations = 1;
       plotDrift = true;
       frames = 2000;
@@ -194,6 +199,7 @@ public class DriftCalculator implements PlugIn {
       minSmoothingPoints = source.minSmoothingPoints;
       maxSmoothingPoints = source.maxSmoothingPoints;
       iterations = source.iterations;
+      extrapolation = source.extrapolation;
       plotDrift = source.plotDrift;
       saveDrift = source.saveDrift;
       frames = source.frames;
@@ -520,6 +526,7 @@ public class DriftCalculator implements PlugIn {
     gd.addSlider("Min_smoothing_points", 5, 50, settings.minSmoothingPoints);
     gd.addSlider("Max_smoothing_points", 5, 50, settings.maxSmoothingPoints);
     gd.addSlider("Smoothing_iterations", 1, 10, settings.iterations);
+    gd.addChoice("Extrapolation", Settings.EXTRAPOLATION_METHODS, settings.extrapolation);
     gd.addCheckbox("Plot_drift", settings.plotDrift);
 
     gd.showDialog();
@@ -537,6 +544,7 @@ public class DriftCalculator implements PlugIn {
     settings.minSmoothingPoints = (int) gd.getNextNumber();
     settings.maxSmoothingPoints = (int) gd.getNextNumber();
     settings.iterations = (int) gd.getNextNumber();
+    settings.extrapolation = gd.getNextChoiceIndex();
     settings.plotDrift = gd.getNextBoolean();
     settings.save();
 
@@ -916,7 +924,7 @@ public class DriftCalculator implements PlugIn {
    * @param originalDriftTimePoints the original drift time points
    */
   private void interpolate(double[] dx, double[] dy, double[] originalDriftTimePoints) {
-    // TODO: Perform extrapolation. Currently the end values are used.
+    // Perform extrapolation. Currently the end values are used.
 
     // Find end points
     int startT = 0;
@@ -928,17 +936,44 @@ public class DriftCalculator implements PlugIn {
       endT--;
     }
 
-    // Extrapolate using a constant value
-    for (int t = startT; t-- > 0;) {
-      dx[t] = dx[startT];
-      dy[t] = dy[startT];
-    }
-    for (int t = endT; ++t < dx.length;) {
-      dx[t] = dx[endT];
-      dy[t] = dy[endT];
+    if (settings.extrapolation == Settings.EXTRAPOLATION_METHODS_EXTEND) {
+      // Extrapolate
+      int startT1 = startT + 1;
+      while (originalDriftTimePoints[startT1] == 0) {
+        startT1++;
+      }
+      final int endT1 = endT - 1;
+      while (originalDriftTimePoints[endT] == 0) {
+        endT--;
+      }
+
+      dx[0] = dx[startT] + (dx[startT] - dx[startT1]) / (startT1 - startT);
+      dy[0] = dy[startT] + (dy[startT] - dy[startT1]) / (startT1 - startT);
+      startT = 0;
+      dx[dx.length - 1] = dx[endT] + (dx[endT] - dx[endT1]) / (endT - endT1);
+      dy[dy.length - 1] = dy[endT] + (dy[endT] - dy[endT1]) / (endT - endT1);
+      endT = dx.length - 1;
+    } else if (settings.extrapolation == Settings.EXTRAPOLATION_METHODS_ZERO) {
+      // duplicate ends
+      dx[0] = dx[startT];
+      dy[0] = dy[startT];
+      startT = 0;
+      dx[dx.length - 1] = dx[endT];
+      dy[dy.length - 1] = dy[endT];
+      endT = dx.length - 1;
+    } else {
+      // Extrapolate using a constant value
+      for (int t = startT; t-- > 0;) {
+        dx[t] = dx[startT];
+        dy[t] = dy[startT];
+      }
+      for (int t = endT; ++t < dx.length;) {
+        dx[t] = dx[endT];
+        dy[t] = dy[endT];
+      }
     }
 
-    final double[][] values = extractValues(originalDriftTimePoints, startT, endT, dx, dy);
+    final double[][] values = extractValues(originalDriftTimePoints, startT, endT, dx, dy, true);
 
     PolynomialSplineFunction fx;
     PolynomialSplineFunction fy;
@@ -950,7 +985,8 @@ public class DriftCalculator implements PlugIn {
       fy = new SplineInterpolator().interpolate(values[0], values[2]);
     }
 
-    for (int t = startT; t <= endT; t++) {
+    // Interpolation will match the ends points so these can be skipped
+    for (int t = startT + 1; t < endT; t++) {
       if (originalDriftTimePoints[t] == 0) {
         dx[t] = fx.value(t);
         dy[t] = fy.value(t);
@@ -1149,15 +1185,55 @@ public class DriftCalculator implements PlugIn {
    * @param maxT the max T
    * @param array1 the array 1
    * @param array2 the array 2
+   * @param includeEnds the include ends
    * @return Array of [index][array1][array2]
    */
   private static double[][] extractValues(double[] data, int minT, int maxT, double[] array1,
       double[] array2) {
-    // Extract data points for smoothing
-    final int timepoints = maxT - minT + 1;
-    final double[][] values = new double[3][timepoints];
+    return extractValues(data, minT, maxT, array1, array2, false);
+  }
+
+  /**
+   * For all indices between min and max, if the data array is not zero then add the index and the
+   * values from array 1 and 2 to the output.
+   *
+   * @param data the data
+   * @param minT the min T
+   * @param maxT the max T
+   * @param array1 the array 1
+   * @param array2 the array 2
+   * @param includeEnds set to true to always include the ends
+   * @return Array of [index][array1][array2]
+   */
+  private static double[][] extractValues(double[] data, int minT, int maxT, double[] array1,
+      double[] array2, boolean includeEnds) {
     int count = 0;
-    for (int t = minT; t <= maxT; t++) {
+    for (int t = minT + 1; t < maxT; t++) {
+      if (data[t] != 0) {
+        count++;
+      }
+    }
+    if (includeEnds) {
+      count += 2;
+    } else {
+      if (data[minT] != 0) {
+        count++;
+      }
+      if (data[maxT] != 0) {
+        count++;
+      }
+    }
+
+    // Extract data points for smoothing
+    final double[][] values = new double[3][count];
+    count = 0;
+    if (data[minT] != 0 || includeEnds) {
+      values[0][count] = minT;
+      values[1][count] = array1[minT];
+      values[2][count] = array2[minT];
+      count++;
+    }
+    for (int t = minT + 1; t < maxT; t++) {
       if (data[t] != 0) {
         values[0][count] = t;
         values[1][count] = array1[t];
@@ -1165,9 +1241,11 @@ public class DriftCalculator implements PlugIn {
         count++;
       }
     }
-    values[0] = Arrays.copyOf(values[0], count);
-    values[1] = Arrays.copyOf(values[1], count);
-    values[2] = Arrays.copyOf(values[2], count);
+    if (data[maxT] != 0 || includeEnds) {
+      values[0][count] = maxT;
+      values[1][count] = array1[maxT];
+      values[2][count] = array2[maxT];
+    }
     return values;
   }
 
@@ -1230,10 +1308,7 @@ public class DriftCalculator implements PlugIn {
    * @param dy the dy
    */
   private void saveDrift(double[] originalDriftTimePoints, double[] dx, double[] dy) {
-    if (!settings.saveDrift) {
-      return;
-    }
-    if (!getDriftFilename()) {
+    if (!settings.saveDrift || !getDriftFilename()) {
       return;
     }
     try (BufferedWriter out = Files.newBufferedWriter(Paths.get(settings.driftFilename))) {
