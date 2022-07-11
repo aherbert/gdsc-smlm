@@ -1396,11 +1396,13 @@ public class DriftCalculator implements PlugIn {
     final int[] blockT = new int[blocks.size()];
     int time = 0;
     for (final List<Localisation> block : blocks) {
-      long sum = 0;
+      // Intensity weighted time-point (since the image uses the localisation intensity)
+      final double sumSignal = block.stream().mapToDouble(l -> l.signal).sum();
+      double sum = 0;
       for (final Localisation r : block) {
-        sum += r.time;
+        sum += r.time * (r.signal / sumSignal);
       }
-      blockT[time++] = (int) Math.round((double) sum / block.size());
+      blockT[time++] = (int) Math.round(sum);
     }
 
     // Calculate a scale to use when constructing the images for alignment
