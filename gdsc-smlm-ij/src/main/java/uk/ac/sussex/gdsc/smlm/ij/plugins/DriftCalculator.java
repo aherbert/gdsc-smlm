@@ -1333,7 +1333,9 @@ public class DriftCalculator implements PlugIn {
 
     BlockPeakResultProcedure(Settings settings) {
       this.frames = settings.frames;
-      this.minimimLocalisations = settings.minimimLocalisations;
+      this.minimimLocalisations = Math.max(1, settings.minimimLocalisations);
+      nextBlock = new ArrayList<>();
+      blocks.add(nextBlock);
     }
 
     @Override
@@ -1343,7 +1345,7 @@ public class DriftCalculator implements PlugIn {
           counter.increment(frames);
         }
         // To avoid blocks without many results only create a new block if the min size has been met
-        if (nextBlock == null || nextBlock.size() >= minimimLocalisations) {
+        if (nextBlock.size() >= minimimLocalisations) {
           nextBlock = new ArrayList<>();
           blocks.add(nextBlock);
         }
@@ -1376,7 +1378,8 @@ public class DriftCalculator implements PlugIn {
       return null;
     }
 
-    // Check the final block has enough localisations
+    // Check the final block has enough localisations.
+    // (Note all previous blocks would have had enough.)
     final List<Localisation> nextBlock = p.nextBlock;
     if (nextBlock.size() < settings.minimimLocalisations) {
       blocks.remove(blocks.size() - 1);
@@ -1397,7 +1400,7 @@ public class DriftCalculator implements PlugIn {
       for (final Localisation r : block) {
         sum += r.time;
       }
-      blockT[time++] = (int) (sum / block.size());
+      blockT[time++] = (int) Math.round((double) sum / block.size());
     }
 
     // Calculate a scale to use when constructing the images for alignment
