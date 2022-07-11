@@ -493,8 +493,7 @@ public class DriftCalculator implements PlugIn {
   private boolean showDialog(Roi[] rois, String[] stackTitles) {
     settings = Settings.load();
 
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(HelpUrls.getUrl("drift-calculator"));
+    final ExtendedGenericDialog gd = createDialog("drift-calculator");
 
     gd.addMessage("Correct the drift in localisation results");
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
@@ -560,8 +559,7 @@ public class DriftCalculator implements PlugIn {
   }
 
   private boolean showSubImageDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(HelpUrls.getUrl("drift-calculator"));
+    final ExtendedGenericDialog gd = createDialog("drift-calculator-sub-image");
 
     gd.addMessage("Compute the drift using localisation sub-image alignment");
     gd.addNumericField("Frames", settings.frames, 0);
@@ -590,8 +588,7 @@ public class DriftCalculator implements PlugIn {
   }
 
   private ImageStack showStackDialog(String[] stackTitles) {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(HelpUrls.getUrl("drift-calculator"));
+    final ExtendedGenericDialog gd = createDialog("drift-calculator-stack");
 
     gd.addMessage("Compute the drift using a reference stack alignment");
 
@@ -650,7 +647,8 @@ public class DriftCalculator implements PlugIn {
   }
 
   private void applyDriftCorrection(MemoryPeakResults results, double[][] drift) {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    final ExtendedGenericDialog gd = createDialog("drift-calculator");
+
     gd.addMessage("Apply drift correction to in-memory results?");
     gd.addChoice("Update_method", Settings.UPDATE_METHODS, settings.updateMethod);
     // Option to save the drift unless it was loaded from file
@@ -702,6 +700,12 @@ public class DriftCalculator implements PlugIn {
         newResults.add(result);
       });
     }
+  }
+
+  private static ExtendedGenericDialog createDialog(String key) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addHelp(HelpUrls.getUrl(key));
+    return gd;
   }
 
   /**
