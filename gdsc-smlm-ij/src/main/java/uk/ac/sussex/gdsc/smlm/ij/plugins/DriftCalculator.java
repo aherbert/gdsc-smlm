@@ -1345,8 +1345,8 @@ public class DriftCalculator implements PlugIn {
         // To avoid blocks without many results only create a new block if the min size has been met
         if (nextBlock == null || nextBlock.size() >= minimimLocalisations) {
           nextBlock = new ArrayList<>();
+          blocks.add(nextBlock);
         }
-        blocks.add(nextBlock);
       }
       nextBlock.add(new Localisation(result.getFrame(), result.getXPosition(),
           result.getYPosition(), result.getIntensity()));
