@@ -892,9 +892,26 @@ public class DriftCalculator implements PlugIn {
     return true;
   }
 
+  /**
+   * Interpolate the input change values for each original drift time point. Original time points
+   * are identified using a non-zero value in the input {@code originalDriftTimePoints}.
+   *
+   * <p>Interpolate the values between the original time points using a spline, or for small numbers
+   * or points a linear function. The interpolator can only create missing values within the range
+   * provided by the input values. The two ends have to be extrapolated; this is performed using a
+   * constant value.
+   *
+   * <p>This interpolation is suitable for original drift time points that correspond to a drift
+   * computed for a single frame, for example from a fiducial marker or a single-frame image
+   * alignment. If the drift value is for a range of time-points then the drift value does not
+   * correspond to drift exactly at the specified time point, for example for an image alignment
+   * where the image was created from many localisations over a range of frames.
+   *
+   * @param dx the change in the x value
+   * @param dy the change in the y value
+   * @param originalDriftTimePoints the original drift time points
+   */
   private void interpolate(double[] dx, double[] dy, double[] originalDriftTimePoints) {
-    // Interpolator can only create missing values within the range provided by the input values.
-    // The two ends have to be extrapolated.
     // TODO: Perform extrapolation. Currently the end values are used.
 
     // Find end points
