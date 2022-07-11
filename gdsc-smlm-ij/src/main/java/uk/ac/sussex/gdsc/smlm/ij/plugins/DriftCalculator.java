@@ -127,6 +127,9 @@ public class DriftCalculator implements PlugIn {
     static final String[] UPDATE_METHODS =
         {"None", "Update", "New dataset", "New truncated dataset"};
     static final String[] SIZES = {"128", "256", "512", "1024", "2048"};
+    static final int UPDATE_METHODS_NONE = 0;
+    static final int UPDATE_METHODS_UPDATE = 1;
+    static final int UPDATE_METHODS_NEW_TRUNCATED = 3;
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
@@ -664,7 +667,7 @@ public class DriftCalculator implements PlugIn {
       settings.saveDrift = gd.getNextBoolean();
       saveDrift(calculatedTimepoints, lastdx, lastdy);
     }
-    if (settings.updateMethod == 0) {
+    if (settings.updateMethod == Settings.UPDATE_METHODS_NONE) {
       return;
     }
 
@@ -674,7 +677,7 @@ public class DriftCalculator implements PlugIn {
     // Note: We can use the raw procedure on the results because we requested
     // the results were in pixels
 
-    if (settings.updateMethod == 1) {
+    if (settings.updateMethod == Settings.UPDATE_METHODS_UPDATE) {
       // Update the results in memory
       ImageJUtils.log("Applying drift correction to the results set: " + results.getName());
       results.forEach((PeakResultProcedure) result -> {
@@ -687,7 +690,7 @@ public class DriftCalculator implements PlugIn {
       newResults.copySettings(results);
       newResults.setName(results.getName() + " (Corrected)");
       MemoryPeakResults.addResults(newResults);
-      final boolean truncate = settings.updateMethod == 3;
+      final boolean truncate = settings.updateMethod == Settings.UPDATE_METHODS_NEW_TRUNCATED;
       ImageJUtils.log("Creating %sdrift corrected results set: " + newResults.getName(),
           (truncate) ? "truncated " : "");
       results.forEach((PeakResultProcedure) result -> {
@@ -695,9 +698,10 @@ public class DriftCalculator implements PlugIn {
             && (result.getFrame() < interpolationStart || result.getFrame() > interpolationEnd)) {
           return;
         }
-        result.setXPosition((float) (result.getXPosition() + dx[result.getFrame()]));
-        result.setYPosition((float) (result.getYPosition() + dy[result.getFrame()]));
-        newResults.add(result);
+        final PeakResult copy = result.copy();
+        copy.setXPosition((float) (result.getXPosition() + dx[result.getFrame()]));
+        copy.setYPosition((float) (result.getYPosition() + dy[result.getFrame()]));
+        newResults.add(copy);
       });
     }
   }
