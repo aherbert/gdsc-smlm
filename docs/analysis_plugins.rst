@@ -26,17 +26,17 @@ Drift can be calculated using:
    * - Method
      - Description
 
-   * - Sub-image alignment
+   * - Localisation Sub-images
      - Subsets of the localisation data are used to build images that are aligned to the global image.
 
    * - Drift file
-     - The drift is loaded from file.
+     - The drift is loaded from file. This file can be created by saving the drift from another calculation method.
 
-   * - Reference stack alignment
-     - Images from a reference stack (e.g. a white light image) are aligned to a global projection.
+   * - Marked ROIs
+     - The positions of fiducial markers are aligned to their centre-of-mass over the entire image. Available when ROIs have been added to the ``ImageJ`` RoiManager.
 
-   * - Fiducial markers within an image
-     - The positions of fiducial markers are aligned to their centre-of-mass over the entire image.
+   * - Reference Stack Alignment
+     - Images from a reference stack (e.g. a white light image) are aligned to a global projection. Available when a stack image is open.
 
 Further details of the methods are shown in the sections below.
 
@@ -163,7 +163,7 @@ The ``Sub-image alignment`` method performs the following steps:
 
 #.  Smooth the drift curve.
 
-#.  Calculate the change to the drift and repeats from step 2 until convergence.
+#.  Calculate the change to the drift and repeat from step 2 until convergence.
 
 
 The following parameters can be specified:
