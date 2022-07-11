@@ -785,6 +785,13 @@ public class DriftCalculator implements PlugIn {
 
     final int n = countNonZeroValues(data);
 
+    if (n < settings.minSmoothingPoints) {
+      ImageJUtils.log(
+          "Not enough points to achieve min smoothing points (%d < %d), ignoring point limits", n,
+          settings.minSmoothingPoints);
+      return settings.smoothing;
+    }
+
     int bandwidthInpoints = (int) (settings.smoothing * n);
 
     // Check the bounds for the smoothing
@@ -849,6 +856,12 @@ public class DriftCalculator implements PlugIn {
       double smoothing, int iterations) {
     final double[][] values =
         extractValues(originalDriftTimePoints, 0, newDx.length - 1, newDx, newDy);
+
+    // Check bandwidth to avoid an exception in the LoessInterpolator
+    // bandwidthInPoints = (int) (smoothing * values.length)
+    if (smoothing * values.length < 2) {
+      return true;
+    }
 
     // Smooth
     final LoessInterpolator loess = new LoessInterpolator(smoothing, iterations);
