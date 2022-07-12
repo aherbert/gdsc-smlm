@@ -208,7 +208,8 @@ public class DynamicMultipleTargetTracing {
        * @throws IllegalArgumentException if the value is not strictly positive
        */
       public Builder setDiffusionCoefficientMaximum(double diffusionCoefficientMaximum) {
-        ValidationUtils.checkStrictlyPositive(diffusionCoefficientMaximum);
+        ValidationUtils.checkStrictlyPositive(diffusionCoefficientMaximum,
+            "diffusionCoefficientMaximum");
         this.diffusionCoefficientMaximum = diffusionCoefficientMaximum;
         return this;
       }
@@ -248,7 +249,7 @@ public class DynamicMultipleTargetTracing {
        * @throws IllegalArgumentException if the value is not strictly positive
        */
       public Builder setDisappearanceDecayFactor(double disappearanceDecayFactor) {
-        ValidationUtils.checkStrictlyPositive(disappearanceDecayFactor);
+        ValidationUtils.checkStrictlyPositive(disappearanceDecayFactor, "disappearanceDecayFactor");
         this.disappearanceDecayFactor = disappearanceDecayFactor;
         return this;
       }
@@ -263,7 +264,7 @@ public class DynamicMultipleTargetTracing {
        * @throws IllegalArgumentException if the value is not positive
        */
       public Builder setDisappearanceThreshold(int disappearanceThreshold) {
-        ValidationUtils.checkPositive(disappearanceThreshold);
+        ValidationUtils.checkPositive(disappearanceThreshold, "disappearanceThreshold");
         this.disappearanceThreshold = disappearanceThreshold;
         return this;
       }
