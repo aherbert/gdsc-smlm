@@ -573,7 +573,9 @@ Cluster Molecules
 
 Cluster localisations into clusters using distance and optionally time thresholds. When using a time threshold each cluster can only have one localisation per time frame. With the correct parameters a cluster should represent all the localisations of a single fluorophore molecule including blinking events.
 
-This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`%s <analysis_plugins:Trace Molecules>`) and many of the options are the same. The following options are available:
+This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`%s <analysis_plugins:Trace Molecules>`) and many of the options are the same. Key differences are that ``Cluster Molecules`` can join clusters together, can join multiple localisations in the same frame, can join new localisations based on the distance to any localisation in a cluster and can measure distances to the cluster centroid. The ``Trace Molecules`` algorithm only joins single localisations to an existing track based on the distance between the closest localisations in time, and requires only 1 localisation per frame in a track. ``Cluster Molecules`` can be used to aggregate more than 1 molecule; ``Trace Molecules`` is used to aggregate localisations from the same molecule over time.
+
+The following options are available:
 
 .. list-table::
    :widths: 20 80
@@ -642,7 +644,7 @@ The following table lists the available clustering algorithms:
      - Joins the closest pair of particles, one of which must not be in a cluster. Clusters are not joined and can only grow when particles are added.
 
    * - Centroid-linkage
-     - Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively
+     - Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively.
 
    * - Particle centroid-linkage
      - Hierarchical centroid-linkage clustering by joining the closest pair of any single particle and another single or cluster. Clusters are not joined and can only grow when particles are added.
@@ -653,7 +655,7 @@ The following table lists the available clustering algorithms:
    * - Pairwise without neighbours
      - A variant of ``PairwiseWithoutNeighbours`` is to join the closest pairs only if the number of neighbours for each is 1. In the event that no pairs has only a single neighbour then only the closest pair is joined.
 
-       This algorithm should return the same results as the ``Closest`` algorithm (but with different run-time performance).
+       This algorithm should return the same results as the ``Centroid-linkage`` algorithm (but with different run-time performance).
 
    * - Centroid-linkage (Distance priority)
      - Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are compared using time and distance thresholds with priority on the closest time gap (within the distance threshold).
@@ -676,7 +678,7 @@ Only the ``(Distance priority)`` and ``(Time priority)`` methods use the time in
 
 All the clustering algorithms (except ``Pairwise``) are multi-threaded for at least part of the algorithm. The number of threads to use is the ``ImageJ`` default set in ``Edit > Options > Memory & Threads...``.
 
-The ``Pairwise`` algorithm is not suitable for multi-threaded operation but is the fastest algorithm by an order of magnitude over the others. All other algorithms have a similar run-time performance except the ``Pairwise without neighbours`` algorithm which doesn't just search for the closest clusters but also tracks the number of neighbours. The algorithm should return the same results as the ``Closest`` algorithm but the analysis of neighbours has run-time implications. At very low densities this algorithm is faster since all pairs without neighbours can be joined in one step. However at most normal and high densities tracking neighbours is costly and the algorithm is approximately 3x slower than the next algorithm.
+The ``Pairwise`` algorithm is not suitable for multi-threaded operation but is the fastest algorithm by an order of magnitude over the others. All other algorithms have a similar run-time performance except the ``Pairwise without neighbours`` algorithm which doesn't just search for the closest clusters but also tracks the number of neighbours. The algorithm should return the same results as the ``Centroid-linkage`` algorithm but the analysis of neighbours has run-time implications. At very low densities this algorithm is faster since all pairs without neighbours can be joined in one step. However at most normal and high densities tracking neighbours is costly and the algorithm is approximately 3x slower than the next algorithm.
 
 
 .. index:: ! Dynamic Trace Molecules
