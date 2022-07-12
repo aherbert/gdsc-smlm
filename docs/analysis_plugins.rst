@@ -684,11 +684,11 @@ The ``Pairwise`` algorithm is not suitable for multi-threaded operation but is t
 .. index:: ! Dynamic Trace Molecules
 
 Dynamic Trace Molecules
--------------------------
+-----------------------
 
 Traces localisations through time and collates them into traces using a probability model to reconnect localisations to existing traces based on diffusion coefficient, intensity and fluorophore disappearance rate.
 
-Use dynamic multiple target tracing based on Sergé *et al* (2008). Details can be found in the paper's supplementary information appendix 2. This tracing uses a model to assign the probability that a localisation should join a current trajectory (or track). The matrix of all localisations paired with all current trajectories is considered and the maximum likelihood reconnection is selected. New trajectories are created as required and existing trajectories can expire if no localisations have been assigned to them for a set number of frames.
+This plugin implements dynamic multiple target tracing based on Sergé *et al* (2008). Details can be found in the paper's supplementary information appendix 2. Tracing uses a model to assign the probability that a localisation should join a current trajectory (or track). The matrix of all localisations paired with all current trajectories is considered and the maximum likelihood reconnection is selected. New trajectories are created as required and existing trajectories can expire if no localisations have been assigned to them for a set number of frames.
 
 The probability model consists of three parts: the probability for a match given the diffusion; the probability for a match given the intensity; and the probability the trajectory blinks or disappears.
 
