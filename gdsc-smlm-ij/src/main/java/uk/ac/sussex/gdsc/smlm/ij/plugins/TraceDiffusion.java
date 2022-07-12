@@ -1090,9 +1090,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       return false;
     }
 
-    // Update the settings
-    SettingsManager.writeSettings(clusteringSettings.build());
-
     // Load the results
     if (!multiMode) {
       final MemoryPeakResults results =
@@ -1153,6 +1150,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     clusteringSettings.setSaveTraces(gd.getNextBoolean());
 
     gd.collectOptions();
+
+    // Update the settings
+    SettingsManager.writeSettings(clusteringSettings.build());
 
     if (gd.invalidNumber()) {
       return false;
@@ -1311,14 +1311,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     gd.showDialog();
 
-    if (gd.wasCanceled() || !readDialog(gd)) {
-      return false;
-    }
-
-    // Update the settings
-    SettingsManager.writeSettings(clusteringSettings.build());
-
-    return true;
+    return !gd.wasCanceled() && readDialog(gd);
   }
 
   private boolean readDialog(ExtendedGenericDialog gd) {
@@ -1348,6 +1341,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       return false;
     }
 
+    // Update the settings
+    SettingsManager.writeSettings(clusteringSettings.build());
+
     if (clusteringSettings.getShowHistograms()) {
       gd = new ExtendedGenericDialog(TITLE);
       gd.addMessage("Select the histograms to display");
@@ -1374,6 +1370,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       settings.displayTraceLength = gd.getNextBoolean();
       settings.displayTraceSize = gd.getNextBoolean();
     }
+
+    // Update the settings
+    SettingsManager.writeSettings(clusteringSettings.build());
 
     // Check arguments
     try {
