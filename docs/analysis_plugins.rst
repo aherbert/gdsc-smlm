@@ -1364,7 +1364,9 @@ When the plugin runs a dialog is presented that allows the datasets to be select
 
     Trace Diffusion (Multi) dataset selection dialog
 
-*  Click a single result set to select or deselect.
+*  Click a single result set to select.
+
+*  Hold the ``Ctrl`` key and click a single result set to select or deselect.
 
 *  Hold the ``Shift`` key to select or deselect a range of results starting from the last clicked result set.
 
@@ -1372,9 +1374,7 @@ When the plugin runs a dialog is presented that allows the datasets to be select
 
 *  Click the ``Cancel`` button to end the plugin.
 
-*  Click the ``OK`` button to run the
-   ``Trace Diffusion``
-   plugin with the selected results.
+*  Click the ``OK`` button to run the ``Trace Diffusion`` plugin with the selected results.
 
 When the ``Trace Diffusion`` plugin is executed it will not have the ``Input`` option as the results have already been selected. If multiple datasets are chosen the dataset name in the results table will be named using the first dataset plus the number of additional datasets, e.g. ``Dataset 1 + 6 others``.
 
