@@ -1434,7 +1434,7 @@ Note: An ideal dual population of fixed and moving molecules will be a bimodel h
 Track Population Analysis
 -------------------------
 
-The ``Track Population Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All contiguous localisations from each track are extracted into a dataset of sub-tracks. A sliding window (of size :math:`w`) is used over each sub-track to extract local features describing the diffusion of the molecule. The time step :math:`\Delta t` is the frame exposure time. Each time point in each sub-track is described as a feature vector.
+The ``Track Population Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All contiguous localisations from each track are extracted into a dataset of sub-tracks. A sliding window (of size :math:`w`) is used over each sub-track to extract local features describing the diffusion of the molecule. The time step :math:`\Delta t` is the frame exposure time. Each time point in each sub-track is described using a feature vector.
 
 The plugin will detect if the input localisations have been assigned a category. If present the category can optionally be used to identify sub-populations within the tracks. Alternatively a multivariate Gaussian mixture model is fit to the data using the Expectation-Maximisation algorithm to estimate sub-populations of tracks that have different diffusion characteristics, for example a stationary and a moving population of molecules.
 
@@ -1467,7 +1467,7 @@ where :math:`\alpha` is the anomalous diffusion coefficient. A value of 1 denote
 
 The Brownian model is a nested model of the FBM model. The significance of the FBM model can be computed using an F-test on the residual sum of squares. The number of insignificant fits is reported to the ``ImageJ`` log window. When the number of insignificant fits is high then the data may contain only standard Brownian motion and the anomalous coefficient :math:`\alpha` can be ignored during the population analysis.
 
-Note: The fit assumes an increasing MSD with time. If a negative slope occurs for the MSD then the data likely corresponds to a stationary molecule and the variation is the static localisation precision. In this case the anomalous coefficient is meaningless and a value of 1 is used.
+Note: The fit assumes an increasing MSD with time. If a flat or negative slope occurs for the MSD then the data likely corresponds to a stationary molecule, or a moving molecule that transitioned to stationary within the analysis window. In this case the anomalous coefficient is meaningless and a value of 1 is used.
 
 Effective diffusion coefficient
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1502,7 +1502,7 @@ Parameters
 
 When the plugin runs a dialog is shown containing all the localisation datasets in memory that contain track IDs. The user can select one or more datasets for analysis. The plugin will verify that the exposure time and spatial calibration are the same across all datasets. This ensures analysis of the same sliding window across datasets is comparable.
 
-If the input data contains categories in the localisations the plugin will ask if these should be used as the populations. If ``Yes`` is selected then the options for fitting the multivariate Gaussian mixture are not shown in the parameter input dialog.
+If the input data contains categories in the localisations the plugin will ask if these should be used as the populations. This enables track populations to be assigned using external analysis and the results loaded for display. If ``Yes`` is selected then the options for fitting the multivariate Gaussian mixture are not shown in the parameter input dialog.
 
 The following analysis parameters can be configured:
 
@@ -1552,6 +1552,9 @@ The following analysis parameters can be configured:
 
    * - Seed
      - The random seed to use to create the initial mixtures for the Expectation-Maximisation algorithm.
+
+   * - Debug
+     - Set to **true** to log additional information during the analysis.
 
    * - Histogram bins
      - The number of bins to use in the histogram. Set to zero for automatic bin size based on the data.
