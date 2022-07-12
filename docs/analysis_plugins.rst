@@ -1119,6 +1119,9 @@ When all the datasets have been traced the plugin presents a second dialog to co
    * - Maximum likelihood
      - Perform jump distance fitting using maximum likelihood estimation (MLE). The default is sum-of-squared residuals (SS) fitting of the cumulative histogram of jump distances.
 
+   * - MLE significance level
+     - Sets the significance level. This is used when testing the log-likelihood ratio during maximum likelihood fitting that an increase in model parameters improves the model.
+
    * - Fit restarts
      - The number of restarts to attempt when fitting using the CMAES optimiser. A higher number produces and more robust fit solution since the best fit of all the restarts is selected.
 
@@ -1226,6 +1229,12 @@ If the ``Show histograms`` option is selected the plugin presents a second dialo
    * - D*/Molecule
      - The apparent diffusion coefficient per molecule. Plots of the all-vs-all and adjacent D* are shown.
 
+   * - Trace length
+     - The length of the trace in |micro|\ m.
+
+   * - Trace size
+     - The number of localisations in the trace.
+
 
 ..
   No index
@@ -1297,7 +1306,7 @@ The plugin shows a summary table of the analysis results. This allows the plugin
      - The number of jumps for jump distance analysis.
 
    * - Beta
-     - The beta parameter which is the ratio between the mean squared distance the localisation precision: :math:`\frac{\mathit{MSD}}{s^2}`.
+     - The beta parameter which is the ratio between the mean squared distance and the localisation precision: :math:`\frac{\mathit{MSD}}{s^2}`.
 
        A beta above 6 indicates that jump distance analysis will produce reliable results [Weimann *et al*, 2013].
 
@@ -1307,10 +1316,10 @@ The plugin shows a summary table of the analysis results. This allows the plugin
    * - Fractions
      - The fractions of each population from jump analysis.
 
-   * - IC
-     - The information criterion (IC) for the best model fit.
+   * - Fit Score
+     - The score for the best model fit.
 
-       Note that the IC is not comparable between the MLE or LSQ methods for fitting. It is also not comparable when the number of jumps is different. It can only be used to compare fitting the same jump distances with a different number of mobile species. This can can be controlled using the ``Minimum`` and ``Maximum N`` parameters.
+       Note that the score is not comparable between the MLE or LSQ methods for fitting. It is also not comparable when the number of jumps is different. It can only be used to compare fitting the same jump distances with a different number of mobile species. This can can be controlled using the ``Minimum`` and ``Maximum N`` parameters.
 
    * - Total signal
      - The average total signal of each trace.
