@@ -144,9 +144,9 @@ public class Optics implements PlugIn {
   private static final int LOG_OPTICS = 0x02;
   private static final int LOG_LOOP = 0x04;
 
-  private static final AtomicInteger WORKED_ID = new AtomicInteger();
+  private static final AtomicInteger WORKER_ID = new AtomicInteger();
 
-  private static AtomicInteger logged = new AtomicInteger();
+  private static final AtomicInteger LOGGED = new AtomicInteger();
 
   /** LUT for clusters. */
   static final LUT CLUSTER_LUT;
@@ -966,7 +966,7 @@ public class Optics implements PlugIn {
     final int id;
 
     BaseWorker() {
-      id = WORKED_ID.getAndIncrement();
+      id = WORKER_ID.getAndIncrement();
       // When constructing the workflow automatically add any workers
       // that can handle cluster selections
       if (this instanceof ClusterSelectedHandler) {
@@ -4565,14 +4565,14 @@ public class Optics implements PlugIn {
   private static void logReferences(boolean isDbscan) {
     final int width = 80;
     final StringBuilder sb = new StringBuilder();
-    if (isDbscan && (logged.getAndUpdate(v -> v | LOG_DBSCAN) & LOG_DBSCAN) != LOG_DBSCAN) {
+    if (isDbscan && (LOGGED.getAndUpdate(v -> v | LOG_DBSCAN) & LOG_DBSCAN) != LOG_DBSCAN) {
       sb.append("DBSCAN: ");
       sb.append(TextUtils
           .wrap("Ester, et al (1996). 'A density-based algorithm for discovering clusters in large "
               + "spatial databases with noise'. Proceedings of the Second International Conference "
               + "on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.", width))
           .append('\n');
-    } else if ((logged.getAndUpdate(v -> v | LOG_OPTICS) & LOG_OPTICS) != LOG_OPTICS) {
+    } else if ((LOGGED.getAndUpdate(v -> v | LOG_OPTICS) & LOG_OPTICS) != LOG_OPTICS) {
       sb.append("OPTICS: ");
       sb.append(TextUtils.wrap(
           "Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: "
@@ -4585,7 +4585,7 @@ public class Optics implements PlugIn {
               + "Management(CIKM). ACM. pp. 861-866.", width))
           .append('\n');
     }
-    if ((logged.getAndUpdate(v -> v | LOG_LOOP) & LOG_LOOP) != LOG_LOOP) {
+    if ((LOGGED.getAndUpdate(v -> v | LOG_LOOP) & LOG_LOOP) != LOG_LOOP) {
       sb.append("LoOP: ");
       sb.append(TextUtils.wrap(
           "Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International "
