@@ -1553,7 +1553,8 @@ public class Optics implements PlugIn {
           scrambleClusters(opticsResult);
         }
 
-        ImageJUtils.log("Clustering mode: %s = %s", settings.getClusteringMode(),
+        ImageJUtils.log("Clustering mode: %s = %s",
+            ClusteringMode.get(settings.getClusteringMode()),
             TextUtils.pleural(clusterCount, "Cluster"));
 
         // We created a new clustering so create a new WorkerResult
