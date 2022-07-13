@@ -1832,7 +1832,7 @@ The following options are available:
      - Select the input results to analyse.
 
    * - Ignore Z
-     - Set to ``true`` to ignore the z coordinate in 3D data and perform 2D clustering. The default is 3D clustering for 3D datasets. Note: The visualisation of clustering results is optimised for 2D. For 3D data the results will be viewed using a projection onto the XY plane.
+     - Set to **true** to ignore the z coordinate in 3D data and perform 2D clustering. The default is 3D clustering for 3D datasets. Note: The visualisation of clustering results is optimised for 2D. For 3D data the results will be viewed using a projection onto the XY plane.
 
    * - Min points
      - The minimum number of neighbours required to create a cluster.
@@ -1886,7 +1886,7 @@ The following options are available:
        - ``Image show selection``: If **true** selection events will select the cluster in the image. The image view is positioned with the cluster in the centre.
 
    * - Debug
-     - Extra option: If *true* write debugging information to the Java console.
+     - Extra option: If **true** write debugging information to the Java console.
 
 
 Analysis
@@ -2001,7 +2001,7 @@ The following options are available:
        Note: Single colour LUTs vary the intensity of the colour from 50% to 100% to provide identification of the order.
 
    * - Invert LUT
-     - Set to ``true`` to invert the LUT.
+     - Set to **true** to invert the LUT.
 
    * - Line width
      - Specify the line width. Use zero to draw lines with a 1 pixel stroke width regardless of the magnification.

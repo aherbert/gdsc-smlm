@@ -753,7 +753,7 @@ The following parameters can be set:
      - The suffix for the output file. Use an empty text field for no suffix.
 
    * - Add header
-     - If ``true`` then the field names will be added as a single line header to the output file. Note that if any field name contains the delimiter then the name is quoted with ``"``; if the delimiter contains ``"`` then an error is raised.
+     - If **true** then the field names will be added as a single line header to the output file. Note that if any field name contains the delimiter then the name is quoted with ``"``; if the delimiter contains ``"`` then an error is raised.
 
    * - Time Unit
      - The output time unit. Available when the results are calibrated with an exposure time.
@@ -989,10 +989,10 @@ The following options are available:
      - The name of the result set.
 
    * - Ignore unmapped
-     - Set to ``true`` to leave any unmapped localisations unchanged. The default is to set the category to zero.
+     - Set to **true** to leave any unmapped localisations unchanged. The default is to set the category to zero.
 
    * - New dataset
-     - Set to ``true`` to create a new dataset with the label ``(categorised)`` appended to the name; the original dataset will be unchanged. The default is to update the dataset in place.
+     - Set to **true** to create a new dataset with the label ``(categorised)`` appended to the name; the original dataset will be unchanged. The default is to update the dataset in place.
 
 
 .. index:: ! Filter Results

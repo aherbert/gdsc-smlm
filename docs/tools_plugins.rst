@@ -464,10 +464,10 @@ The following parameters can be configured:
      - The border to apply to the input image. In the spatial domain no pixels within the border region will be filtered. In the frequency domain the border will define the range for a window function to transform the image edge gradually to zero. A `Tukey window <https://en.wikipedia.org/wiki/Window_function#Tukey_window>`_ is used.
 
    * - Zero outside image
-     - Applies when filtering in the spatial domain. If *true* all pixels outside the image are zero; otherwise edge extension is used to obtain the value from the closest pixel inside the image.
+     - Applies when filtering in the spatial domain. If **true** all pixels outside the image are zero; otherwise edge extension is used to obtain the value from the closest pixel inside the image.
 
    * - Preview
-     - Set to *true* to show the filter applied to the current image frame.
+     - Set to **true** to show the filter applied to the current image frame.
 
 Pressing ``OK`` in the plugin dialog will apply the filter settings to the current slice or the entire image stack.
 
