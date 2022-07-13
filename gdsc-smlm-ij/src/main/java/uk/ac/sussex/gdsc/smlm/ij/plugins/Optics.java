@@ -162,7 +162,7 @@ public class Optics implements PlugIn {
   static final LUT LOOP_LUT;
 
   static {
-    VALUE_LUT = LutHelper.createLut(LutColour.FIRE);
+    VALUE_LUT = LutHelper.createLut(LutColour.GRAYS);
 
     // Need to be able to see all colours against white (plot) or black (image) background
     final LUT fireGlow = LutHelper.createLut(LutColour.FIRE_GLOW, true);
