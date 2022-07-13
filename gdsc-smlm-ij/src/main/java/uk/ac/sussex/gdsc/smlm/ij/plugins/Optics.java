@@ -40,6 +40,7 @@ import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
+import ij.gui.Toolbar;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
@@ -66,6 +67,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
@@ -2010,7 +2012,13 @@ public class Optics implements PlugIn {
         return;
       }
 
-      startX = getX(event);
+      // Only respond to selection events (i.e. not dragging to scroll the plot)
+      if (Toolbar.getToolId() == Toolbar.RECTANGLE && event.getButton() == MouseEvent.BUTTON1
+          && !IJ.spaceBarDown()) {
+        startX = getX(event);
+      } else {
+        startX = Double.NaN;
+      }
     }
 
     private double getX(MouseEvent event) {
@@ -2024,11 +2032,13 @@ public class Optics implements PlugIn {
 
     @Override
     public void mouseReleased(MouseEvent event) {
-      if (!inputSettings.getOpticsEventSettingsOrBuilder().getPlotCreateSelection()) {
+      final double localStartX = startX;
+      if (Double.isNaN(localStartX)
+          || !inputSettings.getOpticsEventSettingsOrBuilder().getPlotCreateSelection()) {
         return;
       }
       final double endX = getX(event);
-      if (Double.isNaN(startX) || Double.isNaN(endX)) {
+      if (Double.isNaN(endX)) {
         return;
       }
 
@@ -2043,15 +2053,26 @@ public class Optics implements PlugIn {
           // Allow drag both ways
           int start;
           int end;
-          if (endX < startX) {
+          if (endX < localStartX) {
             start = (int) endX;
-            end = (int) startX;
+            end = (int) localStartX;
           } else {
-            start = (int) startX;
+            start = (int) localStartX;
             end = (int) endX;
           }
-          // Ignore the hierarchy as we only want to find the parent clusters
-          return clusteringResult.getOpticsResult().getClustersFromOrder(start, end, false);
+
+          // The cluster to select could be made an option:
+          // - closest overlap (current behaviour)
+          // - top-level cluster overlapping the range (previous behaviour)
+          // - all clusters overlapping the range
+          // - largest cluster within the selection range
+          final OptionalInt closest =
+              clusteringResult.getOpticsResult().getClosestClusterFromOrder(start, end);
+          return closest.isPresent() ? new int[] {closest.getAsInt()} : null;
+
+          // Ignore the hierarchy to find the top level parent cluster; otherwise return all
+          // overlapping clusters
+          // return clusteringResult.getOpticsResult().getClustersFromOrder(start, end, false);
         }
       });
     }
@@ -2846,8 +2867,8 @@ public class Optics implements PlugIn {
         for (final int clusterId : clusters) {
           final Hull hull = hulls[clusterId];
           if (hull == null) {
-            rois.add(createRoi(clusteringResult.getBounds()[clusterId],
-                clusteringResult.getSize()[clusterId]));
+            final float[] bounds = clusteringResult.getBounds()[clusterId];
+            rois.add(createRoi(bounds, clusteringResult.getSize()[clusterId]));
           } else {
             rois.add(createRoi(hull, false));
           }

@@ -1713,7 +1713,7 @@ The following options are available (extra options are activated by holding the 
        - ``Table show selection``: If **true** selection events will select the cluster in the ``Clusters`` results table. Only the first cluster selected will be highlighted (as the table does not support discontinuous selections).
        - ``Image create selection``: If **true** mouse clicks in the image inside a cluster generate selection events. The smallest cluster by area is selected allowing clicks of smaller clusters inside larger clusters.
        - ``Image show selection``: If **true** selection events will select the cluster in the image. The image view is positioned with the cluster in the centre.
-       - ``Plot create selection``: If **true** mouse selection drags on the reachability plot will generate selection events. All clusters in the horizontal range from the start to the end of the drag are selected.
+       - ``Plot create selection``: If **true** mouse selection drags (using the rectangle tool) on the reachability plot will generate selection events. The cluster that most closely overlaps the horizontal range from the start to the end of the drag are selected.
        - ``Plot show selection``: If **true** selection events will select the cluster in the reachability plot. The plot is zoomed to the start and end of the cluster range with the full profile displayed.
 
        Note: It is possible that the live preview can stop responding to click events, e.g. on the localisation image or cluster table. In this case simply disable and re-enable the preview.
