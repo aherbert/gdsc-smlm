@@ -1652,7 +1652,7 @@ The following options are available (extra options are activated by holding the 
      - Select the input results to analyse.
 
    * - Ignore Z
-     - Set to ``true`` to ignore the z coordinate in 3D data and perform 2D clustering. The default is 3D clustering for 3D datasets. Note: The visualisation of clustering results is optimised for 2D. For 3D data the results will be viewed using a projection onto the XY plane.
+     - Set to **true** to ignore the z coordinate in 3D data and perform 2D clustering. The default is 3D clustering for 3D datasets. Note: The visualisation of clustering results is optimised for 2D. For 3D data the results will be viewed using a projection onto the XY plane.
 
    * - Min points
      - The minimum number of neighbours required to create a cluster.
@@ -1663,17 +1663,17 @@ The following options are available (extra options are activated by holding the 
        - ``OPTICS``: Use a generating distance parameter to define the search radius for neighbours.
        - ``FastOPTICS``: Assign neighbours using projections to a line to define local neighbours in the projected space. The number of projections (splits) can be configured or is set automatically using the dataset size.
 
-         Extra options allow the configuration of using random vectors (default is equi-distributed on a circle) and the sample mode for which point to assign the sub-set to. Note that the project is recursively split into sub-set. If the ``Approx sets`` option disabled the subset must be smaller than ``Min points``; if enabled this will save any sets that are close to ``Min points`` in size (within 50%) allowing larger subsets to be included.
+         Extra options allow the configuration of using random vectors (default is equi-distributed on a circle) and the sample mode for which point to assign the sub-set to. Note that the projection is recursively split into sub-sets. If the ``Approx sets`` option is disabled the subset must be smaller than ``Min points``; if enabled this will save any sets that are close to ``Min points`` in size (within 50%) allowing larger subsets to be included.
 
    * - Clustering
      - Specify the algorithm to assign clusters:
 
        - ``Xi``: Use a parameter to define the ends of clusters using the steepness of the reachability profile. The clusters are hierarchical, i.e. small clusters may be within larger clusters. Clusters are assigned a level indicating the depth in the hierarchy.
 
-         A smaller number for ``Xi`` will create more clusters.
+         A smaller number for ``Xi`` will create more clusters. By default the clusters can have any reachability distance between points. An extension to the ``Xi`` algorithm is to restrict joining items using a ``Lower limit`` and ``Upper limit`` for the reachability distance, for example to prevent clusters forming within the localisation precision or clusters forming between very far apart localisations.
        - ``Pseudo-DBSCAN``: Use a single clustering distance to divide the reachability profile. The clusters are not hierarchical.
 
-         The ``Core points`` option will only output points that have a core distance within the clustering distance. This excludes points that may be reachable from a cluster but do not have enough neighbours to initialise a cluster. The effect is that the clusters will be identical independent of the encounter order of the algorithm; outlier/edge points that may or may not be included in a cluster depending on processing order are excluded.
+       The ``Core points`` option will only output points that have a core distance within the clustering distance. This excludes points that may be reachable from a cluster but do not have enough neighbours to initialise a cluster. The effect is that the clusters will be identical independent of the encounter order of the algorithm; outlier/edge points that may or may not be included in a cluster depending on processing order are excluded.
 
    * - Show table
      - Show the clusters in a results table.
@@ -1716,8 +1716,10 @@ The following options are available (extra options are activated by holding the 
        - ``Plot create selection``: If **true** mouse selection drags on the reachability plot will generate selection events. All clusters in the horizontal range from the start to the end of the drag are selected.
        - ``Plot show selection``: If **true** selection events will select the cluster in the reachability plot. The plot is zoomed to the start and end of the cluster range with the full profile displayed.
 
+       Note: It is possible that the live preview can stop responding to click events, e.g. on the localisation image or cluster table. In this case simply disable and re-enable the preview.
+
    * - Debug
-     - Extra option: If *true* write debugging information to the Java console.
+     - Extra option: If **true** write debugging information to the Java console.
 
 
 Analysis
