@@ -317,9 +317,9 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
       imp = new ImagePlus(title, ip);
       // Apply the selected lookup table
       if (TextUtils.isNotEmpty(lutName)) {
-        final LutColour colour = LutColour.forName(lutName);
-        if (colour != null) {
-          imp.setLut(LutHelper.createLut(LutColour.forName(lutName), true));
+        final LutColour lutColour = LutColour.forName(lutName);
+        if (lutColour != null) {
+          imp.setLut(LutHelper.createLut(lutColour, true));
         } else {
           // Assume ImageJ LUT
           WindowManager.setTempCurrentImage(imp);
