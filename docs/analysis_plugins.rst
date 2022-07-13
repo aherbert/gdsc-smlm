@@ -1684,7 +1684,17 @@ The following options are available (extra options are activated by holding the 
      - Specify the scale for the output image. The size of the image is the raw pixel bounds for the localisation data multiplied by the scale.
 
    * - Image mode
-     - Specify the type of image to create. See :numref:`{number}: {name} <fitting_plugins:Results Parameters>`.
+     - Specify the mode used to colour the image localisations.
+
+       - ``Cluster Id``: Use the cluster ID.
+       - ``Cluster Depth``: Use the cluster depth.
+       - ``Cluster Order``: Use the cluster order.
+       - ``Value``: Use the localisation intensity.
+       - ``Count``: Use the a count of 1 for each localisation.
+       - ``LoOP``: Use the cluster Local Outlier Probability.
+       - ``None``: Do not render localisations on the image.
+
+       The ``Value`` and ``Count`` options can be weighted and equalised (see :numref:`{number}: {name} <fitting_plugins:Results Parameters>`).
 
    * - Outline
      - Specify how clusters should be outlined on the image. The outline algorithm can be configured using the ``...`` button to specify a convex hull or concave hull of the cluster points. The outline can be coloured by cluster ID.
