@@ -25,8 +25,11 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import java.awt.Color;
 import java.util.List;
@@ -79,8 +82,8 @@ public class BlinkEstimator implements PlugIn {
 
   /** The milliseconds./frame */
   private double msPerFrame;
-  /** The show plots flag. */
-  private boolean showPlots;
+  /** The organiser to collate the plots. */
+  private WindowOrganiser wo;
 
   private double[] parameters;
   private boolean increaseNFittedPoints;
@@ -176,12 +179,13 @@ public class BlinkEstimator implements PlugIn {
     msPerFrame = results.getCalibrationReader().getExposureTime();
     ImageJUtils.log("%s: %d localisations", TITLE, results.size());
 
-    showPlots = true;
+    wo = new WindowOrganiser();
     if (settings.rangeFittedPoints > 0) {
       computeFitCurves(results, true);
     } else {
       computeBlinkingRate(results, true);
     }
+    wo.tile();
   }
 
   private boolean showDialog() {
@@ -264,7 +268,6 @@ public class BlinkEstimator implements PlugIn {
 
     // Plot
     final String xAxisTitle = "Fitted points";
-    final WindowOrganiser wo = new WindowOrganiser();
     plot(xAxisTitle, "N", npoints, parameters[0], wo);
     plot(xAxisTitle, "nBlinks", npoints, parameters[1], wo);
     plot(xAxisTitle, "tOff", npoints, parameters[2], wo);
@@ -272,7 +275,6 @@ public class BlinkEstimator implements PlugIn {
       plot(xAxisTitle, "R^2", npoints, r2, wo);
     }
     plot(xAxisTitle, "Adjusted R^2", npoints, adjustedR2, wo);
-    wo.tile();
   }
 
   /**
@@ -331,11 +333,11 @@ public class BlinkEstimator implements PlugIn {
     }
 
     // Display
-    if (showPlots) {
+    if (wo != null) {
       final String title = TITLE + " Molecule Counts";
       final Plot plot = new Plot(title, "td (ms)", "Count");
       plot.addPoints(td, ntd, Plot.LINE);
-      ImageJUtils.display(title, plot);
+      ImageJUtils.display(title, plot, wo);
 
       plot.setColor(Color.red);
       plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), Plot.CIRCLE);
@@ -350,7 +352,7 @@ public class BlinkEstimator implements PlugIn {
 
       plot.setColor(Color.blue);
       plot.addPoints(xOther, yOther, Plot.CROSS);
-      ImageJUtils.display(title, plot);
+      ImageJUtils.display(title, plot, wo);
     }
 
     // Check if the fitted curve asymptotes above the real curve
@@ -465,8 +467,14 @@ public class BlinkEstimator implements PlugIn {
       final List<Molecule> molecules = fitter.extractLocalisations(results, true);
       final String title = (verbose) ? TITLE + " Localisation Precision" : null;
 
+      // Ensure we organise a new plot
+      final PlotWindow pw1 = getPlotWindow(title);
       fittedAverage =
           fitter.calculateAveragePrecision(molecules, title, settings.histogramBins, true, true);
+      final PlotWindow pw2 = getPlotWindow(title);
+      if (pw2 != pw1) {
+        wo.add(pw2);
+      }
     } catch (final DataException ignored) {
       // This is thrown when the data cannot be converted for precision computation
     }
@@ -485,6 +493,16 @@ public class BlinkEstimator implements PlugIn {
 
     // The fitter does checks for a good fit to the histogram so just return the value
     return fittedAverage;
+  }
+
+  private static PlotWindow getPlotWindow(String title) {
+    if (title != null) {
+      final ImagePlus imp = WindowManager.getImage(title);
+      if (imp != null && imp.getWindow() instanceof PlotWindow && imp.getTitle().equals(title)) {
+        return (PlotWindow) imp.getWindow();
+      }
+    }
+    return null;
   }
 
   /**
