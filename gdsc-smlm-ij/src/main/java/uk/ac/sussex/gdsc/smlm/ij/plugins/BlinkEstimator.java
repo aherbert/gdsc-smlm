@@ -307,6 +307,7 @@ public class BlinkEstimator implements PlugIn {
    * @param verbose the verbose
    * @return the blinking rate
    */
+  @VisibleForTesting
   double computeBlinkingRate(MemoryPeakResults results, boolean verbose) {
     parameters = null;
     increaseNFittedPoints = false;
