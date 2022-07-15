@@ -3682,16 +3682,25 @@ public class Optics implements PlugIn {
 
       // Add the DBSCAN clustering distance
       double distance = settings.getClusteringDistance();
+      StringBuilder label = new StringBuilder(128);
       if (distance > 0) {
         plot.setColor(Color.red);
         plot.drawLine(1, distance, order.length, distance);
+        label.append("Clustering distance = ").append(MathUtils.rounded(distance));
       }
 
       // Find the clustering distance using a % noise in the KNN distance samples
       distance = findClusteringDistance(profile, fractionNoise);
       plot.setColor(Color.blue);
       plot.drawDottedLine(1, distance, order.length, distance, 2);
+      if (label.length() != 0) {
+        label.append("; ");
+      }
+      label.append(MathUtils.rounded(100 * fractionNoise)).append("% noise distance = ")
+          .append(MathUtils.rounded(distance));
 
+      plot.setColor(Color.black);
+      plot.addLabel(0, 0, label.toString());
       ImageJUtils.display(title, plot, preserve);
 
       if (settings.getClusteringDistance() == 0) {
