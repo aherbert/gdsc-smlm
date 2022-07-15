@@ -1798,9 +1798,9 @@ DBSCAN
 
 Runs the Density-based spatial clustering of applications with noise (`DBSCAN <https://en.wikipedia.org/wiki/DBSCAN>`_) algorithm [Ester *et al*, 1996] to perform interactive density-based clustering of localisation data.
 
-This plugin is a modification of the ``OPTICS`` plugin. The DBSCAN algorithm predates the OPTICS algorithm. The difference is that localisations are processed in arbitrary order. In OPTICS the algorithm tracks how reachable points are from each other and links more reachable points first. DBSCAN does not make this distinction. As per OPTICS the DBSCAN algorithm each point in the data is analysed to determine the number of neighbours within a specified `radius`. A minimum number of points (`MinPoints`) is specified which describes the number of points required to form a cluster.
+This plugin is a modification of the ``OPTICS`` plugin. The DBSCAN algorithm predates the OPTICS algorithm. The difference is that localisations are processed in arbitrary order. In OPTICS the algorithm tracks how reachable points are from each other and links more reachable points first. DBSCAN does not make this distinction. As per OPTICS the DBSCAN algorithm analyses each point in the data to determine the number of neighbours within a specified `radius`. A minimum number of points (`MinPoints`) is specified which describes the number of points required to form a cluster.
 
-Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the `radius`. If the neighbourhood satisfies `MinPoints` then a new cluster is created. The neighbours that are reachable from a core point are added to the cluster and put in a queue to be processed. Processing occurs in arbitrary order. When no more points are reachable from core points in the cluster then a new unprocessed point is chosen.
+Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the `radius`. If the neighbourhood satisfies `MinPoints` (defined as a core point) then a new cluster is created. The neighbours that are reachable from a core point are added to the cluster and put in a queue to be processed. Processing occurs in arbitrary order. When no more points are reachable from core points in the cluster then a new unprocessed point is chosen.
 
 The DBSCAN algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptomatically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
 
@@ -1814,7 +1814,7 @@ Parameter Estimation
 
 The ``MinPoints`` parameter can be set to approximately 2 times the number of dimensions. For 2D localisation data this is 4. It may be necessary to increase this number for large datasets, noisy data or data that contains a large number of duplicates. The later scenario is common with localisation data where multiple frames may contain the same fluorophore.
 
-The ``Clustering distance`` parameter can be chosen by using a k-nearest neighbour (KNN) distance graph, plotting the distance to the ``k = MinPoints - 1`` nearest neighbour in descending order (:numref:`Figure %s <fig_dbscan_knn_distance_example>`). If too small then a large amount of the data will not be clustered. Too large and the clusters will start to merge. A ``Noise`` parameter can be used to indicate a distance threshold by excluding a fraction of the KNN graph.
+The ``Clustering distance`` parameter can be chosen by using a k-nearest neighbour (KNN) distance graph, plotting the distance to the ``k = MinPoints - 1`` nearest neighbour in descending order (:numref:`Figure %s <fig_dbscan_knn_distance_example>`). If too small then a large amount of the data will not be clustered. Too large and the clusters will start to merge. A ``Noise`` parameter can be used to indicate a distance threshold by excluding a fraction of the KNN graph, ordered from the largest KNN distance.
 
 .. _fig_dbscan_knn_distance_example:
 .. figure:: images/dbscan_knn_distance_example.jpg
@@ -1848,7 +1848,7 @@ The following options are available:
      - The minimum number of neighbours required to create a cluster.
 
    * - Noise
-     - The fraction of data to exclude when plotting the estimated clustering distance on the KNN graph.
+     - The fraction of data (ordered from the largest KNN distance) to exclude when plotting the estimated clustering distance on the KNN graph.
 
    * - Samples
      - The number of random points to choose from the data to construct the KNN graph. If set to below 1 then all data points will be processed.
