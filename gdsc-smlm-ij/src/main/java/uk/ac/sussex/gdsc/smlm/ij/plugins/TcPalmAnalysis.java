@@ -1266,7 +1266,8 @@ public class TcPalmAnalysis implements PlugIn {
   private boolean showDialog() {
     settings = SettingsManager.readTcPalmAnalysisSettings(0).toBuilder();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addMessage("Analyse the time-correlated activation of traced data");
+    gd.addMessage("Analyse the time-correlated activation of traced data.\n \n"
+        + "Mark an ROI on the super-resolution image to perform analysis.");
     ResultsManager.addInput(gd, "Input", settings.getInputOption(), InputSource.MEMORY);
     // Require results settings to use the standard ResultsManager image options
     final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
