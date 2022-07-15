@@ -132,6 +132,18 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
   /** 1/2. */
   private static final float HALF = 0.5f;
 
+  /**
+   * The empty value for mapped values. Use negative zero so that we know when positive zero has
+   * been written to the array.
+   */
+  private static final double EMPTY_MAPPED = -0.0;
+  /**
+   * The empty value for display of negative values. Use min value. Any float value over-writing
+   * this or added to this will be different; replace images will be fine and cumulative images will
+   * result in a sum from approximately zero.
+   */
+  private static final double EMPTY_NEGATIVE = Double.MIN_VALUE;
+
   /** The empty value. */
   private double empty;
 
@@ -221,10 +233,10 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
    * @param title Title of the image (appended with a suffix)
    * @param bounds Define the bounding rectangle of the image coordinates. Any results outside this
    *        will not be displayed.
-   * @param scale The image scale. Must be strictly positive.
+   * @param scale The image scale. Must be strictly positive and finite.
    */
   public ImageJImagePeakResults(String title, Rectangle bounds, float scale) {
-    if (scale <= 0 || Float.isNaN(scale)) {
+    if (!(scale > 0 && scale < Float.POSITIVE_INFINITY)) {
       throw new IllegalArgumentException("Invalid scale: " + scale);
     }
 
@@ -298,13 +310,13 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     nextPaintTime = System.currentTimeMillis() + repaintDelay;
     data = new double[width * height];
 
-    // Use negative zero so that we know when positive zero has been written to the array.
     if ((displayFlags & (DISPLAY_MAPPED | DISPLAY_MAP_ZERO)) == (DISPLAY_MAPPED
         | DISPLAY_MAP_ZERO)) {
-      empty = -0.0f;
+      // Note: Cannot be used with DISPLAY_NEGATIVES so there is no clash
+      empty = EMPTY_MAPPED;
     }
     if ((displayFlags & DISPLAY_NEGATIVES) != 0) {
-      empty = Double.NaN;
+      empty = EMPTY_NEGATIVE;
     }
 
     resetData();
@@ -547,11 +559,11 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
       double min;
 
       if ((displayFlags & DISPLAY_NEGATIVES) != 0) {
-        // We use NaN to mark the data as empty.
-        // This cannot be displayed in ImageJ so we use -Infinity in the
-        // data as a special value. This is ignored by ImageJ for most
-        // FloatProcessor functionality.
-        int index = findNonNaNIndex(data);
+        // We use a special value to mark the data as empty.
+        // For display in ImageJ we use -Infinity in the data as a special value.
+        // This is ignored by ImageJ for most FloatProcessor functionality and allows
+        // use of a custom image stack to map these 'empty' values to black.
+        int index = findNonEmptyIndex(data);
         if (index == -1) {
           max = 1;
           min = 0;
@@ -560,8 +572,8 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
           Arrays.fill(pixels, 0, index, Float.NEGATIVE_INFINITY);
           max = min = data[index];
           while (index < data.length) {
-            // Check for NaN
-            if (data[index] != data[index]) {
+            // Check for empty
+            if (data[index] == EMPTY_NEGATIVE) {
               pixels[index] = Float.NEGATIVE_INFINITY;
             } else {
               if (max < data[index]) {
@@ -587,9 +599,9 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     }
   }
 
-  private static int findNonNaNIndex(double[] data) {
+  private static int findNonEmptyIndex(double[] data) {
     for (int i = 0; i < data.length; i++) {
-      if (!Double.isNaN(data[i])) {
+      if (data[i] != EMPTY_NEGATIVE) {
         return i;
       }
     }
