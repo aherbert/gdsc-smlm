@@ -183,7 +183,11 @@ public class DrawClusters implements PlugIn {
       }
     }
 
+    ImagePlus imp = WindowManager.getImage(settings.title);
     if (count == 0) {
+      if (imp != null) {
+        imp.setOverlay(null);
+      }
       IJ.error(TITLE, "No traces achieved the size limits");
       return;
     }
@@ -204,7 +208,6 @@ public class DrawClusters implements PlugIn {
     IJ.showStatus(msg);
 
     final Rectangle bounds = results.getBounds(true);
-    ImagePlus imp = WindowManager.getImage(settings.title);
     boolean isUseStackPosition = settings.useStackPosition;
     if (imp == null) {
       // Create a default image using 100 pixels as the longest edge
