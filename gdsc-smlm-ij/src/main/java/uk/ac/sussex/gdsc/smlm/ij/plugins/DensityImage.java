@@ -656,11 +656,13 @@ public class DensityImage implements PlugIn {
       newResults.setName(results.getName() + " Density Filter");
     }
 
-    // Draw an image - Use error so that a floating point value can be used on a single pixel
+    // Draw an image:
+    // Do not use weighted mode so that a floating point value can be used on a single pixel
     final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
         ResultsImageType.DRAW_INTENSITY, false, false, results.getName() + " Density",
         results.getBounds(), results.getNmPerPixel(), settings.imageScale, 0,
         (settings.cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
+    // Negatives are required for the Ripley's score functions
     image.setDisplayFlags(image.getDisplayFlags() | ImageJImagePeakResults.DISPLAY_NEGATIVES);
     image.setLutName("grays");
     image.setLiveImage(false);
