@@ -748,8 +748,10 @@ public class TcPalmAnalysis implements PlugIn {
 
         @Override
         protected void setValue(Object value) {
-          // Boxed primitives should never be null
-          setText(rounder.toString(((Number) value).doubleValue()));
+          // Boxed primitives should never be null but check anyway
+          if (value instanceof Number) {
+            setText(rounder.toString(((Number) value).doubleValue()));
+          }
         }
       };
       renderer.setHorizontalAlignment(SwingConstants.TRAILING);
