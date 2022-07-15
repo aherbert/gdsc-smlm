@@ -45,6 +45,7 @@ import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.Molecule;
@@ -263,13 +264,15 @@ public class BlinkEstimator implements PlugIn {
 
     // Plot
     final String xAxisTitle = "Fitted points";
-    plot(xAxisTitle, "N", npoints, parameters[0]);
-    plot(xAxisTitle, "nBlinks", npoints, parameters[1]);
-    plot(xAxisTitle, "tOff", npoints, parameters[2]);
+    final WindowOrganiser wo = new WindowOrganiser();
+    plot(xAxisTitle, "N", npoints, parameters[0], wo);
+    plot(xAxisTitle, "nBlinks", npoints, parameters[1], wo);
+    plot(xAxisTitle, "tOff", npoints, parameters[2], wo);
     if (IJ.debugMode) {
-      plot(xAxisTitle, "R^2", npoints, r2);
+      plot(xAxisTitle, "R^2", npoints, r2, wo);
     }
-    plot(xAxisTitle, "Adjusted R^2", npoints, adjustedR2);
+    plot(xAxisTitle, "Adjusted R^2", npoints, adjustedR2, wo);
+    wo.tile();
   }
 
   /**
@@ -289,11 +292,12 @@ public class BlinkEstimator implements PlugIn {
     return d2;
   }
 
-  private static void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y) {
+  private static void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y,
+      WindowOrganiser wo) {
     final String title = TITLE + " " + yAxisTitle;
     final Plot plot = new Plot(title, xAxisTitle, yAxisTitle);
     plot.addPoints(x, y, Plot.LINE);
-    ImageJUtils.display(title, plot);
+    ImageJUtils.display(title, plot, wo);
   }
 
   /**

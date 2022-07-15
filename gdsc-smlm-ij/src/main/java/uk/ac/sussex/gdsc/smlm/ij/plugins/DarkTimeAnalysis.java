@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.Prefs;
+import ij.WindowManager;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -252,7 +254,8 @@ public class DarkTimeAnalysis implements PlugIn {
       }
     }
 
-    plotDarkTimeHistogram(stats);
+    final WindowOrganiser wo = new WindowOrganiser();
+    plotDarkTimeHistogram(stats, wo);
 
     // Cumulative histogram
     for (int i = 1; i < times.length; i++) {
@@ -282,7 +285,8 @@ public class DarkTimeAnalysis implements PlugIn {
     final String title = "Cumulative Dark-time";
     final Plot plot = new Plot(title, "Time (ms)", "Percentile");
     plot.addPoints(x, y, Plot.LINE);
-    ImageJUtils.display(title, plot);
+    ImageJUtils.display(title, plot, wo);
+    wo.tile();
 
     // Report percentile
     for (int i = 0; i < y.length; i++) {
@@ -296,7 +300,7 @@ public class DarkTimeAnalysis implements PlugIn {
     tracker.status("");
   }
 
-  private void plotDarkTimeHistogram(StoredData stats) {
+  private void plotDarkTimeHistogram(StoredData stats, WindowOrganiser wo) {
     if (settings.histogramBins >= 0) {
       // Convert the X-axis to milliseconds
       final double[] xValues = stats.getValues();
@@ -306,7 +310,7 @@ public class DarkTimeAnalysis implements PlugIn {
 
       // Ensure the bin width is never less than 1
       new HistogramPlotBuilder("Dark-time", StoredDataStatistics.create(xValues), "Time (ms)")
-          .setIntegerBins(true).setNumberOfBins(settings.histogramBins).show();
+          .setIntegerBins(true).setNumberOfBins(settings.histogramBins).show(wo);
     }
   }
 }
