@@ -2009,7 +2009,9 @@ The following options are available:
        If no output image is selected then the default output image will be created as a stack of the required size.
 
    * - Colour
-     - Specify how the cluster colour is assigned from the look-up table.
+     - Specify how the cluster colour is assigned from the look-up table. The LUT is applied as a linear mapping from zero to the maximum value in the selected data. If clusters are filtered then the maximum value remaining may change and the same cluster may change colour.
+
+       Note: The ``None`` option applies the colour using the encountered order of the extracted clusters ordered by cluster ID. If cluster IDs are a natural sequence this will match the ``ID`` option unless clusters have been filtered.
 
    * - LUT
      - Specify the look-up table (i.e. the colour) used to plot the clusters.
