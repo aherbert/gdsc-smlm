@@ -304,7 +304,7 @@ public class BlinkEstimator implements PlugIn {
    * Compute blinking rate.
    *
    * @param results the results
-   * @param verbose the verbose
+   * @param verbose set to true to record details to the ImageJ log window
    * @return the blinking rate
    */
   @VisibleForTesting
