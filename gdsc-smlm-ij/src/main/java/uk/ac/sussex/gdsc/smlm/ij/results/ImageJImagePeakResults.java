@@ -482,9 +482,7 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
       // Get the current maximum
       double max = data[0];
       for (int i = 1; i < data.length; i++) {
-        if (max < data[i]) {
-          max = data[i];
-        }
+        max = max < data[i] ? data[i] : max;
       }
 
       // Compress into 16-bit image if necessary
@@ -495,9 +493,7 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
 
       for (int i = 0; i < pixels.length; i++) {
         int index = (int) (norm * data[i]);
-        if (index > k) {
-          index = k;
-        }
+        index = index > k ? k : index;
         pixels[i] = (short) index;
       }
 
@@ -582,9 +578,7 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
         max = data[0];
         min = 0;
         for (int i = 0; i < data.length; i++) {
-          if (max < data[i]) {
-            max = data[i];
-          }
+          max = max < data[i] ? data[i] : max;
           pixels[i] = (float) data[i];
         }
       }
