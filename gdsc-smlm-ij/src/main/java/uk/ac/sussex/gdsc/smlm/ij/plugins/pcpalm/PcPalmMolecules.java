@@ -721,7 +721,7 @@ public class PcPalmMolecules implements PlugIn {
 
   /**
    * Extract molecules for the PC-PALM analysis.
-   * 
+   *
    * <p>Estimate the localisation uncertainty (precision) of each molecule using the formula of
    * Mortensen, et al (2010), Nature Methods 7, 377-381. Store distance in nm and signal in photons
    * using the calibration.

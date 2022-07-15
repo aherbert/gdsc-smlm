@@ -5969,7 +5969,8 @@ public class BenchmarkFilterAnalysis
     pauseFilterTimer();
 
     if (interactive) {
-      final String filename = getFilename("Filter_set_" + setNumber, settings.filterSetFilename, ".xml");
+      final String filename =
+          getFilename("Filter_set_" + setNumber, settings.filterSetFilename, ".xml");
       if (filename != null) {
         settings.filterSetFilename = filename;
         Prefs.set(Settings.KEY_FILTERSET_FILENAME, filename);
