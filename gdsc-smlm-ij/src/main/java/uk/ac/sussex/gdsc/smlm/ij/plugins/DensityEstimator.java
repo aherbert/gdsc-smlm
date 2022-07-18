@@ -203,8 +203,8 @@ public class DensityEstimator implements PlugIn {
     final boolean includeSingles = settings.includeSingles;
     final int size = 2 * border + 1;
     final double minDensity = Math.pow(size, -2);
-    ImageJUtils.log("%s : %s : Global density %s. Minimum density in %dx%d px = %s um^-2", TITLE,
-        results.getName(), MathUtils.rounded(globalDensity * scale), size, size,
+    ImageJUtils.log("%s : %s : Global density %s um^-2. Minimum density in %dx%d px = %s um^-2",
+        TITLE, results.getName(), MathUtils.rounded(globalDensity * scale), size, size,
         MathUtils.rounded(minDensity * scale));
 
     final IntArrayList x = new IntArrayList();
