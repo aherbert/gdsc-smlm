@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import ij.IJ;
 import ij.plugin.PlugIn;
 import java.util.concurrent.atomic.AtomicReference;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -122,27 +121,23 @@ public class NeighbourAnalysis implements PlugIn {
   }
 
   private void saveTraces(Trace[] traces) {
-    final String filename =
-        ImageJUtils.getFilename("Traces_File", settings.filename);
-    if (filename != null) {
-      // Remove extension and replace with .xls
-      settings.filename = FileUtils.replaceExtension(filename, ".xls");
+    // Remove extension and replace with .xls
+    settings.filename = FileUtils.replaceExtension(settings.filename, ".xls");
 
-      final boolean showDeviations = results.hasDeviations();
-      final TextFilePeakResults traceResults =
-          new TextFilePeakResults(settings.filename, showDeviations);
-      traceResults.copySettings(results);
-      traceResults.begin();
-      if (!traceResults.isActive()) {
-        IJ.error(TITLE, "Failed to write to file: " + settings.filename);
-        return;
-      }
-      traceResults.addComment(createSettingsComment());
-      for (final Trace trace : traces) {
-        traceResults.addCluster(trace); // addTrace(...) does a sort on the results
-      }
-      traceResults.end();
+    final boolean showDeviations = results.hasDeviations();
+    final TextFilePeakResults traceResults =
+        new TextFilePeakResults(settings.filename, showDeviations);
+    traceResults.copySettings(results);
+    traceResults.begin();
+    if (!traceResults.isActive()) {
+      IJ.error(TITLE, "Failed to write to file: " + settings.filename);
+      return;
     }
+    traceResults.addComment(createSettingsComment());
+    for (final Trace trace : traces) {
+      traceResults.addCluster(trace); // addTrace(...) does a sort on the results
+    }
+    traceResults.end();
   }
 
   private String createSettingsComment() {
@@ -159,6 +154,7 @@ public class NeighbourAnalysis implements PlugIn {
 
     gd.addNumericField("Distance_Threshold (px)", settings.distanceThreshold, 4);
     gd.addNumericField("Time_Threshold (frames)", settings.timeThreshold, 0);
+    gd.addFilenameField("Traces_file", settings.filename);
 
     gd.showDialog();
 
@@ -181,6 +177,7 @@ public class NeighbourAnalysis implements PlugIn {
     settings.inputOption = ResultsManager.getInputSource(gd);
     settings.distanceThreshold = gd.getNextNumber();
     settings.timeThreshold = (int) gd.getNextNumber();
+    settings.filename = gd.getNextString();
 
     if (settings.distanceThreshold < 0) {
       settings.distanceThreshold = 0;
