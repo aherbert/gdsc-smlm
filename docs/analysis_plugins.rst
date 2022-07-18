@@ -3281,7 +3281,7 @@ Each computation of new results will be saved to memory with the prefix of the i
 Density Estimator
 -----------------
 
-Estimates the local density using squares of size :math:`N` around localisations. The size :math:`N` should reflect the extent of the PSF in pixels. All overlapping PSFs are joined to an area and the density of localisations in each area is computed. Non-overlapping PSFs are single isolated localisations which have a minimum density defined as :math:`N^-2`. These can optionally be included in the analysis or excluded (as the density of neighbours around the singles is effectively zero).
+Estimates the local density using squares of size :math:`N` around localisations. The size :math:`N` should reflect the extent of the PSF in pixels. All overlapping PSFs are joined to an area and the density of localisations in each area is computed. Non-overlapping PSFs are single isolated localisations which have a minimum density defined as :math:`N^{-2}`. These can optionally be included in the analysis or excluded (as the density of neighbours around the singles is effectively zero).
 
 .. list-table::
    :widths: 20 80
