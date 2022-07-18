@@ -63,6 +63,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.filter.AndFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
+import uk.ac.sussex.gdsc.smlm.results.filter.FilterXStreamUtils;
 import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
@@ -132,6 +133,9 @@ public class CreateFilters implements PlugIn, ItemListener {
       } else {
         IJ.error(TITLE, "No filters created");
       }
+    } catch (final DataException ex) {
+      IJ.error(TITLE, "Created invalid filter:\n \n" + ex.getMessage());
+      IJ.showStatus("");
     } catch (final IOException | ParserConfigurationException | SAXException ex) {
       IJ.error(TITLE, "Unable to load the input XML:\n" + ex.getMessage());
       IJ.showStatus("");
@@ -220,11 +224,16 @@ public class CreateFilters implements PlugIn, ItemListener {
   }
 
   private static String getName(StringBuilder sb) {
-    final Filter f = Filter.fromXml(sb.toString());
-    if (f != null) {
-      return f.getType().replaceAll("&", "&amp;");
+    final String xml = sb.toString();
+    try {
+      final Object f = FilterXStreamUtils.getXStreamInstance().fromXML(xml);
+      if (f instanceof Filter) {
+        return ((Filter) f).getType().replaceAll("&", "&amp;");
+      }
+    } catch (final Exception ignored) {
+      // Do nothing
     }
-    return "";
+    throw new DataException(xml);
   }
 
   private void saveFilters(StringWriter sw, int total) {
