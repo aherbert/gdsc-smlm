@@ -2623,7 +2623,7 @@ The output filter set will be named using the name of the filter. For example:
 
 .. code-block:: xml
 
-    <SNRFilter snr="10:20:2"/>
+    <SnrFilter snr="10:20:2"/>
 
 Becomes:
 
@@ -2631,12 +2631,12 @@ Becomes:
 
     <FilterSet name="SNR">
       <filters class="linked-list">
-        <SNRFilter snr="10"/>
-        <SNRFilter snr="12"/>
-        <SNRFilter snr="14"/>
-        <SNRFilter snr="16"/>
-        <SNRFilter snr="18"/>
-        <SNRFilter snr="20"/>
+        <SnrFilter snr="10"/>
+        <SnrFilter snr="12"/>
+        <SnrFilter snr="14"/>
+        <SnrFilter snr="16"/>
+        <SnrFilter snr="18"/>
+        <SnrFilter snr="20"/>
       </filters>
     </FilterSet>
 
