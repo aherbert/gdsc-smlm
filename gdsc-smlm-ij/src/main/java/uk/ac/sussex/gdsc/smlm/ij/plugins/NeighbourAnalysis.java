@@ -141,7 +141,7 @@ public class NeighbourAnalysis implements PlugIn {
   }
 
   private String createSettingsComment() {
-    return String.format("Neighbour tracing : distance-threshold = %f : time-threshold = %d",
+    return String.format("Neighbour tracing : distance-threshold = %s : time-threshold = %d",
         settings.distanceThreshold, settings.timeThreshold);
   }
 
