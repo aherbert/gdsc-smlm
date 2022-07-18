@@ -875,7 +875,7 @@ public class SpotAnalysis extends PlugInFrame
         Plot.LINE);
 
     plot.setColor(Color.blue);
-    ImageJUtils.display(title, plot);
+    ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
   }
 
   /**
