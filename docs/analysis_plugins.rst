@@ -2668,23 +2668,17 @@ plugin (see section :numref:`{number}<analysis_plugins:Create Filters>`).
 Spot Analysis
 -------------
 
-The
-``Spot Analysis``
-plugin is designed to allow analysis of fluorophore blinking kinetics using calibration images.
+The ``Spot Analysis`` plugin is designed to allow analysis of fluorophore blinking kinetics using calibration images.
 
 The plugin allows the user to extract an ROI outlining a fluorophore position from an image and manually mark the frames where a spot is visible. A trace of the image intensity helps the user choose the brightest frames where a spot may be present. The plugin records the signal, on-time and off-time for the fluorophore to files for later analysis.
 
-The plugin has been used to generate distributions for the signal-per-frame, on-times and off-times for mEOS3 fluorophores captured at a frame rate of 50 frames a second (20ms exposure time). At this rate the fluorophore emissions are very faint but frames can be manually labelled as on (or off). By analysing hundreds of spots it is possible to extract distribution parameters that allow the fluorophores to be modelled using the
-``Create Data``
-plugin.
+The plugin has been used to generate distributions for the signal-per-frame, on-times and off-times for mEOS3 fluorophores captured at a frame rate of 50 frames a second (20ms exposure time). At this rate the fluorophore emissions are very faint but frames can be manually labelled as on (or off). By analysing hundreds of spots it is possible to extract distribution parameters that allow the fluorophores to be modelled using the ``Create Data`` plugin.
 
 
 Input Images
 ~~~~~~~~~~~~
 
-The purpose of the plugin is to mark the fluorescent bursts from a single fluorophore. Consequently the input images should ideally be of single fluorophores spread evenly on the image and fixed in position. Overlapping fluorophores can be excluded from analysis by only selecting spots that appear distinct. An example input image with a simulated PSF image generated using the
-``Peak Fit``
-plugin is shown in :numref:`Figure %s <fig_spot_analysis_example_input_image>`. A single spot has been selected with an ROI on the PSF image. The selection has been applied to the original image to select the region for analysis.
+The purpose of the plugin is to mark the fluorescent bursts from a single fluorophore. Consequently the input images should ideally be of single fluorophores spread evenly on the image and fixed in position. Overlapping fluorophores can be excluded from analysis by only selecting spots that appear distinct. An example input image with a simulated PSF image generated using the ``Peak Fit`` plugin is shown in :numref:`Figure %s <fig_spot_analysis_example_input_image>`. A single spot has been selected with an ROI on the PSF image. The selection has been applied to the original image to select the region for analysis.
 
 .. _fig_spot_analysis_example_input_image:
 .. figure:: images/spot_analysis_example_input_image.png
@@ -2742,9 +2736,7 @@ The following parameters can be set:
 Profiling a Spot Region
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The first action is to select a spot on the input image using a rectangular ROI. It is difficult to see spots on the input image which has many frames and very few fluorescent bursts. Consequently it is recommended that an overview image is created to allow the spots to be identified. This could be a maximum or average intensity projection of the input image. However it is best to identify spots using the
-``Find Peaks``
-plugin and then reconstruct an image using the fitted PSFs. If the image scale is set to 1 then the reconstructed image is the same size as the input image. This allows spots to be outlined on the PSF image and then the ROI reapplied to the original image. An example of this is show in :numref:`Figure %s <fig_spot_analysis_example_input_image>`.
+The first action is to select a spot on the input image using a rectangular ROI. It is difficult to see spots on the input image which has many frames and very few fluorescent bursts. Consequently it is recommended that an overview image is created to allow the spots to be identified. This could be a maximum or average intensity projection of the input image. However it is best to identify spots using the ``Find Peaks`` plugin and then reconstruct an image using the fitted PSFs. If the image scale is set to 1 then the reconstructed image is the same size as the input image. This allows spots to be outlined on the PSF image and then the ROI reapplied to the original image. An example of this is show in :numref:`Figure %s <fig_spot_analysis_example_input_image>`.
 
 When a suitable spot has been outlined the region can be analysed using the ``Profile`` button. The analysis extracts the region into a new image named ``Spot Analysis Raw spot``. This is magnified to allow easier viewing. The same region is subjected to a Gaussian blur and extracted to a new image name ``Spot Analysis Blur spot``. The blurred image can make it easier to see peaks in very noisy images. In addition an average intensity projection is created for the spot region and named ``Spot Analysis Average spot``. The average image can indicate if the spot is fixed and central, moves around the image or overlaps with other signal. An example of the raw, blur and average images are shown in :numref:`Figure %s <fig_spot_analysis_spot_images>`. The average spot image shows a blurred spot biased to the upper-right corner but the signal is distinct so the spot is suitable for analysis. The ``Find Peaks`` fitting algorithm is applied to the current frame of the raw and blurred spot (using the configured PSF width). If a spot is detected within 50% of the distance to the centre of the frame it is marked on the image using an cross overlay.
 
@@ -2780,9 +2772,7 @@ When the spot image is moved to a new frame the plugin will update the signal an
 
 The plugin also runs the ``Peak Fit`` algorithm on the raw and blurred spot image. Identified localisations will be marked on the image with an overlay. The signal and SNR for the raw fit and blur fit are shown in the plugin window.
 
-Combining inspection of the spot images with consideration of the signal and SNR of the raw data and fitted data should allow the user to decide if a fluorophore is on in the selected frame. The frame can be added to the on-frames list using the ``Add`` button. This can also be performed using a shortcut key mapped to the
-``Spot Analysis (Add)``
-plugin (see section :numref:`%s <analysis_plugins:Spot Analysis (Add)>`).
+Combining inspection of the spot images with consideration of the signal and SNR of the raw data and fitted data should allow the user to decide if a fluorophore is on in the selected frame. The frame can be added to the on-frames list using the ``Add`` button. This can also be performed using a shortcut key mapped to the ``Spot Analysis (Add)`` plugin (see section :numref:`%s <analysis_plugins:Spot Analysis (Add)>`). By default running the ``Spot Analysis`` plugin will bind the ``Spot Analysis (add)`` plugin to the number ``6`` key.
 
 The frame is added to the list in the ``Spot Analysis`` window along with the current estimate of the signal for that frame. Note that LOESS smoothing only uses frames that have not been selected as on-frames. Consequently the background and the noise are updated as more on-frames are added to the list.
 
@@ -2879,6 +2869,8 @@ Spot Analysis (Add)
 This plugin provides a named plugin command for the ``Add`` button of the ``Spot Analysis`` plugin.
 
 Any named plugin command can be mapped to a hot key using ``ImageJ``'s ``Plugins > Shortcuts > Create Shortcut...`` command. Thus the ``Add`` button can be mapped by ``ImageJ`` to a keyboard shortcut. This allows the user to scroll through an image generated by the ``Spot Analysis`` plugin using the standard left and right arrow keys to move between frames. When a spot is present the user adds the spot to the list by clicking the ``Add`` button on the ``Spot Analysis`` window. If the ``Add`` command is mapped to a shortcut the user can perform the same action using the hotkey. This allows faster analysis of images using only simple keyboard commands.
+
+Running the ``Spot Analysis`` plugin will bind the ``Spot Analysis (Add)`` plugin to the number ``6`` key. This can be updated using the commands in the ``Plugins > Shortcuts`` menu.
 
 
 .. index:: ! Crosstalk Activation Analysis
