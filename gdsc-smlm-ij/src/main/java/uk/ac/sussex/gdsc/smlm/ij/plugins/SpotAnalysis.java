@@ -722,6 +722,7 @@ public class SpotAnalysis extends PlugInFrame
   private double[][] extractSpotProfile(ImagePlus imp, Rectangle bounds, ImageStack rawSpot) {
     final int nSlices = imp.getStackSize();
     final IJImageSource rawSource = new IJImageSource(imp);
+    rawSource.open();
 
     final double[][] profile = new double[2][nSlices];
     for (int n = 0; n < nSlices; n++) {
