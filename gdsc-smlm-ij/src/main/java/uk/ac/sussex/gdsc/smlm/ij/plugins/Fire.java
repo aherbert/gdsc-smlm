@@ -1211,7 +1211,7 @@ public class Fire implements PlugIn {
 
       if (plot == null) {
         final String title = name + " FRC Curve";
-        plot = new Plot(title, String.format("Spatial Frequency (%s^-1)", units), "FRC");
+        plot = new Plot(title, String.format("Spatial Frequency (%s^^-1^^)", units), "FRC");
 
         xValues = new double[frcCurve.getSize()];
         final double l = frcCurve.fieldOfView;
@@ -1676,7 +1676,7 @@ public class Fire implements PlugIn {
         line[i] = curve.value(q[i], estimate);
       }
       final String title = pluginTitle + " Initial fit";
-      final Plot plot = new Plot(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
+      final Plot plot = new Plot(title, "Spatial Frequency (nm^^-1^^)", "FRC Numerator");
       final String label = String.format("Q = %.3f", qvalue);
       plot.addPoints(qScaled, smooth, Plot.LINE);
       plot.setColor(Color.red);
@@ -2239,7 +2239,7 @@ public class Fire implements PlugIn {
       // Add this to aid is manual adjustment
       final double plateauness = computePlateauness(qvalue, mu, sd);
 
-      Plot plot = new Plot(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
+      Plot plot = new Plot(title, "Spatial Frequency (nm^^-1^^)", "FRC Numerator");
 
       String label = String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qvalue, mean, sigma);
       plot.setColor(Color.red);
@@ -2293,7 +2293,7 @@ public class Fire implements PlugIn {
       }
 
       // Produce a ratio plot. Plateauness is designed to achieve a value of 1 for this ratio.
-      plot = new Plot(title2, "Spatial Frequency (nm^-1)", "FRC Numerator / Spurious component");
+      plot = new Plot(title2, "Spatial Frequency (nm^^-1^^)", "FRC Numerator / Spurious component");
       final double xMax = qscaled[qscaled.length - 1];
       if (qvalue > 0) {
         plot.addLabel(0, 0, String.format("Cost = %.3f", plateauness));
