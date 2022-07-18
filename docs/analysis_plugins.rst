@@ -2947,7 +2947,7 @@ The localisations are then loaded, the calibration is verified and the traces ar
 
 Note: The activation frame for each channel is the frame immediately following the pulse activation laser for the flourophore assigned to channel N. The channel is arbitrary. It is used to allow the output results to be mapped to the pulse wavelengths and fluorophores. The pulse life cycle and any computed crosstalk for each channel will be stored and shown as the default settings in the ``Pulse Activation Analysis`` plugin allowing the two plugins to be used together.
 
-When the pulse life cycle has been configured the plugin will split the traces into activations using the ``Dark frames for new activation`` parameter. Activations are non-specific if they occur in a frame not following an activation pulse; otherwise the activations are specific to that pulse channel. The plugin records the background (non-specific) and channel (specific) activations rates to the ``ImageJ`` log window. These can be used to verify that the pulse life cycle has been correctly configured. Ideally the channel activation rates should be higher than the background activation rate; the target channel activation rate should be far higher than the other channels. In the following example the analysis has been performed on traced data from a non-pulsed experiment and the background rate is the same the channel activation rate::
+When the pulse life cycle has been configured the plugin will split the traces into activations using the ``Dark frames for new activation`` parameter. Activations are non-specific if they occur in a frame not following an activation pulse; otherwise the activations are specific to that pulse channel. The plugin records the background (non-specific) and channel (specific) activations rates to the ``ImageJ`` log window. These can be used to verify that the pulse life cycle has been correctly configured. Ideally the channel activation rates should be higher than the background activation rate; the target channel activation rate should be far higher than the other channels. In the following example the analysis has been performed on traced data from a non-pulsed experiment and the background rate is the same as the channel activation rate::
 
     Activation rate : Background = 9331/17996 = 0.5185 per frame
     Activation rate : Channel 1 = 376/667 = 0.5637 per frame
@@ -2973,7 +2973,7 @@ Simulated Crosstalk
 
 The ``Crosstalk Activation Analysis`` plugin requires a set of traced localisations from a pulsed life cycle experiment with conjugated fluorophores. This data can be simulated allowing the plugin to be tested.
 
-The simulation can be run by holding the ``Shift`` key down when running the plugin. This will provide an option to run the simulation or to perform crosstalk analysis as normal. Note that the ``Shift`` must be pressed when the main ``ImageJ`` window is the active. When run in simulation mode the plugin will create multiple datasets in memory and the crosstalk analysis is not run.
+The simulation can be run by holding the ``Shift`` key down when running the plugin. This will provide an option to run the simulation or to perform crosstalk analysis as normal. Note that the ``Shift`` key must be pressed when the main ``ImageJ`` window is the active. When run in simulation mode the plugin will create multiple datasets in memory and the crosstalk analysis is not run.
 
 The simulation requires parameters for 3 sets of molecules which are drawn on a fixed size image region. For brevity only the parameters for a single channel are described:
 
@@ -3024,7 +3024,7 @@ When the simulation is run it uses the following defaults:
      - 256
 
    * - Activation Density
-     - The activation density in molecules/|micro|\ m.
+     - The activation density in molecules/|micro|\ m. Pixel pitch is 100nm.
      - 0.1
 
    * - Non-specific frequency
@@ -3039,17 +3039,17 @@ When the simulation is run it uses the following defaults:
      - The activation frames for the pulse cycle.
      - 1, 11, 21
 
-Initially the simulation creates the distribution shapes for the molecules in each channel and then samples the shapes to create the molecules. These are then activated in their target channel using an activation probability based on the image region and activation density, i.e. some of the molecules will randomly active each pulse. The crosstalk is used to determine the activation probability for how often the molecules activate following a pulse in their non-target channel. At each pulse the number of activated molecules is sampled from a binomial distribution with the configured activation probability. All non-pulse frame are sampled using the background activation probability. Note that is this simulation a molecule is active for only 1 frame.
+Initially the simulation creates the distribution shapes for the molecules in each channel and then samples the shapes to create the molecules. These are then activated in their target channel using an activation probability based on the image region and activation density, i.e. some of the molecules will randomly active each pulse. The crosstalk is used to determine the activation probability for how often the molecules activate following a pulse in their non-target channel. At each pulse the number of activated molecules is sampled from a binomial distribution with the configured activation probability. All non-pulse frame are sampled using the background activation probability. Note that in this simulation a molecule is active for only 1 frame.
 
-When the simulation is complete the actual crosstalk for each channel is computed and recorded in the ``ImageJ`` log window with the configured values and the actual crosstalk after the ``=>`` text::
+When the simulation is complete the actual crosstalk for each channel is computed and recorded in the ``ImageJ`` log window with the configured values and the actual crosstalk after the ``->`` text::
 
-    Simulated crosstalk C12  0.05285=>0.05185, C13  0.1264=>0.1257
-    Simulated crosstalk C21  0.07117=>0.07333, C23  0.09783=>0.09856
-    Simulated crosstalk C31  0.137=>0.1362, C32  0.1297=>0.1286
+    Simulated crosstalk C12  0.05285->0.05185, C13  0.1264->0.1257
+    Simulated crosstalk C21  0.07117->0.07333, C23  0.09783->0.09856
+    Simulated crosstalk C31  0.137->0.1362, C32  0.1297->0.1286
 
 The simulation is recorded using datasets in memory with the prefix ``Activation Analysis Simulation``. Each localisation is assigned a unique ID. The effect is that tracing of results is perfect and all separate activations are a new trace. A combined dataset is create along with a dataset for each channel with the suffix ``CN`` where `N` is 1, 2, or 3. The channel datasets can be used as input for the ``Crosstalk Analysis Plugin`` as they represent the imaging of 1 fluorophore-chromophore pair under the full imaging pulse life cycle.
 
-For reference a 3 colour image composite is created with dimensions 1024x1024 pixels (see :numref:`Figure %s <fig_crosstalk_activation_analysis_simulation_example>`). This contains the localisations from each channel drawn with perfect spectral unmixing; each set of localisations is drawn on the correct channel regardless on whether it was due to an activation in the correct or incorrect pulse. This is a reference image for a perfect result. There is currently not an option to draw the localisations with colours associated with the pulse activation frame, i.e. the raw spectrally mixed image. This can be done using no crosstalk correction in the ``Pulse Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Pulse Activation Analysis>`).
+For reference a 3 colour image composite is created with dimensions 1024x1024 pixels (see :numref:`Figure %s <fig_crosstalk_activation_analysis_simulation_example>`). This contains the localisations from each channel drawn with perfect spectral unmixing; each set of localisations is drawn on the correct channel regardless of whether it was due to an activation in the correct or incorrect pulse. This is a reference image for a perfect result. There is currently not an option to draw the localisations with colours associated with the pulse activation frame, i.e. the raw spectrally mixed image. This can be done using no crosstalk correction in the ``Pulse Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Pulse Activation Analysis>`).
 
 After the simulation has finished the ``Crosstalk Activation Analysis`` plugin can be run again on any of the simulation channel datasets. The pulse cycle will be correctly configured for the simulation pulse cycle. The computed crosstalk ratios shown on the results plot should match those logged by the simulation to the ``ImageJ`` log window.
 
