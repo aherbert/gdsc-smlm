@@ -321,6 +321,7 @@ public class SpotAnalysis extends PlugInFrame
     createFrame();
     setup();
 
+    // Note: These bindings to not appear to be triggered.
     addKeyListener(new KeyAdapter() {
       @Override
       public void keyTyped(KeyEvent event) {
