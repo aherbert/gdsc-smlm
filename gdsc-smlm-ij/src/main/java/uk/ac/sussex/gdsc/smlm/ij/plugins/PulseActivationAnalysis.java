@@ -2134,7 +2134,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
     // Report simulated cross talk
     final double[] crosstalk = computeCrosstalk(count, channel);
-    ImageJUtils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", Settings.CT_NAMES[index1],
+    ImageJUtils.log("Simulated crosstalk C%s  %s->%s, C%s  %s->%s", Settings.CT_NAMES[index1],
         MathUtils.rounded(settings.ct[index1]), MathUtils.rounded(crosstalk[c1]),
         Settings.CT_NAMES[index2], MathUtils.rounded(settings.ct[index2]),
         MathUtils.rounded(crosstalk[c2]));
