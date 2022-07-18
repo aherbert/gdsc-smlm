@@ -33,7 +33,6 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GUI;
 import ij.gui.Roi;
-import ij.macro.MacroRunner;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij3d.Content;
@@ -1579,10 +1578,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
     gd.addHelp(HelpUrls.getUrl(HELP_KEY));
   }
 
-  @SuppressWarnings("unused")
   private static void showHelp() {
-    final String macro = "run('URL...', 'url=" + HelpUrls.getUrl(HELP_KEY) + "');";
-    new MacroRunner(macro);
+    ImageJUtils.showUrl(HelpUrls.getUrl(HELP_KEY));
   }
 
   private static Point3f[] createSphereSize(MemoryPeakResults results, Builder settings) {

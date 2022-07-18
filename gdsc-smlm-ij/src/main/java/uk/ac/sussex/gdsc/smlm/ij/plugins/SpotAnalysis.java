@@ -148,6 +148,7 @@ public class SpotAnalysis extends PlugInFrame
   private Button deleteButton;
   private Button saveButton;
   private Button saveTracesButton;
+  private Button helpButton;
   private Label currentLabel;
   private Label rawFittedLabel;
   private Label blurFittedLabel;
@@ -441,6 +442,9 @@ public class SpotAnalysis extends PlugInFrame
         runMode = 4;
       } else if ((Button) actioner == saveTracesButton) {
         runMode = 5;
+      } else if ((Button) actioner == helpButton) {
+        ImageJUtils.showUrl(HelpUrls.getUrl("spot-analysis"));
+        runMode = 0;
       }
     }
 
@@ -1144,6 +1148,8 @@ public class SpotAnalysis extends PlugInFrame
     saveButton.addActionListener(this);
     saveTracesButton = new Button("Save Traces");
     saveTracesButton.addActionListener(this);
+    helpButton = new Button("Help");
+    helpButton.addActionListener(this);
 
     currentLabel = new Label();
     mainPanel.add(createLabelPanel(currentLabel, "", ""));
@@ -1163,6 +1169,7 @@ public class SpotAnalysis extends PlugInFrame
     buttonPanel.add(deleteButton, BorderLayout.CENTER);
     buttonPanel.add(saveButton, BorderLayout.CENTER);
     buttonPanel.add(saveTracesButton, BorderLayout.CENTER);
+    buttonPanel.add(helpButton, BorderLayout.CENTER);
 
     mainPanel.add(buttonPanel);
 
