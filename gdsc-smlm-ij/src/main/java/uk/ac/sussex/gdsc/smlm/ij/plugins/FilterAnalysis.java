@@ -29,7 +29,6 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import java.awt.Color;
@@ -50,6 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -288,7 +288,10 @@ public class FilterAnalysis implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    final String inputDirectory = getInputDirectory();
+    // Load filters from file or generate from dialog input
+    final boolean fileInput = (arg != null && arg.contains("file"));
+
+    final String inputDirectory = getInputDirectory(fileInput);
     if (inputDirectory == null) {
       return;
     }
@@ -298,9 +301,6 @@ public class FilterAnalysis implements PlugIn {
       IJ.error(TITLE, "No results could be loaded. Check files have the suffix .xls, .csv or .bin");
       return;
     }
-
-    // Load filters from file or generate from dialog input
-    final boolean fileInput = (arg != null && arg.contains("file"));
 
     if (!showDialog(resultsList, fileInput)) {
       return;
@@ -328,14 +328,23 @@ public class FilterAnalysis implements PlugIn {
     analyse(resultsList, filterSets);
   }
 
-  private static String getInputDirectory() {
+  private static String getInputDirectory(boolean fileInput) {
     final GUIFilterSettings.Builder filterSettings =
         SettingsManager.readGuiFilterSettings(0).toBuilder();
 
-    if (filterSettings.getFilterAnalysisDirectory() != null) {
-      OpenDialog.setDefaultDirectory(filterSettings.getFilterAnalysisDirectory());
+    final ExtendedGenericDialog gd = createDialog(fileInput);
+
+    gd.addMessage("Performs filtering on a set of categorised localisation results and "
+        + "\ncomputes match statistics for each filter.");
+    gd.addDirectoryField("Results_directory", filterSettings.getFilterAnalysisDirectory());
+
+    gd.showDialog();
+
+    if (gd.wasCanceled()) {
+      return null;
     }
-    filterSettings.setFilterAnalysisDirectory(IJ.getDirectory("Select results directory ..."));
+
+    filterSettings.setFilterAnalysisDirectory(gd.getNextString());
     if (filterSettings.getFilterAnalysisDirectory() == null) {
       return null;
     }
@@ -343,6 +352,16 @@ public class FilterAnalysis implements PlugIn {
     SettingsManager.writeSettings(filterSettings.build());
 
     return filterSettings.getFilterAnalysisDirectory();
+  }
+
+  private static ExtendedGenericDialog createDialog(boolean fileInput) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    String helpKey = "filter-analysis";
+    if (fileInput) {
+      helpKey += "-file";
+    }
+    gd.addHelp(HelpUrls.getUrl(helpKey));
+    return gd;
   }
 
   @SuppressWarnings("unchecked")
@@ -429,12 +448,7 @@ public class FilterAnalysis implements PlugIn {
   }
 
   private boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput) {
-    final GenericDialog gd = new GenericDialog(TITLE);
-    String helpKey = "filter-analysis";
-    if (fileInput) {
-      helpKey += "-file";
-    }
-    gd.addHelp(HelpUrls.getUrl(helpKey));
+    final ExtendedGenericDialog gd = createDialog(fileInput);
 
     int total = 0;
     final Counter tp = new Counter();
