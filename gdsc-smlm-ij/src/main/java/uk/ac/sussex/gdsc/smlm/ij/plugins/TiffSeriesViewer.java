@@ -336,16 +336,18 @@ public class TiffSeriesViewer implements PlugIn {
           new File(settings.outputDirectory, imp.getShortTitle() + "%0" + digits + "d.tif")
               .getPath();
 
-      IJ.showStatus("Saving image ...");
       try {
         for (int i = 1; i <= size; i += nImages) {
           if (ImageJUtils.isInterrupted()) {
             break;
           }
           ImageJUtils.showSlowProgress(i, size);
+          final int from = i;
+          final int to = Math.min(size, i + nImages - 1);
+          ImageJUtils.showStatus(() -> "Creating sub-image ... " + from + " - " + to);
           final String path = String.format(format, i);
           final ImageStack out = new ImageStack(source.getWidth(), source.getHeight());
-          for (int j = 0, k = i; j < nImages && k <= size; j++, k++) {
+          for (int k = from; k <= to; k++) {
             out.addSlice(null, stack.getPixels(k));
           }
           final ImagePlus outImp = new ImagePlus(path, out);
