@@ -3318,7 +3318,7 @@ This plugin is based on the FIRE (Fourier Image REsolution) plugin produced as p
 
 Additional functionality for correction of spurious correlations has been added based on Matlab code kindly provided by Prof. Bernd Reiger (corresponding author of the FIRE paper).
 
-Fourier Ring Correlation computes the correlation between the features of two images at a certain spatial frequency. A 2D image is transformed into the frequency domain using a Fourier transform. The frequency image represents the amplitude and phase of the original data at different frequencies. These can be visualised as a 2D image, the centre of the image represents the lowest frequencies moving to the highest frequencies at the edge of the image. Points taken from a ring drawn around the centre will represent all the amplitude and phases present at a single frequency. Two images can be compared at a given frequency by measuring the correlation of the data sampled from the same ring on both images. This is the Fourier Ring Correlation (FRC).
+Fourier Ring Correlation computes the correlation between the features of two images at a certain spatial frequency. A 2D image is transformed into the frequency domain using a Fourier transform. The frequency image represents the amplitude and phase of the original data at different frequencies. These can be visualised as a 2D image, the centre of the image represents the lowest spatial frequencies moving to the highest frequencies at the edge of the image. Points taken from a ring drawn around the centre will represent all the amplitude and phases present at a single frequency. Two images can be compared at a given frequency by measuring the correlation of the data sampled from the same ring on both images. This is the Fourier Ring Correlation (FRC).
 
 To compute the image resolution of a set of localisations requires the following steps:
 
@@ -3416,7 +3416,7 @@ with :math:`\sigma` the sigma-factor (see Heel & Schatz, (2005), equation 2). Fo
 Spurious Correlation (Q) Correction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When analysing a single dataset, if the same emitter is localised more than once then this can lead to correlations being observed at all spatial frequencies if localisations from the same emitter are split into each half-dataset (because a non-zero pixel will be present in the same position is both images). These spurious correlations can be corrected by subtracting a term from the numerator of the FRC and adding it to the denominator. The FRC at a given frequency *q* is given by the sum of the conjugate multiple of the Fourier transform oFf two sub-images divided by the product of the sums of the squared absolute values of each transformed sub-image:
+When analysing a single dataset, if the same emitter is localised more than once then this can lead to correlations being observed at all spatial frequencies if localisations from the same emitter are split into each half-dataset (because a non-zero pixel will be present in the same position in both images). These spurious correlations can be corrected by subtracting a term from the numerator of the FRC and adding it to the denominator. The FRC at a given frequency *q* is given by the sum of the conjugate multiple of the Fourier transform of two sub-images divided by the product of the sums of the squared absolute values of each transformed sub-image:
 
 .. math::
 
@@ -3448,7 +3448,7 @@ and :math:`H(q)` is the factor in the correlation averages related to the locali
 
     H(q)=\frac{1}{\sqrt{1+8\pi ^{2}\Delta \sigma ^{2}q^{2}}}\exp(-{\frac{4\pi ^{2}\sigma _{m}^{2}q^{2}}{1+8\pi ^{2}\Delta \sigma^{2}q^{2}}})
 
-Note that the given equations have been updated from those provided in Niewenhuizen, *et al* (2013) to those used in the code. If *Q=0* then no correction is applied. A plugin for estimating *Q* (the average number of activation cycles per emitter) is provided (see :ref:`analysis_plugins:FIRE Q Estimation`).
+Note that the given equations have been updated from those provided in Niewenhuizen, *et al* (2013) to those used in the code provided by Bernd Reiger. If *Q=0* then no correction is applied. A plugin for estimating *Q* (the average number of activation cycles per emitter) is provided (see :ref:`analysis_plugins:FIRE Q Estimation`).
 
 The corrected FRC is thus:
 
@@ -3477,8 +3477,7 @@ to select the localisation data
    * - Input2
      - The optional second results set to analyse.
 
-   * - Use ROI/
-       Choose ROI
+   * - Use ROI / Choose ROI
      - If any open images current have an area ROI then the option to choose an ROI is provided. This option is not shown when no ROIs are available.
 
        Use ROI is shown when only 1 ROI is available.
@@ -3560,7 +3559,7 @@ Fourier Options
 
        The FRC is calculated by sampling the circle at N points where N is equal to :math:`\pi r \times \mathit{Sampling\:factor}`. Increasing this value will slow down the algorithm but increase resolution of the FRC curve.
 
-       Note that samples are taken in the interval :math:`[0 - \pi]` radians since the Fourier image is two-fold radially symmetric.
+       Note that samples are taken in the interval :math:`[0, \pi]` radians since the Fourier image is two-fold radially symmetric.
 
 
 ..
