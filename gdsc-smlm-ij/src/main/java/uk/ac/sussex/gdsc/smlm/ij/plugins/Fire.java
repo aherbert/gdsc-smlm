@@ -40,7 +40,6 @@ import ij.process.ImageProcessor;
 import ij.process.LUT;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.AWTEvent;
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
@@ -2844,7 +2843,7 @@ public class Fire implements PlugIn {
       final double plateauness = qplot.computePlateauness(qplot.qvalue, mu, sd);
 
       ImageJUtils.addMessage(gd,
-          "Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n"
+          "Estimate the blinking correction parameter Q\nfor Fourier Ring Correlation\n \n"
               + "Initial estimate:\nPrecision = %.3f +/- %.3f\nQ = %s\nCost = %.3f",
           histogram.mean, histogram.sigma, MathUtils.rounded(qplot.qvalue), plateauness);
 
@@ -2855,10 +2854,12 @@ public class Fire implements PlugIn {
       gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
       gd.addSlider("Sigma (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
       gd.addSlider("Q (x10)", 0, Math.max(50, q10 * 2), q10);
-      gd.addCheckbox("Reset_all", false);
+      // Create after the dialog has the required fields
+      final FireDialogListener dl = new FireDialogListener(gd, histogram, qplot, workflow);
       gd.addMessage("Double-click a slider to reset");
+      gd.addAndGetButton("Reset all", e -> dl.resetAll());
 
-      gd.addDialogListener(new FireDialogListener(gd, histogram, qplot, workflow));
+      gd.addDialogListener(dl);
 
       // Show this when the workers have finished drawing the plots so it is on top
       try {
@@ -2925,9 +2926,7 @@ public class Fire implements PlugIn {
     boolean notActive = true;
     volatile int ignore;
     Workflow<WorkSettings, Object> workflow;
-    double defaultMean;
-    double defaultSigma;
-    double defaultQValue;
+    final WorkSettings defaultWork;
     String textM;
     String textS;
     String textQ;
@@ -2937,22 +2936,19 @@ public class Fire implements PlugIn {
     Scrollbar sl1;
     Scrollbar sl2;
     Scrollbar sl3;
-    Checkbox cb;
     final boolean isMacro;
 
     FireDialogListener(ExtendedGenericDialog gd, PrecisionHistogram histogram, QPlot qplot,
         Workflow<WorkSettings, Object> workflow) {
       time = System.currentTimeMillis() + 1000;
       this.workflow = workflow;
-      this.defaultMean = histogram.mean;
-      this.defaultSigma = histogram.sigma;
-      this.defaultQValue = qplot.qvalue;
+      defaultWork = new WorkSettings(histogram.mean, histogram.sigma, qplot.qvalue);
+
       isMacro = ImageJUtils.isMacro();
       // For the reset
       tf1 = (TextField) gd.getNumericFields().get(0);
       tf2 = (TextField) gd.getNumericFields().get(1);
       tf3 = (TextField) gd.getNumericFields().get(2);
-      cb = (Checkbox) (gd.getCheckboxes().get(0));
       // Sliders
       sl1 = (Scrollbar) gd.getSliders().get(0);
       sl2 = (Scrollbar) gd.getSliders().get(1);
@@ -2984,36 +2980,17 @@ public class Fire implements PlugIn {
 
       notActive = false;
 
-      double mean = Math.abs(gd.getNextNumber()) / 10;
-      double sigma = Math.abs(gd.getNextNumber()) / 10;
-      double qvalue = Math.abs(gd.getNextNumber()) / 10;
-      final boolean reset = gd.getNextBoolean();
+      final double mean = Math.abs(gd.getNextNumber()) / 10;
+      final double sigma = Math.abs(gd.getNextNumber()) / 10;
+      final double qvalue = Math.abs(gd.getNextNumber()) / 10;
 
       // Even events from the slider come through as TextEvent from the TextField
       // since ImageJ captures the slider event as just updates the TextField.
-
-      // Allow reset to default
-      if (reset) {
-        // This does not trigger the event
-        cb.setState(false);
-        mean = this.defaultMean;
-        sigma = this.defaultSigma;
-        qvalue = this.defaultQValue;
-      }
 
       final WorkSettings work = new WorkSettings(mean, sigma, qvalue);
 
       // Offload this work onto a thread that just picks up the most recent dialog input.
       workflow.run(work);
-
-      if (reset) {
-        // These trigger dialogItemChanged(...) so do them after we added
-        // work to the queue and ignore the events
-        ignore = 3;
-        tf1.setText(textM);
-        tf2.setText(textS);
-        tf3.setText(textQ);
-      }
 
       return true;
     }
@@ -3034,6 +3011,17 @@ public class Fire implements PlugIn {
       if (sl == sl3) {
         tf3.setText(textQ);
       }
+    }
+
+    void resetAll() {
+      // Reset to initial values
+      workflow.run(defaultWork);
+
+      // These trigger dialogItemChanged(...) so ignore the events
+      ignore = 3;
+      tf1.setText(textM);
+      tf2.setText(textS);
+      tf3.setText(textQ);
     }
   }
 
