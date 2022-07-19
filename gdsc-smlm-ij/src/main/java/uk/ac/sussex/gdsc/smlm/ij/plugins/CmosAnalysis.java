@@ -988,7 +988,7 @@ public class CmosAnalysis implements PlugIn {
     final int bins = 2 * HistogramPlot.getBinsSturgesRule(pixelGain.length);
     final WindowOrganiser wo = new WindowOrganiser();
     showHistogram("Offset (ADU)", pixelOffset, bins, statsOffset, wo);
-    showHistogram("Variance (ADU^2)", pixelVariance, bins, statsVariance, wo);
+    showHistogram("Variance (ADU^^2^^)", pixelVariance, bins, statsVariance, wo);
     showHistogram("Gain (ADU/e)", pixelGain, bins, statsGain, wo);
     wo.tile();
 

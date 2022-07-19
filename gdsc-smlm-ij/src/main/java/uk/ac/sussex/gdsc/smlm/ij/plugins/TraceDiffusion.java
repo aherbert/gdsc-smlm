@@ -499,7 +499,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
       // Always show the jump distance histogram
       jdTitle = TITLE + " Jump Distance";
-      jdPlot = new Plot(jdTitle, "Distance (um^2)", "Cumulative Probability");
+      jdPlot = new Plot(jdTitle, "Distance (um^^2^^)", "Cumulative Probability");
       jdPlot.addPoints(jdHistogram[0], jdHistogram[1], Plot.LINE);
       display(jdTitle, jdPlot);
 
@@ -1396,7 +1396,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       saveMsd(x, y, sd);
     }
 
-    final Plot plot = new Plot(title, "Time (s)", "Distance (um^2)");
+    final Plot plot = new Plot(title, "Time (s)", "Distance (um^^2^^)");
     plot.addPoints(x, y, Plot.LINE);
     // Set limits before any plotting
     double max = 0;

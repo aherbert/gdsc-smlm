@@ -815,7 +815,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         final RealVector p1 = msdFitter.lvmSolution1.getPoint();
         final RealVector p2 = msdFitter.lvmSolution2.getPoint();
         final String title = TITLE + " MSD vs Time";
-        final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+        final Plot plot = new Plot(title, "time (s)", "MSD (um^^2^^)");
         final StringBuilder msg = new StringBuilder(512);
         try (Formatter formatter = new Formatter(msg)) {
           formatter.format("Brownian D=%s, s=%s : FBM D=%s, s=%s, alpha=%s (p-value=%s)",
@@ -838,7 +838,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         if (settings.showMsdOverT) {
           plot.setLogScaleX();
           plot.setLogScaleY();
-          plot.setXYLabels("time (s)", "MSD/t (um^2/s)");
+          plot.setXYLabels("time (s)", "MSD/t (um^^2^^/s)");
           converter = yy -> {
             for (int i = 0; i < yy.length; i++) {
               yy[i] /= t[i];
@@ -1110,7 +1110,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         final RealVector p1 = msdFitter.lvmSolution1.getPoint();
         final RealVector p2 = msdFitter.lvmSolution2.getPoint();
         final String title = String.format("Component %d MSD vs Time", comp);
-        final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+        final Plot plot = new Plot(title, "time (s)", "MSD (um^^2^^)");
         // Note:
         // The number of windows is the count of samples of the longest jump.
         final int numberOfWindows = (int) msds[msds.length - 1].getN();
@@ -1138,7 +1138,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         if (settings.showMsdOverT) {
           plot.setLogScaleX();
           plot.setLogScaleY();
-          plot.setXYLabels("time (s)", "MSD/t (um^2/s)");
+          plot.setXYLabels("time (s)", "MSD/t (um^^2^^/s)");
           converter = yy -> {
             for (int i = 0; i < yy.length; i++) {
               yy[i] /= t[i];
@@ -2654,7 +2654,7 @@ public class TrackPopulationAnalysis implements PlugIn {
             // ) {
             // final RealVector p = msdFitter.lvmSolution2.getPoint();
             // final String title = "anomalous exponent";
-            // final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+            // final Plot plot = new Plot(title, "time (s)", "MSD (um^^2^^)");
             // final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
             // plot.addLabel(0, 0, msdFitter.lvmSolution2.getPoint().toString() + " p="
             // + msdFitter.pValue + ". " + msdFitter.lvmSolution1.getPoint().toString());
@@ -3378,7 +3378,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // ) {
       // final RealVector p = lvmSolution2.getPoint();
       // final String title = "anomalous exponent";
-      // final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+      // final Plot plot = new Plot(title, "time (s)", "MSD (um^^2^^)");
       // final double[] t = SimpleArrayUtils.newArray(s.length, deltaT, deltaT);
       // plot.addLabel(0, 0, lvmSolution2.getPoint().toString() + " p=" + pValue + ". "
       // + lvmSolution1.getPoint().toString());

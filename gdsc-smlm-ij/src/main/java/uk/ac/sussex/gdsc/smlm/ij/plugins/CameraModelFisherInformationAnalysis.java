@@ -604,7 +604,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     // Test if we can use ImageJ support for a X log scale
     final boolean logScaleX = ((float) photons[0] != 0);
     final double[] x = (logScaleX) ? photons : exp;
-    final String xTitle = (logScaleX) ? "photons" : "log10(photons)";
+    final String xTitle = (logScaleX) ? "photons" : "log!!10!!(photons)";
 
     // Get interpolation for alpha. Convert to base e.
     final double[] logU = exp.clone();

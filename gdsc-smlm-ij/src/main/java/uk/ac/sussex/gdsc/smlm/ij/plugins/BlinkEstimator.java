@@ -272,9 +272,9 @@ public class BlinkEstimator implements PlugIn {
     plot(xAxisTitle, "nBlinks", npoints, parameters[1], wo);
     plot(xAxisTitle, "tOff", npoints, parameters[2], wo);
     if (IJ.debugMode) {
-      plot(xAxisTitle, "R^2", npoints, r2, wo);
+      plot(xAxisTitle, "R^^2^^", npoints, r2, wo);
     }
-    plot(xAxisTitle, "Adjusted R^2", npoints, adjustedR2, wo);
+    plot(xAxisTitle, "Adjusted R^^2^^", npoints, adjustedR2, wo);
   }
 
   /**

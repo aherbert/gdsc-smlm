@@ -650,7 +650,7 @@ public class PcPalmAnalysis implements PlugIn {
       noPlots = WindowManager.getFrame(spatialPlotTitle) == null;
       topPlotTitle = frequencyDomainTitle;
 
-      plotCorrelation(gr, 0, spatialPlotTitle, "molecules/um^2", true, false);
+      plotCorrelation(gr, 0, spatialPlotTitle, "molecules/um^^2^^", true, false);
     } else {
       // -----------------
       // Image correlation in the Frequency Domain

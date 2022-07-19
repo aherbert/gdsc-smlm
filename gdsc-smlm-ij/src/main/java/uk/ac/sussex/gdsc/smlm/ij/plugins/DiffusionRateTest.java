@@ -586,7 +586,7 @@ public class DiffusionRateTest implements PlugIn {
   private void plotMsd(int totalSteps, double[] xValues, double[] yValues, double[] lower,
       double[] upper, PolynomialFunction fitted, int dimensions) {
     final String title = TITLE + " " + dimensions + "D";
-    final Plot plot = new Plot(title, "Time (seconds)", "Mean-squared Distance (um^2)");
+    final Plot plot = new Plot(title, "Time (seconds)", "Mean-squared Distance (um^^2^^)");
     plot.addPoints(xValues, yValues, Plot.LINE);
     double[] limits = MathUtils.limits(upper);
     limits = MathUtils.limits(limits, lower);
@@ -651,7 +651,7 @@ public class DiffusionRateTest implements PlugIn {
         values[values.length - 1] = x[x.length - 1] + 0.1;
       }
     }
-    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability");
+    Plot jdPlot = new Plot(title2, "Distance (um^^2^^)", "Cumulative Probability");
     jdPlot.addPoints(jdHistogram[0], jdHistogram[1], Plot.LINE);
     ImageJUtils.display(title2, jdPlot, windowOrganiser);
 
@@ -688,7 +688,7 @@ public class DiffusionRateTest implements PlugIn {
     title2 = title + " Jump " + dimensions + "D";
     final StoredDataStatistics jumpDistances2 = StoredDataStatistics.create(values);
     final HistogramPlot histogramPlot =
-        new HistogramPlotBuilder(title2, jumpDistances2, "Distance (um^2)").build();
+        new HistogramPlotBuilder(title2, jumpDistances2, "Distance (um^^2^^)").build();
     // Assume the plot works
     histogramPlot.show(windowOrganiser);
 
@@ -726,7 +726,7 @@ public class DiffusionRateTest implements PlugIn {
     final double[] values = jumpDistances.values();
     String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
     final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
-    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability");
+    Plot jdPlot = new Plot(title2, "Distance (um^^2^^)", "Cumulative Probability");
     jdPlot.addPoints(jdHistogram[0], jdHistogram[1], Plot.LINE);
     ImageJUtils.display(title2, jdPlot, windowOrganiser);
 
@@ -760,7 +760,7 @@ public class DiffusionRateTest implements PlugIn {
     // ---------
     title2 = title + " Jump " + dimensions + "D";
     final HistogramPlot histogramPlot =
-        new HistogramPlotBuilder(title2, jumpDistances, "Distance (um^2)").build();
+        new HistogramPlotBuilder(title2, jumpDistances, "Distance (um^^2^^)").build();
     // Assume the plot works
     histogramPlot.show(windowOrganiser);
 

@@ -254,14 +254,14 @@ public class DensityEstimator implements PlugIn {
     final String label =
         String.format("Density = %s +/- %s um^-2", MathUtils.rounded(mean), MathUtils.rounded(sd));
 
-    final Plot plot = new Plot("Frame vs Density", "Frame", "Density (um^-2)");
+    final Plot plot = new Plot("Frame vs Density", "Frame", "Density (um^^-2^^)");
     plot.addPoints(frame, density, Plot.CIRCLE);
     plot.addLabel(0, 0, label);
     final WindowOrganiser wo = new WindowOrganiser();
     ImageJUtils.display(plot.getTitle(), plot, wo);
 
     // Histogram density
-    new HistogramPlotBuilder("Local", StoredData.create(density), "Density (um^-2)")
+    new HistogramPlotBuilder("Local", StoredData.create(density), "Density (um^^-2^^)")
         .setPlotLabel(label).show(wo);
 
     wo.tile();
