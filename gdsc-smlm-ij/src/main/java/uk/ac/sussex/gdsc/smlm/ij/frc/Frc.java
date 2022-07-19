@@ -696,19 +696,6 @@ public class Frc {
       Fht.swapQuadrants(new FloatProcessor(size, size, im2));
       progess.incrementProgress(THIRD);
     } else {
-      // Simple implementation. This is left for testing.
-      // FloatProcessor[] fft = getComplexFFT(ip1);
-      // mean1 = taperedImageMean;
-      // re1 = (float[]) fft[0].getPixels();
-      // im1 = (float[]) fft[1].getPixels();
-      // progess.incrementProgress(THIRD);
-      //
-      // fft = getComplexFFT(ip2);
-      // mean2 = taperedImageMean;
-      // re2 = (float[]) fft[0].getPixels();
-      // im2 = (float[]) fft[1].getPixels();
-      // progess.incrementProgress(THIRD);
-
       // Speed up by reusing the FHT object which performs pre-computation
 
       final float[] f1 = (float[]) ip1.getPixels();
@@ -725,6 +712,7 @@ public class Frc {
       final float[] f2 = (float[]) ip2.getPixels();
       final Fht fht2 = new Fht(f2, ip2.getWidth(), false);
       fht2.copyTables(fht1);
+      fht2.transform();
       fft = fht2.getComplexTransformProcessors();
       re2 = (float[]) fft[0].getPixels();
       im2 = (float[]) fft[1].getPixels();
