@@ -3433,7 +3433,7 @@ The correction term is computed as:
 
 .. math::
 
-    \mathit{Corr}(q)=\frac{Q}{Q_{\mathit{norm}}}\cdot H(q)\mathit{sinc}(\pi\cdot q)^{2}
+    \mathit{Corr}(q)=\frac{Q}{Q_{\mathit{norm}}}\cdot H(q)\mathbb{sinc}(\pi\cdot q)^{2}
 
 where :math:`Q` is the average number of activation cycles per emitter (i.e. repeat localisations),
 :math:`Q_{\mathit{norm}}` is a normalisation using the mean pixel value in the input images prior to Fourier transform:
@@ -3691,7 +3691,7 @@ When analysing a single dataset, if the same emitter is localised more than once
 
 .. math::
 
-    \mathit{Corr}(q)=\frac{Q}{Q_{\mathit{norm}}}\cdot H(q)\mathit{sinc}(\pi\cdot q)^{2}
+    \mathit{Corr}(q)=\frac{Q}{Q_{\mathit{norm}}}\cdot H(q)\mathbb{sinc}(\pi\cdot q)^{2}
 
 where :math:`Q_{\mathit{norm}}` is a normalisation using the mean pixel value in the input images prior to
 Fourier transform:
@@ -3700,13 +3700,15 @@ Fourier transform:
 
     Q_{\mathit{norm}}=\frac{1}{\mathit{mean}_{1}}+\frac{1}{\mathit{mean}_{2}}
 
-and *H(q)* is the factor in the correlation averages related to the localisation uncertainties:
+and :math:`H(q)` is the factor in the correlation averages related to the localisation uncertainties:
 
 .. math::
 
     H(q)=\frac{1}{\sqrt{1+8\pi ^{2}\Delta \sigma ^{2}q^{2}}}\exp(-{\frac{4\pi ^{2}\sigma _{m}^{2}q^{2}}{1+8\pi ^{2}\Delta \sigma^{2}q^{2}}})
 
-Note that *H(q)* is typically computed assuming the theoretical distribution of localisation uncertainties. However it can be constructed using a sample of *N* points from the actual localisation uncertainties :math:`\sigma_i` if they are available:
+and :math:`\mathbb{sinc}(x) = \sin(x) / x` (the unnormalised `sinc <https://en.wikipedia.org/wiki/Sinc_function>`_ function).
+
+Note that :math:`H(q)` is typically computed assuming the theoretical distribution of localisation uncertainties. However it can be constructed using a sample of *N* points from the actual localisation uncertainties :math:`\sigma_i` if they are available:
 
 .. math::
 
@@ -3720,7 +3722,7 @@ Estimating Q
 
 The true correlation term (due to underlying structure in the data) will decline towards zero at high spatial frequencies. This leaves the spurious correlation term as the main contributor to the FRC numerator at high spatial frequencies. A method for estimating the term involves fitting the model of the correction term to the FRC numerator using a range of spatial frequencies where there is no actual correlation.
 
-There are three terms to estimate: :math:`Q`, :math:`\sigma_m` and :math:`\Delta\sigma`. If the uncertainty is not available in the dataset then it must be entered as fixed value and only *Q* will be estimated. If the localisation uncertainty is available for each localisation then it can be estimated using two methods. The first method fits a Gaussian to a histogram of the localisation uncertainty. Alternatively the *H(q)* term can be initially constructed using a random sample of the actual localisation uncertainty and the mean estimated from the initial quadratic fit (see below).
+There are three terms to estimate: :math:`Q`, :math:`\sigma_m` and :math:`\Delta\sigma`. If the uncertainty is not available in the dataset then it must be entered as fixed value and only *Q* will be estimated. If the localisation uncertainty is available for each localisation then it can be estimated using two methods. The first method fits a Gaussian to a histogram of the localisation uncertainty. Alternatively the :math:`H(q)` term can be initially constructed using a random sample of the actual localisation uncertainty and the mean estimated from the initial quadratic fit (see below).
 
 The FRC numerator at a given frequency *q* is given by the sum of the conjugate multiple of the Fourier transform of two sub-images:
 
@@ -3740,19 +3742,19 @@ If the correlation is mainly composed of the spurious correlation then the follo
 
 .. math::
 
-    1=\frac{v(q)}{\frac{Q}{Q_{\mathit{norm}}}\cdot H(q)\mathit{sinc}(\pi\cdot q)^{2}}
+    1=\frac{v(q)}{\frac{Q}{Q_{\mathit{norm}}}\cdot H(q)\mathbb{sinc}(\pi\cdot q)^{2}}
 
 *Q* can thus be estimated using:
 
 .. math::
 
-    Q=\frac{Q_{\mathit{norm}}\cdot v(q)}{H(q)\mathit{sinc}(\pi \cdot q)^{2}}
+    Q=\frac{Q_{\mathit{norm}}\cdot v(q)}{H(q)\mathbb{sinc}(\pi \cdot q)^{2}}
 
 This term varies widely in magnitude with q and so the following function is used:
 
 .. math::
 
-    f(q)=\log (|\frac{Q_{\mathit{norm}}\cdot v(q)}{H(q)\mathit{sinc}(\pi \cdot q)^{2}}|)
+    f(q)=\log (|\frac{Q_{\mathit{norm}}\cdot v(q)}{H(q)\mathbb{sinc}(\pi \cdot q)^{2}}|)
 
 This function is described below equation (7) of the Online Methods of Niewenhuizen, *et al* (2013). The function *f(q)* typically is a function that initially decreases, then levels off to a constant plateau value and finally increases again. The function can be well fit using a quadratic (:math:`f(q)=a+bq^2`) if the fit is performed over a suitable range of *q* where the plateau occurs.
 
@@ -3762,7 +3764,7 @@ To reduce noise the plugin allows smoothing using a median window before applica
 
     Q=\exp (a)
 
-Note that *H(q)* is typically computed assuming the theoretical distribution of localisation uncertainties. However it can be constructed using a random sample of *N* points from the actual localisation uncertainties. In this case the parameter :math:`\sigma_m` can also be estimated from the fit using:
+Note that :math:`H(q)` is typically computed assuming the theoretical distribution of localisation uncertainties. However it can be constructed using a random sample of *N* points from the actual localisation uncertainties. In this case the parameter :math:`\sigma_m` can also be estimated from the fit using:
 
 .. math::
 
@@ -3868,7 +3870,7 @@ Estimation Options
 
        * ``Stored``: Use the precision value that is stored in the results, e.g. from loaded data. These are fit with a Gaussian to estimate :math:`\sigma_m` and :math:`\Delta\sigma`.
 
-       * `Calculate``: Calculate the precision of each localisation using the formula of Mortensen. These are fit with a Gaussian to estimate :math:`\sigma_m` and :math:`\Delta\sigma`. This option requires that the localisations have a signal and width value and the results are calibrated with a gain and pixel size (in nm).
+       * ``Calculate``: Calculate the precision of each localisation using the formula of Mortensen. These are fit with a Gaussian to estimate :math:`\sigma_m` and :math:`\Delta\sigma`. This option requires that the localisations have a signal and width value and the results are calibrated with a gain and pixel size (in nm).
 
    * - Precision Mean
      - The mean of the localisation uncertainty (precision) for use in ``Fixed`` estimation (:math:`\sigma_m`).
@@ -3877,9 +3879,9 @@ Estimation Options
      - The standard deviation of the localisation uncertainty (precision) for use in ``Fixed`` estimation (:math:`\Delta\sigma`).
 
    * - Sample decay
-     - Set this to true to sample the localisation precision values to generate *H(q)* for the initial Q-estimation. :math:`\sigma_m` is then also estimated from the initial fit.
+     - Set this to true to sample the localisation precision values to generate :math:`H(q)` for the initial Q-estimation. :math:`\sigma_m` is then also estimated from the initial fit.
 
-       The default generates *H(q)* using :math:`\sigma_m` and :math:`\Delta\sigma` from the ``Fixed`` input or generated from fitting the precision histogram with a Gaussian.
+       The default generates :math:`H(q)` using :math:`\sigma_m` and :math:`\Delta\sigma` from the ``Fixed`` input or generated from fitting the precision histogram with a Gaussian.
 
    * - LOESS smoothing
      - Smooth the curve *f(q)* using LOESS smoothing. The default smooths the data using a median window before applying the absolute and logarithm functions.
@@ -3992,7 +3994,7 @@ Once the plots have been displayed the plugin shows a dialog (:numref:`Figure %s
 
 The user can adjust any of the current parameter values and see the effects on the plots dynamically. The cost function value is updated and shown so that the effects of manual estimation can be compared to the initial auto-estimation. Adjustments can be made to the slider or by editing the text field value. Note that the estimate values are magnified 10-fold to allow finer adjustment of the estimates. This is due to the limited functionality of sliders within ``ImageJ`` dialogs.
 
-The ``Reset all`` checkbox can be used to set the values back to the initial estimates, for example if adjustments have significantly changed the cost function. Alternatively a double-click on a single slider will reset only that slider.
+The ``Reset all`` button can be used to set the values back to the initial estimates, for example if adjustments have significantly changed the cost function. Alternatively a double-click on a single slider will reset only that slider.
 
 Clicking the ``OK`` button will close the dialog and the current estimates are saved to memory. These values will be used in the FIRE plugin for the fields for spurious correlation correction.
 
