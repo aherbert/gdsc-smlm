@@ -1230,7 +1230,7 @@ public class Frc {
   /**
    * Perform LOESS smoothing on the FRC curve.
    *
-   * <p>| * The correlation values are smoothed using a LOESS interpolation with bandwidth of 0.0707
+   * <p>The correlation values are smoothed using a LOESS interpolation with bandwidth of 0.0707
    * and robustness of 0. If smoothing fails the original curve values are returned. If successful
    * then the input curve is optionally copied and updated with the smoothed correlation.
    *
