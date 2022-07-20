@@ -603,6 +603,9 @@ Fitting details are recorded in the ``ImageJ`` log window. The fit for each mode
 
        For the emulsion model the average circle radius :math:`r_0`.
 
+   * - Domain Density
+     - This is the amplitude component of :math:`g(r)^\text{protein}`, it is proportional to the density of proteins in the cluster.
+
    * - N-cluster
      - For the clustered model the average occupancy of a cluster :math:`N^\text{cluster}`.
 
