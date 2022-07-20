@@ -683,7 +683,7 @@ public class PcPalmAnalysis implements PlugIn {
       // Store the area of the image in um^2
       final double areaInPx = (double) im.getWidth() * im.getHeight();
       weightedAreaInPx =
-          (settings.applyWindow) ? weightedAreaInPx *= wp.getStatistics().mean : areaInPx;
+          (settings.applyWindow) ? MathUtils.sum((float[]) (wp.getPixels())) : areaInPx;
       area = areaInPx * settings.nmPerPixel * settings.nmPerPixel / 1e6;
       weightedArea = weightedAreaInPx * settings.nmPerPixel * settings.nmPerPixel / 1e6;
       noOfMolecules = molecules.size();
