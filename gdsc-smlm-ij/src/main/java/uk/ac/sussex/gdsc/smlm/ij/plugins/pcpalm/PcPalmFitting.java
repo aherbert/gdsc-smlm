@@ -522,8 +522,8 @@ public class PcPalmFitting implements PlugIn {
       axisTitle = "g(r)";
     }
     final String title = TITLE + " " + axisTitle;
-    final Plot plot = PcPalmAnalysis.plotCorrelation(gr, offset, title, axisTitle, spatialDomain,
-        settings.showErrorBars);
+    final Plot plot = PcPalmAnalysis.plotCorrelation(gr, offset, title,
+        axisTitle.replace("^2", "^^2^^"), spatialDomain, settings.showErrorBars);
 
     if (spatialDomain) {
       saveCorrelationCurve(gr);
