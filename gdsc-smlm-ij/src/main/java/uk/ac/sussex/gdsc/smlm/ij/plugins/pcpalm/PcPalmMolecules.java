@@ -486,17 +486,17 @@ public class PcPalmMolecules implements PlugIn {
           + "Computes a binary image from localisation data");
 
       gd.addNumericField("Molecules", settings.numberOfMolecules, 0);
-      gd.addNumericField("Simulation_size (um)", settings.simulationSize, 2);
+      gd.addNumericField("Simulation_size", settings.simulationSize, 2, 6, "um");
       gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
       gd.addChoice("Blinking_distribution", Settings.BLINKING_DISTRIBUTION,
           settings.blinkingDistribution);
-      gd.addNumericField("Average_precision (nm)", settings.sigmaS, 2);
+      gd.addNumericField("Average_precision", settings.sigmaS, 2, 6, "nm");
       gd.addCheckbox("Show_histograms", settings.showHistograms);
       gd.addCheckbox("Distance_analysis", settings.distanceAnalysis);
       gd.addChoice("Cluster_simulation", Settings.CLUSTER_SIMULATION, settings.clusterSimulation);
       gd.addNumericField("Cluster_number", settings.clusterNumber, 2);
       gd.addNumericField("Cluster_variation (SD)", settings.clusterNumberStdDev, 2);
-      gd.addNumericField("Cluster_radius", settings.clusterRadius, 2);
+      gd.addNumericField("Cluster_radius", settings.clusterRadius, 2, 6, "nm");
       gd.addCheckbox("Show_cluster_mask", settings.showClusterMask);
 
       Recorder.recordOption("Run_mode", Settings.RUN_MODE[settings.runMode]);
@@ -1132,8 +1132,8 @@ public class PcPalmMolecules implements PlugIn {
 
     gd.addMessage("Use distance and time thresholds to trace localisations into molecules.");
 
-    gd.addNumericField("Distance (nm)", settings.distanceThreshold, 0);
-    gd.addNumericField("Time (seconds)", settings.timeThreshold, 2);
+    gd.addNumericField("Distance", settings.distanceThreshold, 0, 6, "nm");
+    gd.addNumericField("Time", settings.timeThreshold, 2, 6, "seconds");
 
     gd.addHelp(HelpUrls.getUrl("pc-palm-molecules"));
     gd.showDialog();
