@@ -58,10 +58,12 @@ import org.jtransforms.fft.DoubleFFT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
@@ -244,12 +246,22 @@ public class PcPalmAnalysis implements PlugIn {
   /**
    * Show a directory selection dialog for the results directory.
    *
+   * @param save true for a save dialog, otherwise a load dialog
    * @return True if a directory was selected
    */
-  private boolean getDirectory() {
-    settings.resultsDirectory =
-        ImageJUtils.getDirectory("Results_directory", settings.resultsDirectory);
-    return settings.resultsDirectory != null;
+  private boolean getDirectory(boolean save) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addMessage(save ? "Saves all the PC-PALM results held in memory to a results folder"
+        : "Loads all the PC-PALM results from a results folder to memory");
+    final String key = save ? "pc-palm-save-results" : "pc-palm-load-results";
+    gd.addHelp(HelpUrls.getUrl(key));
+    gd.addDirectoryField("Results_directory", settings.resultsDirectory);
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return false;
+    }
+    settings.resultsDirectory = gd.getNextString();
+    return TextUtils.isNotEmpty(settings.resultsDirectory);
   }
 
   /**
@@ -260,7 +272,7 @@ public class PcPalmAnalysis implements PlugIn {
   private void saveResults(List<CorrelationResult> results) {
     if (results.isEmpty()) {
       error("No results in memory");
-    } else if (getDirectory()) {
+    } else if (getDirectory(true)) {
       final XStream xs = new XStream(new DomDriver());
       xs.allowTypes(new Class[] {CorrelationResult.class});
       for (final CorrelationResult result : results) {
@@ -287,7 +299,7 @@ public class PcPalmAnalysis implements PlugIn {
    * @return the updated results
    */
   private List<CorrelationResult> loadResults(final List<CorrelationResult> results) {
-    if (getDirectory()) {
+    if (getDirectory(false)) {
       final File[] fileList =
           (new File(settings.resultsDirectory)).listFiles((arg0, arg1) -> arg1.endsWith("xml"));
       if (fileList == null) {
