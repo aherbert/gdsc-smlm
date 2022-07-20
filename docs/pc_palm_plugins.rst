@@ -356,7 +356,7 @@ The correlation curve is displayed (see :numref:`Figure %s <fig_pc_palm_gr_curve
 PC-PALM Spatial Analysis
 ------------------------
 
-Perform pair-correlation spatial analysis as per the paper by [Puchnar, *et al*, 2013]. This methods plots the molecule density around each localisation as a function of distance from the localisation.
+Perform pair-correlation spatial analysis as per the paper by [Puchnar, *et al*, 2013]. The method plots the molecule density around each localisation as a function of distance from the localisation.
 
 Molecules representing distinct on bursts from a fluorophore over one or more frames must be prepared using ``PC-PALM Molecules``. That plugin will create an image of the molecule data. A region of interest (ROI) can be marked on the image using any area ROI. This is the region that will be extracted from the molecule dataset for analysis. For example individual cells may be outlined using the freehand ROI tool. If no ROI is present then the plugin will analyse the entire dataset.
 
