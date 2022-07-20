@@ -76,6 +76,7 @@ import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
@@ -641,6 +642,9 @@ public class PcPalmMolecules implements PlugIn {
     return newResults;
   }
 
+  /**
+   * Run pc palm.
+   */
   private void runPcPalm() {
     if (!showPcPalmDialog()) {
       return;
@@ -651,6 +655,9 @@ public class PcPalmMolecules implements PlugIn {
     // Follow the PC-PALM protocol
     log("Fitting localisation precision...");
     final List<Molecule> localisations = extractLocalisations(settings.results, true);
+    if (localisations == null) {
+      return;
+    }
     final double sigmaRaw = calculateAveragePrecision(localisations, "Localisations");
     log("%d localisations with an average precision of %.2f", settings.results.size(), sigmaRaw);
 
@@ -728,7 +735,7 @@ public class PcPalmMolecules implements PlugIn {
    *
    * @param results the results
    * @param extractPrecision if true extract the precision
-   * @return the array list
+   * @return the array list (or null if precisions cannot be computed)
    * @throws DataException If conversion to nm and photons with computed precision is not possible
    */
   public List<Molecule> extractLocalisations(MemoryPeakResults results, boolean extractPrecision) {
@@ -742,9 +749,11 @@ public class PcPalmMolecules implements PlugIn {
     // Optional precision
     IntToDoubleFunction p;
     if (extractPrecision) {
-      final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
-      pp.getPrecision();
-      p = i -> pp.precisions[i];
+      final double[] precisions = getPrecisions(results);
+      if (precisions == null) {
+        return null;
+      }
+      p = i -> precisions[i];
     } else {
       p = i -> 0;
     }
@@ -1118,13 +1127,34 @@ public class PcPalmMolecules implements PlugIn {
         / settings.results.getCalibrationReader().getExposureTime()));
 
     // Get precisions
-    final PrecisionResultProcedure pp = new PrecisionResultProcedure(settings.results);
-    pp.getPrecision();
+    final double[] precisions = getPrecisions(settings.results);
+    if (precisions == null) {
+      return;
+    }
 
     final ArrayList<Molecule> singles = new ArrayList<>();
-    settings.molecules = traceMolecules(settings.results, pp.precisions, settings.distanceThreshold,
+    settings.molecules = traceMolecules(settings.results, precisions, settings.distanceThreshold,
         timeInFrames, singles);
     settings.molecules.addAll(singles);
+  }
+
+  /**
+   * Gets the precisions. Handle no precision in the results by returning null.
+   *
+   * @param results the results
+   * @return the precisions (or null)
+   */
+  private static double[] getPrecisions(MemoryPeakResults results) {
+    try {
+      final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+      pp.getPrecision();
+      return pp.precisions;
+    } catch (DataException ex) {
+      // record the error
+      ImageJPluginLoggerHelper.getLogger(PcPalmMolecules.class)
+          .warning(() -> "No precisions: " + ex.getMessage());
+    }
+    return null;
   }
 
   private boolean showManualTracingDialog() {
