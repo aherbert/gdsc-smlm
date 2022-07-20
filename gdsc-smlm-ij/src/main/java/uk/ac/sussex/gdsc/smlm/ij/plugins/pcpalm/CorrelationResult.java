@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
-import uk.ac.sussex.gdsc.smlm.results.ImageSource;
-
 /**
  * Used to store the correlation (g(r)) result for the PC-PALM analysis.
  */
@@ -33,8 +31,8 @@ class CorrelationResult {
   /** The id. */
   int id;
 
-  /** The source. */
-  ImageSource source;
+  /** The source for the result. */
+  String source;
 
   /** The minx. */
   double minx;
@@ -86,7 +84,7 @@ class CorrelationResult {
    * @param gr the correlation curve
    * @param spatialDomain the spatial domain
    */
-  CorrelationResult(int id, ImageSource source, double minx, double miny, double maxx, double maxy,
+  CorrelationResult(int id, String source, double minx, double miny, double maxx, double maxy,
       double uniquePoints, double nmPerPixel, double peakDensity, boolean binaryImage,
       double[][] gr, boolean spatialDomain) {
     this.id = id;

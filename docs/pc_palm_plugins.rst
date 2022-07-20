@@ -302,7 +302,7 @@ A summary of the input data used for analysis is recorded to a results table:
    * - ID
      - The identifier of the results.
 
-   * - Image Source
+   * - Source
      - The source data for the results.
 
    * - X

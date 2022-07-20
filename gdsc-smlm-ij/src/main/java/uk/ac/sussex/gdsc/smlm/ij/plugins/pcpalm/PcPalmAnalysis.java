@@ -69,6 +69,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 /**
  * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve.
@@ -654,9 +655,9 @@ public class PcPalmAnalysis implements PlugIn {
 
       final double[][] gr = {radius, pcf, null};
 
-      final CorrelationResult result =
-          new CorrelationResult(0, moleculesResults.results.getSource(), boundaryMinx, boundaryMiny,
-              boundaryMaxx, boundaryMaxy, countN, settings.correlationInterval, 0, false, gr, true);
+      final CorrelationResult result = new CorrelationResult(0,
+          getImageSource(moleculesResults.results), boundaryMinx, boundaryMiny, boundaryMaxx,
+          boundaryMaxy, countN, settings.correlationInterval, 0, false, gr, true);
       addCorrelationResult(result);
 
       noPlots = WindowManager.getFrame(spatialPlotTitle) == null;
@@ -754,6 +755,17 @@ public class PcPalmAnalysis implements PlugIn {
     log("%s domain analysis computed in %s ms", (spatialDomain) ? "Spatial" : "Frequency",
         MathUtils.rounded((System.nanoTime() - start) * 1e-6, 4));
     log("---");
+  }
+
+  /**
+   * Gets the image source. Creates a NullSource if the results have no source. This allows the
+   * source to be saved and loaded from file.
+   *
+   * @param results the results
+   * @return the image source
+   */
+  private static String getImageSource(MemoryPeakResults results) {
+    return results.getName();
   }
 
   private static ImageProcessor applyWindow(ImageProcessor im, ImageWindow imageWindow) {
@@ -1171,7 +1183,7 @@ public class PcPalmAnalysis implements PlugIn {
     peakDensity *= 1e6 / (settings.nmPerPixel * settings.nmPerPixel);
 
     final CorrelationResult result =
-        new CorrelationResult(0, moleculesResults.results.getSource(), minx, miny, maxx, maxy,
+        new CorrelationResult(0, getImageSource(moleculesResults.results), minx, miny, maxx, maxy,
             uniquePoints, settings.nmPerPixel, peakDensity, settings.binaryImage, gr, false);
     addCorrelationResult(result);
 
@@ -1205,7 +1217,7 @@ public class PcPalmAnalysis implements PlugIn {
       Arrays.stream(new String[] {
           // @formatter:off
           "ID",
-          "Image Source",
+          "Source",
           "X",
           "X %",
           "Y",

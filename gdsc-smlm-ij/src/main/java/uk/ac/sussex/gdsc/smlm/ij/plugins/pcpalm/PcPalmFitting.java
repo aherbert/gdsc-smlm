@@ -538,7 +538,7 @@ public class PcPalmFitting implements PlugIn {
         continue;
       }
       titles.add(String.format("%d%s: %s (%s nm/px)", r.id, (r.spatialDomain) ? "" : "*",
-          r.source.getName(), MathUtils.rounded(r.nmPerPixel, 3)));
+          r.source, MathUtils.rounded(r.nmPerPixel, 3)));
     }
     return titles;
   }
