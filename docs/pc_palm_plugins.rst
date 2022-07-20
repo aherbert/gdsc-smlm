@@ -443,7 +443,7 @@ When the ``PC-PALM Fitting`` plugin executes the source for the combined curve m
    * - Select PC-PALM Analysis results
      - Select results saved to memory by the ``PC-PALM Analysis`` plugin.
 
-       If this option is selected a second dialog is presented containing a list of available results. Those from a frequency analysis will be identified. A single result can be selected. After the first result is selected the dialog is updated to contain only those results that can be combined with the first result (i.e. same curve type and spatial resolution). The dialog is iteratively presented to allow selected of results one at a time from those not yet selected. Pressing the ``Cancel`` button will halt selection of results and all the curves are combined to create an average curve.
+       If this option is selected a second dialog is presented containing a list of available results. Results must be compatible so they can be combined. This requires the same pixel size and type of analysis. Those from a frequency analysis will be identified with a ``*`` after the result ID and the pixel size of the analysed image is displayed. Multiple results can be selected in the dialog. If the selected results are not from a compatible analysis then an error message is recorded to the ``ImageJ`` log.
 
        If only 1 results set is available then the dialog is skipped and the single result set selected.
 

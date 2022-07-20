@@ -37,8 +37,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -69,7 +71,9 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
@@ -97,6 +101,8 @@ public class PcPalmFitting implements PlugIn {
   private static final String INPUT_ANALYSIS = "Select PC-PALM Analysis results";
   private static final String HEADER_PEAK_DENSITY = "Peak density (um^-2)";
   private static final String HEADER_SPATIAL_DOMAIN = "Spatial domain";
+
+  private static final AtomicReference<List<String>> LAST_SELECTED = new AtomicReference<>();
 
   private RandomModelFunction randomModel;
   private ClusteredModelFunctionGradient clusteredModel;
@@ -343,21 +349,20 @@ public class PcPalmFitting implements PlugIn {
     // - load a correlation curve
     // - use previous results (if available)
     // - select a set of analysis results (if available)
-    String[] options = {INPUT_FROM_FILE, "", ""};
-    int count = 1;
+    final LocalList<String> options = new LocalList<>(3);
+    options.add(INPUT_FROM_FILE);
     final CorrelationCurveResult previous = LATEST_RESULT.get();
     if (previous != null) {
-      options[count++] = INPUT_PREVIOUS;
+      options.add(INPUT_PREVIOUS);
     }
     final List<CorrelationResult> allResults = PcPalmAnalysis.getResults();
     if (!allResults.isEmpty()) {
-      options[count++] = INPUT_ANALYSIS;
+      options.add(INPUT_ANALYSIS);
     }
 
-    options = Arrays.copyOf(options, count);
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage("Select the source for the correlation curve");
-    gd.addChoice("Input", options, settings.inputOption);
+    gd.addChoice("Input", options.toArray(new String[0]), settings.inputOption);
     gd.addHelp(HelpUrls.getUrl("pc-palm-fitting"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -419,28 +424,46 @@ public class PcPalmFitting implements PlugIn {
     // If only one result then use that
     if (allResults.size() == 1) {
       results.add(allResults.get(0));
-      return true;
-    }
+    } else {
+      // Bulk selection. Result IDs should be unique
+      final HashMap<String, CorrelationResult> map = new HashMap<>(allResults.size());
+      final LocalList<String> items = new LocalList<>(allResults.size());
+      allResults.forEach(r -> {
+        final String i = Integer.toString(r.id);
+        map.put(i, r);
+        items.add(i);
+      });
 
-    // Otherwise build a set of matched analysis results
-    try {
-      while (selectNextCorrelation(allResults, results)) {
-        // All processing done in selectNextCorrelation
+      final MultiDialog md = new MultiDialog(TITLE, items);
+      md.setSelected(LAST_SELECTED.get());
+      md.setDisplayConverter(s -> {
+        final CorrelationResult r = map.get(s);
+        return r == null ? s
+            : String.format("%d%s: %s (%s nm/px)", r.id, (r.spatialDomain) ? "" : "*", r.source,
+                MathUtils.rounded(r.nmPerPixel, 3));
+      });
+      md.setHelpUrl(HelpUrls.getUrl("pc-palm-fitting"));
+      md.showDialog();
+
+      if (md.wasCancelled()) {
+        return false;
       }
-    } catch (final Exception ex) {
-      IJ.error(TITLE, ex.getMessage());
-      return false;
+
+      final List<String> selected = md.getSelectedResults();
+      LAST_SELECTED.set(selected);
+
+      // Get the results
+      selected.forEach(s -> results.add(map.get(s)));
     }
 
-    // Remove bad results from the dataset.
-    final ArrayList<CorrelationResult> newResults = new ArrayList<>(results.size());
-    for (final CorrelationResult r : results) {
+    // Filter bad results
+    results.removeIf(r -> {
       // If the PC-PALM Analysis has been done on too few molecules then the g(r) curve will be bad
       if (r.uniquePoints < 10) {
         header();
         ImageJUtils.log("Excluding dataset ID %d - Too few unique points (%f)", r.id,
             r.uniquePoints);
-        continue;
+        return true;
       }
       // If the PC-PALM Analysis has a g(r) curve all below 1 then it is not valid
       final int offset = r.spatialDomain ? 0 : 1;
@@ -454,103 +477,29 @@ public class PcPalmFitting implements PlugIn {
         header();
         ImageJUtils.log("Excluding dataset ID %d - g(r) curve is always below 1 (max = %f)", r.id,
             max);
-        continue;
-      }
-      newResults.add(r);
-    }
-
-    results = newResults;
-    return !results.isEmpty();
-  }
-
-  private static boolean selectNextCorrelation(List<CorrelationResult> allResults,
-      List<CorrelationResult> results) {
-    final List<String> titles = buildTitlesList(allResults, results);
-
-    // Show a dialog allowing the user to select an input image
-    if (titles.isEmpty()) {
-      return false;
-    }
-
-    final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(HelpUrls.getUrl("pc-palm-fitting"));
-    gd.addMessage(
-        "Select the next correlation curve\nFrequency domain curves are identified with *");
-    final int n = (results.size() + 1);
-
-    // If in macro mode then we must just use the String input field to allow the macro
-    // IJ to return the field values from the macro arguments. Using a Choice input
-    // will always return a field value.
-
-    if (IJ.isMacro()) {
-      // Use blank default value so bad macro parameters return nothing
-      gd.addStringField("R_" + n, "");
-    } else {
-      gd.addChoice("R_" + n, titles.toArray(new String[0]), "");
-    }
-
-    gd.addMessage("Cancel to finish");
-    gd.showDialog();
-    if (gd.wasCanceled()) {
-      return false;
-    }
-
-    String title;
-    if (IJ.isMacro()) {
-      title = gd.getNextString();
-    } else {
-      title = gd.getNextChoice();
-    }
-
-    // Check the correlation exists. If not then exit. This is mainly relevant for Macro mode since
-    // the loop will continue otherwise since the titles list is not empty.
-    final String[] fields = title.split("\\*?:");
-    try {
-      final int id = Integer.parseInt(fields[0]);
-      for (final CorrelationResult r : allResults) {
-        if (r.id == id) {
-          results.add(r);
-          return true;
-        }
-      }
-    } catch (final NumberFormatException ignored) {
-      // Ignore
-    }
-    return false;
-  }
-
-  private static List<String> buildTitlesList(List<CorrelationResult> allResults,
-      List<CorrelationResult> results) {
-    // Make all subsequent results match the same nmPerPixel limit
-    double nmPerPixel = 0;
-    boolean spatialDomain = false;
-    boolean filter = false;
-    if (!results.isEmpty()) {
-      filter = true;
-      nmPerPixel = results.get(0).nmPerPixel;
-      spatialDomain = results.get(0).spatialDomain;
-    }
-
-    final ArrayList<String> titles = new ArrayList<>();
-    for (final CorrelationResult r : allResults) {
-      if (alreadySelected(results, r)
-          || (filter && (r.nmPerPixel != nmPerPixel || r.spatialDomain != spatialDomain))) {
-        continue;
-      }
-      titles.add(String.format("%d%s: %s (%s nm/px)", r.id, (r.spatialDomain) ? "" : "*",
-          r.source, MathUtils.rounded(r.nmPerPixel, 3)));
-    }
-    return titles;
-  }
-
-  private static boolean alreadySelected(List<CorrelationResult> results,
-      CorrelationResult result) {
-    for (final CorrelationResult r2 : results) {
-      if (result.id == r2.id) {
         return true;
       }
+      return false;
+    });
+
+    // Check they are all the same domain and nm/pixel
+    if (results.isEmpty()) {
+      return false;
     }
-    return false;
+
+    final CorrelationResult first = results.get(0);
+    final double nmPerPixel = first.nmPerPixel;
+    final boolean spatialDomain = first.spatialDomain;
+    final Optional<CorrelationResult> different = results.stream()
+        .filter(r -> r.nmPerPixel != nmPerPixel || r.spatialDomain != spatialDomain).findAny();
+
+    if (different.isPresent()) {
+      header();
+      ImageJUtils.log("Datasets must have matching analysis domain and nm/pixel, e.g. %s and %s",
+          first.spatialDomain ? "spatial" : "frequency", MathUtils.rounded(first.nmPerPixel, 3));
+      return false;
+    }
+    return true;
   }
 
   /**
