@@ -578,7 +578,8 @@ public class PcPalmClusters implements PlugIn {
     // If this is a macro then the dialog will not have Yes or No pressed.
     // Add a checkbox that can be read from the macro arguments by ImageJ.
     final String macroOption = "subtract";
-    if (IJ.isMacro()) {
+    final boolean macro = IJ.isMacro();
+    if (macro) {
       gd.addCheckbox(macroOption, true);
     }
 
@@ -591,8 +592,8 @@ public class PcPalmClusters implements PlugIn {
       autoSave = settings.autoSave = gd.getNextBoolean();
     }
 
-    if (IJ.isMacro()) {
-      // If the macro option flag is not found then the arguments do not want this to run
+    if (macro) {
+      // If the macroOption flag is not found then the macro arguments do not want this to run
       if (!gd.getNextBoolean()) {
         return null;
       }
