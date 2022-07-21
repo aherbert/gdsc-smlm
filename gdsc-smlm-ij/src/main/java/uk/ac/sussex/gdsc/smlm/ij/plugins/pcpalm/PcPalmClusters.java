@@ -421,7 +421,11 @@ public class PcPalmClusters implements PlugIn {
     if (!settings.saveHistogram) {
       return false;
     }
-    settings.histogramFile = ImageJUtils.getFilename("Histogram_file", settings.histogramFile);
+    final String filename = ImageJUtils.getFilename("Histogram_file", settings.histogramFile);
+    if (filename == null) {
+      return false;
+    }
+    settings.histogramFile = FileUtils.replaceExtension(filename, "tsv");
     return saveHistogram(histogramData, settings.histogramFile);
   }
 
@@ -434,13 +438,7 @@ public class PcPalmClusters implements PlugIn {
    * @return true, if successful
    */
   private static boolean saveHistogram(HistogramData histogramData, String filename) {
-    if (filename == null) {
-      return false;
-    }
-
     final float[][] hist = histogramData.histogram;
-
-    filename = FileUtils.replaceExtension(filename, "tsv");
     try (BufferedWriter output = Files.newBufferedWriter(Paths.get(filename))) {
       if (histogramData.isCalibrated()) {
         output.write(String.format("Frames  %d", histogramData.frames));
