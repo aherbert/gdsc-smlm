@@ -95,7 +95,7 @@ public final class CustomContentHelper {
    * Creates an indexed object from a list of triangle vertices.
    *
    * @param list the list of triangle vertices
-   * @return the vertices and faces of the the object
+   * @return the vertices and faces of the object
    */
   public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list) {
     // Compact the vertices to a set of vertices and faces

@@ -2287,7 +2287,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     sb.append(Settings.MATCHING_METHODS[settings.matchingMethod]).append('\t');
 
     // Plot a graph of the additional results we would fit at all score thresholds.
-    // This assumes we just pick the the doublet if we fit it (NO FILTERING at all!)
+    // This assumes we just pick the doublet if we fit it (NO FILTERING at all!)
 
     // Initialise the score for residuals 0
     // Store this as it serves as a baseline for the filtering analysis

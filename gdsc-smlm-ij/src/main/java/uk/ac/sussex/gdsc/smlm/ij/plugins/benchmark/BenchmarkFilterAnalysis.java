@@ -240,7 +240,7 @@ public class BenchmarkFilterAnalysis
   private static final AtomicReference<FitResultData> FIT_RESULTS_DATA_CACHE =
       new AtomicReference<>(new FitResultData());
 
-  /** A reference to the the best filter results from the latest iteration analysis. */
+  /** A reference to the best filter results from the latest iteration analysis. */
   private static final AtomicReference<Map<String, ComplexFilterScore>> ITER_BEST_FILTER =
       new AtomicReference<>();
 

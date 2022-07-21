@@ -1187,9 +1187,9 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   }
 
   /**
-   * Gets the coordinate shift relative the the largest peak width.
+   * Gets the coordinate shift relative the largest peak width.
    *
-   * @return the coordinate shift relative the the largest peak width.
+   * @return the coordinate shift relative the largest peak width.
    */
   public double getCoordinateShiftFactor() {
     return filterSettings.getShiftFactor();

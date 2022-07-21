@@ -266,7 +266,7 @@ public final class ParameterBounds {
   }
 
   /**
-   * Determine if the current solution (a) is at the the bounds.
+   * Determine if the current solution (a) is at the bounds.
    *
    * @param a the current parameters
    * @return true, if the point is at the bounds

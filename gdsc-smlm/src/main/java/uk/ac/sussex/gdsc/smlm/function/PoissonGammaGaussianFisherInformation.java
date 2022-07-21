@@ -691,7 +691,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
     // The PoissonGammaFunction can switch to an approximation
     // of the Bessel functions and the totals may not be correct.
-    // Ensure the the sum of P and A are both 1 as this is required
+    // Ensure the sum of P and A are both 1 as this is required
     // for the integration to work.
     // This will be a factor when the mean is large. If the sums are nearly 1
     // then this will have little effect so do it anyway.

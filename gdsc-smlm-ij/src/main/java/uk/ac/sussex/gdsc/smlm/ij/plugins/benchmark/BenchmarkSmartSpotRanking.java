@@ -968,12 +968,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     add(sb, (100.0 * countTp) / candidateData.countPositive);
     add(sb, (100.0 * countFp) / candidateData.countNegative);
 
-    // Add counts of the the candidates
+    // Add counts of the candidates
     add(sb, countTp + countFp);
     add(sb, countTp);
     add(sb, countFp);
 
-    // Add fractional counts of the the candidates
+    // Add fractional counts of the candidates
     double tp = counter1[0];
     double fp = counter1[1];
     add(sb, tp + fp);

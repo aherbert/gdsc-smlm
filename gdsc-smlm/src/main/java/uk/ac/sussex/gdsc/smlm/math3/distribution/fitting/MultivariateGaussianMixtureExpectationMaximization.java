@@ -934,7 +934,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
    * Gets the log likelihood of the data under the fitted model. This is the sum of the log
    * likelihood of each point.
    *
-   * <p>Note: In contrast to the the Apache Commons Math class this is not divided by the number of
+   * <p>Note: In contrast to the Apache Commons Math class this is not divided by the number of
    * points (i.e. the mean log likelihood).
    *
    * @return log likelihood of data or zero of no data has been fit

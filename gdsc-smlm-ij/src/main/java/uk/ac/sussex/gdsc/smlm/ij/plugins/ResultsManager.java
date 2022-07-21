@@ -1664,7 +1664,7 @@ public class ResultsManager implements PlugIn {
   /**
    * Check the calibration of the results exists, if not then prompt for it with a dialog.
    *
-   * <p>Missing calibration is written to the Logger for the the class.
+   * <p>Missing calibration is written to the Logger for the class.
    *
    * @param results The results
    * @return True if OK; false if calibration dialog cancelled

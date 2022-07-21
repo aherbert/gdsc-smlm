@@ -769,7 +769,7 @@ public class MultiPathFilter {
    * result. The SelectedResultStore is used to determine if that result has been fit already. If
    * not it is added to the output list.
    *
-   * <p>The method returns the the same results as
+   * <p>The method returns the same results as
    * {@link #accept(MultiPathFitResult, boolean, SelectedResultStore)} but includes the FitResult
    * that the data originated from.
    *

@@ -972,7 +972,7 @@ public class DynamicMultipleTargetTracing {
   }
 
   /**
-   * Creates the the action for an unmatched localisation. This will create a new trajectory and add
+   * Creates the action for an unmatched localisation. This will create a new trajectory and add
    * it to the list.
    *
    * @param configuration the configuration
@@ -1062,7 +1062,7 @@ public class DynamicMultipleTargetTracing {
     final double r_off = configuration.getDisappearanceDecayFactor();
     // Here t is the gap in frames between the current frame t and the frame when the trajectory
     // entered the full off state (t_off).
-    // t=0 indicates no gap and the the trajectory was on in the last frame. This has a probability
+    // t=0 indicates no gap and the trajectory was on in the last frame. This has a probability
     // of 1.0 and so log(p) of zero.
     for (int t = 1; t <= n; t++) {
       logPOff[t] = -t / r_off;

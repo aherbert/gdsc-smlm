@@ -118,14 +118,14 @@ public interface CoordinateStore {
   CoordinateStore resize(int minx, int miny, int width, int height);
 
   /**
-   * Gets the the min x coordinate value.
+   * Gets the min x coordinate value.
    *
    * @return the min X
    */
   int getMinX();
 
   /**
-   * Gets the the min y coordinate value.
+   * Gets the min y coordinate value.
    *
    * @return the min Y
    */

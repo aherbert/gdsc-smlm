@@ -2930,7 +2930,7 @@ The localisations are then loaded, the calibration is verified and the traces ar
      - The full length of the pulse cycle in frames.
 
    * - Dark frames for new activation
-     - The number of frames between localisations in the same trace used to split the the trace into activations. The minimum is 1. This will split any non-continuous localisations from a trace into separate activations.
+     - The number of frames between localisations in the same trace used to split the trace into activations. The minimum is 1. This will split any non-continuous localisations from a trace into separate activations.
 
        For results where localisations may be dropped during the fitting process this number can be increased, e.g. 5 will only create new activations if there is a gap of 5 frames in the same trace.
 
@@ -3181,7 +3181,7 @@ The localisations are then loaded, the calibration is verified and the traces ar
      - The full length of the pulse cycle in frames.
 
    * - Dark frames for new activation
-     - The number of frames between localisations in the same trace used to split the the trace into activations. The minimum is 1. This will split any non-continuous localisations from a trace into separate activations.
+     - The number of frames between localisations in the same trace used to split the trace into activations. The minimum is 1. This will split any non-continuous localisations from a trace into separate activations.
 
        For results where localisations may be dropped during the fitting process this number can be increased, e.g. 5 will only create new activations if there is a gap of 5 frames in the same trace.
 

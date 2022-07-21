@@ -225,7 +225,7 @@ public class FitJob {
   }
 
   /**
-   * Set the indices of the the data that were fitted.
+   * Set the indices of the data that were fitted.
    *
    * <p>This method is not implemented within this class but can be overridden if necessary to allow
    * access to the results from the {@link FitWorker}.

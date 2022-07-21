@@ -36,7 +36,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
  * <p>rollingBlock algorithm uses two consecutive 1D passes using (2n+1) strips. Each pass is
  * computed using a rolling total thus each pixel sum can be computed using a single addition and
  * subtraction of the end pixels of the strip. Due to cumulative error of the rolling sum the
- * results may differ from the other algorithms for large images (applies to the the float version
+ * results may differ from the other algorithms for large images (applies to the float version
  * since integer arithmetic should be robust within Integer.MAX bounds). Speed ~ Order(1).
  *
  *

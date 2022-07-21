@@ -477,7 +477,7 @@ In the event of no association between proteins the molecules are uniform and th
 
     g(r)^\text{peaks} = g(r)^\text{stoch} + 1
 
-If the proteins are distributed according to a micro-emulsion model the the molecules will be randomly distributed within non-overlapping circles of a similar size (see Veatch *et al* (2012), figure 3). The micro-emulsion is modelled as:
+If the proteins are distributed according to a micro-emulsion model the molecules will be randomly distributed within non-overlapping circles of a similar size (see Veatch *et al* (2012), figure 3). The micro-emulsion is modelled as:
 
 .. math::
 
@@ -509,7 +509,7 @@ The ratio of the density of the proteins in clusters to the average density acro
 
     \psi^\text{cluster} = 2A
 
-Note: Both the emulsion model and random clustered model (:math:`g(r)^\text{protein}`) use a convolution of the protein model function with :math:`g(r)^\text{PSF}`. For simplicity the convolution can be omitted. This is valid when the positional uncertainty :math:`\sigma_s` is an order of magnitude smaller than the spatial extent of clusters thus the Gaussian convolution has a small effect on the the curve. Thus the emulsion model for :math:`g(r)^\text{protein}` is a damped cosine function and the random clustered model is an exponential.
+Note: Both the emulsion model and random clustered model (:math:`g(r)^\text{protein}`) use a convolution of the protein model function with :math:`g(r)^\text{PSF}`. For simplicity the convolution can be omitted. This is valid when the positional uncertainty :math:`\sigma_s` is an order of magnitude smaller than the spatial extent of clusters thus the Gaussian convolution has a small effect on the curve. Thus the emulsion model for :math:`g(r)^\text{protein}` is a damped cosine function and the random clustered model is an exponential.
 
 Fitting of the curve is performed using a least squares estimtor to minimise the difference between the *g(r)* curve and the model. The fit uses a bounded `CMA-ES optimiser <https://en.wikipedia.org/wiki/CMA-ES>`_ which is stochastic and derivative free. The initial solution may be improved if restarted and the number of restarts is configurable. Optionally an attempt can be made to imrpove the solution  using a numerical gradient based method which is not suited to the initial search but works well when close to the optimal solution.
 

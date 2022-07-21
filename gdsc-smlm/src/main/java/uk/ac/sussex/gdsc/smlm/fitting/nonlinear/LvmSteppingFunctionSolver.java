@@ -270,7 +270,7 @@ public abstract class LvmSteppingFunctionSolver extends SteppingFunctionSolver {
   }
 
   /**
-   * Sets the the initial lambda for the Levenberg-Marquardt fitting routine.
+   * Sets the initial lambda for the Levenberg-Marquardt fitting routine.
    *
    * @param initialLambda the initial lambda for the Levenberg-Marquardt fitting routine
    */
@@ -279,7 +279,7 @@ public abstract class LvmSteppingFunctionSolver extends SteppingFunctionSolver {
   }
 
   /**
-   * Gets the the initial lambda for the Levenberg-Marquardt fitting routine.
+   * Gets the initial lambda for the Levenberg-Marquardt fitting routine.
    *
    * @return the initial lambda
    */

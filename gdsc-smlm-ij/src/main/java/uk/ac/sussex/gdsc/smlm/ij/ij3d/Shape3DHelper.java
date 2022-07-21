@@ -817,7 +817,7 @@ public final class Shape3DHelper {
    * Creates an indexed object from a list of vertices.
    *
    * @param list the list of vertices
-   * @return the vertices and indices of the the object
+   * @return the vertices and indices of the object
    */
   public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list) {
     // Compact the vertices to a set of vertices and faces

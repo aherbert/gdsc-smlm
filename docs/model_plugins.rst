@@ -3754,7 +3754,7 @@ The following parameters are used by every single filter:
 
 The ``Benchmark Filter Parameters`` plugin uses the top scoring filter from the ``Benchmark Filter Analysis`` plugin and searches for the best filter control parameters. The search algorithms are similar to those described in section :numref:`{number}: {name} <model_plugins:Filter Optimisation>` and the filters are scored using the same metrics. Due to the low number of parameters and the expected bounds for each parameter the number of combinations is expected to be small. Thus the genetic algorithm has been removed and a new algorithm has been added that allows enumeration of the entire range in appropriate step increments.
 
-In the the ``Benchmark Filter Analysis`` plugin the range for the parameter optimisation is defined using a filter set due unlimited number of filter combinations. In contrast the ``Benchmark Filter Parameters`` plugin defines the range for the small set of parameters in the plugin dialog. The dialog is very similar to the dialog for the ``Benchmark Filter Analysis`` plugin. The following are different options for this plugin:
+In the ``Benchmark Filter Analysis`` plugin the range for the parameter optimisation is defined using a filter set due unlimited number of filter combinations. In contrast the ``Benchmark Filter Parameters`` plugin defines the range for the small set of parameters in the plugin dialog. The dialog is very similar to the dialog for the ``Benchmark Filter Analysis`` plugin. The following are different options for this plugin:
 
 .. list-table::
    :widths: 20 80
@@ -3880,7 +3880,7 @@ The plugin requires the following parameters to control the iteration:
      - The minimum reduction factor to adjust the parameter ranges when performing the filter optimisation. Set to 1 this has no effect. Otherwise the reduction factor linear ramps from 1 to min over the configured number of iterations.
 
    * - Min range reduction iterations
-     - The number of iterations taken to reach the ``Min range reduction`` factor. The iteration count is the the number of refits of the spot data thus excludes the optional inner convergence of the filter parameters.
+     - The number of iterations taken to reach the ``Min range reduction`` factor. The iteration count is the number of refits of the spot data thus excludes the optional inner convergence of the filter parameters.
 
    * - Converge before refit
      - Set to **true** to require the filter parameters to converge before performing a refit of the spot data with the new best filter.

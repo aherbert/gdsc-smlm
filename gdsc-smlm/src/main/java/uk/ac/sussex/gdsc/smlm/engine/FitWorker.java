@@ -1140,7 +1140,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
       // Q. Should this be ignored for existing results? They have already passed validation.
       // So we do not have to be as strict on their width and could just use the drift from
-      // the the initial estimate.
+      // the initial estimate.
       // For now do a full validation since multi-fit results are only accepted if existing
       // results are still valid.
 
@@ -3182,7 +3182,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     /**
      * Perform quadrant analysis on the residuals.
      *
-     * <p>Perform quadrant analysis as per rapidSTORM to analyse if the residuals of the the fit are
+     * <p>Perform quadrant analysis as per rapidSTORM to analyse if the residuals of the fit are
      * skewed around the single fit centre. This may indicate the result is actually two spots (a
      * doublet).
      *
