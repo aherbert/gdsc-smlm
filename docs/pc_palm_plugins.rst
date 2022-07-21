@@ -665,6 +665,20 @@ The noise subtracted histogram will be displayed in a new plot window. If auto-s
 Note: Clustering of molecules and background noise localisations produces higher counts than expected across the entire histogram. It is impossible to correctly subtract the additional high cluster counts due to noise. Experiments should be configured to minimise noise to the extent that noise localisations are unlikely to be colocated with localisations from fluorophores. The only significant contributions of noise localisations is a higher count of 1 molecule/cluster due to isolated noise localisations. In this situation background subtraction of noise mainly targets the count of monomers and can improve the fit of the binomial distribution to the corrected data.
 
 
+.. index:: Histogram normalisation
+
+Histogram normalisation
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Histograms are calibrated using the number of frames (*t*) and the area of each frame (*a*). The counts (*c*) can be normalised using:
+
+.. math::
+
+    c_{norm} = \frac{c}{t a}
+
+The counts per frame per area allows histograms from different experiments (with potentially different duration and imaging area) to be combined. Noise subtraction on a single histogram can be performed when loading a histogram from file. However combining histogram counts requires the experiments to be performed using very similar imaging conditions to avoid introducing artifacts in the summary histogram, for example due to vastly different number of observations between samples. Combination of histograms is not currently supported but can be done manually. Since each noise subtracted histogram should have the profile of the same binomial distribution, a combined histogram could be created by converting each histogram to sum to 1, averaging, then rescaling to a count; the combined histogram can be fit by the analysis plugin. Alternatively fitting could be performed simultaneously on multiple histograms in an external analysis package.
+
+
 Parameters
 ~~~~~~~~~~
 
