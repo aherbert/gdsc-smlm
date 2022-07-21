@@ -626,7 +626,7 @@ public class PcPalmClusters implements PlugIn {
       final GenericDialog gd = new GenericDialog(TITLE);
       final String[] items = {"Clustering", "File"};
 
-      gd.addMessage("Fit a Binomial distribution to a histogram of cluster sizes.\n \n"
+      gd.addMessage("Fit a binomial distribution to a histogram of cluster sizes.\n \n"
           + "Select the method to generate the histogram:");
       gd.addChoice("Method", items, items[settings.runMode]);
       gd.addHelp(HelpUrls.getUrl("pc-palm-clusters"));
@@ -780,7 +780,7 @@ public class PcPalmClusters implements PlugIn {
   }
 
   /**
-   * Fit a zero-truncated Binomial to the cumulative histogram.
+   * Fit a zero-truncated binomial to the cumulative histogram.
    *
    * @param histogramData the histogram data
    * @return the double[]
@@ -796,7 +796,7 @@ public class PcPalmClusters implements PlugIn {
     }
     mean = sum / count;
 
-    final String name = "Zero-truncated Binomial distribution";
+    final String name = "Zero-truncated binomial distribution";
     ImageJUtils.log("Mean cluster size = %s", MathUtils.rounded(mean));
     ImageJUtils.log("Fitting cumulative " + name);
 
