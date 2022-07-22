@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
@@ -110,7 +111,6 @@ import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
@@ -1263,8 +1263,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     gd.addSlider("Match_signal", 0, 3.5, settings.signalFactor);
     gd.addSlider("Lower_signal", 0, 3.5, settings.lowerSignalFactor);
 
-    final FitEngineConfigurationProvider fitEngineConfigurationProvider =
-        new PeakFit.SimpleFitEngineConfigurationProvider(config);
+    final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider = () -> config;
 
     // Collect options for fitting
     final double sa = getSa();

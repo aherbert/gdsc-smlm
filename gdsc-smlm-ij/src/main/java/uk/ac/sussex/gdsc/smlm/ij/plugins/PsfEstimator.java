@@ -34,6 +34,7 @@ import ij.text.TextWindow;
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
@@ -250,8 +251,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
     PeakFit.addCameraOptions(gd, fitConfig);
     PeakFit.addPsfOptions(gd, fitConfig);
-    final PeakFit.SimpleFitEngineConfigurationProvider provider =
-        new PeakFit.SimpleFitEngineConfigurationProvider(config);
+    final Supplier<FitEngineConfiguration> provider = () -> config;
     PeakFit.addDataFilterOptions(gd, provider);
     PeakFit.addSearchOptions(gd, provider);
     PeakFit.addBorderOptions(gd, provider);
@@ -285,7 +285,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
     gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
     gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
-    PeakFit.addPrecisionOptions(gd, new PeakFit.SimpleFitConfigurationProvider(fitConfig));
+    PeakFit.addPrecisionOptions(gd, () -> fitConfig);
 
     gd.showDialog();
 

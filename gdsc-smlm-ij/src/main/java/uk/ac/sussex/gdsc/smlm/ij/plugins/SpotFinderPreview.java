@@ -52,6 +52,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -87,7 +88,6 @@ import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.filters.SpotFilterHelper;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.RelativeParameterProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.CreateData;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -256,10 +256,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     final String[] models = CameraModelManager.listCameraModels(true);
     gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
 
-    PeakFit.addPsfOptions(gd, (FitConfigurationProvider) () -> fitConfig);
-    final PeakFit.SimpleFitEngineConfigurationProvider provider =
-        new PeakFit.SimpleFitEngineConfigurationProvider(config);
-    PeakFit.addDataFilterOptions(gd, provider);
+    PeakFit.addPsfOptions(gd, () -> fitConfig);
+    final Supplier<FitEngineConfiguration> provider = () -> config;
+    PeakFit.addDataFilterOptions(gd, () -> config);
     gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
         config.getDataFilterMethod(1, settings.defaultDataFilterMethod).ordinal());
     PeakFit.addRelativeParameterOptions(gd,
@@ -267,7 +266,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
           @Override
           void setAbsolute(boolean absolute) {
             final FitEngineConfiguration c =
-                fitEngineConfigurationProvider.getFitEngineConfiguration();
+                fitEngineConfigurationProvider.get();
             final DataFilterMethod m = c.getDataFilterMethod(1, settings.defaultDataFilterMethod);
             final double smooth = c.getDataFilterParameterValue(1, settings.defaultSmooth);
             c.setDataFilter(m, smooth, absolute, 1);
@@ -275,13 +274,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
           @Override
           boolean isAbsolute() {
-            return fitEngineConfigurationProvider.getFitEngineConfiguration()
+            return fitEngineConfigurationProvider.get()
                 .getDataFilterParameterAbsolute(1, false);
           }
 
           @Override
           double getValue() {
-            return fitEngineConfigurationProvider.getFitEngineConfiguration()
+            return fitEngineConfigurationProvider.get()
                 .getDataFilterParameterValue(1, settings.defaultSmooth);
           }
         });

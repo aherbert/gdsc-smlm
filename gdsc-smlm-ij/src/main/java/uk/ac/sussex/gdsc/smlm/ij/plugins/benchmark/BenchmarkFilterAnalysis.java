@@ -2914,7 +2914,7 @@ public class BenchmarkFilterAnalysis
     final FitEngineConfiguration tmp = FitEngineConfiguration.create();
     tmp.setDuplicateDistance(settings.duplicateDistance);
     tmp.setDuplicateDistanceAbsolute(settings.duplicateDistanceAbsolute);
-    PeakFit.addDuplicateDistanceOptions(gd, new PeakFit.SimpleFitEngineConfigurationProvider(tmp));
+    PeakFit.addDuplicateDistanceOptions(gd, () -> tmp);
     if (showOptimiseParams) {
       gd.addNumericField("Min_duplicate_distance", settings.minDuplicateDistance, 2);
       gd.addNumericField("Max_duplicate_distance", settings.maxDuplicateDistance, 2);

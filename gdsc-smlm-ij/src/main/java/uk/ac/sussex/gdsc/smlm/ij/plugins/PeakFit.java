@@ -1210,8 +1210,8 @@ public class PeakFit implements PlugInFilter {
       gd.addCheckbox("Ignore_bounds_for_noise", ignoreBoundsForNoise);
     }
 
-    final FitConfigurationProvider fitConfigurationProvider = () -> fitConfig;
-    final FitEngineConfigurationProvider fitEngineConfigurationProvider = () -> config;
+    final Supplier<FitConfiguration> fitConfigurationProvider = () -> fitConfig;
+    final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider = () -> config;
 
     addPsfOptions(gd, fitConfigurationProvider);
     addDataFilterOptions(gd, fitEngineConfigurationProvider);
@@ -1571,82 +1571,6 @@ public class PeakFit implements PlugInFilter {
         });
   }
 
-
-  /**
-   * Allow the latest fitEngineConfiguration to be provided for update.
-   */
-  @FunctionalInterface
-  public interface FitEngineConfigurationProvider {
-    /**
-     * Gets the fitEngineConfiguration.
-     *
-     * @return the fitEngineConfiguration
-     */
-    FitEngineConfiguration getFitEngineConfiguration();
-  }
-
-
-  /**
-   * Allow the latest fitConfiguration to be provided for update.
-   */
-  @FunctionalInterface
-  public interface FitConfigurationProvider {
-    /**
-     * Gets the fitConfiguration.
-     *
-     * @return the fitConfiguration
-     */
-    FitConfiguration getFitConfiguration();
-  }
-
-
-  /**
-   * Simple implementation of {@link FitEngineConfigurationProvider}.
-   */
-  public static class SimpleFitEngineConfigurationProvider
-      implements FitEngineConfigurationProvider {
-    /** The fit engine configuration. */
-    private final FitEngineConfiguration config;
-
-    /**
-     * Instantiates a new simple fit engine configuration provider.
-     *
-     * @param config the configuration
-     */
-    public SimpleFitEngineConfigurationProvider(FitEngineConfiguration config) {
-      this.config = config;
-    }
-
-    @Override
-    public FitEngineConfiguration getFitEngineConfiguration() {
-      return config;
-    }
-  }
-
-
-  /**
-   * Simple implementation of {@link FitConfigurationProvider}.
-   */
-  public static class SimpleFitConfigurationProvider implements FitConfigurationProvider {
-    /** The configuration. */
-    private final FitConfiguration fitConfig;
-
-    /**
-     * Instantiates a new simple fit configuration provider.
-     *
-     * @param fitConfig the configuration
-     */
-    public SimpleFitConfigurationProvider(FitConfiguration fitConfig) {
-      this.fitConfig = fitConfig;
-    }
-
-    @Override
-    public FitConfiguration getFitConfiguration() {
-      return fitConfig;
-    }
-
-  }
-
   /**
    * Adds the PSF options.
    *
@@ -1658,7 +1582,7 @@ public class PeakFit implements PlugInFilter {
    */
   public static void addPsfOptions(final ExtendedGenericDialog gd,
       final FitConfiguration fitConfiguration) {
-    addPsfOptions(gd, new SimpleFitConfigurationProvider(fitConfiguration));
+    addPsfOptions(gd, () -> fitConfiguration);
   }
 
   /**
@@ -1671,13 +1595,13 @@ public class PeakFit implements PlugInFilter {
    * @param fitConfigurationProvider the fit configuration provider
    */
   public static void addPsfOptions(final ExtendedGenericDialog gd,
-      final FitConfigurationProvider fitConfigurationProvider) {
-    final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+      final Supplier<FitConfiguration> fitConfigurationProvider) {
+    final FitConfiguration fitConfig = fitConfigurationProvider.get();
     gd.addChoice("PSF", getPsfTypeNames(), PsfProtosHelper.getName(fitConfig.getPsfType()),
         new OptionListener<Integer>() {
           @Override
           public boolean collectOptions(Integer field) {
-            final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+            final FitConfiguration fitConfig = fitConfigurationProvider.get();
             fitConfig.setPsfType(PeakFit.getPsfTypeValues()[field]);
             return collectOptions(false);
           }
@@ -1688,7 +1612,7 @@ public class PeakFit implements PlugInFilter {
           }
 
           private boolean collectOptions(boolean silent) {
-            final FitConfiguration localFitConfig = fitConfigurationProvider.getFitConfiguration();
+            final FitConfiguration localFitConfig = fitConfigurationProvider.get();
             final PSFType psfType = localFitConfig.getPsfType();
             final ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
             PSF oldPsf = null;
@@ -1754,7 +1678,7 @@ public class PeakFit implements PlugInFilter {
     /** The name. */
     String name;
     /** The fit engine configuration provider. */
-    FitEngineConfigurationProvider fitEngineConfigurationProvider;
+    Supplier<FitEngineConfiguration> fitEngineConfigurationProvider;
     /**
      * Set to true to include the value in {@link #getMin()} and {@link #getMax()}.
      */
@@ -1769,7 +1693,7 @@ public class PeakFit implements PlugInFilter {
      * @param fitEngineConfigurationProvider the fit engine configuration provider
      */
     public RelativeParameterProvider(double min, double max, String name,
-        FitEngineConfigurationProvider fitEngineConfigurationProvider) {
+        Supplier<FitEngineConfiguration> fitEngineConfigurationProvider) {
       this(min, max, name, fitEngineConfigurationProvider, false);
     }
 
@@ -1783,7 +1707,7 @@ public class PeakFit implements PlugInFilter {
      * @param includeValue the include value
      */
     public RelativeParameterProvider(double min, double max, String name,
-        FitEngineConfigurationProvider fitEngineConfigurationProvider, boolean includeValue) {
+        Supplier<FitEngineConfiguration> fitEngineConfigurationProvider, boolean includeValue) {
       this.min = min;
       this.max = max;
       this.name = name;
@@ -1913,12 +1837,11 @@ public class PeakFit implements PlugInFilter {
    * @param fitEngineConfigurationProvider the fit engine configuration provider
    */
   public static void addDataFilterOptions(final ExtendedGenericDialog gd,
-      final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
+      final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider) {
     final int n = 0;
     final DataFilterMethod defaultFilterMethod = DataFilterMethod.GAUSSIAN;
     final double defaultFilterSmoothing = 0.5;
-    final FitEngineConfiguration config =
-        fitEngineConfigurationProvider.getFitEngineConfiguration();
+    final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
     gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
         config.getDataFilterType().ordinal());
     gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
@@ -1927,8 +1850,7 @@ public class PeakFit implements PlugInFilter {
         new RelativeParameterProvider(0, 2.5, "Smoothing", fitEngineConfigurationProvider, true) {
           @Override
           void setAbsolute(boolean absolute) {
-            final FitEngineConfiguration c =
-                fitEngineConfigurationProvider.getFitEngineConfiguration();
+            final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
             final DataFilterMethod m = c.getDataFilterMethod(n, defaultFilterMethod);
             final double smooth = c.getDataFilterParameterValue(n, defaultFilterSmoothing);
             c.setDataFilter(m, smooth, absolute, n);
@@ -1936,14 +1858,13 @@ public class PeakFit implements PlugInFilter {
 
           @Override
           boolean isAbsolute() {
-            return fitEngineConfigurationProvider.getFitEngineConfiguration()
-                .getDataFilterParameterAbsolute(n, false);
+            return fitEngineConfigurationProvider.get().getDataFilterParameterAbsolute(n, false);
           }
 
           @Override
           double getValue() {
-            return fitEngineConfigurationProvider.getFitEngineConfiguration()
-                .getDataFilterParameterValue(n, defaultFilterSmoothing);
+            return fitEngineConfigurationProvider.get().getDataFilterParameterValue(n,
+                defaultFilterSmoothing);
           }
         });
   }
@@ -1955,22 +1876,22 @@ public class PeakFit implements PlugInFilter {
    * @param fitEngineConfigurationProvider the fit engine configuration provider
    */
   public static void addSearchOptions(final ExtendedGenericDialog gd,
-      final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
+      final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider) {
     addRelativeParameterOptions(gd, new RelativeParameterProvider(0.5, 2.5, "Search width",
         fitEngineConfigurationProvider, true) {
       @Override
       void setAbsolute(boolean absolute) {
-        fitEngineConfigurationProvider.getFitEngineConfiguration().setSearchAbsolute(absolute);
+        fitEngineConfigurationProvider.get().setSearchAbsolute(absolute);
       }
 
       @Override
       boolean isAbsolute() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration().getSearchAbsolute();
+        return fitEngineConfigurationProvider.get().getSearchAbsolute();
       }
 
       @Override
       double getValue() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration().getSearch();
+        return fitEngineConfigurationProvider.get().getSearch();
       }
     });
   }
@@ -1982,22 +1903,22 @@ public class PeakFit implements PlugInFilter {
    * @param fitEngineConfigurationProvider the fit engine configuration provider
    */
   public static void addBorderOptions(final ExtendedGenericDialog gd,
-      final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
+      final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider) {
     addRelativeParameterOptions(gd, new RelativeParameterProvider(0.5, 2.5, "Border width",
         fitEngineConfigurationProvider, true) {
       @Override
       void setAbsolute(boolean absolute) {
-        fitEngineConfigurationProvider.getFitEngineConfiguration().setBorderAbsolute(absolute);
+        fitEngineConfigurationProvider.get().setBorderAbsolute(absolute);
       }
 
       @Override
       boolean isAbsolute() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration().getBorderAbsolute();
+        return fitEngineConfigurationProvider.get().getBorderAbsolute();
       }
 
       @Override
       double getValue() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration().getBorder();
+        return fitEngineConfigurationProvider.get().getBorder();
       }
     });
   }
@@ -2009,23 +1930,23 @@ public class PeakFit implements PlugInFilter {
    * @param fitEngineConfigurationProvider the fit engine configuration provider
    */
   public static void addFittingOptions(final ExtendedGenericDialog gd,
-      final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
+      final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider) {
     // For this we allow the slider range to increase as the user may have a large fit width
     addRelativeParameterOptions(gd, new RelativeParameterProvider(2, 4.5, "Fitting width",
         fitEngineConfigurationProvider, true) {
       @Override
       void setAbsolute(boolean absolute) {
-        fitEngineConfigurationProvider.getFitEngineConfiguration().setFittingAbsolute(absolute);
+        fitEngineConfigurationProvider.get().setFittingAbsolute(absolute);
       }
 
       @Override
       boolean isAbsolute() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration().getFittingAbsolute();
+        return fitEngineConfigurationProvider.get().getFittingAbsolute();
       }
 
       @Override
       double getValue() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration().getFitting();
+        return fitEngineConfigurationProvider.get().getFitting();
       }
     });
   }
@@ -2038,24 +1959,22 @@ public class PeakFit implements PlugInFilter {
    * @param fitEngineConfigurationProvider the fit engine configuration provider
    */
   public static void addDuplicateDistanceOptions(final ExtendedGenericDialog gd,
-      final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
+      final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider) {
     addRelativeParameterOptions(gd, new RelativeParameterProvider(0, 1.5, "Duplicate distance",
         fitEngineConfigurationProvider) {
       @Override
       void setAbsolute(boolean absolute) {
-        fitEngineConfigurationProvider.getFitEngineConfiguration()
-            .setDuplicateDistanceAbsolute(absolute);
+        fitEngineConfigurationProvider.get().setDuplicateDistanceAbsolute(absolute);
       }
 
       @Override
       boolean isAbsolute() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration()
-            .getDuplicateDistanceAbsolute();
+        return fitEngineConfigurationProvider.get().getDuplicateDistanceAbsolute();
       }
 
       @Override
       double getValue() {
-        return fitEngineConfigurationProvider.getFitEngineConfiguration().getDuplicateDistance();
+        return fitEngineConfigurationProvider.get().getDuplicateDistance();
       }
     });
   }
@@ -2068,13 +1987,12 @@ public class PeakFit implements PlugInFilter {
    * @param fitConfigurationProvider the fit configuration provider
    */
   public static void addPrecisionOptions(final ExtendedGenericDialog gd,
-      final FitConfigurationProvider fitConfigurationProvider) {
-    gd.addNumericField("Precision",
-        fitConfigurationProvider.getFitConfiguration().getPrecisionThreshold(), 2,
+      final Supplier<FitConfiguration> fitConfigurationProvider) {
+    gd.addNumericField("Precision", fitConfigurationProvider.get().getPrecisionThreshold(), 2,
         new OptionListener<Double>() {
           @Override
           public boolean collectOptions(Double field) {
-            fitConfigurationProvider.getFitConfiguration().setPrecisionThreshold(field);
+            fitConfigurationProvider.get().setPrecisionThreshold(field);
             return collectOptions(false);
           }
 
@@ -2084,7 +2002,7 @@ public class PeakFit implements PlugInFilter {
           }
 
           private boolean collectOptions(boolean silent) {
-            final FitConfiguration localFitConfig = fitConfigurationProvider.getFitConfiguration();
+            final FitConfiguration localFitConfig = fitConfigurationProvider.get();
             final ExtendedGenericDialog egd = new ExtendedGenericDialog("Precision Options", null);
             final int oldIndex = localFitConfig.getPrecisionMethod().ordinal();
             egd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), oldIndex);
@@ -2896,7 +2814,7 @@ public class PeakFit implements PlugInFilter {
     final String[] filterNames = SettingsManager.getDataFilterMethodNames();
     final DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
 
-    final FitEngineConfigurationProvider fitEngineConfigurationProvider = () -> config;
+    final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider = () -> config;
 
     for (int i = 1; i < filterCount; i++) {
       final int filter = i + 1;
@@ -2927,8 +2845,7 @@ public class PeakFit implements PlugInFilter {
         @Override
         void setAbsolute(boolean absolute) {
           // Get the current settings
-          final FitEngineConfiguration c =
-              fitEngineConfigurationProvider.getFitEngineConfiguration();
+          final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
           final DataFilterMethod m = c.getDataFilterMethod(ii);
           final double smooth = c.getDataFilterParameter(ii).getValue();
           // Reset with the new absolute value
@@ -2937,15 +2854,13 @@ public class PeakFit implements PlugInFilter {
 
         @Override
         boolean isAbsolute() {
-          final FitEngineConfiguration c =
-              fitEngineConfigurationProvider.getFitEngineConfiguration();
+          final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
           return c.getDataFilterParameterAbsolute(ii, c.getDataFilterParameterAbsolute(ii - 1));
         }
 
         @Override
         double getValue() {
-          final FitEngineConfiguration c =
-              fitEngineConfigurationProvider.getFitEngineConfiguration();
+          final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
           return c.getDataFilterParameterValue(ii, c.getDataFilterParameterValue(ii - 1));
         }
       });

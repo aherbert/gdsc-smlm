@@ -55,6 +55,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
@@ -1728,8 +1729,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Collect options for fitting
     PeakFit.addPsfOptions(gd, fitConfig);
-    final PeakFit.SimpleFitEngineConfigurationProvider provider =
-        new PeakFit.SimpleFitEngineConfigurationProvider(config);
+    final Supplier<FitEngineConfiguration> provider = () -> config;
     PeakFit.addDataFilterOptions(gd, provider);
     PeakFit.addSearchOptions(gd, provider);
     PeakFit.addBorderOptions(gd, provider);

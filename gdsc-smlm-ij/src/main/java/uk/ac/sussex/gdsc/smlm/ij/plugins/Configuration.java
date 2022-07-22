@@ -36,6 +36,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -51,7 +52,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 /**
@@ -183,7 +183,7 @@ public class Configuration implements PlugIn {
     PeakFit.addPsfOptions(gd, fitConfig);
 
     gd.addMessage("--- Maxima identification ---");
-    final FitEngineConfigurationProvider provider = this::getFitEngineConfiguration;
+    final Supplier<FitEngineConfiguration> provider = this::getFitEngineConfiguration;
     PeakFit.addDataFilterOptions(gd, provider);
     PeakFit.addSearchOptions(gd, provider);
     PeakFit.addBorderOptions(gd, provider);

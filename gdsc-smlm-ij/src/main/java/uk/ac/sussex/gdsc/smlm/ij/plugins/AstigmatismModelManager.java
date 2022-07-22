@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
@@ -92,7 +93,6 @@ import uk.ac.sussex.gdsc.smlm.engine.ParameterisedFitJob;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.AstigmatismModelManagerSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.GaussianPsfModel;
@@ -586,8 +586,7 @@ public class AstigmatismModelManager implements PlugIn {
 
     PeakFit.addPsfOptions(gd, fitConfig);
 
-    final FitEngineConfigurationProvider provider =
-        new PeakFit.SimpleFitEngineConfigurationProvider(config);
+    final Supplier<FitEngineConfiguration> provider = () -> config;
     PeakFit.addFittingOptions(gd, provider);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
         FitProtosHelper.getName(fitConfig.getFitSolver()));
@@ -605,7 +604,7 @@ public class AstigmatismModelManager implements PlugIn {
     // Fitting may need to be extra wide
     final double w = fitConfig.getMaxWidthFactor();
     gd.addSlider("Width_factor", 1.01, Math.max(10, w), w);
-    PeakFit.addPrecisionOptions(gd, new PeakFit.SimpleFitConfigurationProvider(fitConfig));
+    PeakFit.addPrecisionOptions(gd, () -> fitConfig);
 
     gd.showDialog();
 
