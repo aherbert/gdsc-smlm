@@ -50,6 +50,8 @@ import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -331,8 +333,15 @@ public class PeakFit implements PlugInFilter {
    * Class to control listening to the main dialog and updating fields.
    *
    * <p>Supports changing all field values using the selected template.
+   *
+   * <p>Supports changing the current configuration for relevant fields which are used in dynamic
+   * dialog option listeners.
+   *
+   * <p>Note: Any exceptions thrown in the listeners may be logged as a stack trace (this occurs in
+   * a debug mode in an IDE) or possibly silently consumed. Full validation of the fields should
+   * always be performed when the dialog is read.
    */
-  private class ItemDialogListener implements ItemListener {
+  private class ItemDialogListener implements ItemListener, TextListener {
 
     // All the fields that will be updated when reloading the configuration file
     private Choice textCameraType;
@@ -353,8 +362,8 @@ public class PeakFit implements PlugInFilter {
     private TextField textNeighbourHeightThreshold;
     private TextField textResidualsThreshold;
     private TextField textDuplicateDistance;
-    // Cannot be accessed through the GenericDialog API
-    private final Scrollbar sliderCoordinateShiftFactor;
+    /** Filter sliders that cannot be accessed through the GenericDialog API. */
+    private final Scrollbar[] sliders;
     private TextField textCoordinateShiftFactor;
     private TextField textSignalStrength;
     private TextField textMinPhotons;
@@ -373,9 +382,9 @@ public class PeakFit implements PlugInFilter {
     private Choice textFileFormat;
     private Checkbox textResultsInMemory;
 
-    ItemDialogListener(Scrollbar sliderCoordinateShiftFactor) {
+    ItemDialogListener(Scrollbar[] sliders) {
       // Special case of a Scrollbar that cannot be accessed easily through the GenericDialog API.
-      this.sliderCoordinateShiftFactor = sliderCoordinateShiftFactor;
+      this.sliders = sliders;
     }
 
     void attach(GenericDialog gd, boolean isCrop) {
@@ -395,6 +404,7 @@ public class PeakFit implements PlugInFilter {
 
       textCameraType = ch.next();
       textNmPerPixel = nu.next();
+      textNmPerPixel.addTextListener(this);
       textExposure = nu.next();
       if (isCrop) {
         cb.next();
@@ -433,6 +443,14 @@ public class PeakFit implements PlugInFilter {
         textMinWidthFactor = nu.next();
         textWidthFactor = nu.next();
         textPrecisionThreshold = nu.next();
+
+        // Required for converting the simple filter to the default smart filter XML
+        textCoordinateShiftFactor.addTextListener(this);
+        textSignalStrength.addTextListener(this);
+        textMinPhotons.addTextListener(this);
+        textMinWidthFactor.addTextListener(this);
+        textWidthFactor.addTextListener(this);
+        textPrecisionThreshold.addTextListener(this);
 
         updateFilterInput();
         textSmartFilter.addItemListener(this);
@@ -485,28 +503,65 @@ public class PeakFit implements PlugInFilter {
           }
         }
       } else if (event.getSource() instanceof Checkbox) {
+        // Note: changes to textDisableSimpleFilter must be replicated in
+        // the current fit config to dynamically configure the z-filter in the PSF options
         if (event.getSource() == textSmartFilter) {
           // Prevent both filters being enabled
-          textDisableSimpleFilter.setState(textSmartFilter.getState());
+          final boolean state = textSmartFilter.getState();
+          textDisableSimpleFilter.setState(state);
+          fitConfig.setDisableSimpleFilter(state);
+          fitConfig.setSmartFilter(state);
+          // Create a default if no configuration exists. This is what occurs when
+          // showing the options listener.
+          if (state) {
+            if (TextUtils.isNullOrEmpty(fitConfig.getSmartFilterString())) {
+              fitConfig.setDirectFilter(
+                  (DirectFilter) Filter.fromXml(fitConfig.getDefaultSmartFilterXml()));
+            }
+          }
           updateFilterInput();
         } else if (event.getSource() == textDisableSimpleFilter) {
+          fitConfig.setDisableSimpleFilter(textDisableSimpleFilter.getState());
           updateFilterInput();
         }
       }
     }
 
+    @Override
+    public void textValueChanged(TextEvent event) {
+      if (event.getSource() == textNmPerPixel) {
+        fitConfig.setNmPerPixel(Double.parseDouble(textNmPerPixel.getText()));
+      } else if (event.getSource() == textCoordinateShiftFactor) {
+        fitConfig.setCoordinateShiftFactor(Double.parseDouble(textCoordinateShiftFactor.getText()));
+      } else if (event.getSource() == textSignalStrength) {
+        fitConfig.setSignalStrength(Double.parseDouble(textSignalStrength.getText()));
+      } else if (event.getSource() == textMinPhotons) {
+        fitConfig.setMinPhotons(Double.parseDouble(textMinPhotons.getText()));
+      } else if (event.getSource() == textMinWidthFactor) {
+        fitConfig.setMinWidthFactor(Double.parseDouble(textMinWidthFactor.getText()));
+      } else if (event.getSource() == textWidthFactor) {
+        fitConfig.setMaxWidthFactor(Double.parseDouble(textWidthFactor.getText()));
+      } else if (event.getSource() == textPrecisionThreshold) {
+        fitConfig.setPrecisionThreshold(Double.parseDouble(textPrecisionThreshold.getText()));
+      }
+    }
+
     private void updateFilterInput() {
       if (textDisableSimpleFilter.getState()) {
-        sliderCoordinateShiftFactor.setEnabled(false);
+        for (final Scrollbar slider : sliders) {
+          slider.setEnabled(false);
+        }
         disableEditing(textCoordinateShiftFactor);
         disableEditing(textSignalStrength);
         disableEditing(textMinPhotons);
-        // These are used to set bounds
+        // These are used to set bounds for bounded solvers so do not disable editing
         // disableEditing(textMinWidthFactor)
         // disableEditing(textWidthFactor)
         disableEditing(textPrecisionThreshold);
       } else {
-        sliderCoordinateShiftFactor.setEnabled(true);
+        for (final Scrollbar slider : sliders) {
+          slider.setEnabled(true);
+        }
         enableEditing(textCoordinateShiftFactor);
         enableEditing(textSignalStrength);
         enableEditing(textMinPhotons);
@@ -957,12 +1012,8 @@ public class PeakFit implements PlugInFilter {
   private boolean setSource(ImageSource imageSource) {
     // Reset
     this.source = null;
-    if (imageSource == null) {
-      return false;
-    }
-
     // Open the image to ensure it is accessible and the width/height are known
-    if (!imageSource.open()) {
+    if ((imageSource == null) || !imageSource.open()) {
       return false;
     }
 
@@ -1224,7 +1275,7 @@ public class PeakFit implements PlugInFilter {
     }
 
     // Special case top get the slider since the GenericDialog does not provide access to this.
-    Scrollbar sliderCoordinateShiftFactor = null;
+    Scrollbar[] sliders = null;
     final boolean isShowGenericDialog = ImageJUtils.isShowGenericDialog();
 
     if (!maximaIdentification) {
@@ -1248,11 +1299,11 @@ public class PeakFit implements PlugInFilter {
       gd.addMessage(
           "--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
-      gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
+      addSmartFilterOptions(gd, fitConfigurationProvider);
       gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
       gd.addSlider("Shift_factor", 0.0, 2.5, fitConfig.getCoordinateShiftFactor());
       if (isShowGenericDialog) {
-        sliderCoordinateShiftFactor = gd.getLastScrollbar();
+        sliders = new Scrollbar[] {gd.getLastScrollbar()};
       }
       gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
       gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
@@ -1261,6 +1312,8 @@ public class PeakFit implements PlugInFilter {
         gd.addChoice("Noise_method", SettingsManager.getNoiseEstimatorMethodNames(),
             config.getNoiseMethod().ordinal());
       }
+      // These are used to set bounds for bounded solvers so do not disable editing by adding
+      // to the sliders array
       gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
       gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
       addPrecisionOptions(gd, fitConfigurationProvider);
@@ -1289,7 +1342,7 @@ public class PeakFit implements PlugInFilter {
 
     // Add a mouse listener to the config file field
     if (isShowGenericDialog) {
-      new ItemDialogListener(sliderCoordinateShiftFactor).attach(gd, isCrop);
+      new ItemDialogListener(sliders).attach(gd, isCrop);
     }
 
     gd.showDialog();
@@ -1591,6 +1644,9 @@ public class PeakFit implements PlugInFilter {
    * <p>Note that if an astigmatic PSF is selected then the model must be created with
    * {@link #configurePsfModel(FitEngineConfiguration, int)}.
    *
+   * <p>Adds a calibrated z-filter for a 3D PSF model. Any recent changes to the calibration must be
+   * reflected in the provided fit configuration for this to be valid.
+   *
    * @param gd the dialog
    * @param fitConfigurationProvider the fit configuration provider
    */
@@ -1638,30 +1694,68 @@ public class PeakFit implements PlugInFilter {
               }
             }
 
+            TypeConverter<DistanceUnit> c = null;
+            if (!fitConfig.isDisableSimpleFilter()
+                // Do not use localFitConfig.is3D() as this validates the current z-model which
+                // may not (yet) be correctly configured.
+                && psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D) {
+              // Create a converter to map the model units in pixels to nm for the dialog.
+              // Note the output units of pixels may not yet be set in the calibration so we assume
+              // it is pixels.
+              c = UnitConverterUtils.createConverter(DistanceUnit.PIXEL, DistanceUnit.NM,
+                  localFitConfig.getCalibrationReader().getNmPerPixel());
+
+              egd.addMessage("3D filter (use zeros to disable)");
+              egd.addNumericField("Min_z", c.convert(localFitConfig.getMinZ()), 0, 6, "nm");
+              egd.addNumericField("Max_z", c.convert(localFitConfig.getMaxZ()), 0, 6, "nm");
+            }
+
             egd.setSilent(silent);
             egd.showDialog(true, gd);
             if (egd.wasCanceled()) {
               return false;
             }
+            boolean changed = false;
             if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D) {
               // The PSF is entirely defined in the model
-              localFitConfig.setPsfModelName(egd.getNextChoice());
-              return true;
+              final String modelName = egd.getNextChoice();
+              if (!localFitConfig.getPsfModelName().equals(modelName)) {
+                localFitConfig.setPsfModelName(modelName);
+                changed = true;
+              }
+            } else {
+              @SuppressWarnings("null")
+              final PSF.Builder b = oldPsf.toBuilder();
+              final int n = b.getParametersCount();
+              for (int i = 0; i < n; i++) {
+                b.getParametersBuilder(i).setValue(egd.getNextNumber());
+              }
+              final PSF newPsf = b.build();
+              localFitConfig.setPsf(newPsf);
+              changed = !oldPsf.equals(newPsf);
+              if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D) {
+                final boolean newFixed = egd.getNextBoolean();
+                changed = changed || (newFixed != localFitConfig.isFixedPsf());
+                localFitConfig.setFixedPsf(newFixed);
+              }
             }
-            @SuppressWarnings("null")
-            final PSF.Builder b = oldPsf.toBuilder();
-            final int n = b.getParametersCount();
-            for (int i = 0; i < n; i++) {
-              b.getParametersBuilder(i).setValue(egd.getNextNumber());
+
+            if (c != null) {
+              double minZ = egd.getNextNumber();
+              double maxZ = egd.getNextNumber();
+
+              // This should be validated when the full dialog is read back,
+              // see validateZFilter(...)
+
+              // Map back
+              minZ = c.convertBack(minZ);
+              maxZ = c.convertBack(maxZ);
+              changed =
+                  changed || localFitConfig.getMinZ() != minZ || localFitConfig.getMaxZ() != maxZ;
+              localFitConfig.setMinZ(minZ);
+              localFitConfig.setMaxZ(maxZ);
             }
-            final PSF newPsf = b.build();
-            localFitConfig.setPsf(newPsf);
-            boolean changed = !oldPsf.equals(newPsf);
-            if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D) {
-              final boolean newFixed = egd.getNextBoolean();
-              changed = changed || (newFixed != localFitConfig.isFixedPsf());
-              localFitConfig.setFixedPsf(newFixed);
-            }
+
             return changed;
           }
         });
@@ -1952,6 +2046,116 @@ public class PeakFit implements PlugInFilter {
   }
 
   /**
+   * Adds the smart filter options. A single boolean field for the smart filter is added. A pop-up
+   * is added to allow the smart filter to to be configured.
+   *
+   * @param gd the dialog
+   * @param fitConfigurationProvider the fit configuration provider
+   */
+  public static void addSmartFilterOptions(final ExtendedGenericDialog gd,
+      final Supplier<FitConfiguration> fitConfigurationProvider) {
+    gd.addCheckbox("Smart_filter", fitConfigurationProvider.get().isSmartFilter(),
+        new OptionListener<Boolean>() {
+          @Override
+          public boolean collectOptions(Boolean field) {
+            fitConfigurationProvider.get().setSmartFilter(field);
+            return collectOptions(false);
+          }
+
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
+
+          private boolean collectOptions(boolean silent) {
+            final FitConfiguration fitConfig = fitConfigurationProvider.get();
+            if (!fitConfig.isSmartFilter()) {
+              return false;
+            }
+            final ExtendedGenericDialog egd =
+                new ExtendedGenericDialog("Smart Filter Options", null);
+            String xml = fitConfig.getSmartFilterString();
+            if (TextUtils.isNullOrEmpty(xml)) {
+              xml = fitConfig.getDefaultSmartFilterXml();
+            }
+
+            egd.addMessage("Smart filter (used to pick optimum results during fitting)");
+            egd.addTextAreas(uk.ac.sussex.gdsc.core.utils.XmlUtils.convertQuotes(xml), null, 8, 60);
+            // Add message about precision filtering
+            egd.addMessage(TextUtils
+                .wrap("Note: Smart filters using precision may require a local background level. "
+                    + "Ensure the camera calibration is correct including any bias.", 80));
+
+            egd.setSilent(silent);
+            egd.showDialog(true, gd);
+            if (egd.wasCanceled()) {
+              return false;
+            }
+
+            final String newXml = egd.getNextText();
+            final Filter f = Filter.fromXml(newXml);
+            if (!(f instanceof DirectFilter)) {
+              return false;
+            }
+
+            if (!xml.equals(newXml)) {
+              fitConfig.setDirectFilter((DirectFilter) f);
+              return true;
+            }
+            // No change
+            return false;
+          }
+        });
+  }
+
+  /**
+   * Validate the smart filter options. Checks the smart filter XML creates a valid filter; the
+   * filter is set as the direct filter in the provided configuration.
+   *
+   * @param fitConfig the fit config
+   * @param silent set to true to suppress validation error messages
+   * @return true, if successful
+   */
+  private static boolean validateSmartFilterOptions(final FitConfiguration fitConfig,
+      boolean silent) {
+    if (!fitConfig.isSmartFilter()) {
+      return true;
+    }
+    final String xml = fitConfig.getSmartFilterString();
+    final Filter f = Filter.fromXml(xml);
+    if (!(f instanceof DirectFilter)) {
+      if (!silent) {
+        return configureSmartFilter(fitConfig);
+      }
+      return false;
+    }
+    fitConfig.setDirectFilter((DirectFilter) f);
+    return true;
+  }
+
+  /**
+   * Validate the z filter options.
+   *
+   * @param fitConfig the fit config
+   * @param silent set to true to suppress validation error messages
+   * @return true, if successful
+   */
+  private static boolean validateZFilterOptions(final FitConfiguration fitConfig, boolean silent) {
+    if (fitConfig.isDisableSimpleFilter() || !fitConfig.is3D()) {
+      return true;
+    }
+    final double minZ = fitConfig.getMinZ();
+    final double maxZ = fitConfig.getMaxZ();
+    if (minZ > maxZ) {
+      if (!silent) {
+        return configureZFilter(fitConfig);
+      }
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Adds the duplicate distance options. A single slider for the duplicate distance parameter is
    * added to the dialog.
    *
@@ -2141,15 +2345,11 @@ public class PeakFit implements PlugInFilter {
    */
   private boolean requireCalibration(CalibrationWriter calibration) {
     // Check for a supported camera
-    if (!calibration.isCcdCamera()) {
-      return true;
-    }
+
     // Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
-    if (!calibration.hasNmPerPixel()) {
-      return true;
-    }
     // Bias can be zero (but this is unlikely)
-    if (!calibration.hasCountPerPhoton() || calibration.getBias() <= 0) {
+    if (!calibration.isCcdCamera() || !calibration.hasNmPerPixel()
+        || !calibration.hasCountPerPhoton() || calibration.getBias() <= 0) {
       return true;
     }
     if (!calibration.hasExposureTime()) {
@@ -2186,16 +2386,8 @@ public class PeakFit implements PlugInFilter {
 
     resetWizardSettings();
 
-    if (!getCameraType(calibration)) {
-      return false;
-    }
-    if (!getPixelPitch(calibration)) {
-      return false;
-    }
-    if (!getGain(calibration)) {
-      return false;
-    }
-    if (!getExposureTime(calibration)) {
+    if (!getCameraType(calibration) || !getPixelPitch(calibration) || !getGain(calibration)
+        || !getExposureTime(calibration)) {
       return false;
     }
     if (!getPeakWidth(calibration)) {
@@ -2440,6 +2632,8 @@ public class PeakFit implements PlugInFilter {
       return false;
     }
 
+    final int flags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
+
     // Check arguments
     try {
       // No check on camera calibration. This is left to the FitConfiguration to
@@ -2510,34 +2704,35 @@ public class PeakFit implements PlugInFilter {
       if (extraOptions) {
         ParameterUtils.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
       }
+
+      // Validation methods may throw exceptions, or return false
+      if (!maximaIdentification) {
+        if (!configurePsfModel(config, flags)) {
+          return false;
+        }
+
+        // Note: configureResultsFilter(...) has been replaced by dynamic option collection
+        if (!validateSmartFilterOptions(fitConfig, false)) {
+          return false;
+        }
+        if (!validateZFilterOptions(fitConfig, false)) {
+          return false;
+        }
+      }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
-    final int flags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
-
-    // If precision filtering then we need the camera bias
-    if (!maximaIdentification) {
-      if (!configurePsfModel(config, flags)) {
-        return false;
-      }
-
-      if (!configureResultsFilter(config, flags)) {
-        return false;
-      }
-    }
-
-    if (!configureDataFilter(config, flags)) {
-      return false;
-    }
-
+    // TODO - add these input to the single dynamic dialog to allow a preview mode.
     // Second dialog for solver dependent parameters
-    if (!maximaIdentification && !configureFitSolver(config, source.getBounds(), bounds, flags)) {
+    if (!configureDataFilter(config, flags) || (!maximaIdentification
+        && !configureFitSolver(config, source.getBounds(), bounds, flags))) {
       return false;
     }
 
-    // Extra parameters are needed for interlaced data
+    // Extra parameters are needed for interlaced data. These are collected with a second
+    // dialog as a preview option from s single input dialog is not applicable.
     if (extraSettings.interlacedData) {
       gd = new ExtendedGenericDialog(TITLE);
       gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
@@ -2568,6 +2763,7 @@ public class PeakFit implements PlugInFilter {
       }
     }
 
+    // TODO - make this optional to allow faster read dialog for a preview 
     final boolean result = saveFitEngineSettings();
     if (!result) {
       IJ.error(TITLE, "Failed to save settings");
@@ -2577,9 +2773,11 @@ public class PeakFit implements PlugInFilter {
   }
 
   /**
-   * Show a dialog to configure the PSF model. The updated settings are saved to the settings file.
+   * Show a dialog to configure the PSF model.
    *
-   * <p>If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
+   * <p>For a 3D astigmatism PSF this attempts to load the astigmatism model and set it in the
+   * configuration. Exceptions will be raised if the model is null or invalid for the current
+   * calibration.
    *
    * @param config the config
    * @return true, if successful
@@ -2589,9 +2787,11 @@ public class PeakFit implements PlugInFilter {
   }
 
   /**
-   * Show a dialog to configure the PSF model. The updated settings are saved to the settings file.
+   * Configure the PSF model. The updated settings are optionally saved to the settings file.
    *
-   * <p>If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
+   * <p>For a 3D astigmatism PSF this attempts to load the astigmatism model and set it in the
+   * configuration. Exceptions will be raised if the model is null or invalid for the current
+   * calibration.
    *
    * @param config the config
    * @param flags the flags
@@ -2655,7 +2855,28 @@ public class PeakFit implements PlugInFilter {
    * @return true, if successful
    */
   public static boolean configureZFilter(FitEngineConfiguration config, int flags) {
-    final FitConfiguration fitConfig = config.getFitConfiguration();
+    if (configureZFilter(config.getFitConfiguration())) {
+      if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SAVE)) {
+        SettingsManager.writeSettings(config, 0);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Show a dialog to configure the results z filter.
+   *
+   * <p>If the fit configuration PSF is not 3D or the simple filter is disabled then this method
+   * returns true. If it is enabled then a dialog is shown to input the configuration for the z
+   * filter.
+   *
+   * <p>Note: The PSF and any z-model must be correctly configured for fitting in pixel units.
+   *
+   * @param fitConfig the fit config
+   * @return true, if successful
+   */
+  public static boolean configureZFilter(FitConfiguration fitConfig) {
     if (fitConfig.isDisableSimpleFilter() || !fitConfig.is3D()) {
       return true;
     }
@@ -2688,10 +2909,6 @@ public class PeakFit implements PlugInFilter {
     // Map back
     fitConfig.setMinZ(c.convertBack(minZ));
     fitConfig.setMaxZ(c.convertBack(maxZ));
-
-    if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SAVE)) {
-      SettingsManager.writeSettings(config, 0);
-    }
 
     return true;
   }
