@@ -27,11 +27,13 @@ package uk.ac.sussex.gdsc.smlm.model.camera;
 import ij.process.FloatProcessor;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -334,6 +336,91 @@ class PerPixelCameraModelTest {
         Assertions.assertEquals(variance[i], model.getVariance(x1, y1));
         Assertions.assertEquals(data.varG2[i], model.getNormalisedVariance(x1, y1));
       }
+    }
+  }
+
+  @Test
+  void testLocate() {
+    final int w = 10;
+    final int h = 20;
+    final float[] b = createData(w, h, 100);
+    final float[] g = createData(w, h, 3);
+    final float[] v = createData(w, h, 7);
+    final PerPixelCameraModel model =
+        PerPixelCameraModel.create(new Rectangle(0, 0, w, h), b, g, v);
+
+    Assertions.assertTrue(model.locate(new NullCameraModel()).isEmpty());
+
+    final PerPixelCameraModel model2 = PerPixelCameraModel.create(new Rectangle(0, 0, w - 1, h - 1),
+        createData(w - 1, h - 1, 123), createData(w - 1, h - 1, 4), createData(w - 1, h - 1, 8));
+    Assertions.assertTrue(model.locate(model2).isEmpty());
+
+    float[] b2 = createData(w + 1, h, b[0]);
+    float[] g2 = createData(w + 1, h, g[0]);
+    float[] v2 = createData(w + 1, h, v[0]);
+    Assertions.assertTrue(model
+        .locate(PerPixelCameraModel.create(new Rectangle(0, 0, w + 1, h), b2, g2, v2)).isEmpty());
+    b2 = createData(w, h + 1, b[0]);
+    g2 = createData(w, h + 1, g[0]);
+    v2 = createData(w, h + 1, v[0]);
+    Assertions.assertTrue(model
+        .locate(PerPixelCameraModel.create(new Rectangle(0, 0, w, h + 1), b2, g2, v2)).isEmpty());
+
+    assertLocate(model, 1, 1, w - 1, h - 1, 0, 0, 1, 0, 0, 1, 1, 1);
+
+    // Randomise
+    final int n = b.length;
+    final UniformRandomProvider rng = RngFactory.createWithFixedSeed();
+    for (final float[] data : new float[][] {b, g, v}) {
+      final float[] restore = data.clone();
+      for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 100; j++) {
+          data[rng.nextInt(n)] = rng.nextFloat();
+        }
+        assertLocate(model, 2, 3, 6, 13);
+        assertLocate(model, 0, 0, w, h);
+        System.arraycopy(restore, 0, data, 0, n);
+      }
+    }
+
+    // Duplicate pixel
+    final int x = 3;
+    final int y = 7;
+    final int ox = 1;
+    final int oy = 10;
+    final int i1 = y * w + x;
+    final int i2 = (y + oy) * w + x + ox;
+    b[i1] = ++b[i2];
+    g[i1] = ++g[i2];
+    v[i1] = ++v[i2];
+    // Large patch matches correctly
+    assertLocate(model, 2, 3, 7, 15);
+    // Small second patch matches the first, including offsets
+    assertLocate(model, 2 + ox, 3 + oy, 7, 5, 2, 3, 2 + ox, 3 + oy);
+    assertLocate(model, 2 + ox - 1, 3 + oy, 7, 5, 2 - 1, 3, 2 + ox - 1, 3 + oy);
+    assertLocate(model, 2 + ox, 3 + oy - 1, 7, 6, 2, 3 - 1, 2 + ox, 3 + oy - 1);
+    assertLocate(model, 2 + ox - 1, 3 + oy - 1, 7, 6, 2 - 1, 3 - 1, 2 + ox - 1, 3 + oy - 1);
+  }
+
+  private static float[] createData(int w, int h, float value) {
+    final float[] d = new float[w * h];
+    Arrays.fill(d, value);
+    return d;
+  }
+
+  private static void assertLocate(PerPixelCameraModel model, int x, int y, int w, int h) {
+    assertLocate(model, x, y, w, h, x, y);
+  }
+
+  private static void assertLocate(PerPixelCameraModel model, int x, int y, int w, int h,
+      int... origin) {
+    final Rectangle bounds = new Rectangle(x, y, w, h);
+    final CameraModel crop = model.crop(bounds, false);
+    final List<Rectangle> rectangles = model.locate(crop);
+    Assertions.assertEquals(origin.length / 2, rectangles.size(), "Number of rectangles");
+    for (int i = 0; i < origin.length; i += 2) {
+      final Rectangle expectedBounds = new Rectangle(origin[i], origin[i + 1], w, h);
+      Assertions.assertEquals(expectedBounds, rectangles.get(i / 2));
     }
   }
 }

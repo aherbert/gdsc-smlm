@@ -25,6 +25,9 @@
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
@@ -705,5 +708,72 @@ public class PerPixelCameraModel implements CameraModel {
   public PerPixelCameraModel copy() {
     // Deep copy
     return new PerPixelCameraModel(true, cameraBounds, bias, gain, variance, varG2);
+  }
+
+  /**
+   * Locate the cropped model within the per-pixel data of this model.
+   *
+   * <p>This method is the functional reverse of {@link #crop(Rectangle, boolean)}. It should return
+   * a rectangle that is able to crop the current model to the input cropped model.
+   *
+   * <p>Note: It may not be possible to uniquely identify the location of a cropped model as it is
+   * possible that the sub-model may match multiple regions. In this case the method will return all
+   * matches.
+   *
+   * @param model the model
+   * @return the crop rectangle(s) (never null)
+   */
+  public List<Rectangle> locate(CameraModel model) {
+    if (model instanceof PerPixelCameraModel) {
+      final PerPixelCameraModel crop = (PerPixelCameraModel) model;
+      final int w1 = getWidth();
+      final int h1 = getHeight();
+      final int w2 = crop.getWidth();
+      final int h2 = crop.getHeight();
+      // Must be smaller
+      if (w2 > w1 || h2 > h1) {
+        return Collections.emptyList();
+      }
+      // Extract search data
+      final float[] b1 = bias;
+      final float[] g1 = gain;
+      final float[] v1 = variance;
+      final float[] b2 = crop.bias;
+      final float[] g2 = crop.gain;
+      final float[] v2 = crop.variance;
+
+      // Set search bounds
+      final int maxx = w1 - w2;
+      final int maxy = h1 - h2;
+
+      // Find a matching pixel
+      final List<Rectangle> rectangles = new ArrayList<>();
+      final float target = g2[0];
+      for (int y = 0; y <= maxy; y++) {
+        for (int x = 0, i = y * w1; x <= maxx; x++, i++) {
+          if (g1[i] == target
+              // Match the entire per-pixel model
+              && match(i, b1, w1, b2, w2, h2) && match(i, g1, w1, g2, w2, h2)
+              && match(i, v1, w1, v2, w2, h2)) {
+            rectangles.add(new Rectangle(getXOrigin() + x, getYOrigin() + y, w2, h2));
+          }
+        }
+      }
+      return rectangles;
+    }
+    return Collections.emptyList();
+  }
+
+  private static boolean match(int index1, float[] data1, int w1, float[] data2, int w2, int h2) {
+    int i2 = 0;
+    for (int y2 = 0; y2 < h2; y2++) {
+      int i1 = index1 + y2 * w1;
+      for (int x2 = 0; x2 < w2; x2++) {
+        if (data1[i1++] != data2[i2++]) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
