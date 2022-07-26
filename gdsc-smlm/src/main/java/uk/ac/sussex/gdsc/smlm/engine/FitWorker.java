@@ -2196,6 +2196,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
       // Using the mean variance allows an estimate for a per-pixel camera model.
       // Use the normalised variance (i.e. the variance in photo-electrons).
+
+      // Note: The argument input bounds are relative to the data bounds so
+      // convert them to fit inside the camera model.
+      // assume: dataBounds == cameraModel.getBounds()
+      //bounds.x += cameraModel.getBounds().x;
+      //bounds.y += cameraModel.getBounds().y;
+      bounds.x += cc.dataBounds.x;
+      bounds.y += cc.dataBounds.y;
       double noiseEstimate = Math.sqrt(background + cameraModel.getMeanNormalisedVariance(bounds));
 
       if (noiseEstimate == 0) {
