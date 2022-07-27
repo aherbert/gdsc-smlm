@@ -123,6 +123,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitQueue;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
 import uk.ac.sussex.gdsc.smlm.engine.ParameterisedFitJob;
 import uk.ac.sussex.gdsc.smlm.filters.SpotFilter;
+import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
@@ -1278,10 +1279,15 @@ public class PeakFit implements PlugInFilter {
     Scrollbar[] sliders = null;
     final boolean isShowGenericDialog = ImageJUtils.isShowGenericDialog();
 
+    final int optionFlags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
+
     if (!maximaIdentification) {
       gd.addMessage("--- Gaussian fitting ---");
-      gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-          FitProtosHelper.getName(fitConfig.getFitSolver()));
+      addFitSolverOptions(gd, fitEngineConfigurationProvider, source.getBounds(), bounds,
+          optionFlags);
+
+      // gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
+      // FitProtosHelper.getName(fitConfig.getFitSolver()));
       if (extraOptions) {
         gd.addCheckbox("Fit_background", fitConfig.isBackgroundFitting());
       }
@@ -1622,6 +1628,15 @@ public class PeakFit implements PlugInFilter {
             return changed;
           }
         });
+    // Pass changes back to the config.
+    // Required to add extra options for the fit solver based on the camera.
+    final Choice ch = gd.getLastChoice();
+    ch.addItemListener(e -> {
+      final CalibrationWriter cal = new CalibrationWriter(calibrationProvider.getCalibration());
+      final CameraType t = SettingsManager.getCameraTypeValues()[ch.getSelectedIndex()];
+      cal.setCameraType(t);
+      calibrationProvider.saveCalibration(cal.getCalibration());
+    });
   }
 
   /**
@@ -1936,8 +1951,140 @@ public class PeakFit implements PlugInFilter {
     final DataFilterMethod defaultFilterMethod = DataFilterMethod.GAUSSIAN;
     final double defaultFilterSmoothing = 0.5;
     final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
+    // A single filter is configured directly in the dialog.
+    // A difference/jury filter use an option listener.
     gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
-        config.getDataFilterType().ordinal());
+        config.getDataFilterType().ordinal(), new OptionListener<Integer>() {
+          @Override
+          public boolean collectOptions(Integer value) {
+            final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
+            config.setDataFilterType(value);
+            return collectOptions(false);
+          }
+
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
+
+          private boolean collectOptions(boolean silent) {
+            final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
+            int filterCount;
+            switch (config.getDataFilterType()) {
+              case JURY:
+                filterCount = Integer.MAX_VALUE;
+                break;
+
+              case DIFFERENCE:
+                filterCount = 2;
+                break;
+
+              case SINGLE:
+              default:
+                // A single filter is configured directly
+                return false;
+            }
+
+            // Collect configuration for additional filters
+            boolean changed = false;
+            int method;
+            double smooth;
+            boolean abs;
+            int numberOfFilters = 1;
+            final int origNumberOfFilters = Math.min(config.getDataFiltersCount(), filterCount);
+            final String[] filterNames = SettingsManager.getDataFilterMethodNames();
+            final DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
+            for (int i = 1; i < filterCount; i++) {
+              final int filter = i + 1;
+              final int ii = i;
+
+              final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+              if (filter == filterCount) {
+                // This is maximum filter count so no continue option
+                ImageJUtils.addMessage(egd, "Configure the %s filter.",
+                    FitProtosHelper.getName(config.getDataFilterType()));
+              } else {
+                egd.enableYesNoCancel("Add", "Continue");
+                ImageJUtils.addMessage(egd,
+                    "Configure the %s filter.\nClick continue to proceed with the current set of %d.",
+                    FitProtosHelper.getName(config.getDataFilterType()), i);
+              }
+
+              final String fieldName = "Spot_filter" + filter;
+              if (IJ.isMacro()) {
+                // Use blank default value so bad macro parameters return nothing
+                egd.addStringField(fieldName, "");
+              } else {
+                egd.addChoice(fieldName, filterNames, filterNames[config
+                    .getDataFilterMethod(ii, config.getDataFilterMethod(ii - 1)).ordinal()]);
+              }
+              addRelativeParameterOptions(egd, new RelativeParameterProvider(0, 4.5,
+                  "Smoothing" + filter, fitEngineConfigurationProvider, true) {
+                @Override
+                void setAbsolute(boolean absolute) {
+                  // Get the current settings
+                  final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
+                  final DataFilterMethod m = c.getDataFilterMethod(ii);
+                  final double smooth = c.getDataFilterParameter(ii).getValue();
+                  // Reset with the new absolute value
+                  c.setDataFilter(m, smooth, absolute, ii);
+                }
+
+                @Override
+                boolean isAbsolute() {
+                  final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
+                  return c.getDataFilterParameterAbsolute(ii,
+                      c.getDataFilterParameterAbsolute(ii - 1));
+                }
+
+                @Override
+                double getValue() {
+                  final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
+                  return c.getDataFilterParameterValue(ii, c.getDataFilterParameterValue(ii - 1));
+                }
+              });
+              egd.setSilent(silent);
+              egd.showDialog(true, gd);
+              if (egd.wasOKed()) {
+                int filterIndex = -1;
+                if (IJ.isMacro()) {
+                  final String filterName = egd.getNextString();
+                  for (int j = 0; j < filterNames.length; j++) {
+                    if (filterNames[j].equals(filterName)) {
+                      filterIndex = j;
+                      break;
+                    }
+                  }
+
+                  if (filterIndex < 0) {
+                    break;
+                  }
+                } else {
+                  filterIndex = egd.getNextChoiceIndex();
+                }
+                method = i < origNumberOfFilters ? config.getDataFilterMethod(i).getNumber() : -1;
+                smooth = config.getDataFilterParameterValue(i, Double.NaN);
+                abs = config.getDataFilterParameterAbsolute(i, false);
+                config.setDataFilter(filterValues[filterIndex], Math.abs(egd.getNextNumber()), i);
+                // Note: The absolute flag is set in extra options
+                egd.collectOptions();
+                changed = changed || method != config.getDataFilterMethod(i).getNumber()
+                    || smooth != config.getDataFilterParameterValue(i)
+                    || abs != config.getDataFilterParameterAbsolute(i);
+                numberOfFilters++;
+              } else {
+                break;
+              }
+            }
+            // Truncation of the current parameters. Allows detection of first time changes
+            // and ignoring second time no changes when using a jury filter,
+            // e.g. 5 -> 4 -> 4 filters (change first time, second time is unchanged)
+            config.setNumberOfFilters(numberOfFilters);
+
+            return changed || origNumberOfFilters != numberOfFilters;
+          }
+        });
+
     gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
         config.getDataFilterMethod(n, defaultFilterMethod).ordinal());
     addRelativeParameterOptions(gd,
@@ -1961,6 +2108,53 @@ public class PeakFit implements PlugInFilter {
                 defaultFilterSmoothing);
           }
         });
+  }
+
+  /**
+   * Validate the data filter options. Checks the data filter can be created.
+   *
+   * <p>This will check if the configuration is OK. For a per-pixel camera model this requires the
+   * model is loaded from the model name.
+   *
+   * @param config the config
+   * @param silent set to true to suppress validation error messages
+   * @return true, if successful
+   */
+  static boolean validateDataFilterOptions(final FitEngineConfiguration config, boolean silent) {
+    try {
+      // We use the previous value in the event the configuration does not have any current values.
+      // Check we have at least the first filter.
+      final int numberOfFilters = config.getDataFiltersCount();
+      if (numberOfFilters == 0) {
+        throw new IllegalStateException("No primary filter is configured");
+      }
+
+      switch (config.getDataFilterType()) {
+        case JURY:
+        case DIFFERENCE:
+          if (numberOfFilters < 2) {
+            throw new IllegalStateException(
+                "Multiple filter parameters required: " + config.getDataFilterType());
+          }
+          // Note: for a difference filter even if there are more than 2 filter configured, the
+          // createSpotFilter() method will only use the first 2. To allow reuse of the parameters
+          // this validation does not discard the rest, i.e. config.setNumberOfFilters(2);
+          break;
+
+        case SINGLE:
+        default:
+          break;
+      }
+
+      config.createSpotFilter();
+    } catch (final IllegalStateException ex) {
+      if (!silent) {
+        IJ.error(TITLE, ex.getMessage());
+      }
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -2043,6 +2237,326 @@ public class PeakFit implements PlugInFilter {
         return fitEngineConfigurationProvider.get().getFitting();
       }
     });
+  }
+
+  /**
+   * Adds the fit solver options. A single choice for the fit solver is added to the dialog.
+   *
+   * <p>The bounds are used to validate the camera model. The camera model must be large enough to
+   * cover the source bounds. If larger then it will be cropped. Optionally an internal region of
+   * the input image can be specified. This is relative to the width and height of the input image.
+   * If no camera model is present then the bounds can be null.
+   *
+   * @param gd the dialog
+   * @param fitEngineConfigurationProvider the fit engine configuration provider
+   * @param sourceBounds the source image bounds (used to validate the camera model dimensions)
+   * @param bounds the crop bounds (relative to the input image, used to validate the camera model
+   *        dimensions)
+   * @param flags the flags
+   */
+  public static void addFitSolverOptions(final ExtendedGenericDialog gd,
+      final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider, Rectangle sourceBounds,
+      Rectangle bounds, int flags) {
+
+    final boolean extraOptions = BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS);
+    final boolean ignoreCalibration = BitFlagUtils.anySet(flags, FLAG_IGNORE_CALIBRATION);
+
+    // Adapted from configureFitSolver. This is a reduced functionality method that collects
+    // options. Validation is performed in validateFitSolverOptions.
+    gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
+        FitProtosHelper
+            .getName(fitEngineConfigurationProvider.get().getFitConfiguration().getFitSolver()),
+        new OptionListener<Integer>() {
+          @Override
+          public boolean collectOptions(Integer value) {
+            fitEngineConfigurationProvider.get().getFitConfiguration().setFitSolver(value);
+            return collectOptions(false);
+          }
+
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
+
+          private boolean collectOptions(boolean silent) {
+            final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
+            final FitConfiguration fitConfig = config.getFitConfiguration();
+            final CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+            final FitSolver fitSolver = fitConfig.getFitSolver();
+
+            final boolean isLvm = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE
+                || fitSolver == FitSolver.LVM_MLE;
+            // Support the deprecated backtracking FastMLE solver as a plain FastMLE solver
+            final boolean isFastMle =
+                fitSolver == FitSolver.FAST_MLE || fitSolver == FitSolver.BACKTRACKING_FAST_MLE;
+            final boolean isSteppingFunctionSolver = isLvm || isFastMle;
+
+            if (fitSolver == FitSolver.MLE) {
+              // Only support CCD/EM-CCD at the moment
+              if (!calibration.isCcdCamera()) {
+                if (!silent) {
+                  IJ.error(TITLE, "CCD/EM-CCD camera is required for fit solver: " + fitSolver);
+                }
+                return false;
+              }
+
+              final ExtendedGenericDialog egd =
+                  new ExtendedGenericDialog("Fit Solver Options", null);
+              if (!ignoreCalibration) {
+                egd.addMessage("Maximum Likelihood Estimation requires CCD-type camera parameters");
+                egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "count");
+                egd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
+                egd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "count");
+                egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 2, 6,
+                    "electron/photon");
+                egd.addCheckbox("EM-CCD", calibration.isEmCcd());
+              } else {
+                egd.addMessage("Maximum Likelihood Estimation requires additional parameters");
+              }
+              final String[] searchNames = SettingsManager.getSearchMethodNames();
+              egd.addChoice("Search_method", searchNames,
+                  FitProtosHelper.getName(fitConfig.getSearchMethod()));
+              egd.addStringField("Relative_threshold",
+                  MathUtils.rounded(fitConfig.getRelativeThreshold()));
+              egd.addStringField("Absolute_threshold",
+                  MathUtils.rounded(fitConfig.getAbsoluteThreshold()));
+              egd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+              egd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(),
+                  0);
+              if (extraOptions) {
+                egd.addCheckbox("Gradient_line_minimisation",
+                    fitConfig.isGradientLineMinimisation());
+              }
+              egd.setSilent(silent);
+              egd.showDialog(true, gd);
+              if (egd.wasCanceled()) {
+                return false;
+              }
+              if (!ignoreCalibration) {
+                calibration.setBias(Math.abs(egd.getNextNumber()));
+                fitConfig.setModelCamera(egd.getNextBoolean());
+                calibration.setReadNoise(Math.abs(egd.getNextNumber()));
+                calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
+                calibration
+                    .setCameraType((egd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
+                fitConfig.setCalibration(calibration.getCalibration());
+              }
+              fitConfig.setSearchMethod(
+                  SettingsManager.getSearchMethodValues()[egd.getNextChoiceIndex()]);
+              fitConfig.setRelativeThreshold(getThresholdNumber(egd));
+              fitConfig.setAbsoluteThreshold(getThresholdNumber(egd));
+              fitConfig.setMaxIterations((int) egd.getNextNumber());
+              fitConfig.setMaxFunctionEvaluations((int) egd.getNextNumber());
+              if (extraOptions) {
+                fitConfig.setGradientLineMinimisation(egd.getNextBoolean());
+              } else {
+                // This option is for the Conjugate Gradient optimiser and makes it less stable
+                fitConfig.setGradientLineMinimisation(false);
+              }
+
+            } else if (isSteppingFunctionSolver) {
+              final boolean requireCalibration =
+                  !ignoreCalibration && fitSolver != FitSolver.LVM_LSE;
+
+              // Collect options for LVM fitting
+              final ExtendedGenericDialog egd =
+                  new ExtendedGenericDialog("Fit Solver Options", null);
+              final String fitSolverName = FitProtosHelper.getName(fitSolver);
+              egd.addMessage(fitSolverName + " requires additional parameters");
+              egd.addStringField("Relative_threshold",
+                  MathUtils.rounded(fitConfig.getRelativeThreshold()));
+              egd.addStringField("Absolute_threshold",
+                  MathUtils.rounded(fitConfig.getAbsoluteThreshold()));
+              egd.addStringField("Parameter_relative_threshold",
+                  MathUtils.rounded(fitConfig.getParameterRelativeThreshold()));
+              egd.addStringField("Parameter_absolute_threshold",
+                  MathUtils.rounded(fitConfig.getParameterAbsoluteThreshold()));
+              egd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+              if (isLvm) {
+                egd.addNumericField("Lambda", fitConfig.getLambda(), 4);
+              }
+              if (isFastMle) {
+                egd.addCheckbox("Fixed_iterations", fitConfig.isFixedIterations());
+                // This works because the proto configuration enum matches the named enum
+                final String[] lineSearchNames = SettingsManager
+                    .getNames((Object[]) FastMleSteppingFunctionSolver.LineSearchMethod.values());
+                egd.addChoice("Line_search_method", lineSearchNames,
+                    lineSearchNames[fitConfig.getLineSearchMethod().getNumber()]);
+              }
+
+              egd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
+              egd.addCheckbox("Dynamic_clamping", fitConfig.isUseDynamicClamping());
+              final PSF psf = fitConfig.getPsf();
+              final boolean isAstigmatism = psf.getPsfType() == PSFType.ASTIGMATIC_GAUSSIAN_2D;
+              final int nParams = PsfHelper.getParameterCount(psf);
+              if (extraOptions) {
+                egd.addNumericField("Clamp_background", fitConfig.getClampBackground(), 2);
+                egd.addNumericField("Clamp_signal", fitConfig.getClampSignal(), 2);
+                egd.addNumericField("Clamp_x", fitConfig.getClampX(), 2);
+                egd.addNumericField("Clamp_y", fitConfig.getClampY(), 2);
+                if (isAstigmatism) {
+                  egd.addNumericField("Clamp_z", fitConfig.getClampZ(), 2);
+                } else {
+                  if (nParams > 1 || !fitConfig.isFixedPsf()) {
+                    egd.addNumericField("Clamp_sx", fitConfig.getClampXSd(), 2);
+                  }
+                  if (nParams > 1) {
+                    egd.addNumericField("Clamp_sy", fitConfig.getClampYSd(), 2);
+                  }
+                  if (nParams > 2) {
+                    egd.addNumericField("Clamp_angle", fitConfig.getClampAngle(), 2);
+                  }
+                }
+              }
+
+              // Extra parameters are needed for calibrated fit solvers
+              if (requireCalibration) {
+                switch (calibration.getCameraType()) {
+                  case CCD:
+                  case EMCCD:
+                  case SCMOS:
+                    break;
+                  default:
+                    if (!silent) {
+                      IJ.error(TITLE, fitSolverName + " requires camera calibration");
+                    }
+                    return false;
+                }
+
+                egd.addMessage(fitSolverName + " requires calibration for camera: "
+                    + CalibrationProtosHelper.getName(calibration.getCameraType()));
+                if (calibration.isScmos()) {
+                  final String[] models = CameraModelManager.listCameraModels(true);
+                  egd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
+                } else {
+                  egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
+                  egd.addNumericField("Gain", calibration.getCountPerPhoton(), 2, 6,
+                      "Count/photon");
+                  egd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "Count");
+                }
+              }
+
+              egd.setSilent(silent);
+              egd.showDialog(true, gd);
+              if (egd.wasCanceled()) {
+                return false;
+              }
+
+              fitConfig.setRelativeThreshold(getThresholdNumber(egd));
+              fitConfig.setAbsoluteThreshold(getThresholdNumber(egd));
+              fitConfig.setParameterRelativeThreshold(getThresholdNumber(egd));
+              fitConfig.setParameterAbsoluteThreshold(getThresholdNumber(egd));
+              fitConfig.setMaxIterations((int) egd.getNextNumber());
+              if (isLvm) {
+                fitConfig.setLambda(egd.getNextNumber());
+              }
+              if (isFastMle) {
+                fitConfig.setFixedIterations(egd.getNextBoolean());
+                fitConfig.setLineSearchMethod(egd.getNextChoiceIndex());
+              }
+
+              fitConfig.setUseClamping(egd.getNextBoolean());
+              fitConfig.setUseDynamicClamping(egd.getNextBoolean());
+              if (extraOptions) {
+                fitConfig.setClampBackground(Math.abs(egd.getNextNumber()));
+                fitConfig.setClampSignal(Math.abs(egd.getNextNumber()));
+                fitConfig.setClampX(Math.abs(egd.getNextNumber()));
+                fitConfig.setClampY(Math.abs(egd.getNextNumber()));
+                if (isAstigmatism) {
+                  fitConfig.setClampZ(Math.abs(egd.getNextNumber()));
+                } else {
+                  if (nParams > 1 || !fitConfig.isFixedPsf()) {
+                    fitConfig.setClampXSd(Math.abs(egd.getNextNumber()));
+                  }
+                  if (nParams > 1) {
+                    fitConfig.setClampYSd(Math.abs(egd.getNextNumber()));
+                  }
+                  if (nParams > 2) {
+                    fitConfig.setClampAngle(Math.abs(egd.getNextNumber()));
+                  }
+                }
+              }
+
+              if (requireCalibration) {
+                if (calibration.isScmos()) {
+                  fitConfig.setCameraModelName(egd.getNextChoice());
+                } else {
+                  calibration.setBias(Math.abs(egd.getNextNumber()));
+                  calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
+                  calibration.setReadNoise(Math.abs(egd.getNextNumber()));
+                  fitConfig.setCalibration(calibration.getCalibration());
+                }
+              }
+
+            } else {
+              if (!silent) {
+                IJ.error(TITLE, "Unknown fit solver: " + fitSolver);
+              }
+              return false;
+            }
+
+            // No check for parameter changes as there is no FitEngineConfiguration equals(),
+            // simply return true.
+            return true;
+          }
+        });
+    // Pass changes back to the config
+    final Choice ch = gd.getLastChoice();
+    ch.addItemListener(e -> {
+      fitEngineConfigurationProvider.get().getFitConfiguration()
+          .setFitSolver(ch.getSelectedIndex());
+    });
+  }
+
+  /**
+   * Validate the fit solver options. Checks the fit solver can be created.
+   *
+   * <p>This will check if the configuration is OK (including convergence criteria). It requires the
+   * camera model is correctly configured. For sCMOS cameras this requires the model is loaded from
+   * the model name.
+   *
+   * @param config the config
+   * @param sourceBounds the source bounds
+   * @param bounds the bounds
+   * @param silent set to true to suppress validation error messages
+   * @return true, if successful
+   */
+  private static boolean validateFitSolverOptions(final FitEngineConfiguration config,
+      Rectangle sourceBounds, Rectangle bounds, boolean silent) {
+    final FitConfiguration fitConfig = config.getFitConfiguration();
+    final FitSolver fitSolver = fitConfig.getFitSolver();
+
+    final boolean isLvm = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE
+        || fitSolver == FitSolver.LVM_MLE;
+
+    try {
+      ParameterUtils.isAboveZero("Relative threshold", fitConfig.getRelativeThreshold());
+      ParameterUtils.isAboveZero("Absolute threshold", fitConfig.getAbsoluteThreshold());
+      ParameterUtils.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+      if (isLvm) {
+        ParameterUtils.isAboveZero("Lambda", fitConfig.getLambda());
+      }
+      if (fitSolver == FitSolver.MLE) {
+        ParameterUtils.isAboveZero("Max function evaluations",
+            fitConfig.getMaxFunctionEvaluations());
+      }
+
+      final FunctionSolver functionSolver = fitConfig.getFunctionSolver();
+
+      if (config.isIncludeNeighbours() && !functionSolver.isBounded()) {
+        if (!silent) {
+          IJ.error(TITLE, "Including neighbours requires a bounded fit solver");
+        }
+        return false;
+      }
+    } catch (final IllegalArgumentException | IllegalStateException ex) {
+      if (!silent) {
+        IJ.error(TITLE, ex.getMessage());
+      }
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -2705,29 +3219,30 @@ public class PeakFit implements PlugInFilter {
         ParameterUtils.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
       }
 
-      // Validation methods may throw exceptions, or return false
-      if (!maximaIdentification) {
-        if (!configurePsfModel(config, flags)) {
-          return false;
-        }
+      // Validation methods may throw exceptions, or return false.
+      // If a sCMOS camera then this may prompt to crop the camera model if the bounds
+      // do not match.
+      if (!validateCameraModelOptions(fitConfig, source.getBounds(), bounds, false)) {
+        return false;
+      }
 
-        // Note: configureResultsFilter(...) has been replaced by dynamic option collection
-        if (!validateSmartFilterOptions(fitConfig, false)) {
-          return false;
-        }
-        if (!validateZFilterOptions(fitConfig, false)) {
+      if (!maximaIdentification) {
+        if (!configurePsfModel(config, flags)
+            // Note: configureResultsFilter(...) has been replaced by dynamic option collection
+            // so the current options are validated
+            || !validateSmartFilterOptions(fitConfig, false)
+            || !validateZFilterOptions(fitConfig, false)
+            || !validateFitSolverOptions(config, source.getBounds(), bounds, false)) {
           return false;
         }
       }
+      // Note: configureDataFilter(...) has been replaced by dynamic option collection
+      // so the current options are validated
+      if (!validateDataFilterOptions(config, false)) {
+        return false;
+      }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
-      return false;
-    }
-
-    // TODO - add these input to the single dynamic dialog to allow a preview mode.
-    // Second dialog for solver dependent parameters
-    if (!configureDataFilter(config, flags) || (!maximaIdentification
-        && !configureFitSolver(config, source.getBounds(), bounds, flags))) {
       return false;
     }
 
@@ -2763,7 +3278,7 @@ public class PeakFit implements PlugInFilter {
       }
     }
 
-    // TODO - make this optional to allow faster read dialog for a preview 
+    // TODO - make this optional to allow faster read dialog for a preview
     final boolean result = saveFitEngineSettings();
     if (!result) {
       IJ.error(TITLE, "Failed to save settings");
@@ -3119,6 +3634,9 @@ public class PeakFit implements PlugInFilter {
     final FitConfiguration fitConfig = config.getFitConfiguration();
     final CalibrationReader calibration = fitConfig.getCalibrationReader();
     if (calibration.isScmos()) {
+      // Q. Should this be done if fitConfig.getCameraModel().isPerPixelModel() is true?
+      // The current model may have been set as a crop already. Resetting it here
+      // means the crop will have to be repeated.
       fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
     }
 
@@ -3162,9 +3680,9 @@ public class PeakFit implements PlugInFilter {
     final boolean isLvm = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE
         || fitSolver == FitSolver.LVM_MLE;
     // Support the deprecated backtracking FastMLE solver as a plain FastMLE solver
-    final boolean isFastMml =
+    final boolean isFastMle =
         fitSolver == FitSolver.FAST_MLE || fitSolver == FitSolver.BACKTRACKING_FAST_MLE;
-    final boolean isSteppingFunctionSolver = isLvm || isFastMml;
+    final boolean isSteppingFunctionSolver = isLvm || isFastMle;
 
     if (fitSolver == FitSolver.MLE) {
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -3245,7 +3763,7 @@ public class PeakFit implements PlugInFilter {
       if (isLvm) {
         gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
       }
-      if (isFastMml) {
+      if (isFastMle) {
         gd.addCheckbox("Fixed_iterations", fitConfig.isFixedIterations());
         // This works because the proto configuration enum matches the named enum
         final String[] lineSearchNames = SettingsManager
@@ -3316,7 +3834,7 @@ public class PeakFit implements PlugInFilter {
       if (isLvm) {
         fitConfig.setLambda(gd.getNextNumber());
       }
-      if (isFastMml) {
+      if (isFastMle) {
         fitConfig.setFixedIterations(gd.getNextBoolean());
         fitConfig.setLineSearchMethod(gd.getNextChoiceIndex());
       }
@@ -3406,6 +3924,29 @@ public class PeakFit implements PlugInFilter {
   }
 
   /**
+   * Load and validate the camera model covers the region of the source.
+   *
+   * <p>Does nothing if the fit solver does not support a sCMOS camera (e.g. MLE).
+   *
+   * @param fitConfig the fit config
+   * @param sourceBounds the source bounds of the input image
+   * @param cropBounds the crop bounds (relative to the input image)
+   * @param initialise the initialise flag
+   * @return true, if successful
+   * @throws IllegalStateException if no camera model exists for the camera type
+   */
+  private static boolean validateCameraModelOptions(FitConfiguration fitConfig,
+      Rectangle sourceBounds, Rectangle cropBounds, boolean initialise) {
+    if (fitConfig.getCalibrationReader().isScmos() && fitConfig.getFitSolver() != FitSolver.MLE) {
+      fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
+      if (!checkCameraModel(fitConfig, sourceBounds, cropBounds, true)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Check the camera model covers the region of the source.
    *
    * @param fitConfig the fit config
@@ -3487,7 +4028,7 @@ public class PeakFit implements PlugInFilter {
    * @param cropBounds the crop bounds (relative to the input image). If null then the full width x
    *        height of the source is used.
    * @param resetOrigin the reset origin flag (to set the output camera model origin to match the
-   *        source bounds)
+   *        crop bounds)
    * @return the camera model (or null if the dialog was cancelled)
    * @throws IllegalArgumentException If the crop cannot be done
    */
@@ -3699,6 +4240,13 @@ public class PeakFit implements PlugInFilter {
     if (ignoreBoundsForNoise) {
       isFitCameraCounts = fitConfig.isFitCameraCounts();
       cameraModel = fitConfig.getCameraModel();
+      // Note:
+      // The camera model has dimensions to match source.next(cropBounds).
+      // However we estimate noise from the entire frame which requires an uncropped model.
+      // This is an issue for a per-pixel model where we must reload the model for the entire frame.
+      if (cameraModel.isPerPixelModel()) {
+        cameraModel = checkFullSizePerPixelCameraModel(cropBounds, cameraModel);
+      }
     }
 
     runTime = System.nanoTime();
@@ -3760,6 +4308,44 @@ public class PeakFit implements PlugInFilter {
     showResults();
 
     source.close();
+  }
+
+  /**
+   * Check the per-pixel camera model covers the full size of the image source.
+   *
+   * @param cropBounds the crop bounds
+   * @param cameraModel the camera model
+   * @return the camera model
+   */
+  private CameraModel checkFullSizePerPixelCameraModel(final Rectangle cropBounds,
+      CameraModel cameraModel) {
+    if (cropBounds.width != source.getWidth() || cropBounds.height != source.getHeight()) {
+      // Try and reload the camera model
+      CameraModel model = CameraModelManager.load(fitConfig.getCameraModelName());
+      if (model instanceof PerPixelCameraModel) {
+        // Find cameraModel within the model
+        final List<Rectangle> rectangles = ((PerPixelCameraModel) model).locate(cameraModel);
+        if (rectangles.size() == 1) {
+          // Expand the crop to cover the entire frame. The cropBounds is relative to the frame
+          // so the offset can be used to expand the source
+          final Rectangle r = rectangles.get(0);
+          r.x -= cropBounds.x;
+          r.y -= cropBounds.y;
+          r.width = source.getWidth();
+          r.height = source.getHeight();
+          model = model.crop(r, true);
+        } else {
+          throw new IllegalStateException("Unable to reload camera model for noise estimation: "
+              + fitConfig.getCameraModelName() + ". Found " + rectangles.size() + "crop matches.");
+        }
+      }
+      if (model == null) {
+        throw new IllegalStateException("Unable to reload camera model for noise estimation: "
+            + fitConfig.getCameraModelName());
+      }
+      return model;
+    }
+    return cameraModel;
   }
 
   private void addSingleFrameOverlay() {
