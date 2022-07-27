@@ -35,7 +35,12 @@ public abstract class MaximaSpotFilter extends SpotFilter {
   private final int search;
   private final int border;
   private final NonMaximumSuppression nms;
-  private float[] data2;
+
+  /**
+   * The preprocessed data produced by the find method. If the find method is overridden then this
+   * should be set manually.
+   */
+  float[] data2;
 
   /**
    * Create the spot filter.

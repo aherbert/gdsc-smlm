@@ -137,6 +137,12 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     // Normalise the intensity across all processors
     final float divisor = (float) (1.0 / processors.length);
 
+    // Since we override the find method we set the preprocessData explicitly
+    for (int j = 0; j < sum.length; j++) {
+      sum[j] *= divisor;
+    }
+    data2 = sum;
+
     int count = 0;
     final Spot[] spots = new Spot[maxIndices.length];
     for (final int maxIndex : maxIndices) {
