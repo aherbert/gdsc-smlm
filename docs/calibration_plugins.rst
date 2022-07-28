@@ -145,9 +145,9 @@ The estimator uses the starting configuration to fit N peaks taken from randomly
      - Log progress of the estimator to the ``ImageJ`` log window.
 
    * - Iterate
-     - When the PSF parameters have converged and a ``Free`` fitting option was chosen a test is done to determine if the angle or Y-width are significant. If not significant the estimator will ignore the insignificant parameter and restart using a simpler PSF. The order of iterations is:
+     - When the PSF parameters have converged and a non-circular PSF option was chosen a test is done to determine if the angle or Y-width are significant. If not significant the estimator will ignore the insignificant parameter and restart using a simpler PSF. The order of iterations is:
 
-       ``Free`` > ``Free Circular`` > ``Circular``
+       ``Rotating Elliptical`` > ``Elliptical`` > ``Circular``
 
        Note these statistics often don't work so unless you expect astigmatism you can choose to start with a ``Circular`` Gaussian and just find the estimated widths.
 

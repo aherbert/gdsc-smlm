@@ -174,6 +174,8 @@ public class PeakFit implements PlugInFilter {
   public static final int FLAG_NO_SAVE = 0x04;
   /** Flag to indicate that data filter options should not be shown for a difference filter. */
   public static final int FLAG_NO_DIFFERENCE_FILTER = 0x08;
+  /** Flag to indicate that PSF options should not be shown for an astigatism model. */
+  public static final int FLAG_NO_ASTIGMATISM = 0x10;
 
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 
@@ -1207,6 +1209,22 @@ public class PeakFit implements PlugInFilter {
     return PsfTypeLoader.PSF_TYPE_NAMES;
   }
 
+  /**
+   * Gets the psf type.
+   *
+   * @param name the name
+   * @return the psf type (or unrecognized)
+   */
+  static PSFType getPsfType(String name) {
+    final String[] names = getPsfTypeNames();
+    for (int i = 0; i < names.length; i++) {
+      if (names[i].equals(name)) {
+        return getPsfTypeValues()[i];
+      }
+    }
+    return PSFType.UNRECOGNIZED;
+  }
+
   private int showDialog(ImagePlus imp) {
     // Executing as an ImageJ plugin.
 
@@ -1669,8 +1687,33 @@ public class PeakFit implements PlugInFilter {
    */
   public static void addPsfOptions(final ExtendedGenericDialog gd,
       final Supplier<FitConfiguration> fitConfigurationProvider) {
+    addPsfOptions(gd, fitConfigurationProvider, 0);
+  }
+
+  /**
+   * Adds the PSF options.
+   *
+   * <p>Note that if an astigmatic PSF is selected then the model must be created with
+   * {@link #configurePsfModel(FitEngineConfiguration, int)}.
+   *
+   * <p>Adds a calibrated z-filter for a 3D PSF model. Any recent changes to the calibration must be
+   * reflected in the provided fit configuration for this to be valid.
+   *
+   * @param gd the dialog
+   * @param fitConfigurationProvider the fit configuration provider
+   * @param flags the flags
+   */
+  public static void addPsfOptions(final ExtendedGenericDialog gd,
+      final Supplier<FitConfiguration> fitConfigurationProvider, int flags) {
     final FitConfiguration fitConfig = fitConfigurationProvider.get();
-    gd.addChoice("PSF", getPsfTypeNames(), PsfProtosHelper.getName(fitConfig.getPsfType()),
+    String[] names = getPsfTypeNames();
+    if (BitFlagUtils.anySet(flags, FLAG_NO_ASTIGMATISM)) {
+      final int index = Arrays.asList(getPsfTypeValues()).indexOf(PSFType.ASTIGMATIC_GAUSSIAN_2D);
+      final String[] original = names;
+      names = IntStream.range(0, names.length).filter(i -> i != index).mapToObj(i -> original[i])
+          .toArray(String[]::new);
+    }
+    gd.addChoice("PSF", names, PsfProtosHelper.getName(fitConfig.getPsfType()),
         new OptionListener<Integer>() {
           @Override
           public boolean collectOptions(Integer field) {

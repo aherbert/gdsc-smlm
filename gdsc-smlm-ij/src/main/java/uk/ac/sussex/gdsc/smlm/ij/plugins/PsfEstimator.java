@@ -89,10 +89,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
   private static final AtomicReference<TextWindow> RESULTS_WINDOW_REF = new AtomicReference<>();
 
-  private double initialPeakStdDev0 = 1;
-  private double initialPeakStdDev1 = 1;
-  private double initialPeakAngle;
-
   private boolean extraOptions;
 
   // These are set only when extra options is true. Otherwise use the defaults.
@@ -208,16 +204,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private int showDialog(ImagePlus imp) {
     // Keep class variables for the parameters we are fitting
     final FitConfiguration fitConfig = config.getFitConfiguration();
-    initialPeakStdDev0 = 1;
-    initialPeakStdDev1 = 1;
-    initialPeakAngle = 0;
-    try {
-      initialPeakStdDev0 = fitConfig.getInitialXSd();
-      initialPeakStdDev1 = fitConfig.getInitialYSd();
-      initialPeakAngle = fitConfig.getInitialAngle();
-    } catch (final IllegalStateException | ConfigurationException ignored) {
-      // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
-    }
 
     if (!extraOptions) {
       interlacedData = false;
@@ -230,9 +216,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     gd.addHelp(HelpUrls.getUrl("psf-estimator"));
     gd.addMessage("Estimate 2D Gaussian to fit maxima");
 
-    gd.addNumericField("Initial_StdDev0", initialPeakStdDev0, 3);
-    gd.addNumericField("Initial_StdDev1", initialPeakStdDev1, 3);
-    gd.addNumericField("Initial_Angle", initialPeakAngle, 3);
     gd.addNumericField("Number_of_peaks", settings.getNumberOfPeaks(), 0);
 
     // pValue sets the smallest significance level probability level at which they are said to be
@@ -240,7 +223,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     // i.e. p <= pValue they are different
 
     // lower pValue means harder to be found different.
-    // lower pValue means easier to be found the same.
+    // higher pValue means easier to be found the same.
 
     gd.addNumericField("p-Value", settings.getPValue(), 4);
     gd.addCheckbox("Update_preferences", settings.getUpdatePreferences());
@@ -250,7 +233,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
 
     PeakFit.addCameraOptions(gd, fitConfig);
-    PeakFit.addPsfOptions(gd, fitConfig);
+    PeakFit.addPsfOptions(gd, () -> config.getFitConfiguration(), PeakFit.FLAG_NO_ASTIGMATISM);
     final Supplier<FitEngineConfiguration> provider = () -> config;
     PeakFit.addDataFilterOptions(gd, provider);
     PeakFit.addSearchOptions(gd, provider);
@@ -297,10 +280,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private boolean readDialog(ExtendedGenericDialog gd) {
-    initialPeakStdDev0 = gd.getNextNumber();
-    initialPeakStdDev1 = gd.getNextNumber();
-    initialPeakAngle = gd.getNextNumber();
-
     settings.setNumberOfPeaks((int) gd.getNextNumber());
     settings.setPValue(gd.getNextNumber());
     settings.setUpdatePreferences(gd.getNextBoolean());
@@ -350,9 +329,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Initial SD0", initialPeakStdDev0);
-      ParameterUtils.isAboveZero("Initial SD1", initialPeakStdDev1);
-      ParameterUtils.isPositive("Initial angle", initialPeakAngle);
       ParameterUtils.isPositive("Number of peaks", settings.getNumberOfPeaks());
       ParameterUtils.isAboveZero("P-value", settings.getPValue());
       ParameterUtils.isEqualOrBelow("P-value", settings.getPValue(), 0.5);
@@ -467,8 +443,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     ignore[Y] = !gf.evaluatesSD1();
 
     final double[] params =
-        {gf.evaluatesAngle() ? initialPeakAngle : 0, gf.evaluatesSD0() ? initialPeakStdDev0 : 0,
-            gf.evaluatesSD1() ? initialPeakStdDev1 : 0, 0, 0};
+        {gf.evaluatesAngle() ? config.getFitConfiguration().getInitialAngle() : 0,
+            gf.evaluatesSD0() ? config.getFitConfiguration().getInitialXSd() : 0,
+            gf.evaluatesSD1() ? config.getFitConfiguration().getInitialYSd() : 0};
     final double[] paramsDev = new double[3];
     final double[] p = {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 
@@ -514,11 +491,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
           params[Y] = (!ignore[Y] && !identical[XY]) ? sampleNew[Y].getMean() : params[X];
           params[ANGLE] = (!ignore[ANGLE]) ? sampleNew[ANGLE].getMean() : 0;
 
-          // update starting configuration
-          initialPeakAngle = (float) params[ANGLE];
-          initialPeakStdDev0 = (float) params[X];
-          initialPeakStdDev1 = (float) params[Y];
-
           if (settings.getUpdatePreferences()) {
             config.getFitConfiguration().setInitialPeakStdDev0((float) params[X]);
             try {
@@ -548,10 +520,10 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private boolean checkAngleSignificance() {
-    boolean tryAgain = false;
     if (ignore[ANGLE]) {
-      return tryAgain;
+      return false;
     }
+    boolean tryAgain = false;
 
     // The angle is relative to the major axis (X).
     // It could be close to 0, 90 or 180 to allow it to be ignored in favour of a free circular
@@ -600,10 +572,14 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private boolean checkXySignificance(boolean[] identical) {
+    if (ignore[Y]) {
+      return false;
+    }
     boolean tryAgain = false;
     if (identical[XY]) {
       log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => "
           + "Re-run with circular function", sampleNew[X].getMean(), sampleNew[Y].getMean());
+      ignore[Y] = true;
       config.getFitConfiguration().setPsfType(PSFType.ONE_AXIS_GAUSSIAN_2D);
       tryAgain = true;
     }
