@@ -172,6 +172,8 @@ public class PeakFit implements PlugInFilter {
   public static final int FLAG_IGNORE_CALIBRATION = 0x02;
   /** Flag to indicate that configuration should not be saved. */
   public static final int FLAG_NO_SAVE = 0x04;
+  /** Flag to indicate that data filter options should not be shown for a difference filter. */
+  public static final int FLAG_NO_DIFFERENCE_FILTER = 0x08;
 
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 
@@ -1947,6 +1949,20 @@ public class PeakFit implements PlugInFilter {
    */
   public static void addDataFilterOptions(final ExtendedGenericDialog gd,
       final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider) {
+    addDataFilterOptions(gd, fitEngineConfigurationProvider, 0);
+  }
+
+  /**
+   * Adds the data filter options for the first filter. Adds to the dialog: <ul> <li>a choice of
+   * filter type (e.g. single, difference, etc)</li> <li>a choice of primary filter (e.g. mean,
+   * Gaussian, etc)</li> <li>a single slider for the primary filter parameter</li> </ul>
+   *
+   * @param gd the dialog
+   * @param fitEngineConfigurationProvider the fit engine configuration provider
+   * @param flags the flags
+   */
+  public static void addDataFilterOptions(final ExtendedGenericDialog gd,
+      final Supplier<FitEngineConfiguration> fitEngineConfigurationProvider, int flags) {
     final int n = 0;
     final DataFilterMethod defaultFilterMethod = DataFilterMethod.GAUSSIAN;
     final double defaultFilterSmoothing = 0.5;
@@ -1976,6 +1992,9 @@ public class PeakFit implements PlugInFilter {
                 break;
 
               case DIFFERENCE:
+                if (BitFlagUtils.anySet(flags, FLAG_NO_DIFFERENCE_FILTER)) {
+                  return false;
+                }
                 filterCount = 2;
                 break;
 
@@ -2120,7 +2139,8 @@ public class PeakFit implements PlugInFilter {
    * @param silent set to true to suppress validation error messages
    * @return true, if successful
    */
-  static boolean validateDataFilterOptions(final FitEngineConfiguration config, boolean silent) {
+  public static boolean validateDataFilterOptions(final FitEngineConfiguration config,
+      boolean silent) {
     try {
       // We use the previous value in the event the configuration does not have any current values.
       // Check we have at least the first filter.

@@ -349,7 +349,7 @@ public class Configuration implements PlugIn {
     if (!PeakFit.configureResultsFilter(config, flags)) {
       return false;
     }
-    if (!PeakFit.configureDataFilter(config, flags)) {
+    if (!PeakFit.validateDataFilterOptions(config, false)) {
       return false;
     }
     if (!PeakFit.configureFitSolver(config, null, null, flags)) {

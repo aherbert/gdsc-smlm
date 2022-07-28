@@ -258,15 +258,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
     PeakFit.addPsfOptions(gd, () -> fitConfig);
     final Supplier<FitEngineConfiguration> provider = () -> config;
-    PeakFit.addDataFilterOptions(gd, () -> config);
+    // Do not support a difference filter in the options as we manually have sliders below.
+    PeakFit.addDataFilterOptions(gd, () -> config, PeakFit.FLAG_NO_DIFFERENCE_FILTER);
     gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
         config.getDataFilterMethod(1, settings.defaultDataFilterMethod).ordinal());
     PeakFit.addRelativeParameterOptions(gd,
         new RelativeParameterProvider(2.5, 4.5, "Smoothing_2", provider) {
           @Override
           void setAbsolute(boolean absolute) {
-            final FitEngineConfiguration c =
-                fitEngineConfigurationProvider.get();
+            final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
             final DataFilterMethod m = c.getDataFilterMethod(1, settings.defaultDataFilterMethod);
             final double smooth = c.getDataFilterParameterValue(1, settings.defaultSmooth);
             c.setDataFilter(m, smooth, absolute, 1);
@@ -274,14 +274,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
           @Override
           boolean isAbsolute() {
-            return fitEngineConfigurationProvider.get()
-                .getDataFilterParameterAbsolute(1, false);
+            return fitEngineConfigurationProvider.get().getDataFilterParameterAbsolute(1, false);
           }
 
           @Override
           double getValue() {
-            return fitEngineConfigurationProvider.get()
-                .getDataFilterParameterValue(1, settings.defaultSmooth);
+            return fitEngineConfigurationProvider.get().getDataFilterParameterValue(1,
+                settings.defaultSmooth);
           }
         });
 
@@ -465,9 +464,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
     if (newCameraModel || !fitEngineSettings.equals(lastFitEngineSettings)
         || !psf.equals(lastPsf)) {
-      // Configure a jury filter
-      if (config.getDataFilterType() == DataFilterType.JURY
-          && !PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE)) {
+      // Validate a difference/jury filter. The options are set in the option listener pop-up.
+      // Note: This may not be required as the call to createSpotFilter() does a similar
+      // validation. Calling this will raise an error if a filter type is set that
+      // requires multiple filter parameters. This is ignored by createSpotFilter() which will
+      // default to a single filter.
+      if (config.getDataFilterType() != DataFilterType.SINGLE
+          && !PeakFit.validateDataFilterOptions(config, false)) {
         gd.getPreviewCheckbox().setState(false);
         return;
       }

@@ -388,10 +388,11 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     if (!PeakFit.configureSmartFilter(config, 0)) {
       return false;
     }
-    if (!PeakFit.configureDataFilter(config, 0)) {
+    if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, 0)) {
       return false;
     }
-    if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, 0)) {
+    // Perform after configureFitSolver as that will load the camera model if required.
+    if (!PeakFit.validateDataFilterOptions(config, false)) {
       return false;
     }
 
@@ -782,18 +783,18 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private static String createResultsHeader() {
     final String[] names = {
         // @formatter:off
-        "Iteration\t",
-        "N-peaks\t",
-        "Angle\t",
-        "+/-\t",
-        "p(Angle same,\t",
-        "X SD\t",
-        "+/-\t",
-        "p(X same,\t",
-        "Y SD\t",
-        "+/-\t",
-        "p(Y same,\t",
-        "p(XY same,"
+        "Iteration",
+        "N-peaks",
+        "Angle",
+        "+/-",
+        "p(Angle same)",
+        "X SD",
+        "+/-",
+        "p(X same)",
+        "Y SD",
+        "+/-",
+        "p(Y same)",
+        "p(XY same)"
         // @formatter:on
     };
     final StringBuilder sb = new StringBuilder(256);

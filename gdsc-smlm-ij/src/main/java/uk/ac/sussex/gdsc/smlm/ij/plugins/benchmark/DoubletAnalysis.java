@@ -1844,6 +1844,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     if (configure && !PeakFit.configurePsfModel(config)) {
       return false;
     }
+    if (!PeakFit.validateDataFilterOptions(config, false)) {
+      return false;
+    }
     if (configure && !PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null,
         PeakFit.FLAG_NO_SAVE)) {
       return false;
