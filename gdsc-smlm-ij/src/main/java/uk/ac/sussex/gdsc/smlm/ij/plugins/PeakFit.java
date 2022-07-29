@@ -35,6 +35,7 @@ import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.filter.PlugInFilter;
+import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
 import java.awt.Checkbox;
@@ -44,14 +45,13 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +63,9 @@ import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -71,18 +74,23 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.TrackProgressAdapter;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -122,6 +130,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitParameters.FitTask;
 import uk.ac.sussex.gdsc.smlm.engine.FitQueue;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
 import uk.ac.sussex.gdsc.smlm.engine.ParameterisedFitJob;
+import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
 import uk.ac.sussex.gdsc.smlm.filters.SpotFilter;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver;
@@ -174,7 +183,7 @@ public class PeakFit implements PlugInFilter {
   public static final int FLAG_NO_SAVE = 0x04;
   /** Flag to indicate that data filter options should not be shown for a difference filter. */
   public static final int FLAG_NO_DIFFERENCE_FILTER = 0x08;
-  /** Flag to indicate that PSF options should not be shown for an astigatism model. */
+  /** Flag to indicate that PSF options should not be shown for an astigmatism model. */
   public static final int FLAG_NO_ASTIGMATISM = 0x10;
 
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
@@ -233,6 +242,8 @@ public class PeakFit implements PlugInFilter {
     boolean showTable;
     boolean showImage;
     boolean fitAcrossAllFrames;
+    boolean previewOverlay;
+    boolean previewTable;
 
     Settings() {
       // Allow 1 thread free.
@@ -240,6 +251,8 @@ public class PeakFit implements PlugInFilter {
       inputOption = "";
       showTable = true;
       showImage = true;
+      previewOverlay = true;
+      previewTable = true;
     }
 
     Settings(Settings source) {
@@ -248,6 +261,8 @@ public class PeakFit implements PlugInFilter {
       showTable = source.showTable;
       showImage = source.showImage;
       fitAcrossAllFrames = source.fitAcrossAllFrames;
+      previewOverlay = source.previewOverlay;
+      previewTable = source.previewTable;
     }
 
     Settings copy() {
@@ -335,6 +350,20 @@ public class PeakFit implements PlugInFilter {
   }
 
   /**
+   * Represents an operation that accepts a single {@code boolean}-valued argument and returns no
+   * result. This is the primitive type specialization of {@link Consumer} for {@code boolean}.
+   */
+  @FunctionalInterface
+  interface BooleanConsumer {
+    /**
+     * Performs this operation on the given argument.
+     *
+     * @param value the input argument
+     */
+    void accept(boolean value);
+  }
+
+  /**
    * Class to control listening to the main dialog and updating fields.
    *
    * <p>Supports changing all field values using the selected template.
@@ -346,12 +375,14 @@ public class PeakFit implements PlugInFilter {
    * a debug mode in an IDE) or possibly silently consumed. Full validation of the fields should
    * always be performed when the dialog is read.
    */
-  private class ItemDialogListener implements ItemListener, TextListener {
+  private class ItemDialogListener
+      implements ItemListener, OptionListener<Boolean>, OptionCollectedListener {
 
     // All the fields that will be updated when reloading the configuration file
     private Choice textCameraType;
     private TextField textNmPerPixel;
     private TextField textExposure;
+    private Checkbox textIgnoreBoundsForNoise;
     private Choice textPsf;
     private Choice textDataFilterType;
     private Choice textDataFilterMethod;
@@ -372,13 +403,13 @@ public class PeakFit implements PlugInFilter {
     private TextField textCoordinateShiftFactor;
     private TextField textSignalStrength;
     private TextField textMinPhotons;
+    private TextField textMinWidthFactor;
+    private TextField textWidthFactor;
     private TextField textPrecisionThreshold;
     private Checkbox textSmartFilter;
     private Checkbox textDisableSimpleFilter;
     private TextField textNoise;
     private Choice textNoiseMethod;
-    private TextField textMinWidthFactor;
-    private TextField textWidthFactor;
     private Checkbox textLogProgress;
     private Checkbox textShowDeviations;
     private Checkbox textResultsTable;
@@ -386,6 +417,14 @@ public class PeakFit implements PlugInFilter {
     private TextField textResultsDirectory;
     private Choice textFileFormat;
     private Checkbox textResultsInMemory;
+
+    private Checkbox previewCheckbox;
+    private boolean preview;
+    private Workflow<Pair<FitEngineConfiguration, Settings>, SettingsList> workflow;
+    private LocalList<BaseWorker> workers;
+
+    /** The logger used by workers to report errors. */
+    Logger logger;
 
     ItemDialogListener(Scrollbar[] sliders) {
       // Special case of a Scrollbar that cannot be accessed easily through the GenericDialog API.
@@ -409,10 +448,10 @@ public class PeakFit implements PlugInFilter {
 
       textCameraType = ch.next();
       textNmPerPixel = nu.next();
-      textNmPerPixel.addTextListener(this);
+      bind(textNmPerPixel, fitConfig::setNmPerPixel);
       textExposure = nu.next();
       if (isCrop) {
-        cb.next();
+        textIgnoreBoundsForNoise = cb.next();
       }
       textPsf = ch.next();
       textDataFilterType = ch.next();
@@ -450,12 +489,12 @@ public class PeakFit implements PlugInFilter {
         textPrecisionThreshold = nu.next();
 
         // Required for converting the simple filter to the default smart filter XML
-        textCoordinateShiftFactor.addTextListener(this);
-        textSignalStrength.addTextListener(this);
-        textMinPhotons.addTextListener(this);
-        textMinWidthFactor.addTextListener(this);
-        textWidthFactor.addTextListener(this);
-        textPrecisionThreshold.addTextListener(this);
+        bind(textCoordinateShiftFactor, fitConfig::setCoordinateShiftFactor);
+        bind(textSignalStrength, fitConfig::setSignalStrength);
+        bind(textMinPhotons, fitConfig::setMinPhotons);
+        bind(textMinWidthFactor, fitConfig::setMinWidthFactor);
+        bind(textWidthFactor, fitConfig::setMaxWidthFactor);
+        bind(textPrecisionThreshold, fitConfig::setPrecisionThreshold);
 
         updateFilterInput();
         textSmartFilter.addItemListener(this);
@@ -506,6 +545,8 @@ public class PeakFit implements PlugInFilter {
           if (template.hasResultsSettings()) {
             refreshSettings(template.getResultsSettings());
           }
+
+          doPreview();
         }
       } else if (event.getSource() instanceof Checkbox) {
         // Note: changes to textDisableSimpleFilter must be replicated in
@@ -532,23 +573,56 @@ public class PeakFit implements PlugInFilter {
       }
     }
 
-    @Override
-    public void textValueChanged(TextEvent event) {
-      if (event.getSource() == textNmPerPixel) {
-        fitConfig.setNmPerPixel(Double.parseDouble(textNmPerPixel.getText()));
-      } else if (event.getSource() == textCoordinateShiftFactor) {
-        fitConfig.setCoordinateShiftFactor(Double.parseDouble(textCoordinateShiftFactor.getText()));
-      } else if (event.getSource() == textSignalStrength) {
-        fitConfig.setSignalStrength(Double.parseDouble(textSignalStrength.getText()));
-      } else if (event.getSource() == textMinPhotons) {
-        fitConfig.setMinPhotons(Double.parseDouble(textMinPhotons.getText()));
-      } else if (event.getSource() == textMinWidthFactor) {
-        fitConfig.setMinWidthFactor(Double.parseDouble(textMinWidthFactor.getText()));
-      } else if (event.getSource() == textWidthFactor) {
-        fitConfig.setMaxWidthFactor(Double.parseDouble(textWidthFactor.getText()));
-      } else if (event.getSource() == textPrecisionThreshold) {
-        fitConfig.setPrecisionThreshold(Double.parseDouble(textPrecisionThreshold.getText()));
-      }
+    /**
+     * Bind updates on the field to the consumer.
+     *
+     * @param field the field
+     * @param consumer the consumer
+     */
+    private void bind(TextField field, DoubleConsumer consumer) {
+      field.addTextListener(e -> {
+        try {
+          final double value = Double.parseDouble(field.getText());
+          consumer.accept(value);
+          doPreview();
+        } catch (final IllegalArgumentException ex) {
+          IJ.log("Invalid input: " + ex.getMessage());
+        }
+      });
+    }
+
+    /**
+     * Bind updates on the field to the consumer.
+     *
+     * @param field the field
+     * @param consumer the consumer
+     */
+    private void bind(Choice field, IntConsumer consumer) {
+      field.addItemListener(e -> {
+        try {
+          consumer.accept(field.getSelectedIndex());
+          doPreview();
+        } catch (final IllegalArgumentException ex) {
+          IJ.log("Invalid input: " + ex.getMessage());
+        }
+      });
+    }
+
+    /**
+     * Bind updates on the field to the consumer.
+     *
+     * @param field the field
+     * @param consumer the consumer
+     */
+    private void bind(Checkbox field, BooleanConsumer consumer) {
+      field.addItemListener(e -> {
+        try {
+          consumer.accept(field.getState());
+          doPreview();
+        } catch (final IllegalArgumentException ex) {
+          IJ.log("Invalid input: " + ex.getMessage());
+        }
+      });
     }
 
     private void updateFilterInput() {
@@ -574,6 +648,7 @@ public class PeakFit implements PlugInFilter {
         // enableEditing(textWidthFactor)
         enableEditing(textPrecisionThreshold);
       }
+      doPreview();
     }
 
     private void disableEditing(TextField textField) {
@@ -682,6 +757,501 @@ public class PeakFit implements PlugInFilter {
           .setText(String.valueOf(resultsSettings.getResultsFileSettings().getResultsDirectory()));
       textFileFormat.select(resultsSettings.getResultsFileSettings().getFileFormatValue());
       textResultsInMemory.setState(resultsSettings.getResultsInMemorySettings().getInMemory());
+    }
+
+    void addPreview(ExtendedGenericDialog gd) {
+      // Create a Workflow to generate results and display them
+
+      gd.addCheckbox("Preview", false, this);
+      previewCheckbox = gd.getLastCheckbox();
+      previewCheckbox.addItemListener(e -> {
+        if (previewCheckbox.getState()) {
+          startPreview();
+        } else {
+          stopPreview();
+        }
+      });
+      gd.addOptionCollectedListener(this);
+
+      // Do not use gd.addDialogListener(this)
+      // It will be triggered by fields that do not affect the preview and reading all fields
+      // is expensive. Add custom bindings to fields of interest.
+      bind(textCameraType, i -> {
+        final CalibrationWriter cw = fitConfig.getCalibrationWriter();
+        cw.setCameraType(SettingsManager.getCameraTypeValues()[i]);
+        fitConfig.setCalibration(cw.getCalibration());
+      });
+      // textNmPerPixel
+      bind(textExposure, v -> {
+        final CalibrationWriter cw = fitConfig.getCalibrationWriter();
+        cw.setExposureTime(v);
+        fitConfig.setCalibration(cw.getCalibration());
+      });
+      bind(textPsf, i -> fitConfig.setPsfType(PeakFit.getPsfTypeValues()[i]));
+      if (textIgnoreBoundsForNoise != null) {
+        bind(textIgnoreBoundsForNoise,
+            b -> ignoreBoundsForNoise = extraSettings.optionIgnoreBoundsForNoise = b);
+      }
+      bind(textDataFilterType, config::setDataFilterType);
+      bind(textDataFilterMethod,
+          i -> config.setDataFilter(i, config.getDataFilterParameterValue(0), 0));
+      bind(textSmooth, v -> config.setDataFilter(config.getDataFilterMethod(0), v, 0));
+      bind(textSearch, config::setSearch);
+      bind(textBorder, config::setBorder);
+      bind(textFitting, config::setFitting);
+      bind(textFitSolver, i -> fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[i]));
+      if (textFitBackground != null) {
+        bind(textFitBackground, fitConfig::setBackgroundFitting);
+      }
+      bind(textFailuresLimit, v -> config.setFailuresLimit((int) v));
+      bind(textPassRate, config::setPassRate);
+      bind(textIncludeNeighbours, config::setIncludeNeighbours);
+      bind(textNeighbourHeightThreshold, config::setNeighbourHeightThreshold);
+      bind(textResidualsThreshold, config::setResidualsThreshold);
+      bind(textDuplicateDistance, config::setDuplicateDistance);
+      // // textCoordinateShiftFactor
+      // // textSignalStrength
+      // // textMinPhotons
+      // // textMinWidthFactor
+      // // textWidthFactor
+      // // textPrecisionThreshold
+      bind(textSmartFilter, fitConfig::setSmartFilter);
+      bind(textDisableSimpleFilter, fitConfig::setDisableSimpleFilter);
+      if (textNoise != null) {
+        bind(textNoise, fitConfig::setNoise);
+        bind(textNoiseMethod, config::setNoiseMethod);
+      }
+
+      // TODO - Respond to these input but use duplicate properties in the settings to
+      // avoid passing the entire resultsSettings into the workflow
+      // bind(textLogProgress, resultsSettings::setLogProgress);
+      // if (textShowDeviations != null) {
+      // bind(textShowDeviations, resultsSettings::setShowDeviations);
+      // }
+    }
+
+    @Override
+    public boolean collectOptions(Boolean value) {
+      // Collect the options for the events
+      final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE + " Preview Settings");
+      final boolean record = Recorder.record;
+      Recorder.record = false;
+      // Detect changes
+      final boolean overlay = settings.previewOverlay;
+      final boolean table = settings.previewTable;
+      egd.addMessage("Configure the interactive preview");
+      egd.addCheckbox("Show_overlay", settings.previewOverlay);
+      egd.addCheckbox("Show_table", settings.previewTable);
+      egd.showDialog(false, null);
+      if (egd.wasCanceled()) {
+        Recorder.record = record;
+        return false;
+      }
+      settings.previewOverlay = egd.getNextBoolean();
+      settings.previewTable = egd.getNextBoolean();
+
+      Recorder.record = record;
+      // TODO - What if there are no preview output choices?
+      // The preview is computing but nothing is displayed...
+      // Will fitting still log to the ImageJ window, etc.
+      return overlay != settings.previewOverlay || table != settings.previewTable;
+    }
+
+    @Override
+    public boolean collectOptions() {
+      // We do not care about collecting settings for the event options in macros
+      return false;
+    }
+
+    @Override
+    public void optionCollected(OptionCollectedEvent event) {
+      doPreview();
+    }
+
+    synchronized void startPreview() {
+      if (!preview) {
+        // Create a workflow and workers
+        if (workflow == null) {
+          workflow = new Workflow<>();
+          workers = new LocalList<>();
+          final int previous = workflow.add(addWorker(new InputWorker()));
+          // The following can operate in parallel
+          workflow.add(addWorker(new OverlayWorker()), previous);
+          workflow.add(addWorker(new TableWorker()), previous);
+          workflow.start();
+          logger = ImageJPluginLoggerHelper.getLogger(PeakFit.class);
+        }
+        preview = true;
+      }
+      doPreview();
+    }
+
+    /**
+     * Adds the worker to the class list. This maintains a reference to all workers so they can be
+     * reset.
+     *
+     * @param worker the worker
+     * @return the worker
+     */
+    private BaseWorker addWorker(BaseWorker worker) {
+      workers.add(worker);
+      return worker;
+    }
+
+    synchronized void stopPreview() {
+      preview = false;
+      // Reset preview output
+      if (workers != null) {
+        workers.forEach(BaseWorker::reset);
+      }
+    }
+
+    void doPreview() {
+      final Workflow<Pair<FitEngineConfiguration, Settings>, SettingsList> workflow = this.workflow;
+      if (preview && workflow != null) {
+        // Clone the config and settings and pass it to the workflow
+        workflow.run(Pair.of(config.createCopy(), settings.copy()));
+      }
+    }
+
+    synchronized void shutdown() {
+      // Stop the preview and the workflow
+      if (workflow != null) {
+        workflow.shutdown(true);
+        stopPreview();
+        workflow = null;
+        workers = null;
+      }
+    }
+
+    /**
+     * Base worker for the computation workflow.
+     */
+    private abstract class BaseWorker
+        implements WorkflowWorker<Pair<FitEngineConfiguration, Settings>, SettingsList> {
+
+      /**
+       * Reset any changes performed during computation.
+       */
+      void reset() {
+        // no-op
+      }
+
+      /**
+       * Gets the MemoryPeakResults from the results list.
+       *
+       * @param list the list
+       * @return the results
+       */
+      MemoryPeakResults getMemoryPeakResults(SettingsList list) {
+        if (list == null || list.size() < 1) {
+          return null;
+        }
+        return (MemoryPeakResults) list.get(0);
+      }
+    }
+
+    /**
+     * Worker to validate input and create the results.
+     *
+     * <p>Note: This could be separated into several workers, e.g:
+     *
+     * <ul>
+     *
+     * <li> Extract the image frame and create the FitJob (depends on the camera model)
+     *
+     * <li> Create the FitWorker and run the FitJob (depends on fit configuration)
+     *
+     * </ul>
+     */
+    private class InputWorker extends BaseWorker {
+      /** The last camera model. */
+      private Pair<String, CameraModel> lastCameraModel;
+
+      @Override
+      public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
+          Pair<FitEngineConfiguration, Settings> previous) {
+        if (current.getLeft() == null) {
+          return previous.getLeft() == null;
+        }
+        if (!current.getLeft().getFitEngineSettings()
+            .equals(previous.getLeft().getFitEngineSettings())) {
+          return false;
+        }
+        return true;
+      }
+
+      @Override
+      public boolean equalResults(SettingsList current, SettingsList previous) {
+        // This method is called when the settings are equal.
+        // The workflow will cache previously computed results.
+        // Here we state the results are the same so that the previous results are reused.
+        // New results will be computed when the settings change.
+        return true;
+      }
+
+      @Override
+      public Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
+          doWork(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+        try {
+          final FitEngineConfiguration config = work.getLeft().getLeft();
+          final FitConfiguration fitConfig = config.getFitConfiguration();
+
+          // This assumes the source is configured at the end of setup(...)
+          // This preview will not support aggregated/interlaced frames.
+
+          // We re-use the current PeakFit instance and extract parts of the fitting methods.
+          // This avoids using a custom resultsSettings and extracting the final results:
+          // PeakFit pf = new PeakFit(config, resultsSettings);
+          // pf.run(source, bounds, ignoreBoundsForNoise);
+          // Extract pf.results
+
+          // From updateFitConfiguration(...)
+          fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
+          config.configureOutputUnits();
+
+          // TODO: Configure logging and deviations
+          // if ...
+          // fitConfig.setLog(logger);
+          // if ...
+          // fitConfig.setComputeDeviations(...);
+
+          // Cache the camera model configuration. We can do this as the crop will be unchanged
+          // and a camera model is uniquely defined by the name.
+          if (fitConfig.getCalibrationReader().isScmos()
+              && fitConfig.getFitSolver() != FitSolver.MLE) {
+            // This requires a camera model.
+            final Pair<String, CameraModel> model = lastCameraModel;
+            if (model == null || !model.getLeft().equals(fitConfig.getCameraModelName())) {
+              if (!validateCameraModelOptions(fitConfig, source.getBounds(), bounds, true)) {
+                logger.warning(() -> "Preview failed to configure camera model");
+                return workFailed(work);
+              }
+              lastCameraModel = Pair.of(fitConfig.getCameraModelName(), fitConfig.getCameraModel());
+            } else {
+              // Re-use camera model
+              fitConfig.setCameraModel(model.getRight());
+            }
+          }
+
+          // We avoid a FitEngine and use a single FitWorker.
+          // From FitEngine.create(config, ...)
+          final int fitting = config.getFittingWidth();
+          final MaximaSpotFilter spotFilter = config.createSpotFilter();
+
+          // Create the results
+          final CalibrationWriter cal = fitConfig.getCalibrationWriter();
+          cal.setTimeUnit(TimeUnit.FRAME);
+          final MemoryPeakResults results = new MemoryPeakResults();
+          results.setName(source.getName() + " Preview");
+          results.setCalibration(cal.getCalibration());
+          results.setPsf(fitConfig.getPsf());
+          results.setSource(source);
+          results.begin();
+
+          // Note: null BlockingQueue for jobs is allowed. We pass in a FitJob manually
+          // and do not call run() to consume the queue.
+          final FitWorker worker = new FitWorker(config, results, null);
+          worker.setSearchParameters(spotFilter, fitting);
+
+          // Assume the image source is already opened by setup(...).
+          // We can call get(int) to get the specific frame without affecting sequential read.
+          final int singleFrame = imp.getCurrentSlice();
+
+          // Do not crop the region from the source if the bounds match the source dimensions
+          final Rectangle cropBounds =
+              (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth()
+                  && bounds.height == source.getHeight()) ? null : bounds;
+
+          // To pre-process data for noise estimation
+          boolean isFitCameraCounts = false;
+          CameraModel cameraModel = null;
+          if (cropBounds != null && ignoreBoundsForNoise) {
+            isFitCameraCounts = fitConfig.isFitCameraCounts();
+            cameraModel = fitConfig.getCameraModel();
+            // Note:
+            // The camera model has dimensions to match source.next(cropBounds).
+            // However we estimate noise from the entire frame which requires an uncropped model.
+            // This is an issue for a per-pixel model where we must reload the model for the entire
+            // frame.
+            if (cameraModel.isPerPixelModel()) {
+              cameraModel = checkFullSizePerPixelCameraModel(cropBounds, cameraModel);
+            }
+          }
+
+          // Noise can optionally be estimated from the entire frame
+          float[] data = (ignoreBoundsForNoise) ? source.get(singleFrame)
+              : source.get(singleFrame, cropBounds);
+          if (data == null) {
+            logger.warning(() -> "Preview failed to extract image data");
+            return workFailed(work);
+          }
+
+          float noise = Float.NaN;
+          if (cameraModel != null) {
+            // We must pre-process the data before noise estimation
+            final float[] data2 = data.clone();
+            if (isFitCameraCounts) {
+              cameraModel.removeBias(data2);
+            } else {
+              cameraModel.removeBiasAndGain(data2);
+            }
+
+            noise = FitWorker.estimateNoise(data2, source.getWidth(), source.getHeight(),
+                config.getNoiseMethod());
+
+            // Crop the data to the region
+            data = ImageJImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds,
+                null);
+          }
+
+          // Get the frame number from the source to allow for interlaced and aggregated data
+          worker.run(createJob(singleFrame, singleFrame, data, bounds, noise));
+          results.end();
+
+          // Create new work with the results
+          return Pair.of(work.getLeft(), new SettingsList(results));
+        } catch (final Exception ex) {
+          logger.warning(() -> "Preview failed to compute results: " + ex.getMessage());
+          return workFailed(work);
+        }
+      }
+
+      /**
+       * Create the result when the computation failed. This allows the rest of the workflow to
+       * respond to the failure.
+       *
+       * @param work the input work
+       * @return the failed work
+       */
+      private Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
+          workFailed(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+        return Pair.of(work.getLeft(), null);
+      }
+    }
+
+    /**
+     * Worker to overlay the fit results on the image.
+     */
+    private class OverlayWorker extends BaseWorker {
+      private boolean reset;
+      private final Overlay overlay = imp.getOverlay();
+
+      @Override
+      public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
+          Pair<FitEngineConfiguration, Settings> previous) {
+        if (current.getRight() == null) {
+          return previous.getRight() == null;
+        }
+        return current.getRight().previewOverlay == previous.getRight().previewOverlay;
+      }
+
+      @Override
+      public boolean equalResults(SettingsList current, SettingsList previous) {
+        // assume a change if the objects have changed
+        return getMemoryPeakResults(current) == getMemoryPeakResults(previous) && !reset;
+      }
+
+      @Override
+      public Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
+          doWork(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+        reset = false;
+        final Settings settings = work.getLeft().getRight();
+        final MemoryPeakResults results = getMemoryPeakResults(work.getRight());
+        if (results == null || !settings.previewOverlay) {
+          reset();
+        } else {
+          overlayResults(imp, results, imp.getCurrentSlice());
+        }
+
+        // No change
+        return work;
+      }
+
+      @Override
+      void reset() {
+        reset = true;
+        imp.setOverlay(overlay);
+      }
+    }
+
+    /**
+     * Worker to create a table of the fit results.
+     */
+    private class TableWorker extends BaseWorker {
+      private boolean reset;
+      ImageJTablePeakResults lastTable;
+      Point position;
+
+      @Override
+      public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
+          Pair<FitEngineConfiguration, Settings> previous) {
+        if (current.getRight() == null) {
+          return previous.getRight() == null;
+        }
+        return current.getRight().previewTable == previous.getRight().previewTable;
+      }
+
+      @Override
+      public boolean equalResults(SettingsList current, SettingsList previous) {
+        // assume a change if the objects have changed
+        return getMemoryPeakResults(current) == getMemoryPeakResults(previous) && !reset;
+      }
+
+      @Override
+      public Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
+          doWork(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+        reset = false;
+        final Settings settings = work.getLeft().getRight();
+        final MemoryPeakResults results = getMemoryPeakResults(work.getRight());
+        if (results == null || !settings.previewOverlay) {
+          reset();
+        } else {
+          // No requirement for a dynamic table as the blocking dialog prevents GUI interaction
+          final ImageJTablePeakResults peakResults = new ImageJTablePeakResults(false);
+
+          // TODO - support all the results settings
+          // peakResults.setDistanceUnit(resultsSettings.getDistanceUnit());
+          // peakResults.setIntensityUnit(resultsSettings.getIntensityUnit());
+          // peakResults.setAngleUnit(resultsSettings.getAngleUnit());
+          // peakResults.setShowPrecision(resultsSettings.getShowPrecision());
+          // if (resultsSettings.getShowPrecision()) {
+          // peakResults.setComputePrecision(true);
+          // }
+          // peakResults.setRoundingPrecision(resultsSettings.getRoundingPrecision());
+          // peakResults.setShowZ(showZ);
+          peakResults.setShowFittingData(true);
+          peakResults.setShowNoiseData(true);
+
+          peakResults.copySettings(results);
+          peakResults.setClearAtStart(true);
+          peakResults.begin();
+          peakResults.addAll(results.toArray());
+          peakResults.end();
+
+          if (peakResults.isNewWindow()) {
+            reset();
+            if (position != null) {
+              peakResults.getResultsWindow().setLocation(position);
+            }
+          }
+          lastTable = peakResults;
+        }
+
+        // No change
+        return work;
+      }
+
+      @Override
+      void reset() {
+        reset = true;
+        final ImageJTablePeakResults table = lastTable;
+        if (table != null) {
+          lastTable = null;
+          position = table.getResultsWindow().getLocation();
+          table.getResultsWindow().close();
+        }
+      }
     }
   }
 
@@ -899,6 +1469,9 @@ public class PeakFit implements PlugInFilter {
       IJ.error(TITLE, "Failed to initialise the source image: " + imageSource.getName());
       return DONE;
     }
+
+    // Store this before the dialog to allow use by the preview workflow
+    this.imp = imp;
 
     final int flags = showDialog(imp);
     if ((flags & DONE) == 0) {
@@ -1366,12 +1939,24 @@ public class PeakFit implements PlugInFilter {
       gd.addSlider("Fraction_of_threads", 0.1, 1, settings.fractionOfThreads);
     }
 
-    // Add a mouse listener to the config file field
+    ItemDialogListener listener = null;
     if (isShowGenericDialog) {
-      new ItemDialogListener(sliders).attach(gd, isCrop);
+      listener = new ItemDialogListener(sliders);
+
+      // Add a listener to dynamically respond to GUI changes
+      listener.attach(gd, isCrop);
+
+      // Add preview checkbox for PeakFit with an input image
+      if (imp != null && !fitMaxima && !maximaIdentification) {
+        listener.addPreview(gd);
+      }
     }
 
     gd.showDialog();
+
+    if (listener != null) {
+      listener.shutdown();
+    }
 
     if (gd.wasCanceled() || !readDialog(gd, isCrop)) {
       return DONE;
@@ -4300,7 +4885,7 @@ public class PeakFit implements PlugInFilter {
     // To pre-process data for noise estimation
     boolean isFitCameraCounts = false;
     CameraModel cameraModel = null;
-    if (ignoreBoundsForNoise) {
+    if (cropBounds != null && ignoreBoundsForNoise) {
       isFitCameraCounts = fitConfig.isFitCameraCounts();
       cameraModel = fitConfig.getCameraModel();
       // Note:
@@ -4441,24 +5026,29 @@ public class PeakFit implements PlugInFilter {
         return;
       }
 
-      final LUT lut = LutHelper.createLut(LutColour.ICE);
-      final Overlay o = new Overlay();
-      final int size = memoryResults.size();
-      final Counter j = new Counter(size);
-      final ImagePlus finalImp = localImp;
-      memoryResults.forEach(DistanceUnit.PIXEL, (XyResultProcedure) (x, y) -> {
-        final PointRoi roi = new OffsetPointRoi(x, y);
-        final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
-        roi.setStrokeColor(c);
-        roi.setFillColor(c);
-        if (finalImp.getStackSize() > 1) {
-          roi.setPosition(singleFrame);
-        }
-        o.add(roi);
-      });
-      localImp.setOverlay(o);
+      overlayResults(localImp, memoryResults, singleFrame);
       localImp.getWindow().toFront();
     }
+  }
+
+  private static void overlayResults(ImagePlus localImp, MemoryPeakResults memoryResults,
+      int singleFrame) {
+    final LUT lut = LutHelper.createLut(LutColour.ICE);
+    final Overlay o = new Overlay();
+    final int size = memoryResults.size();
+    final Counter j = new Counter(size);
+    final ImagePlus finalImp = localImp;
+    memoryResults.forEach(DistanceUnit.PIXEL, (XyResultProcedure) (x, y) -> {
+      final PointRoi roi = new OffsetPointRoi(x, y);
+      final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
+      roi.setStrokeColor(c);
+      roi.setFillColor(c);
+      if (finalImp.getStackSize() > 1) {
+        roi.setPosition(singleFrame);
+      }
+      o.add(roi);
+    });
+    localImp.setOverlay(o);
   }
 
   /**
