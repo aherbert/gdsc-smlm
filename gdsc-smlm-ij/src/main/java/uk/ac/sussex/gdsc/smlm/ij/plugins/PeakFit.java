@@ -244,6 +244,9 @@ public class PeakFit implements PlugInFilter {
     boolean fitAcrossAllFrames;
     boolean previewOverlay;
     boolean previewTable;
+    boolean previewLogProgress;
+    boolean previewShowDeviations;
+    ResultsTableSettings tableSettings;
 
     Settings() {
       // Allow 1 thread free.
@@ -253,6 +256,7 @@ public class PeakFit implements PlugInFilter {
       showImage = true;
       previewOverlay = true;
       previewTable = true;
+      tableSettings = ResultsTableSettings.getDefaultInstance();
     }
 
     Settings(Settings source) {
@@ -263,6 +267,9 @@ public class PeakFit implements PlugInFilter {
       fitAcrossAllFrames = source.fitAcrossAllFrames;
       previewOverlay = source.previewOverlay;
       previewTable = source.previewTable;
+      previewLogProgress = source.previewLogProgress;
+      previewShowDeviations = source.previewShowDeviations;
+      tableSettings = source.tableSettings;
     }
 
     Settings copy() {
@@ -283,6 +290,14 @@ public class PeakFit implements PlugInFilter {
      */
     void save() {
       INSTANCE.set(this);
+    }
+
+    void setPreviewLogProgress(boolean previewLogProgress) {
+      this.previewLogProgress = previewLogProgress;
+    }
+
+    void setPreviewShowDeviations(boolean previewShowDeviations) {
+      this.previewShowDeviations = previewShowDeviations;
     }
   }
 
@@ -822,12 +837,12 @@ public class PeakFit implements PlugInFilter {
         bind(textNoiseMethod, config::setNoiseMethod);
       }
 
-      // TODO - Respond to these input but use duplicate properties in the settings to
+      // Respond to these input but use duplicate properties in the settings to
       // avoid passing the entire resultsSettings into the workflow
-      // bind(textLogProgress, resultsSettings::setLogProgress);
-      // if (textShowDeviations != null) {
-      // bind(textShowDeviations, resultsSettings::setShowDeviations);
-      // }
+      bind(textLogProgress, settings::setPreviewLogProgress);
+      if (textShowDeviations != null) {
+        bind(textShowDeviations, settings::setPreviewShowDeviations);
+      }
     }
 
     @Override
@@ -839,9 +854,15 @@ public class PeakFit implements PlugInFilter {
       // Detect changes
       final boolean overlay = settings.previewOverlay;
       final boolean table = settings.previewTable;
+      final ResultsTableSettings tableSettings = settings.tableSettings;
       egd.addMessage("Configure the interactive preview");
       egd.addCheckbox("Show_overlay", settings.previewOverlay);
-      egd.addCheckbox("Show_table", settings.previewTable);
+      // Support all table options
+      final ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
+      resultsSettings.setResultsTableSettings(tableSettings);
+      resultsSettings.getResultsTableSettingsBuilder().setShowTable(table);
+      ResultsManager.addTableResultsOptions(egd, resultsSettings,
+          ResultsManager.FLAG_NO_SECTION_HEADER);
       egd.showDialog(false, null);
       if (egd.wasCanceled()) {
         Recorder.record = record;
@@ -849,12 +870,15 @@ public class PeakFit implements PlugInFilter {
       }
       settings.previewOverlay = egd.getNextBoolean();
       settings.previewTable = egd.getNextBoolean();
+      egd.collectOptions();
+      settings.tableSettings = resultsSettings.getResultsTableSettings();
 
       Recorder.record = record;
-      // TODO - What if there are no preview output choices?
-      // The preview is computing but nothing is displayed...
-      // Will fitting still log to the ImageJ window, etc.
-      return overlay != settings.previewOverlay || table != settings.previewTable;
+      // Note: If there are no preview output choices then the preview is computing
+      // but nothing is displayed... For now this is ignored. Some options such as
+      // recording to the ImageJ log window are configured in other dialogs.
+      return overlay != settings.previewOverlay || table != settings.previewTable
+          || !tableSettings.equals(settings.tableSettings);
     }
 
     @Override
@@ -971,11 +995,19 @@ public class PeakFit implements PlugInFilter {
       @Override
       public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
           Pair<FitEngineConfiguration, Settings> previous) {
-        if (current.getLeft() == null) {
-          return previous.getLeft() == null;
+        FitEngineConfiguration config1 = current.getLeft();
+        FitEngineConfiguration config2 = previous.getLeft();
+        if (config1 == null) {
+          return config2 == null;
         }
-        if (!current.getLeft().getFitEngineSettings()
-            .equals(previous.getLeft().getFitEngineSettings())) {
+        if (!config1.getFitEngineSettings().equals(config2.getFitEngineSettings())) {
+          return false;
+        }
+        // Assume if the config is not null then the settings are not null
+        final Settings settings1 = current.getRight();
+        final Settings settings2 = previous.getRight();
+        if (settings1.previewLogProgress != settings2.previewLogProgress
+            || settings1.previewShowDeviations != settings2.previewShowDeviations) {
           return false;
         }
         return true;
@@ -995,6 +1027,7 @@ public class PeakFit implements PlugInFilter {
           doWork(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
         try {
           final FitEngineConfiguration config = work.getLeft().getLeft();
+          final Settings settings = work.getLeft().getRight();
           final FitConfiguration fitConfig = config.getFitConfiguration();
 
           // This assumes the source is configured at the end of setup(...)
@@ -1010,11 +1043,9 @@ public class PeakFit implements PlugInFilter {
           fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
           config.configureOutputUnits();
 
-          // TODO: Configure logging and deviations
-          // if ...
-          // fitConfig.setLog(logger);
-          // if ...
-          // fitConfig.setComputeDeviations(...);
+          // Configure logging and deviations
+          fitConfig.setLog(settings.previewLogProgress ? logger : null);
+          fitConfig.setComputeDeviations(settings.previewShowDeviations);
 
           // Cache the camera model configuration. We can do this as the crop will be unchanged
           // and a camera model is uniquely defined by the name.
@@ -1140,10 +1171,12 @@ public class PeakFit implements PlugInFilter {
       @Override
       public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
           Pair<FitEngineConfiguration, Settings> previous) {
-        if (current.getRight() == null) {
-          return previous.getRight() == null;
+        final Settings settings1 = current.getRight();
+        final Settings settings2 = previous.getRight();
+        if (settings1 == null) {
+          return settings2 == null;
         }
-        return current.getRight().previewOverlay == previous.getRight().previewOverlay;
+        return settings1.previewOverlay == settings2.previewOverlay;
       }
 
       @Override
@@ -1186,10 +1219,18 @@ public class PeakFit implements PlugInFilter {
       @Override
       public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
           Pair<FitEngineConfiguration, Settings> previous) {
-        if (current.getRight() == null) {
-          return previous.getRight() == null;
+        final Settings settings1 = current.getRight();
+        final Settings settings2 = previous.getRight();
+        if (settings1 == null) {
+          return settings2 == null;
         }
-        return current.getRight().previewTable == previous.getRight().previewTable;
+        if (settings1.previewTable) {
+          // Only compare the table settings if the table is displayed
+          if (!settings.tableSettings.equals(settings2.tableSettings)) {
+            return false;
+          }
+        }
+        return settings1.previewTable == settings2.previewTable;
       }
 
       @Override
@@ -1209,19 +1250,21 @@ public class PeakFit implements PlugInFilter {
         } else {
           // No requirement for a dynamic table as the blocking dialog prevents GUI interaction
           final ImageJTablePeakResults peakResults = new ImageJTablePeakResults(false);
+          final ResultsTableSettings resultsSettings = work.getLeft().getRight().tableSettings;
 
-          // TODO - support all the results settings
-          // peakResults.setDistanceUnit(resultsSettings.getDistanceUnit());
-          // peakResults.setIntensityUnit(resultsSettings.getIntensityUnit());
-          // peakResults.setAngleUnit(resultsSettings.getAngleUnit());
-          // peakResults.setShowPrecision(resultsSettings.getShowPrecision());
-          // if (resultsSettings.getShowPrecision()) {
-          // peakResults.setComputePrecision(true);
-          // }
-          // peakResults.setRoundingPrecision(resultsSettings.getRoundingPrecision());
-          // peakResults.setShowZ(showZ);
-          peakResults.setShowFittingData(true);
-          peakResults.setShowNoiseData(true);
+          // Support all the results settings
+          peakResults.setDistanceUnit(resultsSettings.getDistanceUnit());
+          peakResults.setIntensityUnit(resultsSettings.getIntensityUnit());
+          peakResults.setAngleUnit(resultsSettings.getAngleUnit());
+          peakResults.setShowFittingData(resultsSettings.getShowFittingData());
+          peakResults.setShowNoiseData(resultsSettings.getShowNoiseData());
+          peakResults.setShowPrecision(resultsSettings.getShowPrecision());
+          if (resultsSettings.getShowPrecision()) {
+            peakResults.setComputePrecision(true);
+          }
+          peakResults.setRoundingPrecision(resultsSettings.getRoundingPrecision());
+          peakResults.setShowZ(results.is3D());
+          peakResults.setShowDeviations(results.hasDeviations());
 
           peakResults.copySettings(results);
           peakResults.setClearAtStart(true);
