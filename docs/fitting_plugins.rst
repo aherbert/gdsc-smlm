@@ -1500,6 +1500,8 @@ If the settings are invalid then an error message is written to the ``ImageJ`` l
 
     The preview mode does not support the additional options for interlaced or integrated frames (see :numref:`{name} <fitting_plugins:Additional Fitting Options>`).
 
+    The :numref:`{name} <fitting_plugins:Spot Finder (Preview)>` plugin allows an interactive view of the candidates that will be identified in an image using the configured spot filter; it supports changing the current image frame during the preview.
+
 
 .. index:: Interactive Results Table
 
