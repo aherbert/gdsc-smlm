@@ -481,7 +481,7 @@ The maxima identification parameters control the search for local maxima in the 
    * - Spot filter type
      - The type of filter to use. The default is a ``Single`` filter.
 
-       If a ``Difference`` or ``Jury`` filter is selected then the plugin will present an additional dialog to configure each additional spot filter. See section :numref:`{number}: {name} <fitting_plugins:Spot Filter Type>`.
+       If a ``Difference`` or ``Jury`` filter is selected then pressing the ``...`` button will present an additional dialog to configure each additional spot filter. See section :numref:`{number}: {name} <fitting_plugins:Spot Filter Type>`.
 
    * - Spot filter
      - The name of the first spot filter:
@@ -570,7 +570,7 @@ The fitting parameters control the fitting algorithm. Fitting is performed on ea
 
        *   ``Fast MLE``: Use a fast Newton-Raphson gradient based maximum likelihood estimation (MLE). The probability model uses Poisson shot noise and Gaussian read noise.
 
-       Each ``Fit Solver`` requires further parameters that are collected in a separate dialog.
+       Each ``Fit Solver`` requires further parameters that can be configured by pressing the ``...`` button.
 
    * - Fail Limit
      - Stop processing the image frame when more than N *consecutive* candidates are rejected. The candidate may be rejected due to a failure to fit the PSF or due to the PSF filter parameters.
@@ -1271,7 +1271,7 @@ The following filtering parameters can be configured:
    * - Smart filter
      - Set to **true** to enable the smart filter.
 
-       A separate dialog is used to enter the XML description of the smart filter.
+       A separate dialog is used to enter the XML description of the smart filter by pressing the ``...`` button.
 
    * - Disable simple filter
      - Set to **true** to disable the simple filters. Only the smart filter will be used.
@@ -1482,6 +1482,23 @@ The results parameters control where the list of localisations will be recorded.
        This is very fast and is the default option applied when no other results outputs are chosen (preventing the loss of results). Results in memory can be accessed by other plugins, for example the ``Result Manager`` can convert them to file or images.
 
        The memory results will be named using the input image title. If a results set already exists with the same name then it will be replaced.
+
+
+
+.. index:: Peak Fit Preview
+
+Peak Fit Preview
+~~~~~~~~~~~~~~~~
+
+If the ``Peak Fit`` plugin is executed using an image then a ``Preview`` option is provided. When preview mode is enabled then any changes to the settings are used to perform fitting on the current image frame. The preview can overlay the results on the current frame and display a table of the results. Preview options are configured using the ``...`` button including configuration of the preview results table. This configuration is separate from the main results table output as fitting of the entire image may not select to generate a table. The preview will respect the ``Log progress`` and ``Show deviations`` options on the main dialog.
+
+If the settings are invalid then an error message is written to the ``ImageJ`` log window and the current preview output will be removed.
+
+.. note::
+
+    Preview mode can be used to experiment with settings and interactively view the effects of changes. However the preview is only available on the current image frame. To preview settings on another frame requires the main dialog to be cancelled, the image frame updated and then the ``Peak Fit`` plugin to be run again.
+
+    The preview mode does not support the additional options for interlaced or integrated frames (see :numref:`{name} <fitting_plugins:Additional Fitting Options>`).
 
 
 .. index:: Interactive Results Table
