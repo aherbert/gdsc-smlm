@@ -481,7 +481,7 @@ The maxima identification parameters control the search for local maxima in the 
    * - Spot filter type
      - The type of filter to use. The default is a ``Single`` filter.
 
-       If a ``Difference`` or ``Jury`` filter is selected then pressing the ``...`` button will present an additional dialog to configure each additional spot filter. See section :numref:`{number}: {name} <fitting_plugins:Spot Filter Type>`.
+       If a ``Difference`` or ``Jury`` filter is configured then pressing the ``...`` button will present an additional dialog to configure each additional spot filter. This dialog is shown automatically when the setting is changed to ensure the additional options are collected. See section :numref:`{number}: {name} <fitting_plugins:Spot Filter Type>`.
 
    * - Spot filter
      - The name of the first spot filter:

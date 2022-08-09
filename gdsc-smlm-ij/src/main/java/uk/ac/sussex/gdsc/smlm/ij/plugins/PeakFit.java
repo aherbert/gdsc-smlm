@@ -186,6 +186,8 @@ public class PeakFit implements PlugInFilter {
   public static final int FLAG_NO_DIFFERENCE_FILTER = 0x08;
   /** Flag to indicate that PSF options should not be shown for an astigmatism model. */
   public static final int FLAG_NO_ASTIGMATISM = 0x10;
+  /** Flag to indicate that data filter options should not be shown for a change in filter. */
+  public static final int FLAG_NO_FILTER_OPTIONS = 0x20;
 
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 
@@ -2644,141 +2646,154 @@ public class PeakFit implements PlugInFilter {
     final double defaultFilterSmoothing = 0.5;
     final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
     // A single filter is configured directly in the dialog.
-    // A difference/jury filter use an option listener.
+    // A difference/jury filter uses an option listener.
+    // This is created first to allow it to be called when the filter type changes.
+    final OptionListener<Integer> optionListener = new OptionListener<Integer>() {
+      @Override
+      public boolean collectOptions(Integer value) {
+        final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
+        config.setDataFilterType(value);
+        return collectOptions(false);
+      }
+
+      @Override
+      public boolean collectOptions() {
+        return collectOptions(true);
+      }
+
+      private boolean collectOptions(boolean silent) {
+        final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
+        int filterCount;
+        switch (config.getDataFilterType()) {
+          case JURY:
+            filterCount = Integer.MAX_VALUE;
+            break;
+
+          case DIFFERENCE:
+            if (BitFlagUtils.anySet(flags, FLAG_NO_DIFFERENCE_FILTER)) {
+              return false;
+            }
+            filterCount = 2;
+            break;
+
+          case SINGLE:
+          default:
+            // A single filter is configured directly
+            return false;
+        }
+
+        // Collect configuration for additional filters
+        boolean changed = false;
+        int method;
+        double smooth;
+        boolean abs;
+        int numberOfFilters = 1;
+        final int origNumberOfFilters = Math.min(config.getDataFiltersCount(), filterCount);
+        final String[] filterNames = SettingsManager.getDataFilterMethodNames();
+        final DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
+        for (int i = 1; i < filterCount; i++) {
+          final int filter = i + 1;
+          final int ii = i;
+
+          final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+          if (filter == filterCount) {
+            // This is maximum filter count so no continue option
+            ImageJUtils.addMessage(egd, "Configure the %s filter.",
+                FitProtosHelper.getName(config.getDataFilterType()));
+          } else {
+            egd.enableYesNoCancel("Add", "Continue");
+            ImageJUtils.addMessage(egd,
+                "Configure the %s filter.\nClick continue to proceed with the current set of %d.",
+                FitProtosHelper.getName(config.getDataFilterType()), i);
+          }
+
+          final String fieldName = "Spot_filter" + filter;
+          if (IJ.isMacro()) {
+            // Use blank default value so bad macro parameters return nothing
+            egd.addStringField(fieldName, "");
+          } else {
+            egd.addChoice(fieldName, filterNames, filterNames[config
+                .getDataFilterMethod(ii, config.getDataFilterMethod(ii - 1)).ordinal()]);
+          }
+          addRelativeParameterOptions(egd, new RelativeParameterProvider(0, 4.5,
+              "Smoothing" + filter, fitEngineConfigurationProvider, true) {
+            @Override
+            void setAbsolute(boolean absolute) {
+              // Get the current settings
+              final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
+              final DataFilterMethod m = c.getDataFilterMethod(ii);
+              final double smooth = c.getDataFilterParameter(ii).getValue();
+              // Reset with the new absolute value
+              c.setDataFilter(m, smooth, absolute, ii);
+            }
+
+            @Override
+            boolean isAbsolute() {
+              final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
+              return c.getDataFilterParameterAbsolute(ii, c.getDataFilterParameterAbsolute(ii - 1));
+            }
+
+            @Override
+            double getValue() {
+              final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
+              return c.getDataFilterParameterValue(ii, c.getDataFilterParameterValue(ii - 1));
+            }
+          });
+          egd.setSilent(silent);
+          egd.showDialog(true, gd);
+          if (egd.wasOKed()) {
+            int filterIndex = -1;
+            if (IJ.isMacro()) {
+              final String filterName = egd.getNextString();
+              for (int j = 0; j < filterNames.length; j++) {
+                if (filterNames[j].equals(filterName)) {
+                  filterIndex = j;
+                  break;
+                }
+              }
+
+              if (filterIndex < 0) {
+                break;
+              }
+            } else {
+              filterIndex = egd.getNextChoiceIndex();
+            }
+            method = i < origNumberOfFilters ? config.getDataFilterMethod(i).getNumber() : -1;
+            smooth = config.getDataFilterParameterValue(i, Double.NaN);
+            abs = config.getDataFilterParameterAbsolute(i, false);
+            config.setDataFilter(filterValues[filterIndex], Math.abs(egd.getNextNumber()), i);
+            // Note: The absolute flag is set in extra options
+            egd.collectOptions();
+            changed = changed || method != config.getDataFilterMethod(i).getNumber()
+                || smooth != config.getDataFilterParameterValue(i)
+                || abs != config.getDataFilterParameterAbsolute(i);
+            numberOfFilters++;
+          } else {
+            break;
+          }
+        }
+        // Truncation of the current parameters. Allows detection of first time changes
+        // and ignoring second time no changes when using a jury filter,
+        // e.g. 5 -> 4 -> 4 filters (change first time, second time is unchanged)
+        config.setNumberOfFilters(numberOfFilters);
+
+        return changed || origNumberOfFilters != numberOfFilters;
+      }
+    };
     gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
-        config.getDataFilterType().ordinal(), new OptionListener<Integer>() {
-          @Override
-          public boolean collectOptions(Integer value) {
-            final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
-            config.setDataFilterType(value);
-            return collectOptions(false);
-          }
+        config.getDataFilterType().ordinal(), optionListener);
 
-          @Override
-          public boolean collectOptions() {
-            return collectOptions(true);
-          }
-
-          private boolean collectOptions(boolean silent) {
-            final FitEngineConfiguration config = fitEngineConfigurationProvider.get();
-            int filterCount;
-            switch (config.getDataFilterType()) {
-              case JURY:
-                filterCount = Integer.MAX_VALUE;
-                break;
-
-              case DIFFERENCE:
-                if (BitFlagUtils.anySet(flags, FLAG_NO_DIFFERENCE_FILTER)) {
-                  return false;
-                }
-                filterCount = 2;
-                break;
-
-              case SINGLE:
-              default:
-                // A single filter is configured directly
-                return false;
-            }
-
-            // Collect configuration for additional filters
-            boolean changed = false;
-            int method;
-            double smooth;
-            boolean abs;
-            int numberOfFilters = 1;
-            final int origNumberOfFilters = Math.min(config.getDataFiltersCount(), filterCount);
-            final String[] filterNames = SettingsManager.getDataFilterMethodNames();
-            final DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
-            for (int i = 1; i < filterCount; i++) {
-              final int filter = i + 1;
-              final int ii = i;
-
-              final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-              if (filter == filterCount) {
-                // This is maximum filter count so no continue option
-                ImageJUtils.addMessage(egd, "Configure the %s filter.",
-                    FitProtosHelper.getName(config.getDataFilterType()));
-              } else {
-                egd.enableYesNoCancel("Add", "Continue");
-                ImageJUtils.addMessage(egd,
-                    "Configure the %s filter.\nClick continue to proceed with the current set of %d.",
-                    FitProtosHelper.getName(config.getDataFilterType()), i);
-              }
-
-              final String fieldName = "Spot_filter" + filter;
-              if (IJ.isMacro()) {
-                // Use blank default value so bad macro parameters return nothing
-                egd.addStringField(fieldName, "");
-              } else {
-                egd.addChoice(fieldName, filterNames, filterNames[config
-                    .getDataFilterMethod(ii, config.getDataFilterMethod(ii - 1)).ordinal()]);
-              }
-              addRelativeParameterOptions(egd, new RelativeParameterProvider(0, 4.5,
-                  "Smoothing" + filter, fitEngineConfigurationProvider, true) {
-                @Override
-                void setAbsolute(boolean absolute) {
-                  // Get the current settings
-                  final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
-                  final DataFilterMethod m = c.getDataFilterMethod(ii);
-                  final double smooth = c.getDataFilterParameter(ii).getValue();
-                  // Reset with the new absolute value
-                  c.setDataFilter(m, smooth, absolute, ii);
-                }
-
-                @Override
-                boolean isAbsolute() {
-                  final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
-                  return c.getDataFilterParameterAbsolute(ii,
-                      c.getDataFilterParameterAbsolute(ii - 1));
-                }
-
-                @Override
-                double getValue() {
-                  final FitEngineConfiguration c = fitEngineConfigurationProvider.get();
-                  return c.getDataFilterParameterValue(ii, c.getDataFilterParameterValue(ii - 1));
-                }
-              });
-              egd.setSilent(silent);
-              egd.showDialog(true, gd);
-              if (egd.wasOKed()) {
-                int filterIndex = -1;
-                if (IJ.isMacro()) {
-                  final String filterName = egd.getNextString();
-                  for (int j = 0; j < filterNames.length; j++) {
-                    if (filterNames[j].equals(filterName)) {
-                      filterIndex = j;
-                      break;
-                    }
-                  }
-
-                  if (filterIndex < 0) {
-                    break;
-                  }
-                } else {
-                  filterIndex = egd.getNextChoiceIndex();
-                }
-                method = i < origNumberOfFilters ? config.getDataFilterMethod(i).getNumber() : -1;
-                smooth = config.getDataFilterParameterValue(i, Double.NaN);
-                abs = config.getDataFilterParameterAbsolute(i, false);
-                config.setDataFilter(filterValues[filterIndex], Math.abs(egd.getNextNumber()), i);
-                // Note: The absolute flag is set in extra options
-                egd.collectOptions();
-                changed = changed || method != config.getDataFilterMethod(i).getNumber()
-                    || smooth != config.getDataFilterParameterValue(i)
-                    || abs != config.getDataFilterParameterAbsolute(i);
-                numberOfFilters++;
-              } else {
-                break;
-              }
-            }
-            // Truncation of the current parameters. Allows detection of first time changes
-            // and ignoring second time no changes when using a jury filter,
-            // e.g. 5 -> 4 -> 4 filters (change first time, second time is unchanged)
-            config.setNumberOfFilters(numberOfFilters);
-
-            return changed || origNumberOfFilters != numberOfFilters;
-          }
-        });
+    if (BitFlagUtils.anyNotSet(flags, FLAG_NO_FILTER_OPTIONS)) {
+      // Ensure a change shows the second dialog to configure the filter.
+      // Note: This functionality could be moved to the ExtendedGenericDialog
+      // to allow notification of option listeners for the dialog.
+      // For the PeakFit preview this is not required as the collection of options
+      // occurs before the item selected event triggers a preview change.
+      final Choice choice = gd.getLastChoice();
+      choice.addItemListener(event -> {
+        optionListener.collectOptions(choice.getSelectedIndex());
+      });
+    }
 
     gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
         config.getDataFilterMethod(n, defaultFilterMethod).ordinal());
