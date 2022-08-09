@@ -3974,7 +3974,6 @@ public class PeakFit implements PlugInFilter {
       }
     }
 
-    // TODO - make this optional to allow faster read dialog for a preview
     final boolean result = saveFitEngineSettings();
     if (!result) {
       IJ.error(TITLE, "Failed to save settings");
