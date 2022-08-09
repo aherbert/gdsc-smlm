@@ -41,6 +41,7 @@ import ij.process.LUT;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Label;
@@ -1216,6 +1217,7 @@ public class PeakFit implements PlugInFilter {
       private boolean reset;
       ImageJTablePeakResults lastTable;
       Point position;
+      Dimension size;
 
       @Override
       public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
@@ -1265,7 +1267,7 @@ public class PeakFit implements PlugInFilter {
           }
           peakResults.setRoundingPrecision(resultsSettings.getRoundingPrecision());
           peakResults.setShowZ(results.is3D());
-          peakResults.setShowDeviations(results.hasDeviations());
+          peakResults.setShowDeviations(work.getLeft().getRight().previewShowDeviations);
 
           peakResults.copySettings(results);
           peakResults.setClearAtStart(true);
@@ -1277,6 +1279,7 @@ public class PeakFit implements PlugInFilter {
             reset();
             if (position != null) {
               peakResults.getResultsWindow().setLocation(position);
+              peakResults.getResultsWindow().setSize(size);
             }
           }
           lastTable = peakResults;
@@ -1292,7 +1295,8 @@ public class PeakFit implements PlugInFilter {
         final ImageJTablePeakResults table = lastTable;
         if (table != null) {
           lastTable = null;
-          position = table.getResultsWindow().getLocation();
+          size = table.getResultsWindow().getSize(size);
+          position = table.getResultsWindow().getLocation(position);
           table.getResultsWindow().close();
         }
       }
