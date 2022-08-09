@@ -1204,7 +1204,7 @@ public class PeakFit implements PlugInFilter {
         reset = false;
         final Settings settings = work.getLeft().getRight();
         final MemoryPeakResults results = getMemoryPeakResults(work.getRight());
-        if (results == null || !settings.previewOverlay) {
+        if (results == null || !settings.previewTable) {
           reset();
         } else {
           // No requirement for a dynamic table as the blocking dialog prevents GUI interaction
