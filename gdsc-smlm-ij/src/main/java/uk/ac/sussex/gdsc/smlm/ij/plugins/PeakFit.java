@@ -999,8 +999,8 @@ public class PeakFit implements PlugInFilter {
       @Override
       public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
           Pair<FitEngineConfiguration, Settings> previous) {
-        FitEngineConfiguration config1 = current.getLeft();
-        FitEngineConfiguration config2 = previous.getLeft();
+        final FitEngineConfiguration config1 = current.getLeft();
+        final FitEngineConfiguration config2 = previous.getLeft();
         if (config1 == null) {
           return config2 == null;
         }
