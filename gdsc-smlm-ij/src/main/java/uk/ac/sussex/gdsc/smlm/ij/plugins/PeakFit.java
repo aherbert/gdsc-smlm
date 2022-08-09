@@ -824,12 +824,13 @@ public class PeakFit implements PlugInFilter {
       bind(textNeighbourHeightThreshold, config::setNeighbourHeightThreshold);
       bind(textResidualsThreshold, config::setResidualsThreshold);
       bind(textDuplicateDistance, config::setDuplicateDistance);
-      // // textCoordinateShiftFactor
-      // // textSignalStrength
-      // // textMinPhotons
-      // // textMinWidthFactor
-      // // textWidthFactor
-      // // textPrecisionThreshold
+      // Already bound ...
+      // textCoordinateShiftFactor
+      // textSignalStrength
+      // textMinPhotons
+      // textMinWidthFactor
+      // textWidthFactor
+      // textPrecisionThreshold
       bind(textSmartFilter, fitConfig::setSmartFilter);
       bind(textDisableSimpleFilter, fitConfig::setDisableSimpleFilter);
       if (textNoise != null) {
