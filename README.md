@@ -80,9 +80,9 @@ you will have to install these to your local Maven repository before building:
         cd ../gdsc-smlm
         mvn package
 
-	This will produce a gdsc-smlm-ij_-[VERSION].jar file in the target directory
-  of the gdsc-smlm-ij module.	All dependencies are copied into the
-  target/dependencies directory of the module.
+   This will produce a gdsc-smlm-ij_-[VERSION].jar file in the target directory
+   of the gdsc-smlm-ij module.	All dependencies are copied into the
+   target/dependencies directory of the module.
 
 1. Installation into a Fiji/ImageJ2 install can be performed using the scijava
 maven goal to populate the application:
@@ -91,16 +91,16 @@ maven goal to populate the application:
         mvn scijava:populate-app -Dscijava.app.directory=/usr/local/fiji
         cd ..
 
-  where `/usr/local/fiji` is the root directory of the ImageJ install.
+   where `/usr/local/fiji` is the root directory of the ImageJ install.
 
 1. Manual installation must copy the gdsc-smlm-ij_* jar into the plugins
 directory of ImageJ.
 
-  Copy the dependencies into the plugins directory (or onto the Java
-  classpath). Note that the Maven package routine puts all dependencies into
-  the target/dependencies directory even if they are not required by the SMLM code
-  (it does not check what functions are actually used by the code). The libraries
-  required are:
+   Copy the dependencies into the plugins directory (or onto the Java
+   classpath). Note that the Maven package routine puts all dependencies into
+   the target/dependencies directory even if they are not required by the SMLM code
+   (it does not check what functions are actually used by the code). The libraries
+   required are:
 
         gdsc-core
         gdsc-core-ij
@@ -124,9 +124,9 @@ directory of ImageJ.
         xstream
         xpp3_min
 
-  To enable use of the 3D viewer also add the Java3D libraries and the native
-  libraries for your platform. This is unnecessary if using Fiji as the correct
-  libraries are present. The libraries required are:
+   To enable use of the 3D viewer also add the Java3D libraries and the native
+   libraries for your platform. This is unnecessary if using Fiji as the correct
+   libraries are present. The libraries required are:
 
         3D_Viewer
         j3dcore
