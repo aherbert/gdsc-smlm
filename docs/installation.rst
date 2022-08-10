@@ -65,7 +65,7 @@ Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
    * - gdsc-smlm
      - Contains the GDSC SMLM library.
 
-   * - gdsc-smlm-ij_
+   * - gdsc-smlm-ij\_
      - Contains the GDSC SMLM ``ImageJ`` plugins.
 
    * - ejml
