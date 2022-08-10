@@ -170,7 +170,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'GDSCSMLM', u'GDSC SMLM Documentation',
-     author, 'GDSCSMLM', 'One line description of project.',
+     author, 'GDSCSMLM', 'Software for single molecule localisation microscopy (SMLM).',
      'Miscellaneous'),
 ]
 
