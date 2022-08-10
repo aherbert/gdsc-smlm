@@ -1,6 +1,2 @@
-.. |br| raw:: html
-
-    <br/>
-
-.. |micro| unicode:: U+03BC
+.. |micro| unicode:: U+03BC .. GREEK SMALL LETTER MU
    :rtrim:

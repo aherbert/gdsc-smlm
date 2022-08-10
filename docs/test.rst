@@ -37,6 +37,10 @@ b\ :sup:`2`
 
 s\ :sub:`a`
 
+|micro| m
+
+|micro|\ m
+
 
 Equations
 =========

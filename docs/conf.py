@@ -72,7 +72,7 @@ pygments_style = 'sphinx'
 
 #highlight_language = 'java'
 
-rst_prolog = open('global.rst', 'r').read()
+rst_epilog = open('global.rst', 'r').read()
 
 # -- Options for HTML output -------------------------------------------------
 
