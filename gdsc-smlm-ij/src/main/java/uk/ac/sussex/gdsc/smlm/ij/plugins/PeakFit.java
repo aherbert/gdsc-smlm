@@ -93,7 +93,6 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgressAdapter;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -370,6 +369,32 @@ public class PeakFit implements PlugInFilter {
   }
 
   /**
+   * Data class to hold the Workflow settings.
+   */
+  private static class WorkSettings {
+    final int slice;
+    final FitEngineConfiguration config;
+    final Settings settings;
+
+    WorkSettings(int slice, FitEngineConfiguration config, Settings settings) {
+      this.slice = slice;
+      this.config = config;
+      this.settings = settings;
+    }
+  }
+
+  /**
+   * Data class to hold the Workflow results.
+   */
+  private static class WorkResults {
+    final MemoryPeakResults results;
+
+    WorkResults(MemoryPeakResults results) {
+      this.results = results;
+    }
+  }
+
+  /**
    * Represents an operation that accepts a single {@code boolean}-valued argument and returns no
    * result. This is the primitive type specialization of {@link Consumer} for {@code boolean}.
    */
@@ -440,7 +465,7 @@ public class PeakFit implements PlugInFilter {
 
     private Checkbox previewCheckbox;
     private boolean preview;
-    private Workflow<SettingsList, SettingsList> workflow;
+    private Workflow<WorkSettings, WorkResults> workflow;
     private LocalList<BaseWorker> workers;
 
     /** The logger used by workers to report errors. */
@@ -964,10 +989,10 @@ public class PeakFit implements PlugInFilter {
     }
 
     void doPreview() {
-      final Workflow<SettingsList, SettingsList> workflow = this.workflow;
+      final Workflow<WorkSettings, WorkResults> workflow = this.workflow;
       if (preview && workflow != null) {
         // Clone the config and settings and pass it to the workflow
-        workflow.run(new SettingsList(imp.getCurrentSlice(), config.createCopy(), settings.copy()));
+        workflow.run(new WorkSettings(imp.getCurrentSlice(), config.createCopy(), settings.copy()));
       }
     }
 
@@ -985,26 +1010,12 @@ public class PeakFit implements PlugInFilter {
     /**
      * Base worker for the computation workflow.
      */
-    private abstract class BaseWorker implements WorkflowWorker<SettingsList, SettingsList> {
-
+    private abstract class BaseWorker implements WorkflowWorker<WorkSettings, WorkResults> {
       /**
        * Reset any changes performed during computation.
        */
       void reset() {
         // no-op
-      }
-
-      /**
-       * Gets the MemoryPeakResults from the results list.
-       *
-       * @param list the list
-       * @return the results
-       */
-      MemoryPeakResults getMemoryPeakResults(SettingsList list) {
-        if (list == null || list.size() < 1) {
-          return null;
-        }
-        return (MemoryPeakResults) list.get(0);
       }
     }
 
@@ -1026,14 +1037,12 @@ public class PeakFit implements PlugInFilter {
       private Pair<String, CameraModel> lastCameraModel;
 
       @Override
-      public boolean equalSettings(SettingsList current, SettingsList previous) {
-        final int slice1 = (int) current.get(0);
-        final int slice2 = (int) previous.get(0);
-        if (slice1 != slice2) {
+      public boolean equalSettings(WorkSettings current, WorkSettings previous) {
+        if (current.slice != previous.slice) {
           return false;
         }
-        final FitEngineConfiguration config1 = (FitEngineConfiguration) current.get(1);
-        final FitEngineConfiguration config2 = (FitEngineConfiguration) previous.get(1);
+        final FitEngineConfiguration config1 = current.config;
+        final FitEngineConfiguration config2 = previous.config;
         if (config1 == null) {
           return config2 == null;
         }
@@ -1041,8 +1050,8 @@ public class PeakFit implements PlugInFilter {
           return false;
         }
         // Assume if the config is not null then the settings are not null
-        final Settings settings1 = (Settings) current.get(2);
-        final Settings settings2 = (Settings) previous.get(2);
+        final Settings settings1 = current.settings;
+        final Settings settings2 = previous.settings;
         if (settings1.previewLogProgress != settings2.previewLogProgress
             || settings1.previewShowDeviations != settings2.previewShowDeviations) {
           return false;
@@ -1051,7 +1060,7 @@ public class PeakFit implements PlugInFilter {
       }
 
       @Override
-      public boolean equalResults(SettingsList current, SettingsList previous) {
+      public boolean equalResults(WorkResults current, WorkResults previous) {
         // This method is called when the settings are equal.
         // The workflow will cache previously computed results.
         // Here we state the results are the same so that the previous results are reused.
@@ -1060,13 +1069,13 @@ public class PeakFit implements PlugInFilter {
       }
 
       @Override
-      public Pair<SettingsList, SettingsList> doWork(Pair<SettingsList, SettingsList> work) {
+      public Pair<WorkSettings, WorkResults> doWork(Pair<WorkSettings, WorkResults> work) {
         try {
           // This allows the preview to respond to current slice changes.
           // If the ROI changes then this is currently not supported.
-          final int singleFrame = (int) work.getLeft().get(0);
-          final FitEngineConfiguration config = (FitEngineConfiguration) work.getLeft().get(1);
-          final Settings settings = (Settings) work.getLeft().get(2);
+          final int singleFrame = work.getLeft().slice;
+          final FitEngineConfiguration config = work.getLeft().config;
+          final Settings settings = work.getLeft().settings;
           final FitConfiguration fitConfig = config.getFitConfiguration();
 
           // This assumes the source is configured at the end of setup(...)
@@ -1179,7 +1188,7 @@ public class PeakFit implements PlugInFilter {
           results.end();
 
           // Create new work with the results
-          return Pair.of(work.getLeft(), new SettingsList(results));
+          return Pair.of(work.getLeft(), new WorkResults(results));
         } catch (final Exception ex) {
           logger.warning(() -> "Preview failed to compute results: " + ex.getMessage());
           return workFailed(work);
@@ -1193,7 +1202,7 @@ public class PeakFit implements PlugInFilter {
        * @param work the input work
        * @return the failed work
        */
-      private Pair<SettingsList, SettingsList> workFailed(Pair<SettingsList, SettingsList> work) {
+      private Pair<WorkSettings, WorkResults> workFailed(Pair<WorkSettings, WorkResults> work) {
         return Pair.of(work.getLeft(), null);
       }
     }
@@ -1206,9 +1215,9 @@ public class PeakFit implements PlugInFilter {
       private final Overlay overlay = imp.getOverlay();
 
       @Override
-      public boolean equalSettings(SettingsList current, SettingsList previous) {
-        final Settings settings1 = (Settings) current.get(2);
-        final Settings settings2 = (Settings) previous.get(2);
+      public boolean equalSettings(WorkSettings current, WorkSettings previous) {
+        final Settings settings1 = current.settings;
+        final Settings settings2 = previous.settings;
         if (settings1 == null) {
           return settings2 == null;
         }
@@ -1216,16 +1225,16 @@ public class PeakFit implements PlugInFilter {
       }
 
       @Override
-      public boolean equalResults(SettingsList current, SettingsList previous) {
+      public boolean equalResults(WorkResults current, WorkResults previous) {
         // assume a change if the objects have changed
-        return getMemoryPeakResults(current) == getMemoryPeakResults(previous) && !reset;
+        return current.results == previous.results && !reset;
       }
 
       @Override
-      public Pair<SettingsList, SettingsList> doWork(Pair<SettingsList, SettingsList> work) {
+      public Pair<WorkSettings, WorkResults> doWork(Pair<WorkSettings, WorkResults> work) {
         reset = false;
-        final Settings settings = (Settings) work.getLeft().get(2);
-        final MemoryPeakResults results = getMemoryPeakResults(work.getRight());
+        final Settings settings = work.getLeft().settings;
+        final MemoryPeakResults results = work.getRight().results;
         if (results == null || !settings.previewOverlay) {
           reset();
         } else {
@@ -1253,9 +1262,9 @@ public class PeakFit implements PlugInFilter {
       Dimension size;
 
       @Override
-      public boolean equalSettings(SettingsList current, SettingsList previous) {
-        final Settings settings1 = (Settings) current.get(2);
-        final Settings settings2 = (Settings) previous.get(2);
+      public boolean equalSettings(WorkSettings current, WorkSettings previous) {
+        final Settings settings1 = current.settings;
+        final Settings settings2 = previous.settings;
         if (settings1 == null) {
           return settings2 == null;
         }
@@ -1269,16 +1278,16 @@ public class PeakFit implements PlugInFilter {
       }
 
       @Override
-      public boolean equalResults(SettingsList current, SettingsList previous) {
+      public boolean equalResults(WorkResults current, WorkResults previous) {
         // assume a change if the objects have changed
-        return getMemoryPeakResults(current) == getMemoryPeakResults(previous) && !reset;
+        return current.results == previous.results && !reset;
       }
 
       @Override
-      public Pair<SettingsList, SettingsList> doWork(Pair<SettingsList, SettingsList> work) {
+      public Pair<WorkSettings, WorkResults> doWork(Pair<WorkSettings, WorkResults> work) {
         reset = false;
-        final Settings settings = (Settings) work.getLeft().get(2);
-        final MemoryPeakResults results = getMemoryPeakResults(work.getRight());
+        final Settings settings = work.getLeft().settings;
+        final MemoryPeakResults results = work.getRight().results;
         if (results == null || !settings.previewTable) {
           reset();
         } else {
