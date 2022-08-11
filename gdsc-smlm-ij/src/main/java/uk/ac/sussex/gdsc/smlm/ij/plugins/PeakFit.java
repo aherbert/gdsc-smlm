@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
+import ij.ImageListener;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
@@ -84,6 +85,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
+import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -394,7 +396,7 @@ public class PeakFit implements PlugInFilter {
    * always be performed when the dialog is read.
    */
   private class ItemDialogListener
-      implements ItemListener, OptionListener<Boolean>, OptionCollectedListener {
+      implements ItemListener, OptionListener<Boolean>, OptionCollectedListener, ImageListener {
 
     // All the fields that will be updated when reloading the configuration file
     private Choice textCameraType;
@@ -438,7 +440,7 @@ public class PeakFit implements PlugInFilter {
 
     private Checkbox previewCheckbox;
     private boolean preview;
-    private Workflow<Pair<FitEngineConfiguration, Settings>, SettingsList> workflow;
+    private Workflow<SettingsList, SettingsList> workflow;
     private LocalList<BaseWorker> workers;
 
     /** The logger used by workers to report errors. */
@@ -847,6 +849,9 @@ public class PeakFit implements PlugInFilter {
       if (textShowDeviations != null) {
         bind(textShowDeviations, settings::setPreviewShowDeviations);
       }
+
+      // Respond to image slice changes
+      ImagePlus.addImageListener(this);
     }
 
     @Override
@@ -896,6 +901,30 @@ public class PeakFit implements PlugInFilter {
       doPreview();
     }
 
+
+    @Override
+    public void imageOpened(ImagePlus imp) {
+      // Ignore
+    }
+
+    @Override
+    public void imageClosed(ImagePlus imp) {
+      if (imp.getID() == PeakFit.this.imp.getID()) {
+        if (logger != null) {
+          logger.warning("Preview image was closed");
+        }
+        // Shutdown the preview if the image is closed?
+        shutdown();
+      }
+    }
+
+    @Override
+    public void imageUpdated(ImagePlus imp) {
+      if (imp.getID() == PeakFit.this.imp.getID()) {
+        doPreview();
+      }
+    }
+
     synchronized void startPreview() {
       if (!preview) {
         // Create a workflow and workers
@@ -935,10 +964,10 @@ public class PeakFit implements PlugInFilter {
     }
 
     void doPreview() {
-      final Workflow<Pair<FitEngineConfiguration, Settings>, SettingsList> workflow = this.workflow;
+      final Workflow<SettingsList, SettingsList> workflow = this.workflow;
       if (preview && workflow != null) {
         // Clone the config and settings and pass it to the workflow
-        workflow.run(Pair.of(config.createCopy(), settings.copy()));
+        workflow.run(new SettingsList(imp.getCurrentSlice(), config.createCopy(), settings.copy()));
       }
     }
 
@@ -950,13 +979,13 @@ public class PeakFit implements PlugInFilter {
         workflow = null;
         workers = null;
       }
+      ImagePlus.removeImageListener(this);
     }
 
     /**
      * Base worker for the computation workflow.
      */
-    private abstract class BaseWorker
-        implements WorkflowWorker<Pair<FitEngineConfiguration, Settings>, SettingsList> {
+    private abstract class BaseWorker implements WorkflowWorker<SettingsList, SettingsList> {
 
       /**
        * Reset any changes performed during computation.
@@ -997,10 +1026,14 @@ public class PeakFit implements PlugInFilter {
       private Pair<String, CameraModel> lastCameraModel;
 
       @Override
-      public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
-          Pair<FitEngineConfiguration, Settings> previous) {
-        final FitEngineConfiguration config1 = current.getLeft();
-        final FitEngineConfiguration config2 = previous.getLeft();
+      public boolean equalSettings(SettingsList current, SettingsList previous) {
+        final int slice1 = (int) current.get(0);
+        final int slice2 = (int) previous.get(0);
+        if (slice1 != slice2) {
+          return false;
+        }
+        final FitEngineConfiguration config1 = (FitEngineConfiguration) current.get(1);
+        final FitEngineConfiguration config2 = (FitEngineConfiguration) previous.get(1);
         if (config1 == null) {
           return config2 == null;
         }
@@ -1008,8 +1041,8 @@ public class PeakFit implements PlugInFilter {
           return false;
         }
         // Assume if the config is not null then the settings are not null
-        final Settings settings1 = current.getRight();
-        final Settings settings2 = previous.getRight();
+        final Settings settings1 = (Settings) current.get(2);
+        final Settings settings2 = (Settings) previous.get(2);
         if (settings1.previewLogProgress != settings2.previewLogProgress
             || settings1.previewShowDeviations != settings2.previewShowDeviations) {
           return false;
@@ -1027,11 +1060,13 @@ public class PeakFit implements PlugInFilter {
       }
 
       @Override
-      public Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
-          doWork(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+      public Pair<SettingsList, SettingsList> doWork(Pair<SettingsList, SettingsList> work) {
         try {
-          final FitEngineConfiguration config = work.getLeft().getLeft();
-          final Settings settings = work.getLeft().getRight();
+          // This allows the preview to respond to current slice changes.
+          // If the ROI changes then this is currently not supported.
+          final int singleFrame = (int) work.getLeft().get(0);
+          final FitEngineConfiguration config = (FitEngineConfiguration) work.getLeft().get(1);
+          final Settings settings = (Settings) work.getLeft().get(2);
           final FitConfiguration fitConfig = config.getFitConfiguration();
 
           // This assumes the source is configured at the end of setup(...)
@@ -1091,7 +1126,6 @@ public class PeakFit implements PlugInFilter {
 
           // Assume the image source is already opened by setup(...).
           // We can call get(int) to get the specific frame without affecting sequential read.
-          final int singleFrame = imp.getCurrentSlice();
 
           // Do not crop the region from the source if the bounds match the source dimensions
           final Rectangle cropBounds =
@@ -1159,8 +1193,7 @@ public class PeakFit implements PlugInFilter {
        * @param work the input work
        * @return the failed work
        */
-      private Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
-          workFailed(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+      private Pair<SettingsList, SettingsList> workFailed(Pair<SettingsList, SettingsList> work) {
         return Pair.of(work.getLeft(), null);
       }
     }
@@ -1173,10 +1206,9 @@ public class PeakFit implements PlugInFilter {
       private final Overlay overlay = imp.getOverlay();
 
       @Override
-      public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
-          Pair<FitEngineConfiguration, Settings> previous) {
-        final Settings settings1 = current.getRight();
-        final Settings settings2 = previous.getRight();
+      public boolean equalSettings(SettingsList current, SettingsList previous) {
+        final Settings settings1 = (Settings) current.get(2);
+        final Settings settings2 = (Settings) previous.get(2);
         if (settings1 == null) {
           return settings2 == null;
         }
@@ -1190,10 +1222,9 @@ public class PeakFit implements PlugInFilter {
       }
 
       @Override
-      public Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
-          doWork(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+      public Pair<SettingsList, SettingsList> doWork(Pair<SettingsList, SettingsList> work) {
         reset = false;
-        final Settings settings = work.getLeft().getRight();
+        final Settings settings = (Settings) work.getLeft().get(2);
         final MemoryPeakResults results = getMemoryPeakResults(work.getRight());
         if (results == null || !settings.previewOverlay) {
           reset();
@@ -1222,10 +1253,9 @@ public class PeakFit implements PlugInFilter {
       Dimension size;
 
       @Override
-      public boolean equalSettings(Pair<FitEngineConfiguration, Settings> current,
-          Pair<FitEngineConfiguration, Settings> previous) {
-        final Settings settings1 = current.getRight();
-        final Settings settings2 = previous.getRight();
+      public boolean equalSettings(SettingsList current, SettingsList previous) {
+        final Settings settings1 = (Settings) current.get(2);
+        final Settings settings2 = (Settings) previous.get(2);
         if (settings1 == null) {
           return settings2 == null;
         }
@@ -1245,17 +1275,16 @@ public class PeakFit implements PlugInFilter {
       }
 
       @Override
-      public Pair<Pair<FitEngineConfiguration, Settings>, SettingsList>
-          doWork(Pair<Pair<FitEngineConfiguration, Settings>, SettingsList> work) {
+      public Pair<SettingsList, SettingsList> doWork(Pair<SettingsList, SettingsList> work) {
         reset = false;
-        final Settings settings = work.getLeft().getRight();
+        final Settings settings = (Settings) work.getLeft().get(2);
         final MemoryPeakResults results = getMemoryPeakResults(work.getRight());
         if (results == null || !settings.previewTable) {
           reset();
         } else {
           // No requirement for a dynamic table as the blocking dialog prevents GUI interaction
           final ImageJTablePeakResults peakResults = new ImageJTablePeakResults(false);
-          final ResultsTableSettings resultsSettings = work.getLeft().getRight().tableSettings;
+          final ResultsTableSettings resultsSettings = settings.tableSettings;
 
           // Support all the results settings
           peakResults.setDistanceUnit(resultsSettings.getDistanceUnit());
@@ -1269,7 +1298,7 @@ public class PeakFit implements PlugInFilter {
           }
           peakResults.setRoundingPrecision(resultsSettings.getRoundingPrecision());
           peakResults.setShowZ(results.is3D());
-          peakResults.setShowDeviations(work.getLeft().getRight().previewShowDeviations);
+          peakResults.setShowDeviations(settings.previewShowDeviations);
 
           peakResults.copySettings(results);
           peakResults.setClearAtStart(true);
@@ -1880,7 +1909,13 @@ public class PeakFit implements PlugInFilter {
       config.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
     }
 
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    // If an image source is present then a preview can be provided.
+    final boolean isShowGenericDialog = ImageJUtils.isShowGenericDialog();
+    final boolean previewMode =
+        isShowGenericDialog && imp != null && !fitMaxima && !maximaIdentification;
+
+    final ExtendedGenericDialog gd = previewMode ? new NonBlockingExtendedGenericDialog(TITLE)
+        : new ExtendedGenericDialog(TITLE);
     String helpKey;
     if (maximaIdentification) {
       helpKey = "spot-finder";
@@ -1920,7 +1955,6 @@ public class PeakFit implements PlugInFilter {
 
     // Special case top get the slider since the GenericDialog does not provide access to this.
     Scrollbar[] sliders = null;
-    final boolean isShowGenericDialog = ImageJUtils.isShowGenericDialog();
 
     final int optionFlags = (extraOptions) ? FLAG_EXTRA_OPTIONS : 0;
 
@@ -1997,7 +2031,7 @@ public class PeakFit implements PlugInFilter {
       listener.attach(gd, isCrop);
 
       // Add preview checkbox for PeakFit with an input image
-      if (imp != null && !fitMaxima && !maximaIdentification) {
+      if (previewMode) {
         listener.addPreview(gd);
       }
     }
@@ -2008,7 +2042,10 @@ public class PeakFit implements PlugInFilter {
       listener.shutdown();
     }
 
-    if (gd.wasCanceled() || !readDialog(gd, isCrop)) {
+    if (gd.wasCanceled()
+        // Handle the image being closed
+        || (gd instanceof NonBlockingExtendedGenericDialog && !imp.isVisible())
+        || !readDialog(gd, isCrop)) {
       return DONE;
     }
 
