@@ -558,6 +558,21 @@ public class PeakFit implements PlugInFilter {
 
       textFileFormat = ch.next();
       textResultsInMemory = cb.next();
+
+      if (isCrop) {
+        getLogger().warning(() -> String.format(
+            "%s initialised to crop bounds [x=%d,y=%d,width=%d,height=%d]."
+                + " Any ROI changes will be ignored. To change the ROI restart the plugin.",
+            TITLE, bounds.x, bounds.y, bounds.width, bounds.height));
+      }
+    }
+
+    Logger getLogger() {
+      Logger l = this.logger;
+      if (l == null) {
+        logger = l = ImageJPluginLoggerHelper.getLogger(PeakFit.class);
+      }
+      return l;
     }
 
     @Override
@@ -935,9 +950,7 @@ public class PeakFit implements PlugInFilter {
     @Override
     public void imageClosed(ImagePlus imp) {
       if (imp.getID() == PeakFit.this.imp.getID()) {
-        if (logger != null) {
-          logger.warning("Preview image was closed");
-        }
+        getLogger().warning("Preview image was closed");
         // Shutdown the preview if the image is closed?
         shutdown();
       }
@@ -961,7 +974,7 @@ public class PeakFit implements PlugInFilter {
           workflow.add(addWorker(new OverlayWorker()), previous);
           workflow.add(addWorker(new TableWorker()), previous);
           workflow.start();
-          logger = ImageJPluginLoggerHelper.getLogger(PeakFit.class);
+          logger = getLogger();
         }
         preview = true;
       }
