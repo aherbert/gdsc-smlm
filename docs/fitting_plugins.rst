@@ -1490,17 +1490,21 @@ The results parameters control where the list of localisations will be recorded.
 Peak Fit Preview
 ~~~~~~~~~~~~~~~~
 
-If the ``Peak Fit`` plugin is executed using an image then a ``Preview`` option is provided. When preview mode is enabled then any changes to the settings are used to perform fitting on the current image frame. The preview can overlay the results on the current frame and display a table of the results. Preview options are configured using the ``...`` button including configuration of the preview results table. This configuration is separate from the main results table output as fitting of the entire image may not select to generate a table. The preview will respect the ``Log progress`` and ``Show deviations`` options on the main dialog.
+If the ``Peak Fit`` plugin is executed using an image then a ``Preview`` option is provided. Preview mode can be used to experiment with settings and interactively view the effects of changes.
 
-If the settings are invalid then an error message is written to the ``ImageJ`` log window and the current preview output will be removed.
+When preview mode is enabled then any changes to the settings are used to perform fitting on the current image frame. The preview can overlay the results on the current frame and display a table of the results. Preview options are configured using the ``...`` button including configuration of the preview results table. This configuration is separate from the main results table output as this may not select to generate a table.
+
+The preview will respect the ``Log progress`` and ``Show deviations`` options on the main dialog. The ``Log progress`` option can be used to ensure settings changes trigger a computation as the final results may be identical and the preview output may be unchanged.
+
+If the settings are invalid then an error message is written to the ``ImageJ`` log window and the current preview output will be removed. Correcting the settings will redisplay the preview output.
+
+The preview option changes the dialog from a blocking dialog (always on top) to a non-blocking dialog (which allows interaction with the other ``ImageJ`` windows). This allows the current image frame to be changed, and the results windows to be adjusted. The preview only responds to changes of the current frame in the target window; other changes are ignored. The preview is initialised using the ROI bounds present when the plugin is executed. Any ROI changes will be ignored. To change the ROI requires restarting the plugin. If the target window is closed then the preview will shutdown and running the ``Peak Fit`` plugin using the ``OK`` button will do nothing.
 
 .. note::
 
-    Preview mode can be used to experiment with settings and interactively view the effects of changes. However the preview is only available on the current image frame. To preview settings on another frame requires the main dialog to be cancelled, the image frame updated and then the ``Peak Fit`` plugin to be run again.
-
     The preview mode does not support the additional options for interlaced or integrated frames (see :numref:`{name} <fitting_plugins:Additional Fitting Options>`).
 
-    The :numref:`{name} <fitting_plugins:Spot Finder (Preview)>` plugin allows an interactive view of the candidates that will be identified in an image using the configured spot filter; it supports changing the current image frame during the preview.
+    The preview performs candidate identification, fitting and then filitering. To perform only candidate identification use the :numref:`{name} <fitting_plugins:Spot Finder (Preview)>` plugin to provide an interactive view of the candidates  identified using the configured spot filter.
 
 
 .. index:: Interactive Results Table
