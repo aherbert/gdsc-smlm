@@ -481,6 +481,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       noise = (float) fitConfig.getNoise();
     }
 
+    // XXX - Is this required?
+    // A single fit can use the smart filter. Multi fit must disable the smart filter
+    // so not all peaks are processed. Note that fits that only fail the width
+    // filter should be tried as a doublet.
+
     // Disable the use of the direct filter within the FitConfiguration validate method.
     // This allows validate() to be used for basic filtering of all fit results (e.g. using the fit
     // region bounds).
@@ -2200,8 +2205,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Note: The argument input bounds are relative to the data bounds so
       // convert them to fit inside the camera model.
       // assume: dataBounds == cameraModel.getBounds()
-      //bounds.x += cameraModel.getBounds().x;
-      //bounds.y += cameraModel.getBounds().y;
+      // bounds.x += cameraModel.getBounds().x;
+      // bounds.y += cameraModel.getBounds().y;
       bounds.x += cc.dataBounds.x;
       bounds.y += cc.dataBounds.y;
       double noiseEstimate = Math.sqrt(background + cameraModel.getMeanNormalisedVariance(bounds));
@@ -2460,7 +2465,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         }
         // Create a new dummy fitted neighbour
         // (Use similar logic to when we create the actual results in #add(SelectedResult))
-        // Note that we do not unfreeze the parameters (i.e. the widths of from astigmatism z-model)
+        // Note that we do not unfreeze the parameters (i.e. the widths of the astigmatism z-model)
         // since we are only interested in the coordinates.
         final double[] p = fitResult.toGaussian2DParameters();
         final float[] params = new float[p.length];
@@ -2491,7 +2496,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             new StandardValueProcedure().getValues(func, precomputedFunctionParams);
       }
 
-      // Add any precomputed values already computed. These are from peak outside the fit region.
+      // Add any precomputed values already computed. These are from peaks outside the fit region.
       if (precomputedFittedNeighboursMulti != null) {
         if (precomputedFunctionValues == null) {
           precomputedFunctionValues = precomputedFittedNeighboursMulti;
@@ -2835,6 +2840,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Create the results
       PreprocessedPeakResult[] results = null;
       if (fitResult.getStatus() == FitStatus.OK) {
+        // XXX When using a smart filter the validation is not yet complete. It is performed
+        // dynamically when selecting the result. So the following computation may proceed
+        // with status OK even if the peak will eventually be rejected.
+
         residualsSingle = gf.getResiduals();
 
         // Debug background estimates
@@ -2889,7 +2898,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
 
         // 3. Check we are not closer to a fitted spot. This has already had a chance at
-        // fitting a doublet so is ignored..
+        // fitting a doublet so is ignored.
 
         final CandidateList peakNeighbours = findPeakNeighbours(candidates.get(candidateId));
         if (peakNeighbours.getSize() != 0) {
@@ -3239,7 +3248,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
      * @param peakNeighbours the peak neighbours
      * @param qa the qa object that performed quadrant analysis
      * @param singleValue the objective function value from fitting a single peak
-     * @return the multi path fit result. fit result
+     * @return the fit result
      */
     private MultiPathFitResult.FitResult fitAsDoublet(FitResult fitResult, double[] region,
         double[] precomputedFunctionValues, CandidateList neighbours, CandidateList peakNeighbours,
@@ -3508,7 +3517,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
 
           // 3. Check we are not closer to a fitted spot. This has already had a chance at
-          // fitting a doublet so is ignored..
+          // fitting a doublet so is ignored.
 
           if (peakNeighbours.getSize() != 0) {
             // Coords for comparison to the real positions
@@ -4409,12 +4418,20 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     if (results == null) {
       if (logger != null) {
         final int candidateId = dynamicMultiPathFitResult.getCandidateId();
+        // The selected result does not include the filter failure status.
+        // Results that were fit and then filtered have an OK status. Only results
+        // that failed to produce a fit can be reported.
+        String msg = "";
+        if (selectedResult.fitResult != null && selectedResult.fitResult.data != null) {
+          FitStatus status = ((FitResult) selectedResult.fitResult.data).getStatus();
+          if (status != FitStatus.OK) {
+            msg = status.toString();
+          }
+        }
         //@formatter:off
         LoggerUtils.log(logger, Level.INFO, "Not fit %d (%d,%d) %s", candidateId,
             cc.fromDataToGlobalX(candidates.get(candidateId).x),
-            cc.fromDataToGlobalY(candidates.get(candidateId).y),
-            (selectedResult.fitResult!=null && selectedResult.fitResult.data!=null) ?
-            ((FitResult) selectedResult.fitResult.data).getStatus().toString() : "");
+            cc.fromDataToGlobalY(candidates.get(candidateId).y), msg);
         //@formatter:on
       }
       // Reporting
