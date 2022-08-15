@@ -617,14 +617,6 @@ public class PeakFit implements PlugInFilter {
           textDisableSimpleFilter.setState(state);
           fitConfig.setDisableSimpleFilter(state);
           fitConfig.setSmartFilter(state);
-          // Create a default if no configuration exists. This is what occurs when
-          // showing the options listener.
-          if (state) {
-            if (TextUtils.isNullOrEmpty(fitConfig.getSmartFilterString())) {
-              fitConfig.setDirectFilter(
-                  (DirectFilter) Filter.fromXml(fitConfig.getDefaultSmartFilterXml()));
-            }
-          }
           updateFilterInput();
         } else if (event.getSource() == textDisableSimpleFilter) {
           fitConfig.setDisableSimpleFilter(textDisableSimpleFilter.getState());
@@ -1004,6 +996,48 @@ public class PeakFit implements PlugInFilter {
     void doPreview() {
       final Workflow<WorkSettings, WorkResults> workflow = this.workflow;
       if (preview && workflow != null) {
+        // Note: Here be synchronisation dragons!
+        // This is where the smart filter is initialised for the preview. It will
+        // create a default from the current simple filter settings if the filter
+        // cannot be initialised.
+        //
+        // The smart filter is set as a DirectFilter but obtained as a String.
+        // The String may be valid if the config is loaded from a previous state but the
+        // filter may not be initialised. To prevent repeat initialisation in the worker
+        // do this here so the filter is cached.
+        //
+        // The only other events that change the direct filter are in the options listener
+        // dialog for the smart filter. So it is very unlikely that GUI interactions will
+        // change the state while initialisation occurs. After initialisation the direct filter
+        // will be non-null and this block will be skipped. Placing initialisation here
+        // ensures the simple filter settings can be changed before enabling a smart
+        // filter (which may then create a default from the latest simple filter settings).
+        if (fitConfig.isSmartFilter() && !fitConfig.isDirectFilter()) {
+          // First-time initialisation is synchronized.
+          // Note that this prevents further events from repeating the filter initialisation
+          // but does not prevent events otherwise modifying the fitConfig.
+          synchronized (fitConfig) {
+            if (fitConfig.isSmartFilter() && !fitConfig.isDirectFilter()) {
+              final String xml = fitConfig.getSmartFilterString();
+              if (!TextUtils.isNullOrEmpty(xml)) {
+                final Filter f = Filter.fromXml(xml);
+                if (f instanceof DirectFilter) {
+                  fitConfig.setDirectFilter((DirectFilter) f);
+                } else {
+                  // The XML is present but invalid. Fall back to the default.
+                  logger.warning(() -> "Invalid smart filter: " + xml
+                      + ". Reverting to simple filter default.");
+                }
+              }
+              if (!fitConfig.isDirectFilter()) {
+                // Create a default if no configuration exists. This is what occurs when
+                // showing the options listener.
+                fitConfig.setDirectFilter(fitConfig.getDefaultSmartFilter());
+              }
+            }
+          }
+        }
+
         // Clone the config and settings and pass it to the workflow
         workflow.run(new WorkSettings(imp.getCurrentSlice(), config.createCopy(), settings.copy()));
       }
@@ -1125,6 +1159,8 @@ public class PeakFit implements PlugInFilter {
               fitConfig.setCameraModel(model.getRight());
             }
           }
+
+          // Note: The smart filter should already be initialised.
 
           // We avoid a FitEngine and use a single FitWorker.
           // From FitEngine.create(config, ...)
