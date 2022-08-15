@@ -1160,7 +1160,11 @@ public class PeakFit implements PlugInFilter {
             }
           }
 
-          // Note: The smart filter should already be initialised.
+          // Note: The smart filter may already be initialised. Disable it if turned off.
+          if (!fitConfig.isSmartFilter()) {
+            // Disable smart filter
+            fitConfig.setDirectFilter(null);
+          }
 
           // We avoid a FitEngine and use a single FitWorker.
           // From FitEngine.create(config, ...)
@@ -4251,6 +4255,8 @@ public class PeakFit implements PlugInFilter {
   public static boolean configureSmartFilter(FitEngineConfiguration config, int flags) {
     final FitConfiguration fitConfig = config.getFitConfiguration();
     if (!fitConfig.isSmartFilter()) {
+      // Disable smart filter
+      fitConfig.setDirectFilter(null);
       return true;
     }
     final boolean result = configureSmartFilter(fitConfig);
@@ -4275,6 +4281,8 @@ public class PeakFit implements PlugInFilter {
    */
   public static boolean configureSmartFilter(final FitConfiguration fitConfig) {
     if (!fitConfig.isSmartFilter()) {
+      // Disable smart filter
+      fitConfig.setDirectFilter(null);
       return true;
     }
 
@@ -4300,6 +4308,7 @@ public class PeakFit implements PlugInFilter {
     xml = gd.getNextText();
     final Filter f = Filter.fromXml(xml);
     if (!(f instanceof DirectFilter)) {
+      fitConfig.setDirectFilter(null);
       return false;
     }
 
