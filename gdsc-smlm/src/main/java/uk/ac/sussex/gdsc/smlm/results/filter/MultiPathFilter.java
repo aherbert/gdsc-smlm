@@ -1164,7 +1164,7 @@ public class MultiPathFilter {
 
     // Check if it failed due to width
     if (!DirectFilter.anySet(validationResults[0],
-        FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.X_SD_FACTOR)) {
+        FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.Y_SD_FACTOR)) {
       return false;
     }
 
