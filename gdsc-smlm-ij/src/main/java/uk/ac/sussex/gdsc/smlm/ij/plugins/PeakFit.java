@@ -2020,7 +2020,7 @@ public class PeakFit implements PlugInFilter {
       // These are used to set bounds for bounded solvers so do not disable editing by adding
       // to the sliders array
       gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-      gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
+      gd.addSlider("Max_width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
       addPrecisionOptions(gd, fitConfigurationProvider);
       // Q. Add dynamically displayed options for z-filtering here?
     }

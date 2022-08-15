@@ -477,7 +477,7 @@ public class PsfDrift implements PlugIn {
         FitProtosHelper.getName(fitConfig.getFitSolver()));
     // We need these to set bounds for any bounded fitters
     gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-    gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
+    gd.addSlider("Max_width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
     gd.addCheckbox("Offset_fit", settings.offsetFitting);
     gd.addNumericField("Start_offset", settings.startOffset, 3);
     gd.addCheckbox("Include_CoM_fit", settings.comFitting);

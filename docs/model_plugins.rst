@@ -441,7 +441,7 @@ Parameters
 
 When the configuration for the analysis has been configured a second dialog is shown to allow the fitting configuration to be specified. Details of the options can be found in section :numref:`{number}: {name} <fitting_plugins:Peak Fit>`.
 
-It is recommended that the peak filtering be configured to allow very wide (out-of-focus) spots (e.g. ``Width factor`` >= 5) and the ``Signal strength`` should allow poor spots (e.g. 1).
+It is recommended that the peak filtering be configured to allow very wide (out-of-focus) spots (e.g. ``Max width factor`` >= 5) and the ``Signal strength`` should allow poor spots (e.g. 1).
 
 
 Output
@@ -598,10 +598,10 @@ Parameters
 
        Note that a second dialog will be presented for the selected solver to be configured. The values are initially set to the defaults which should work in most cases. See the ``Peak Fit`` plugin for details of how to configure the solver (section :numref:`{number}<fitting_plugins:Peak Fit>`).
 
-   * - Min width factory
+   * - Min width factor
      - The minimum width, relative to the starting width, to accept the fit.
 
-   * - Width factor
+   * - Max width factor
      - The maximum width, relative to the starting width, to accept the fit.
 
    * - Offset fit
@@ -914,7 +914,7 @@ Create Model
 
 Create a model by fitting a 2D Gaussian to a PSF image. An stack image must be available with an example PSF marked with a single ``ImageJ`` point ROI. Multiple points are not currently supported because it does not appear to be necessary. Repeating the analysis on different examples should create a model with approximately the same width curve. This is simplified by the plugin saving the configuration options used in the last analysis.
 
-Presents a dialog where PSF image can be selected. The plugin then asks for the z-step resolution of the PSF stack and presents a dialog where the fitting can be configured. The fitting options are a simplified version of the options available in the ``Peak Fit`` plugin (see :numref:`{number}: {name} <fitting_plugins:Peak Fit>`). The same dialog fields are used to allow users familiar with ``Peak Fit`` to configure the options. The camera used to image the data must be configured and the expected PSF type. This should be an elliptical Gaussian; other options that do not fit independent X and Y widths will produce data that cannot be fit with a model. Fitting is most sensitive to the initial PSF width parameter so this should be tried using a few different sizes. The ``Fitting Width`` parameter should be wide enough to capture the out-of-focus PSF. Filtering options can be used to discard bad fits for out-of-focus spots. The ``Width factor`` should be high so that wide spots can be used to model the out-of-focus PSF.
+Presents a dialog where PSF image can be selected. The plugin then asks for the z-step resolution of the PSF stack and presents a dialog where the fitting can be configured. The fitting options are a simplified version of the options available in the ``Peak Fit`` plugin (see :numref:`{number}: {name} <fitting_plugins:Peak Fit>`). The same dialog fields are used to allow users familiar with ``Peak Fit`` to configure the options. The camera used to image the data must be configured and the expected PSF type. This should be an elliptical Gaussian; other options that do not fit independent X and Y widths will produce data that cannot be fit with a model. Fitting is most sensitive to the initial PSF width parameter so this should be tried using a few different sizes. The ``Fitting Width`` parameter should be wide enough to capture the out-of-focus PSF. Filtering options can be used to discard bad fits for out-of-focus spots. The ``Max width factor`` should be high so that wide spots can be used to model the out-of-focus PSF.
 
 Once the fitting is configured the plugin will fit each frame of the input image. The data is used to produce the plot of the following metrics against the z depth:
 

@@ -603,7 +603,7 @@ public class AstigmatismModelManager implements PlugIn {
     gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
     // Fitting may need to be extra wide
     final double w = fitConfig.getMaxWidthFactor();
-    gd.addSlider("Width_factor", 1.01, Math.max(10, w), w);
+    gd.addSlider("Max_width_factor", 1.01, Math.max(10, w), w);
     PeakFit.addPrecisionOptions(gd, () -> fitConfig);
 
     gd.showDialog();

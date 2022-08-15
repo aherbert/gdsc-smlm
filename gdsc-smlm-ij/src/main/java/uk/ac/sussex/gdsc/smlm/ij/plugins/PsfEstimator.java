@@ -267,7 +267,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
     gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
     gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-    gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
+    gd.addSlider("Max_width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
     PeakFit.addPrecisionOptions(gd, () -> fitConfig);
 
     gd.showDialog();
