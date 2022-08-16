@@ -1111,7 +1111,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
 
   @Override
   public boolean isFitValidation() {
-    return isDirectFilter() || isRegionValidation() || !isDisableSimpleFilter();
+    return isRegionValidation() || isDirectFilter() || !isDisableSimpleFilter();
   }
 
   /**
@@ -2187,6 +2187,28 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    */
   public FitStatus validatePeak(int n, double[] initialParams, double[] params,
       double[] paramDevs) {
+    // TODO
+    // In the call to Gaussian2DFitConfiguration isValidateFit
+    // create a validation object that will run only the required validation.
+    // This object can be null if no validation is configured. Add notes in
+    // javadoc that isValidateFit must be called to initialise validation.
+
+    // Check if outside the fit window.
+    if (isRegionValidation()) {
+      final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
+      final double x = params[Gaussian2DFunction.X_POSITION + offset] + coordinateOffset;
+      final double y = params[Gaussian2DFunction.Y_POSITION + offset] + coordinateOffset;
+      if (x <= 0 || x >= fitRegionWidth || y <= 0 || y >= fitRegionHeight) {
+        if (log != null) {
+          log.info(() -> String.format(
+              "Bad peak %d: Coordinates outside fit region (x=%g,y=%g) <> %d,%d", n, x, y,
+              fitRegionWidth, fitRegionHeight));
+        }
+        return setValidationResult(FitStatus.OUTSIDE_FIT_REGION,
+            new double[] {x, y, fitRegionWidth, fitRegionHeight});
+      }
+    }
+
     // This requires local background and noise so that validation works the same
     // way for simple filtering as it would for a PreprocessedPeakResult.
 
@@ -2215,22 +2237,6 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
       }
       // At the moment we do not get any other validation data
       return setValidationResult(FitStatus.FAILED_SMART_FILTER, null);
-    }
-
-    // Check if outside the fit window.
-    if (isRegionValidation()) {
-      final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
-      final double x = params[Gaussian2DFunction.X_POSITION + offset] + coordinateOffset;
-      final double y = params[Gaussian2DFunction.Y_POSITION + offset] + coordinateOffset;
-      if (x <= 0 || x >= fitRegionWidth || y <= 0 || y >= fitRegionHeight) {
-        if (log != null) {
-          log.info(() -> String.format(
-              "Bad peak %d: Coordinates outside fit region (x=%g,y=%g) <> %d,%d", n, x, y,
-              fitRegionWidth, fitRegionHeight));
-        }
-        return setValidationResult(FitStatus.OUTSIDE_FIT_REGION,
-            new double[] {x, y, fitRegionWidth, fitRegionHeight});
-      }
     }
 
     if (isDisableSimpleFilter()) {
