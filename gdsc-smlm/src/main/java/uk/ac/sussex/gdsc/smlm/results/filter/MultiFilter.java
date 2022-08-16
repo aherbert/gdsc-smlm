@@ -335,7 +335,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     }
 
     if (widthEnabled) {
-      components = (shiftEnabled) ? componentsWidthShift : componentsNoWidthShift;
+      components = (shiftEnabled) ? componentsWidthShift : componentsWidthNoShift;
     } else {
       components = (shiftEnabled) ? componentsNoWidthShift : componentsNoWidthNoShift;
     }
