@@ -149,6 +149,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     fitConfig.setPrecisionThreshold(0);
     fitConfig.setMinWidthFactor(0);
     fitConfig.setMaxWidthFactor(0);
+    // Disable the direct filter
+    fitConfig.setDirectFilter(null);
 
     fitConfig.setNoise(0);
     config.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
@@ -167,6 +169,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     filterFitConfig.setMinWidthFactor(0);
     filterFitConfig.setMaxWidthFactor(0);
     filterFitConfig.setPrecisionMethod(PrecisionMethod.MORTENSEN);
+    // Disable the direct filter
+    fitConfig.setDirectFilter(null);
 
     CONFIG_REF = new AtomicReference<>(config);
     FILtER_FIT_CONFIG_REF = new AtomicReference<>(filterFitConfig);

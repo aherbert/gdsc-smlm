@@ -100,6 +100,17 @@ import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
 
 /**
  * Fits local maxima using a 2D Gaussian.
+ *
+ * <p>Note: The {@link FitConfiguration} is used to configure the fitting and filtering. The results
+ * are filtered using only the implementation of
+ * {@link IDirectFilter#validate(PreprocessedPeakResult)}. This will use a configured DirectFilter
+ * or else use the current filter configuration.
+ *
+ * <p>The implementation of
+ * {@link uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitConfiguration#validateFit(int, double[], double[], double[])
+ * Gaussian2DFitConfiguration.validateFit} has the usage of the direct filter and the filter
+ * configuration disabled. This method is only used in a preliminary filtering of results that
+ * are outside the region bounds.
  */
 public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResultStore {
   /**
@@ -481,17 +492,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       noise = (float) fitConfig.getNoise();
     }
 
-    // XXX - Is this required?
-    // A single fit can use the smart filter. Multi fit must disable the smart filter
-    // so not all peaks are processed. Note that fits that only fail the width
-    // filter should be tried as a doublet.
-
-    // Disable the use of the direct filter within the FitConfiguration validate method.
-    // This allows validate() to be used for basic filtering of all fit results (e.g. using the fit
-    // region bounds).
+    // Disable the use of the direct filter and simple filtering within the FitConfiguration
+    // validate method. This allows validate() to be used for basic filtering of all fit results
+    // (e.g. using the fit region bounds).
     // The validation of each result will be performed by the FitConfiguration implementation
-    // of the IDirectFilter interface. This may involve the DirectFilter object.
+    // of the IDirectFilter interface. This may involve the DirectFilter object or else it defers
+    // to the simple filtering.
+    // TODO - Verify if simple filter can be set as a direct filter using
+    //if (fitConfig.getSmartFilterName().isEmpty()) {
+    //  fitConfig.setDirectFilter(fitConfig.getDefaultSmartFilter());
+    //}
     fitConfig.setSmartFilter(false);
+    fitConfig.setDisableSimpleFilter(true);
 
     workerId = nextWorkerId.getAndIncrement();
 
@@ -1637,9 +1649,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Only validate the fitted neighbours and the current candidate.
       // The unfitted neighbours are allowed to fail.
 
-      // Turn off validation of peaks
-      final boolean smartFilter = fitConfig.isSmartFilter();
-      final boolean disableSimpleFilter = fitConfig.isDisableSimpleFilter();
       final boolean computeDeviationsFlag = fitConfig.getComputeDeviationsFlag();
       // Check if the filter requires deviations as we temporarily disable the
       // smart filter (so fitConfig.isComputeDeviations() could be false) but the
@@ -1647,8 +1656,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       if (fitConfig.isComputeDeviations()) {
         fitConfig.setComputeDeviations(true);
       }
-      fitConfig.setSmartFilter(false);
-      fitConfig.setDisableSimpleFilter(true);
       fitConfig.setFitRegion(0, 0, 0);
 
       // Increase the iterations for a multiple fit.
@@ -1693,8 +1700,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
       // Restore
       fitConfig.setComputeDeviations(computeDeviationsFlag);
-      fitConfig.setSmartFilter(smartFilter);
-      fitConfig.setDisableSimpleFilter(disableSimpleFilter);
       fitConfig.setFitRegion(width, height, 0.5);
       fitConfig.setMaxIterations(maxIterations);
       fitConfig.setMaxFunctionEvaluations(maxEvaluations);
@@ -2828,6 +2833,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           params[Gaussian2DFunction.BACKGROUND] == 0);
       fitConfig.setPrecomputedFunctionValues(null);
       valueSingle = getFitValue();
+
       updateResult(fitResult);
 
       // Ensure the initial parameters are at the candidate position since we may have used an
@@ -3303,6 +3309,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // for the pre-processed peak results.
 
       // TODO - Should width and signal validation be disabled too?
+      // TODO - Should all validation be disabled to allow a fit to be made then validated
+      // separately in the multi-path filter?
       final double shift = fitConfig.getCoordinateShift();
       final int maxIterations = fitConfig.getMaxIterations();
       final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();

@@ -1257,7 +1257,7 @@ Various output from the fitting process can be used to create descriptors to fil
 * The background noise estimate is used to create a signal-to-noise ratio for the peak
 * The estimated (x,y) localisation precision of the peak
 
-Filtering can use a simple filter that allows setting filters for each of the descriptors of a peak. Alternatively a smart filter can be configured that uses an XML description of a filter. The smart filter can be very complex including combinations of individual filters. More descriptions of the available  filters can be found using the ``Create Filters`` plugin (see section :numref:`%s <analysis_plugins:Create Filters>`). Smart filters are created as output from the benchmarking plugins that identify optimum filters for a simulated training image. These filters will be saved as part of a fitting template. Note that the default smart filter uses the settings from the current simple filters for each peak descriptor.
+Filtering can use a simple filter that allows setting filters for each of the descriptors of a peak. Alternatively a smart filter can be configured that uses an XML description of a filter. It is not possible to use a smart filter in conjuction with simple filtering. The smart filter can be very complex including combinations of individual filters. More descriptions of the available  filters can be found using the ``Create Filters`` plugin (see section :numref:`%s <analysis_plugins:Create Filters>`). Smart filters are created as output from the benchmarking plugins that identify optimum filters for a simulated training image. These filters will be saved as part of a fitting template. Note that the default smart filter uses the settings from the current simple filters for each peak descriptor.
 
 The following filtering parameters can be configured:
 
@@ -1269,12 +1269,9 @@ The following filtering parameters can be configured:
      - Description
 
    * - Smart filter
-     - Set to **true** to enable the smart filter.
+     - Set to **true** to enable the smart filter (and ignore simple filtering).
 
-       A separate dialog is used to enter the XML description of the smart filter by pressing the ``...`` button.
-
-   * - Disable simple filter
-     - Set to **true** to disable the simple filters. Only the smart filter will be used.
+       A separate dialog is used to enter the XML description of the smart filter by pressing the ``...`` button. This disables use of the simple filter settings as the two are mutually exclusive. If no XML description is available a default is created using the simple filter settings.
 
    * - Shift factor
      - Any peak that shifts more than a factor of the initial peak standard deviation is discarded.

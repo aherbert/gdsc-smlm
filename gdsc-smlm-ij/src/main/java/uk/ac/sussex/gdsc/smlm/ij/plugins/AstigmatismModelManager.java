@@ -596,7 +596,6 @@ public class AstigmatismModelManager implements PlugIn {
         "--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
     gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
-    gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
     gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
     gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
     gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
@@ -625,7 +624,6 @@ public class AstigmatismModelManager implements PlugIn {
     fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
     pluginSettings.setLogFitProgress(gd.getNextBoolean());
     fitConfig.setSmartFilter(gd.getNextBoolean());
-    fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
     fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
     fitConfig.setSignalStrength(gd.getNextNumber());
     fitConfig.setMinPhotons(gd.getNextNumber());

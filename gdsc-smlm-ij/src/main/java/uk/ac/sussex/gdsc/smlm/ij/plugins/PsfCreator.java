@@ -1922,7 +1922,6 @@ public class PsfCreator implements PlugInFilter {
     // No complex filtering so we get a fit. It should be easy to fit anyway.
     fitConfig.setPrecisionThreshold(0);
     fitConfig.setDirectFilter(null);
-    // fitConfig.setDisableSimpleFilter(true);
 
     // Use this for debugging the fit
     // fitConfig.setLog(uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper.getDefaultLogger());

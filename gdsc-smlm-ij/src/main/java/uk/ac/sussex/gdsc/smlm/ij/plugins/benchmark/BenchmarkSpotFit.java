@@ -461,6 +461,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       fitConfig.setPrecisionThreshold(0);
       fitConfig.setMinWidthFactor(0);
       fitConfig.setMaxWidthFactor(0);
+      // Disable the direct filter
+      fitConfig.setDirectFilter(null);
 
       fitConfig.setBackgroundFitting(true);
       fitConfig.setNoise(0);

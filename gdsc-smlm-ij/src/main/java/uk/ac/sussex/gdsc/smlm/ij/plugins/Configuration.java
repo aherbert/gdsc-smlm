@@ -82,7 +82,6 @@ public class Configuration implements PlugIn {
   private TextField textResidualsThreshold;
   private TextField textDuplicateDistance;
   private Checkbox textSmartFilter;
-  private Checkbox textDisableSimpleFilter;
   private TextField textCoordinateShiftFactor;
   private TextField textSignalStrength;
   private TextField textMinPhotons;
@@ -208,7 +207,6 @@ public class Configuration implements PlugIn {
         "--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
     gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
-    gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
     gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
     gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
     gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
@@ -247,7 +245,6 @@ public class Configuration implements PlugIn {
       textResidualsThreshold = nu.next();
       textDuplicateDistance = nu.next();
       textSmartFilter = cb.next();
-      textDisableSimpleFilter = cb.next();
       textCoordinateShiftFactor = nu.next();
       textSignalStrength = nu.next();
       textMinPhotons = nu.next();
@@ -257,7 +254,6 @@ public class Configuration implements PlugIn {
 
       updateFilterInput();
       textSmartFilter.addItemListener(this::itemStateChanged);
-      textDisableSimpleFilter.addItemListener(this::itemStateChanged);
     }
 
     if (save) {
@@ -299,7 +295,6 @@ public class Configuration implements PlugIn {
     config.setDuplicateDistance(gd.getNextNumber());
 
     fitConfig.setSmartFilter(gd.getNextBoolean());
-    fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
     fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
     fitConfig.setSignalStrength(gd.getNextNumber());
     fitConfig.setMinPhotons(gd.getNextNumber());
@@ -444,15 +439,12 @@ public class Configuration implements PlugIn {
         }
       }
     } else if (event.getSource() instanceof Checkbox) {
-      if (event.getSource() == textSmartFilter) {
-        textDisableSimpleFilter.setState(textSmartFilter.getState());
-      }
       updateFilterInput();
     }
   }
 
   private void updateFilterInput() {
-    if (textDisableSimpleFilter.getState()) {
+    if (textSmartFilter.getState()) {
       disableEditing(textCoordinateShiftFactor);
       disableEditing(textSignalStrength);
       disableEditing(textMinPhotons);
@@ -539,8 +531,7 @@ public class Configuration implements PlugIn {
 
     // Filtering
     textSmartFilter.setState(fitConfig.isSmartFilter());
-    textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
-    if (!fitConfig.isDisableSimpleFilter()) {
+    if (!fitConfig.isSmartFilter()) {
       textCoordinateShiftFactor.setText(String.valueOf(fitConfig.getCoordinateShiftFactor()));
       textSignalStrength.setText(String.valueOf(fitConfig.getSignalStrength()));
       textWidthFactor.setText(String.valueOf(fitConfig.getMaxWidthFactor()));

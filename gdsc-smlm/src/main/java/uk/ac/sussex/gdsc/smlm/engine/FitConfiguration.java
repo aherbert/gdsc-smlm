@@ -3531,13 +3531,6 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
       return directFilter.validate(peak);
     }
 
-    // Q. Is this necessary? Simple filtering is to support turning off
-    // filtering in the validatePeak(...) method. Set a debug point to check
-    // if this is used.
-    if (isDisableSimpleFilter()) {
-      return 0;
-    }
-
     // Do filtering
     if (peak.getSignal() < getMinPhotons()) {
       return FilterValidationFlag.PHOTONS;

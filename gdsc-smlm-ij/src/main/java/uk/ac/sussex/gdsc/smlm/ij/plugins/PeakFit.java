@@ -452,7 +452,6 @@ public class PeakFit implements PlugInFilter {
     private TextField textWidthFactor;
     private TextField textPrecisionThreshold;
     private Checkbox textSmartFilter;
-    private Checkbox textDisableSimpleFilter;
     private TextField textNoise;
     private Choice textNoiseMethod;
     private Checkbox textLogProgress;
@@ -521,7 +520,6 @@ public class PeakFit implements PlugInFilter {
         textResidualsThreshold = nu.next();
         textDuplicateDistance = nu.next();
         textSmartFilter = cb.next();
-        textDisableSimpleFilter = cb.next();
         textCoordinateShiftFactor = nu.next();
         textSignalStrength = nu.next();
         textMinPhotons = nu.next();
@@ -543,7 +541,6 @@ public class PeakFit implements PlugInFilter {
 
         updateFilterInput();
         textSmartFilter.addItemListener(this);
-        textDisableSimpleFilter.addItemListener(this);
       }
       textLogProgress = cb.next();
       if (!maximaIdentification) {
@@ -609,17 +606,10 @@ public class PeakFit implements PlugInFilter {
           doPreview();
         }
       } else if (event.getSource() instanceof Checkbox) {
-        // Note: changes to textDisableSimpleFilter must be replicated in
+        // Note: changes to textSmartFilter must be replicated in
         // the current fit config to dynamically configure the z-filter in the PSF options
         if (event.getSource() == textSmartFilter) {
-          // Prevent both filters being enabled
-          final boolean state = textSmartFilter.getState();
-          textDisableSimpleFilter.setState(state);
-          fitConfig.setDisableSimpleFilter(state);
-          fitConfig.setSmartFilter(state);
-          updateFilterInput();
-        } else if (event.getSource() == textDisableSimpleFilter) {
-          fitConfig.setDisableSimpleFilter(textDisableSimpleFilter.getState());
+          fitConfig.setSmartFilter(textSmartFilter.getState());
           updateFilterInput();
         }
       }
@@ -678,7 +668,7 @@ public class PeakFit implements PlugInFilter {
     }
 
     private void updateFilterInput() {
-      if (textDisableSimpleFilter.getState()) {
+      if (textSmartFilter.getState()) {
         for (final Scrollbar slider : sliders) {
           slider.setEnabled(false);
         }
@@ -778,8 +768,7 @@ public class PeakFit implements PlugInFilter {
 
         // Filtering
         textSmartFilter.setState(fitConfig.isSmartFilter());
-        textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
-        if (!fitConfig.isDisableSimpleFilter()) {
+        if (!fitConfig.isSmartFilter()) {
           textCoordinateShiftFactor.setText(String.valueOf(fitConfig.getCoordinateShiftFactor()));
           textSignalStrength.setText(String.valueOf(fitConfig.getSignalStrength()));
           textWidthFactor.setText(String.valueOf(fitConfig.getMaxWidthFactor()));
@@ -869,7 +858,6 @@ public class PeakFit implements PlugInFilter {
       // textWidthFactor
       // textPrecisionThreshold
       bind(textSmartFilter, fitConfig::setSmartFilter);
-      bind(textDisableSimpleFilter, fitConfig::setDisableSimpleFilter);
       if (textNoise != null) {
         bind(textNoise, fitConfig::setNoise);
         bind(textNoiseMethod, config::setNoiseMethod);
@@ -2045,7 +2033,6 @@ public class PeakFit implements PlugInFilter {
           "--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
       addSmartFilterOptions(gd, fitConfigurationProvider);
-      gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
       gd.addSlider("Shift_factor", 0.0, 2.5, fitConfig.getCoordinateShiftFactor());
       if (isShowGenericDialog) {
         sliders = new Scrollbar[] {gd.getLastScrollbar()};
@@ -2489,7 +2476,7 @@ public class PeakFit implements PlugInFilter {
             }
 
             TypeConverter<DistanceUnit> c = null;
-            if (!fitConfig.isDisableSimpleFilter()
+            if (!fitConfig.isSmartFilter()
                 // Do not use localFitConfig.is3D() as this validates the current z-model which
                 // may not (yet) be correctly configured.
                 && psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D) {
@@ -3443,9 +3430,17 @@ public class PeakFit implements PlugInFilter {
   private static boolean validateSmartFilterOptions(final FitConfiguration fitConfig,
       boolean silent) {
     if (!fitConfig.isSmartFilter()) {
+      // Disable smart filter
+      fitConfig.setDirectFilter(null);
       return true;
     }
     final String xml = fitConfig.getSmartFilterString();
+    if (TextUtils.isNullOrEmpty(xml)) {
+      if (!silent) {
+        return configureSmartFilter(fitConfig);
+      }
+      return false;
+    }
     final Filter f = Filter.fromXml(xml);
     if (!(f instanceof DirectFilter)) {
       if (!silent) {
@@ -3465,7 +3460,7 @@ public class PeakFit implements PlugInFilter {
    * @return true, if successful
    */
   private static boolean validateZFilterOptions(final FitConfiguration fitConfig, boolean silent) {
-    if (fitConfig.isDisableSimpleFilter() || !fitConfig.is3D()) {
+    if (fitConfig.isSmartFilter() || !fitConfig.is3D()) {
       return true;
     }
     final double minZ = fitConfig.getMinZ();
@@ -3915,7 +3910,6 @@ public class PeakFit implements PlugInFilter {
       config.setDuplicateDistance(gd.getNextNumber());
 
       fitConfig.setSmartFilter(gd.getNextBoolean());
-      fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
       fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
       fitConfig.setSignalStrength(gd.getNextNumber());
       fitConfig.setMinPhotons(gd.getNextNumber());
@@ -3984,7 +3978,7 @@ public class PeakFit implements PlugInFilter {
         ParameterUtils.isPositive("Residuals threshold", config.getResidualsThreshold());
         ParameterUtils.isPositive("Duplicate distance", config.getDuplicateDistance());
 
-        if (!fitConfig.isDisableSimpleFilter()) {
+        if (!fitConfig.isSmartFilter()) {
           ParameterUtils.isPositive("Coordinate Shift factor",
               fitConfig.getCoordinateShiftFactor());
           ParameterUtils.isPositive("Signal strength", fitConfig.getSignalStrength());
@@ -3993,7 +3987,7 @@ public class PeakFit implements PlugInFilter {
         if (extraOptions) {
           ParameterUtils.isPositive("Noise", fitConfig.getNoise());
         }
-        if (!fitConfig.isDisableSimpleFilter()) {
+        if (!fitConfig.isSmartFilter()) {
           ParameterUtils.isPositive("Min width factor", fitConfig.getMinWidthFactor());
           ParameterUtils.isPositive("Width factor", fitConfig.getMaxWidthFactor());
           ParameterUtils.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
@@ -4168,7 +4162,7 @@ public class PeakFit implements PlugInFilter {
    * Show a dialog to configure the results z filter. The updated settings are saved to the settings
    * file.
    *
-   * <p>If the fit configuration PSF is not 3D or the simple filter is disabled then this method
+   * <p>If the fit configuration PSF is not 3D or the smart filter is enabled then this method
    * returns true. If it is enabled then a dialog is shown to input the configuration for the z
    * filter.
    *
@@ -4191,7 +4185,7 @@ public class PeakFit implements PlugInFilter {
   /**
    * Show a dialog to configure the results z filter.
    *
-   * <p>If the fit configuration PSF is not 3D or the simple filter is disabled then this method
+   * <p>If the fit configuration PSF is not 3D or the smart filter is enabled then this method
    * returns true. If it is enabled then a dialog is shown to input the configuration for the z
    * filter.
    *
@@ -4201,7 +4195,7 @@ public class PeakFit implements PlugInFilter {
    * @return true, if successful
    */
   public static boolean configureZFilter(FitConfiguration fitConfig) {
-    if (fitConfig.isDisableSimpleFilter() || !fitConfig.is3D()) {
+    if (fitConfig.isSmartFilter() || !fitConfig.is3D()) {
       return true;
     }
 
@@ -5366,7 +5360,7 @@ public class PeakFit implements PlugInFilter {
       IJ.log("Spot Filter = " + spotFilter.getDescription());
       final int w = 2 * engine.getFitting() + 1;
       ImageJUtils.log("Fit window = %d x %d", w, w);
-      if (!fitConfig.isDisableSimpleFilter()) {
+      if (!fitConfig.isSmartFilter()) {
         IJ.log("Coordinate shift = "
             + MathUtils.rounded(config.getFitConfiguration().getCoordinateShift()));
         IJ.log("Signal strength = " + MathUtils.rounded(fitConfig.getSignalStrength()));
@@ -5407,6 +5401,12 @@ public class PeakFit implements PlugInFilter {
 
     config.configureOutputUnits();
 
+    // Require a configured smart filter (run silently)
+    if (!validateSmartFilterOptions(fitConfig, true)) {
+      return false;
+    }
+
+    // Note: This may show a dialog. Update to be silent for programmatic use?
     return checkCameraModel(localFitConfig, source.getBounds(), bounds, true);
   }
 
