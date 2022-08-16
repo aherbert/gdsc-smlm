@@ -4427,8 +4427,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       if (logger != null) {
         final int candidateId = dynamicMultiPathFitResult.getCandidateId();
         // The selected result does not include the filter failure status.
+        // There may be many filtering failures per candidate due to multiple fitting paths.
         // Results that were fit and then filtered have an OK status. Only results
-        // that failed to produce a fit can be reported.
+        // that failed to produce a fit have a fit status that can be reported;
+        // this may occur for one or more fitting paths and we can only report on the
+        // selected result, otherwise leave blank.
         String msg = "";
         if (selectedResult.fitResult != null && selectedResult.fitResult.data != null) {
           FitStatus status = ((FitResult) selectedResult.fitResult.data).getStatus();
