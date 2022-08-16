@@ -609,7 +609,8 @@ public class PeakFit implements PlugInFilter {
         // Note: changes to textSmartFilter must be replicated in
         // the current fit config to dynamically configure the z-filter in the PSF options
         if (event.getSource() == textSmartFilter) {
-          fitConfig.setSmartFilter(textSmartFilter.getState());
+          // This will be bound for the preview
+          //fitConfig.setSmartFilter(textSmartFilter.getState());
           updateFilterInput();
         }
       }
@@ -690,7 +691,9 @@ public class PeakFit implements PlugInFilter {
         // enableEditing(textWidthFactor)
         enableEditing(textPrecisionThreshold);
       }
-      doPreview();
+      // Do not call doPreview().
+      // That is triggered in the binding that sets the fitConfig properties.
+      // doPreview();
     }
 
     private void disableEditing(TextField textField) {
@@ -1176,6 +1179,9 @@ public class PeakFit implements PlugInFilter {
 
           // Note: null BlockingQueue for jobs is allowed. We pass in a FitJob manually
           // and do not call run() to consume the queue.
+          // Note: The FitWorker modifies the smart filter flag. Since this is part of the
+          // state to detect changes we must reset it.
+          final boolean isSmartFilter = fitConfig.isSmartFilter();
           final FitWorker worker = new FitWorker(config, results, null);
           worker.setSearchParameters(spotFilter, fitting);
 
@@ -1233,7 +1239,8 @@ public class PeakFit implements PlugInFilter {
           worker.run(createJob(singleFrame, singleFrame, data, bounds, noise));
           results.end();
 
-          // Create new work with the results
+          // Create new work with the results. Reset the state modified by the FitWorker.
+          fitConfig.setSmartFilter(isSmartFilter);
           return Pair.of(work.getLeft(), new WorkResults(results));
         } catch (final Exception ex) {
           logger.warning(() -> "Preview failed to compute results: " + ex.getMessage());
