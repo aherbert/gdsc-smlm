@@ -96,7 +96,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
-import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
 
 /**
  * Fits local maxima using a 2D Gaussian.
@@ -109,8 +108,8 @@ import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
  * <p>The implementation of
  * {@link uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitConfiguration#validateFit(int, double[], double[], double[])
  * Gaussian2DFitConfiguration.validateFit} has the usage of the direct filter and the filter
- * configuration disabled. This method is only used in a preliminary filtering of results that
- * are outside the region bounds.
+ * configuration disabled. This method is only used in a preliminary filtering of results that are
+ * outside the region bounds.
  */
 public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResultStore {
   /**
@@ -499,9 +498,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     // of the IDirectFilter interface. This may involve the DirectFilter object or else it defers
     // to the simple filtering.
     // TODO - Verify if simple filter can be set as a direct filter using
-    //if (fitConfig.getSmartFilterName().isEmpty()) {
-    //  fitConfig.setDirectFilter(fitConfig.getDefaultSmartFilter());
-    //}
+    // if (fitConfig.getSmartFilterName().isEmpty()) {
+    // fitConfig.setDirectFilter(fitConfig.getDefaultSmartFilter());
+    // }
     fitConfig.setSmartFilter(false);
     fitConfig.setDisableSimpleFilter(true);
 
@@ -3298,33 +3297,19 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           (qa.y2 - 0.5);
       // -+-+-
 
-      // If validation is on in the fit configuration:
-      // - Disable checking of position movement since we guessed the 2-peak location.
+      // Note: Filter validation is disabled in the fit configuration (fits are validated
+      // in the multi-path filter).
       // - Disable checking within the fit region as we do that per peak
       // (which is better than failing if either peak is outside the region)
       // - Increase the iterations level then reset afterwards.
-      // Note: If simple validation is using the precision from the fit deviations
-      // then it will be a under-estimate. This is good enough for initial filtering
-      // and the deviations for the entire function parameters will be re-computed
-      // for the pre-processed peak results.
 
-      // TODO - Should width and signal validation be disabled too?
-      // TODO - Should all validation be disabled to allow a fit to be made then validated
-      // separately in the multi-path filter?
-      final double shift = fitConfig.getCoordinateShift();
       final int maxIterations = fitConfig.getMaxIterations();
       final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 
-      final double coordinateShift = Math.min(width, height);
-      fitConfig.setCoordinateShift(coordinateShift);
       fitConfig.setFitRegion(0, 0, 0);
       fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
       fitConfig
           .setMaxFunctionEvaluations(maxEvaluations * FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS);
-      // Also change the shift in a smart filter
-      if (fitConfig.isDirectFilter()) {
-        fitConfig.setup(0, new ShiftFilterSetupData(coordinateShift / fitConfig.getWidthMax()));
-      }
 
       // We assume that residuals calculation is on but just in case something else turned it off we
       // get the state.
@@ -3345,13 +3330,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       fitConfig.setPrecomputedFunctionValues(null);
       gf.setComputeResiduals(isComputeResiduals);
 
-      fitConfig.setCoordinateShift(shift);
       fitConfig.setFitRegion(width, height, 0.5);
       fitConfig.setMaxIterations(maxIterations);
       fitConfig.setMaxFunctionEvaluations(maxEvaluations);
-      if (fitConfig.isDirectFilter()) {
-        fitConfig.setup(0);
-      }
 
       updateResult(newFitResult);
 
