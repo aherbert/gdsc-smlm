@@ -873,10 +873,10 @@ public class PeakFit implements PlugInFilter {
         bind(textShowDeviations, settings::setPreviewShowDeviations);
       }
 
-      // Restore to the dialog the settings for the preview.
-      // These may be different from the state loaded from the fit configuration.
-      textLogProgress.setState(settings.previewLogProgress);
-      textShowDeviations.setState(settings.previewShowDeviations);
+      // Restore to the preview settings the state loaded in the dialog.
+      // These are simply used to avoid passing the ResultsSettings object.
+      settings.previewLogProgress = textLogProgress.getState();
+      settings.previewShowDeviations = textShowDeviations.getState();
 
       // Respond to image slice changes
       ImagePlus.addImageListener(this);
