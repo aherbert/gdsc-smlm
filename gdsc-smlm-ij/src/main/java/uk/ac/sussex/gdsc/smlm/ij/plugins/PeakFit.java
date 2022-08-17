@@ -39,21 +39,23 @@ import ij.plugin.filter.PlugInFilter;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
+import ij.text.TextWindow;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Label;
 import java.awt.Panel;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.SystemColor;
 import java.awt.TextField;
+import java.awt.Window;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1295,9 +1297,7 @@ public class PeakFit implements PlugInFilter {
      */
     private class TableWorker extends BaseWorker {
       private boolean reset;
-      ImageJTablePeakResults lastTable;
-      Point position;
-      Dimension size;
+      private TextWindow lastWindow;
 
       @Override
       public boolean equalSettings(WorkSettings current, WorkSettings previous) {
@@ -1349,18 +1349,27 @@ public class PeakFit implements PlugInFilter {
 
           peakResults.copySettings(results);
           peakResults.setClearAtStart(true);
+          // Preview is tied to the current image.
+          // Multiple previews on the same image will write to the same result window!
+          peakResults.setTableTitle(TITLE + " Results " + imp.getTitle());
           peakResults.begin();
           peakResults.addAll(results.toArray());
           peakResults.end();
 
+          final TextWindow tw = peakResults.getResultsWindow();
           if (peakResults.isNewWindow()) {
             reset();
-            if (position != null) {
-              peakResults.getResultsWindow().setLocation(position);
-              peakResults.getResultsWindow().setSize(size);
-            }
+            final int id = imp.getID();
+            PreviewTableLocation.restoreLocation(id, tw);
+            tw.addWindowListener(new WindowAdapter() {
+              @Override
+              public void windowClosed(WindowEvent e) {
+                PreviewTableLocation.saveLocation(id, e.getWindow());
+                super.windowClosed(e);
+              }
+            });
           }
-          lastTable = peakResults;
+          lastWindow = tw;
         }
 
         // No change
@@ -1370,14 +1379,59 @@ public class PeakFit implements PlugInFilter {
       @Override
       void reset() {
         reset = true;
-        final ImageJTablePeakResults table = lastTable;
-        if (table != null) {
-          lastTable = null;
-          size = table.getResultsWindow().getSize(size);
-          position = table.getResultsWindow().getLocation(position);
-          table.getResultsWindow().close();
+        final TextWindow window = lastWindow;
+        if (window != null) {
+          lastWindow = null;
+          window.close();
         }
       }
+    }
+  }
+
+  /**
+   * Helper class to save and restore the window location for the preview results table. This class
+   * is required to be static so functionality cannot be within the worker instance.
+   *
+   * <p>Currently the save restore only works for the most recently previewed image. If a new image
+   * is selected for preview then the restore will not use the previously saved location (as the
+   * image may be in a different screen position). The expected functionality is to restore the
+   * preview table to the same place if the preview is stopped and restarted, or the plugin is
+   * cancelled and then run on the same image and the preview started.
+   */
+  private static class PreviewTableLocation {
+    /** The last id. Image IDs are expected to be negative. */
+    private static int lastId;
+    private static int x;
+    private static int y;
+    private static int width;
+    private static int height;
+
+    /**
+     * Restore the window location.
+     *
+     * @param id the window id (expected to be non-zero)
+     * @param window the window
+     */
+    static void restoreLocation(int id, Window window) {
+      // Only restore if the saved location is valid
+      if (lastId == id) {
+        window.setLocation(x, y);
+        window.setSize(width, height);
+      }
+    }
+
+    /**
+     * Save the window location.
+     *
+     * @param id the window id (expected to be non-zero)
+     * @param window the window
+     */
+    static void saveLocation(int id, Window window) {
+      lastId = id;
+      x = window.getX();
+      y = window.getY();
+      width = window.getWidth();
+      height = window.getHeight();
     }
   }
 
