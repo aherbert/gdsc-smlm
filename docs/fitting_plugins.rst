@@ -1271,7 +1271,7 @@ The following filtering parameters can be configured:
    * - Smart filter
      - Set to **true** to enable the smart filter (and ignore simple filtering).
 
-       A separate dialog is used to enter the XML description of the smart filter by pressing the ``...`` button. This disables use of the simple filter settings as the two are mutually exclusive. If no XML description is available a default is created using the simple filter settings.
+       A separate dialog is used to enter the XML description of the smart filter by pressing the ``...`` button. This disables use of the simple filter settings as the two are mutually exclusive; the width factor settings are not disabled as these are used to set conservative lower and upper bounds for bounded fit solvers. If no XML description is available a default is created using the simple filter settings.
 
    * - Shift factor
      - Any peak that shifts more than a factor of the initial peak standard deviation is discarded.
