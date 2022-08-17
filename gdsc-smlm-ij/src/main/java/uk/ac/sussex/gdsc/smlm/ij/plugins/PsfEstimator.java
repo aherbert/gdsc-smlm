@@ -262,6 +262,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     gd.addMessage(
         "--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
     gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
+    gd.addMessage("Simple filter settings (used when smart filter is disabled)");
     gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
     gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
     gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
