@@ -97,6 +97,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.OpticsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCalculatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFEstimatorSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PeakFitPreviewSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SaveLocalisationsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SummariseResultsSettings;
@@ -1240,6 +1241,17 @@ public final class SettingsManager {
    */
   public static ImageJ3DResultsViewerSettings readImageJ3DResultsViewerSettings(int flags) {
     return new ConfigurationReader<>(GuiSettings.DefaultImageJ3DResultsViewerSettings.INSTANCE)
+        .read(flags);
+  }
+
+  /**
+   * Read the PeakFitPreviewSettings from the settings file in the settings directory.
+   *
+   * @param flags the flags
+   * @return the PeakFitPreviewSettings
+   */
+  public static PeakFitPreviewSettings readPeakFitPreviewSettings(int flags) {
+    return new ConfigurationReader<>(GuiSettings.DefaultPeakFitPreviewSettings.INSTANCE)
         .read(flags);
   }
 

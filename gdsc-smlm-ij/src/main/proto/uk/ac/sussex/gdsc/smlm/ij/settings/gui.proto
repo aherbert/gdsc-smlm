@@ -727,3 +727,12 @@ message TcPalmAnalysisSettings {
   bool disable_overlap_check = 18;
   double loop_scale = 19;
 }
+
+// Contains settings for the preview mode of the Peak Fit plugin
+message PeakFitPreviewSettings {
+  bool overlay = 1;
+  bool table = 2;
+  bool logProgress = 3;
+  bool showDeviations = 4;
+  uk.ac.sussex.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 5;
+}

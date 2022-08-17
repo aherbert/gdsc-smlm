@@ -67,6 +67,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.OpticsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCalculatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFEstimatorSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PeakFitPreviewSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SaveLocalisationsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TcPalmAnalysisSettings;
@@ -596,6 +597,24 @@ public final class GuiSettings {
         .setPixelSize(5);
       // @formatter:on
       // No LUT to use the grey default. This allows a colour overlay to be distinct.
+      INSTANCE = builder.build();
+    }
+  }
+
+  /** The default PeakFitPreviewSettings. */
+  public static class DefaultPeakFitPreviewSettings {
+    /** Default settings instance. */
+    public static final PeakFitPreviewSettings INSTANCE;
+
+    static {
+      final PeakFitPreviewSettings.Builder builder = PeakFitPreviewSettings.newBuilder();
+      builder.setOverlay(true);
+      builder.setTable(true);
+      final ResultsTableSettings.Builder resultsTableSettings =
+          builder.getResultsTableSettingsBuilder();
+      resultsTableSettings.setShowNoiseData(true);
+      resultsTableSettings.setShowPrecision(true);
+      resultsTableSettings.setRoundingPrecision(4);
       INSTANCE = builder.build();
     }
   }

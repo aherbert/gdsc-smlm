@@ -142,6 +142,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCalculatorSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PeakFitPreviewSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GuiSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
@@ -246,11 +247,6 @@ public class PeakFit implements PlugInFilter {
     boolean showTable;
     boolean showImage;
     boolean fitAcrossAllFrames;
-    boolean previewOverlay;
-    boolean previewTable;
-    boolean previewLogProgress;
-    boolean previewShowDeviations;
-    ResultsTableSettings tableSettings;
 
     Settings() {
       // Allow 1 thread free.
@@ -258,9 +254,6 @@ public class PeakFit implements PlugInFilter {
       inputOption = "";
       showTable = true;
       showImage = true;
-      previewOverlay = true;
-      previewTable = true;
-      tableSettings = ResultsTableSettings.getDefaultInstance();
     }
 
     Settings(Settings source) {
@@ -269,11 +262,6 @@ public class PeakFit implements PlugInFilter {
       showTable = source.showTable;
       showImage = source.showImage;
       fitAcrossAllFrames = source.fitAcrossAllFrames;
-      previewOverlay = source.previewOverlay;
-      previewTable = source.previewTable;
-      previewLogProgress = source.previewLogProgress;
-      previewShowDeviations = source.previewShowDeviations;
-      tableSettings = source.tableSettings;
     }
 
     Settings copy() {
@@ -294,14 +282,6 @@ public class PeakFit implements PlugInFilter {
      */
     void save() {
       INSTANCE.set(this);
-    }
-
-    void setPreviewLogProgress(boolean previewLogProgress) {
-      this.previewLogProgress = previewLogProgress;
-    }
-
-    void setPreviewShowDeviations(boolean previewShowDeviations) {
-      this.previewShowDeviations = previewShowDeviations;
     }
   }
 
@@ -374,9 +354,9 @@ public class PeakFit implements PlugInFilter {
   private static class WorkSettings {
     final int slice;
     final FitEngineConfiguration config;
-    final Settings settings;
+    final PeakFitPreviewSettings settings;
 
-    WorkSettings(int slice, FitEngineConfiguration config, Settings settings) {
+    WorkSettings(int slice, FitEngineConfiguration config, PeakFitPreviewSettings settings) {
       this.slice = slice;
       this.config = config;
       this.settings = settings;
@@ -466,6 +446,7 @@ public class PeakFit implements PlugInFilter {
     private boolean preview;
     private Workflow<WorkSettings, WorkResults> workflow;
     private LocalList<BaseWorker> workers;
+    private PeakFitPreviewSettings.Builder previewSettings;
 
     /** The logger used by workers to report errors. */
     Logger logger;
@@ -610,7 +591,7 @@ public class PeakFit implements PlugInFilter {
         // the current fit config to dynamically configure the z-filter in the PSF options
         if (event.getSource() == textSmartFilter) {
           // This will be bound for the preview
-          //fitConfig.setSmartFilter(textSmartFilter.getState());
+          // fitConfig.setSmartFilter(textSmartFilter.getState());
           updateFilterInput();
         }
       }
@@ -805,6 +786,8 @@ public class PeakFit implements PlugInFilter {
 
     void addPreview(ExtendedGenericDialog gd) {
       // Create a Workflow to generate results and display them
+      previewSettings =
+          SettingsManager.readPeakFitPreviewSettings(SettingsManager.FLAG_SILENT).toBuilder();
 
       gd.addCheckbox("Preview", false, this);
       previewCheckbox = gd.getLastCheckbox();
@@ -868,15 +851,15 @@ public class PeakFit implements PlugInFilter {
 
       // Respond to these input but use duplicate properties in the settings to
       // avoid passing the entire resultsSettings into the workflow
-      bind(textLogProgress, settings::setPreviewLogProgress);
+      bind(textLogProgress, previewSettings::setLogProgress);
       if (textShowDeviations != null) {
-        bind(textShowDeviations, settings::setPreviewShowDeviations);
+        bind(textShowDeviations, previewSettings::setShowDeviations);
       }
 
       // Restore to the preview settings the state loaded in the dialog.
       // These are simply used to avoid passing the ResultsSettings object.
-      settings.previewLogProgress = textLogProgress.getState();
-      settings.previewShowDeviations = textShowDeviations.getState();
+      previewSettings.setLogProgress(textLogProgress.getState());
+      previewSettings.setShowDeviations(textShowDeviations.getState());
 
       // Respond to image slice changes
       ImagePlus.addImageListener(this);
@@ -889,11 +872,11 @@ public class PeakFit implements PlugInFilter {
       final boolean record = Recorder.record;
       Recorder.record = false;
       // Detect changes
-      final boolean overlay = settings.previewOverlay;
-      final boolean table = settings.previewTable;
-      final ResultsTableSettings tableSettings = settings.tableSettings;
+      final boolean overlay = previewSettings.getOverlay();
+      final boolean table = previewSettings.getTable();
+      final ResultsTableSettings tableSettings = previewSettings.getResultsTableSettings();
       egd.addMessage("Configure the interactive preview");
-      egd.addCheckbox("Show_overlay", settings.previewOverlay);
+      egd.addCheckbox("Show_overlay", overlay);
       // Support all table options
       final ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
       resultsSettings.setResultsTableSettings(tableSettings);
@@ -905,17 +888,17 @@ public class PeakFit implements PlugInFilter {
         Recorder.record = record;
         return false;
       }
-      settings.previewOverlay = egd.getNextBoolean();
-      settings.previewTable = egd.getNextBoolean();
+      previewSettings.setOverlay(egd.getNextBoolean());
+      previewSettings.setTable(egd.getNextBoolean());
       egd.collectOptions();
-      settings.tableSettings = resultsSettings.getResultsTableSettings();
+      previewSettings.setResultsTableSettings(resultsSettings.getResultsTableSettings());
 
       Recorder.record = record;
       // Note: If there are no preview output choices then the preview is computing
       // but nothing is displayed... For now this is ignored. Some options such as
       // recording to the ImageJ log window are configured in other dialogs.
-      return overlay != settings.previewOverlay || table != settings.previewTable
-          || !tableSettings.equals(settings.tableSettings);
+      return overlay != previewSettings.getOverlay() || table != previewSettings.getTable()
+          || !tableSettings.equals(previewSettings.getResultsTableSettings());
     }
 
     @Override
@@ -987,6 +970,7 @@ public class PeakFit implements PlugInFilter {
       if (workers != null) {
         workers.forEach(BaseWorker::reset);
       }
+      SettingsManager.writeSettings(previewSettings);
     }
 
     void doPreview() {
@@ -1035,7 +1019,8 @@ public class PeakFit implements PlugInFilter {
         }
 
         // Clone the config and settings and pass it to the workflow
-        workflow.run(new WorkSettings(imp.getCurrentSlice(), config.createCopy(), settings.copy()));
+        workflow.run(
+            new WorkSettings(imp.getCurrentSlice(), config.createCopy(), previewSettings.build()));
       }
     }
 
@@ -1093,10 +1078,10 @@ public class PeakFit implements PlugInFilter {
           return false;
         }
         // Assume if the config is not null then the settings are not null
-        final Settings settings1 = current.settings;
-        final Settings settings2 = previous.settings;
-        if (settings1.previewLogProgress != settings2.previewLogProgress
-            || settings1.previewShowDeviations != settings2.previewShowDeviations) {
+        final PeakFitPreviewSettings settings1 = current.settings;
+        final PeakFitPreviewSettings settings2 = previous.settings;
+        if (settings1.getLogProgress() != settings2.getLogProgress()
+            || settings1.getShowDeviations() != settings2.getShowDeviations()) {
           return false;
         }
         return true;
@@ -1118,7 +1103,7 @@ public class PeakFit implements PlugInFilter {
           // If the ROI changes then this is currently not supported.
           final int singleFrame = work.getLeft().slice;
           final FitEngineConfiguration config = work.getLeft().config;
-          final Settings settings = work.getLeft().settings;
+          final PeakFitPreviewSettings settings = work.getLeft().settings;
           final FitConfiguration fitConfig = config.getFitConfiguration();
 
           // This assumes the source is configured at the end of setup(...)
@@ -1135,8 +1120,8 @@ public class PeakFit implements PlugInFilter {
           config.configureOutputUnits();
 
           // Configure logging and deviations
-          fitConfig.setLog(settings.previewLogProgress ? logger : null);
-          fitConfig.setComputeDeviations(settings.previewShowDeviations);
+          fitConfig.setLog(settings.getLogProgress() ? logger : null);
+          fitConfig.setComputeDeviations(settings.getShowDeviations());
 
           // Cache the camera model configuration. We can do this as the crop will be unchanged
           // and a camera model is uniquely defined by the name.
@@ -1269,12 +1254,12 @@ public class PeakFit implements PlugInFilter {
 
       @Override
       public boolean equalSettings(WorkSettings current, WorkSettings previous) {
-        final Settings settings1 = current.settings;
-        final Settings settings2 = previous.settings;
+        final PeakFitPreviewSettings settings1 = current.settings;
+        final PeakFitPreviewSettings settings2 = previous.settings;
         if (settings1 == null) {
           return settings2 == null;
         }
-        return settings1.previewOverlay == settings2.previewOverlay;
+        return settings1.getOverlay() == settings2.getOverlay();
       }
 
       @Override
@@ -1286,9 +1271,9 @@ public class PeakFit implements PlugInFilter {
       @Override
       public Pair<WorkSettings, WorkResults> doWork(Pair<WorkSettings, WorkResults> work) {
         reset = false;
-        final Settings settings = work.getLeft().settings;
+        final PeakFitPreviewSettings settings = work.getLeft().settings;
         final MemoryPeakResults results = work.getRight().results;
-        if (results == null || !settings.previewOverlay) {
+        if (results == null || !settings.getOverlay()) {
           reset();
         } else {
           overlayResults(imp, results, imp.getCurrentSlice());
@@ -1316,18 +1301,18 @@ public class PeakFit implements PlugInFilter {
 
       @Override
       public boolean equalSettings(WorkSettings current, WorkSettings previous) {
-        final Settings settings1 = current.settings;
-        final Settings settings2 = previous.settings;
+        final PeakFitPreviewSettings settings1 = current.settings;
+        final PeakFitPreviewSettings settings2 = previous.settings;
         if (settings1 == null) {
           return settings2 == null;
         }
-        if (settings1.previewTable) {
+        if (settings1.getTable()) {
           // Only compare the table settings if the table is displayed
-          if (!settings.tableSettings.equals(settings2.tableSettings)) {
+          if (!settings1.getResultsTableSettings().equals(settings2.getResultsTableSettings())) {
             return false;
           }
         }
-        return settings1.previewTable == settings2.previewTable;
+        return settings1.getTable() == settings2.getTable();
       }
 
       @Override
@@ -1339,14 +1324,14 @@ public class PeakFit implements PlugInFilter {
       @Override
       public Pair<WorkSettings, WorkResults> doWork(Pair<WorkSettings, WorkResults> work) {
         reset = false;
-        final Settings settings = work.getLeft().settings;
+        final PeakFitPreviewSettings settings = work.getLeft().settings;
         final MemoryPeakResults results = work.getRight().results;
-        if (results == null || !settings.previewTable) {
+        if (results == null || !settings.getTable()) {
           reset();
         } else {
           // No requirement for a dynamic table as the blocking dialog prevents GUI interaction
           final ImageJTablePeakResults peakResults = new ImageJTablePeakResults(false);
-          final ResultsTableSettings resultsSettings = settings.tableSettings;
+          final ResultsTableSettings resultsSettings = settings.getResultsTableSettings();
 
           // Support all the results settings
           peakResults.setDistanceUnit(resultsSettings.getDistanceUnit());
@@ -1360,7 +1345,7 @@ public class PeakFit implements PlugInFilter {
           }
           peakResults.setRoundingPrecision(resultsSettings.getRoundingPrecision());
           peakResults.setShowZ(results.is3D());
-          peakResults.setShowDeviations(settings.previewShowDeviations);
+          peakResults.setShowDeviations(settings.getShowDeviations());
 
           peakResults.copySettings(results);
           peakResults.setClearAtStart(true);
