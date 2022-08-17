@@ -431,7 +431,8 @@ public class AstigmatismModelManager implements PlugIn {
     // Select an image
     final String[] list = getImageList();
     if (list.length == 0) {
-      IJ.error("No suitable images");
+      IJ.error("No suitable images.\n \nRequire a greyscale image stack with a"
+          + "single point ROI labelling a PSF spot.");
       return false;
     }
     final GenericDialog gd = new GenericDialog(TITLE);
@@ -1294,7 +1295,7 @@ public class AstigmatismModelManager implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Save the model");
     gd.addCheckbox("Save_model", pluginSettings.getSaveModel());
-    gd.addStringField("Model_name", pluginSettings.getModelName());
+    gd.addStringField("Model_name", pluginSettings.getModelName(), 30);
     gd.addMessage("Save the model width to this plugin's settings, e.g. to use\n"
         + "on another selected PSF when creating a model.");
     gd.addCheckbox("Save_fit_width", pluginSettings.getSaveFitWidth());
