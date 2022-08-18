@@ -83,6 +83,7 @@ import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.core.utils.Correlator;
+import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -2536,22 +2537,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     if (index <= FILTER_PRECISION
         && (settings.showFilterScoreHistograms || upper.requiresJaccard || lower.requiresJaccard)) {
       // Jaccard score verses the range of the metric
-      for (final double[] d : matchScores) {
-        if (!Double.isFinite(d[index])) {
-          ImageJUtils.log("Error in fit data [%d]: %s", index, d[index]);
-        }
-      }
 
-      // Do not use Double.compare(double, double) so we get exceptions in the sort for inf/nan
-      Arrays.sort(matchScores, (o1, o2) -> {
-        if (o1[index] < o2[index]) {
-          return -1;
-        }
-        if (o1[index] > o2[index]) {
-          return 1;
-        }
-        return 0;
-      });
+      // If non-finites exist then we cannot plot them in the range.
+      // Previously this was logged to the ImageJ log window but no handling was added.
+      // It occurs for example in the precision which can be infinite if the fitted signal
+      // is zero (possible using a LSE fit with lower bound as zero).
+
+      // Using Double.compare will move +infinite and NaN to the end.
+      Arrays.sort(matchScores, (o1, o2) -> Double.compare(o1[index], o2[index]));
 
       final int scoreIndex = FILTER_PRECISION + 1;
       final int n = results.size();
@@ -2574,12 +2567,25 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         final Plot plot = new Plot(title, xLabel, "Jaccard");
         plot.addPoints(metric, jaccard, Plot.LINE);
         // Remove outliers
-        final double[] limitsx = MathUtils.limits(metric);
-        final Percentile p = new Percentile();
-        final double l = p.evaluate(metric, 25);
-        final double u = p.evaluate(metric, 75);
-        final double iqr = 1.5 * (u - l);
-        limitsx[1] = Math.min(limitsx[1], u + iqr);
+        final double[] limitsx = {metric[0], metric[metric.length - 1]};
+        // Handle non-finite range
+        if (!Double.isFinite(limitsx[1])) {
+          final int i = SimpleArrayUtils.findLastIndex(metric, Double::isFinite);
+          if (i != -1) {
+            final double[] tmp = Arrays.copyOf(metric, i + 1);
+            final Percentile p = new Percentile();
+            final double l = p.evaluate(metric, 25);
+            final double u = p.evaluate(metric, 75);
+            final double iqr = 1.5 * (u - l);
+            limitsx[1] = Math.min(tmp[i], u + iqr);
+          }
+        } else {
+          final Percentile p = new Percentile();
+          final double l = p.evaluate(metric, 25);
+          final double u = p.evaluate(metric, 75);
+          final double iqr = 1.5 * (u - l);
+          limitsx[1] = Math.min(limitsx[1], u + iqr);
+        }
         plot.setLimits(limitsx[0], limitsx[1], 0, MathUtils.max(jaccard));
         ImageJUtils.display(title, plot, wo);
       }
@@ -2597,19 +2603,26 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final StoredDataStatistics s2 = stats[1][index];
     final StoredDataStatistics s3 = stats[2][index];
 
-    final DescriptiveStatistics d = s1.getStatistics();
+    // Statistics of finite values
+    DescriptiveStatistics d = null;
+
     double median = 0;
     Plot plot = null;
     String title = null;
 
     if (settings.showFilterScoreHistograms) {
+      // Filter the value to finite values (for plotting)
+      final double[] tmp = Arrays.stream(s1.values()).filter(Double::isFinite).toArray();
+      d = new DescriptiveStatistics(tmp);
+
       median = d.getPercentile(50);
       final String label =
-          String.format("n = %d. Median = %s nm", s1.getN(), MathUtils.rounded(median));
-      final HistogramPlot histogramPlot = new HistogramPlotBuilder(TITLE, s1, xLabel)
-          .setMinBinWidth(filterCriteria[index].minBinWidth)
-          .setRemoveOutliersOption((filterCriteria[index].restrictRange) ? 1 : 0)
-          .setPlotLabel(label).build();
+          String.format("n = %d. Median = %s nm", d.getN(), MathUtils.rounded(median));
+      final HistogramPlot histogramPlot =
+          new HistogramPlotBuilder(TITLE, DoubleData.wrap(tmp), xLabel)
+              .setMinBinWidth(filterCriteria[index].minBinWidth)
+              .setRemoveOutliersOption((filterCriteria[index].restrictRange) ? 1 : 0)
+              .setPlotLabel(label).build();
       final PlotWindow plotWindow = histogramPlot.show(wo);
       if (plotWindow == null) {
         IJ.log("Failed to show the histogram: " + xLabel);
@@ -2657,12 +2670,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     if (settings.showFilterScoreHistograms) {
       title = TITLE + " Cumul " + xLabel;
       plot = new Plot(title, xLabel, "Frequency");
-      // Find limits
-      double[] xlimit = MathUtils.limits(h1[0]);
-      xlimit = MathUtils.limits(xlimit, h2[0]);
-      xlimit = MathUtils.limits(xlimit, h3[0]);
+      // Find finite limits. Note if no finite values are present then the method has returned when
+      // plotting the scores.
+      final int i1 = SimpleArrayUtils.findLastIndex(h1[0], Double::isFinite);
+      final double[] xlimit = {h1[0][0], h1[0][i1]};
       // Restrict using the inter-quartile range
       if (filterCriteria[index].restrictRange) {
+        @SuppressWarnings("null")
         final double q1 = d.getPercentile(25);
         final double q2 = d.getPercentile(75);
         final double iqr = (q2 - q1) * 2.5;
@@ -2670,11 +2684,24 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         xlimit[1] = MathUtils.min(xlimit[1], median + iqr);
       }
       plot.setLimits(xlimit[0], xlimit[1], 0, 1.05);
-      plot.addPoints(h1[0], h1[1], Plot.LINE);
-      plot.setColor(Color.red);
-      plot.addPoints(h2[0], h2[1], Plot.LINE);
-      plot.setColor(Color.blue);
-      plot.addPoints(h3[0], h3[1], Plot.LINE);
+
+      // Add only the cumulative curve up to the last finite value
+      final double[][][] h = {h1, h2, h3};
+      final Color[] colours = {Color.black, Color.red, Color.blue};
+      final int[] last = {i1, SimpleArrayUtils.findLastIndex(h2[0], Double::isFinite),
+          SimpleArrayUtils.findLastIndex(h3[0], Double::isFinite)};
+      for (int i = 0; i < colours.length; i++) {
+        if (last[i] >= 0) {
+          plot.setColor(colours[i]);
+          double[] x = h[i][0];
+          double[] y = h[i][1];
+          if (last[i] < x.length - 1) {
+            x = Arrays.copyOf(x, last[i] + 1);
+            y = Arrays.copyOf(y, last[i] + 1);
+          }
+          plot.addPoints(x, y, Plot.LINE);
+        }
+      }
     }
 
     // Determine the maximum difference between the TP and FP
@@ -2781,6 +2808,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       default:
         throw new IllegalStateException("Missing upper limit method");
     }
+    // h1 is a cumulative histogram of the sorted metric
     final double min = getPercentile(h1, 0);
     final double max = getPercentile(h1, 1);
     return new double[] {lowerBound, upperBound, min, max};
@@ -2800,7 +2828,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   /**
-   * Gets the value from x corresponding to the value in the y values.
+   * Gets the value from x corresponding to the value in the y values (assumed to be sorted).
+   * Linear interpolation is used when the target value is between two y-values.
    *
    * @param x the x
    * @param y the y
@@ -2808,15 +2837,23 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the x-value
    */
   private static double getXValue(double[] x, double[] y, double yvalue) {
-    for (int i = 0; i < x.length; i++) {
-      if (y[i] >= yvalue) {
-        if (i == 0 || y[i] == yvalue) {
-          return x[i];
-        }
-        // Interpolation
-        return MathUtils.interpolateX(x[i - 1], y[i - 1], x[i], y[i], yvalue);
-      }
+    int index = Arrays.binarySearch(y, yvalue);
+    if (index >= 0) {
+      // Exact match
+      return x[index];
     }
+    // Insertion point is the index of first value greater than yvalue
+    index = ~index;
+    if (index == 0) {
+      // yvalue is smaller than y[0]
+      return x[0];
+    }
+    // Interpolation
+    if (index < y.length) {
+      // yvalue is within y[i-1] to y[i]
+      return MathUtils.interpolateX(x[index - 1], y[index - 1], x[index], y[index], yvalue);
+    }
+    // yvalue is larger than y[end]
     return x[x.length - 1];
   }
 
