@@ -1166,11 +1166,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     silent = false;
     finished = false;
-    if (!initialise()) {
-      return;
-    }
-
-    if (!showDialog()) {
+    if (!initialise() || !showDialog()) {
       return;
     }
 
@@ -2482,13 +2478,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   private static boolean noMatch(MultiPathFitResult fitResult) {
-    if (isMatch(fitResult.getSingleFitResult())) {
-      return false;
-    }
-    if (isMatch(fitResult.getMultiFitResult())) {
-      return false;
-    }
-    if (isMatch(fitResult.getDoubletFitResult())) {
+    if (isMatch(fitResult.getSingleFitResult()) || isMatch(fitResult.getMultiFitResult()) || isMatch(fitResult.getDoubletFitResult())) {
       return false;
     }
     return !isMatch(fitResult.getMultiDoubletFitResult());
@@ -2496,13 +2486,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   private static boolean
       isMatch(uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult) {
-    if (fitResult == null) {
-      return false;
-    }
-    if (fitResult.status != 0) {
-      return false;
-    }
-    if (fitResult.getResults() == null) {
+    if ((fitResult == null) || (fitResult.status != 0) || (fitResult.getResults() == null)) {
       return false;
     }
     for (int resultIndex = 0; resultIndex < fitResult.getResults().length; resultIndex++) {
@@ -2550,9 +2534,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // is zero (possible using a LSE fit with lower bound as zero).
 
       // Using Double.compare will move +infinite and NaN to the end
-      Arrays.sort(matchScores,
-          increasing ? (o1, o2) -> Double.compare(o2[index], o1[index])
-              : (o1, o2) -> Double.compare(o1[index], o2[index]));
+      Arrays.sort(matchScores, increasing ? (o1, o2) -> Double.compare(o2[index], o1[index])
+          : (o1, o2) -> Double.compare(o1[index], o2[index]));
 
       final int scoreIndex = FILTER_PRECISION + 1;
       final int n = results.size();
