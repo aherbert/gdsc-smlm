@@ -90,6 +90,7 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -5747,12 +5748,16 @@ public class CreateData implements PlugIn {
     final float[] noise = new float[source.getFrames() + 1];
     source.setReadHint(ReadHint.SEQUENTIAL);
     source.open();
+    final Ticker ticker =
+        Ticker.createStarted(SimpleImageJTrackProgress.getInstance(), noise.length, false);
     for (int slice = 1; slice < noise.length; slice++) {
       final float[] data = source.next();
       // Use the trimmed method as there may be a lot of spots in the frame
       noise[slice] = FitWorker.estimateNoise(data, width, height,
           NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
+      ticker.tick();
     }
+    ticker.stop();
 
     // Statistics stats = Statistics.create(Arrays.copyOfRange(noise, 1, noise.length));
     // System.out.printf("Noise = %.3f +/- %.3f (%d)\n", stats.getMean(),
