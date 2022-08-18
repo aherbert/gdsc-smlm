@@ -2478,7 +2478,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   private static boolean noMatch(MultiPathFitResult fitResult) {
-    if (isMatch(fitResult.getSingleFitResult()) || isMatch(fitResult.getMultiFitResult()) || isMatch(fitResult.getDoubletFitResult())) {
+    if (isMatch(fitResult.getSingleFitResult()) || isMatch(fitResult.getMultiFitResult())
+        || isMatch(fitResult.getDoubletFitResult())) {
       return false;
     }
     return !isMatch(fitResult.getMultiDoubletFitResult());
@@ -2520,7 +2521,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     double[] jaccard = null;
     double[] metric = null;
-    double maxJaccard = 0;
+    int maxJaccardIndex = 0;
     if (index <= FILTER_PRECISION
         && (settings.showFilterScoreHistograms || upper.requiresJaccard || lower.requiresJaccard)) {
       // Jaccard score verses the range of the metric.
@@ -2551,11 +2552,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         metric[k + 1] = matchScores[k][index];
       }
       metric[0] = metric[1];
-      maxJaccard = MathUtils.max(jaccard);
 
       if (increasing) {
         SimpleArrayUtils.reverse(metric);
+        SimpleArrayUtils.reverse(jaccard);
       }
+
+      maxJaccardIndex = SimpleArrayUtils.findMaxIndex(jaccard);
 
       if (settings.showFilterScoreHistograms) {
         final String title = TITLE + " Jaccard " + xLabel;
@@ -2581,7 +2584,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
           final double iqr = 1.5 * (u - l);
           limitsx[1] = Math.min(limitsx[1], u + iqr);
         }
-        plot.setLimits(limitsx[0], limitsx[1], 0, MathUtils.max(jaccard));
+        plot.setLimits(limitsx[0], limitsx[1], 0, jaccard[maxJaccardIndex]);
         ImageJUtils.display(title, plot, wo);
       }
     }
@@ -2773,7 +2776,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         lowerBound = 0;
         break;
       case HALF_MAX_JACCARD_VALUE:
-        lowerBound = getXValue(metric, jaccard, maxJaccard * 0.5);
+        // Assume the jaccard values are sorted up to the max value. This allows use of
+        // the binary search.
+        lowerBound = getXValue(metric, Arrays.copyOf(jaccard, maxJaccardIndex),
+            jaccard[maxJaccardIndex] * 0.5);
         break;
       default:
         throw new IllegalStateException("Missing lower limit method");
@@ -2797,8 +2803,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         upperBound = 0;
         break;
       case MAX_JACCARD2:
-        upperBound = getXValue(metric, jaccard, maxJaccard) * 2;
-        // System.out.printf("MaxJ = %.4f @ %.3f\n", maxJ, u / 2);
+        upperBound = metric[maxJaccardIndex] * 2;
         break;
       default:
         throw new IllegalStateException("Missing upper limit method");
