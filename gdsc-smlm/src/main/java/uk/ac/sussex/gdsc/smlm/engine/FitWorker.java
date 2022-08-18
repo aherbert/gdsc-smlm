@@ -4604,7 +4604,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     final double signal = 30;
     // Note: SNR is the mean signal to noise. Rose criterion sets a minimum level at 5.
     // https://en.wikipedia.org/wiki/Signal-to-noise_ratio#Alternative_definition
-    final float snr = 5;
+    // However a lower level is often observed for SMLM spot data.
+    final float snr = 2;
     final double minWidth = 0.5;
     final double maxWidth = 4;
     final double shift = 2;
