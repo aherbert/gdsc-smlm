@@ -290,13 +290,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int minBinWidth;
     final boolean restrictRange;
     final boolean requireLabel;
+    /** Set to true if increase the criteria will filter more spots. */
+    final boolean increasing;
 
-    FilterCriteria(ParameterType type, LowerLimit lower, UpperLimit upper) {
-      this(type, type.toString(), lower, upper, 0, true, true);
+    FilterCriteria(ParameterType type, LowerLimit lower, UpperLimit upper, boolean increasing) {
+      this(type, type.toString(), lower, upper, 0, true, true, increasing);
     }
 
     FilterCriteria(ParameterType type, String name, LowerLimit lower, UpperLimit upper,
-        int minBinWidth, boolean restrictRange, boolean requireLabel) {
+        int minBinWidth, boolean restrictRange, boolean requireLabel, boolean increasing) {
       this.type = type;
       this.name = name;
       this.lower = lower;
@@ -304,6 +306,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       this.minBinWidth = minBinWidth;
       this.restrictRange = restrictRange;
       this.requireLabel = requireLabel;
+      this.increasing = increasing;
     }
   }
 
@@ -2336,17 +2339,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       criteria = new FilterCriteria[9];
       int index = 0;
       //@formatter:off
-      criteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.MIN, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      criteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.MIN, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      criteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.MIN, UpperLimit.ZERO);
-      criteria[index++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
-      criteria[index++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-      criteria[index++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+      criteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.MIN, UpperLimit.MAX_POSITIVE_CUMUL_DELTA, true);
+      criteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.MIN, UpperLimit.MAX_POSITIVE_CUMUL_DELTA, true);
+      criteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.MIN, UpperLimit.ZERO, true);
+      criteria[index++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT, false);
+      criteria[index++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT, false);
+      criteria[index++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT, false);
       // Precision has enough discrimination power to be able to use the Jaccard score
-      criteria[index++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
+      criteria[index++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2, false);
       // These are not filters but are used for stats analysis
-      criteria[index++] = new FilterCriteria(null, "Iterations",  LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
-      criteria[index]   = new FilterCriteria(null, "Evaluations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+      criteria[index++] = new FilterCriteria(null, "Iterations",  LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false, false);
+      criteria[index]   = new FilterCriteria(null, "Evaluations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false, false);
       //@formatter:on
 
       filterCriteria = criteria;
@@ -2536,15 +2539,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     double maxJaccard = 0;
     if (index <= FILTER_PRECISION
         && (settings.showFilterScoreHistograms || upper.requiresJaccard || lower.requiresJaccard)) {
-      // Jaccard score verses the range of the metric
+      // Jaccard score verses the range of the metric.
+      // Note: The score should be computed against the metric as its filtering power
+      // is reduced.
+      final boolean increasing = filterCriteria[index].increasing;
 
       // If non-finites exist then we cannot plot them in the range.
       // Previously this was logged to the ImageJ log window but no handling was added.
       // It occurs for example in the precision which can be infinite if the fitted signal
       // is zero (possible using a LSE fit with lower bound as zero).
 
-      // Using Double.compare will move +infinite and NaN to the end.
-      Arrays.sort(matchScores, (o1, o2) -> Double.compare(o1[index], o2[index]));
+      // Using Double.compare will move +infinite and NaN to the end
+      Arrays.sort(matchScores,
+          increasing ? (o1, o2) -> Double.compare(o2[index], o1[index])
+              : (o1, o2) -> Double.compare(o1[index], o2[index]));
 
       final int scoreIndex = FILTER_PRECISION + 1;
       final int n = results.size();
@@ -2561,6 +2569,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       }
       metric[0] = metric[1];
       maxJaccard = MathUtils.max(jaccard);
+
+      if (increasing) {
+        SimpleArrayUtils.reverse(metric);
+      }
 
       if (settings.showFilterScoreHistograms) {
         final String title = TITLE + " Jaccard " + xLabel;
@@ -2828,8 +2840,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   /**
-   * Gets the value from x corresponding to the value in the y values (assumed to be sorted).
-   * Linear interpolation is used when the target value is between two y-values.
+   * Gets the value from x corresponding to the value in the y values (assumed to be sorted). Linear
+   * interpolation is used when the target value is between two y-values.
    *
    * @param x the x
    * @param y the y
