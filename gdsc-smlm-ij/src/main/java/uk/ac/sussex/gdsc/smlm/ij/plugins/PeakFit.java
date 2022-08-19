@@ -1252,7 +1252,14 @@ public class PeakFit implements PlugInFilter {
      */
     private class OverlayWorker extends BaseWorker {
       private boolean reset;
-      private final Overlay overlay = imp.getOverlay();
+
+      /** The reset overlay (an overlay that was replaced by this worker). */
+      private Overlay resetOverlay;
+      /**
+       * The last overlay added by the worker. This is compared by reference so we initialise it
+       * with an object to distinguish it from null.
+       */
+      private Object addedOverlay = new Object();
 
       @Override
       public boolean equalSettings(WorkSettings current, WorkSettings previous) {
@@ -1278,7 +1285,17 @@ public class PeakFit implements PlugInFilter {
         if (results == null || !settings.getOverlay()) {
           reset();
         } else {
+          // Track changes this workers makes to the overlay
+          final Object o = addedOverlay;
+          final Overlay before = imp.getOverlay();
           overlayResults(imp, results, imp.getCurrentSlice());
+          final Overlay after = imp.getOverlay();
+          // If this worker did not add the previous overlay,
+          // then store it to use to reset the image
+          if (before != o) {
+            resetOverlay = before;
+          }
+          addedOverlay = after;
         }
 
         // No change
@@ -1288,7 +1305,10 @@ public class PeakFit implements PlugInFilter {
       @Override
       void reset() {
         reset = true;
-        imp.setOverlay(overlay);
+        // Only reset if this worker added the current overlay
+        if (addedOverlay == imp.getOverlay()) {
+          imp.setOverlay(resetOverlay);
+        }
       }
     }
 
