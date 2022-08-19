@@ -1415,8 +1415,7 @@ public class PeakFit implements PlugInFilter {
     static void restoreLocation(int id, Window window) {
       // Only restore if the saved location is valid
       if (lastId == id) {
-        window.setLocation(x, y);
-        window.setSize(width, height);
+        window.setBounds(x, y, width, height);
       }
     }
 
