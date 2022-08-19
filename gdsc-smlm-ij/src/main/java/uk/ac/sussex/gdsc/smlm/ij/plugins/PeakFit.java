@@ -196,7 +196,6 @@ public class PeakFit implements PlugInFilter {
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
 
   private int pluginFlags;
-  private int singleFrame;
   private ImagePlus imp;
 
   // Used within the run(ImageProcessor) method
@@ -1288,8 +1287,7 @@ public class PeakFit implements PlugInFilter {
           // Track changes this workers makes to the overlay
           final Object o = addedOverlay;
           final Overlay before = imp.getOverlay();
-          overlayResults(imp, results, imp.getCurrentSlice());
-          final Overlay after = imp.getOverlay();
+          final Overlay after = overlayResults(imp, results, imp.getCurrentSlice());
           // If this worker did not add the previous overlay,
           // then store it to use to reset the image
           if (before != o) {
@@ -1537,13 +1535,9 @@ public class PeakFit implements PlugInFilter {
         return DONE;
       }
 
-      if (settings.fitAcrossAllFrames) {
-        // Allow the user to select a different image. The source will be set as per the
-        // main fit routine from the image (imp).
-        singleFrame = 0;
-      } else {
-        // Check for single frame
-        singleFrame = getSingleFrame(localResults);
+      // Allow fitting the same result positions across all frames (the source will be set as per
+      // the main fit routine from the image (imp)), or fitting the original source.
+      if (!settings.fitAcrossAllFrames) {
         // Forces the maxima to be used with their original source.
         imp = null;
         imageSource = localResults.getSource();
@@ -2166,61 +2160,6 @@ public class PeakFit implements PlugInFilter {
         || (gd instanceof NonBlockingExtendedGenericDialog && !imp.isVisible())
         || !readDialog(gd, isCrop)) {
       return DONE;
-    }
-
-    if (imp != null) {
-      // Store whether the user selected to process all the images.
-      final int flags = IJ.setupDialog(imp, pluginFlags);
-
-      // Check if cancelled
-      if ((flags & DONE) != 0) {
-        return DONE;
-      }
-
-      if ((flags & DOES_STACKS) == 0) {
-        // Save the slice number for the overlay
-        singleFrame = imp.getCurrentSlice();
-
-        // Account for interlaced data
-        if (extraSettings.interlacedData) {
-          int start = singleFrame;
-
-          // Calculate the first frame that is not skipped
-          while (ignoreFrame(start) && start > extraSettings.dataStart) {
-            start--;
-          }
-          if (start < extraSettings.dataStart) {
-            log("The current frame (%d) is before the start of the interlaced data", singleFrame);
-            return DONE;
-          }
-          if (start != singleFrame) {
-            log("Updated the current frame (%d) to a valid interlaced data frame (%d)", singleFrame,
-                start);
-          }
-          singleFrame = start;
-        }
-
-        // Account for integrated frames
-        int endFrame = singleFrame;
-        if (extraSettings.integrateFrames > 1) {
-          int totalFrames = 1;
-          while (totalFrames < extraSettings.integrateFrames) {
-            endFrame++;
-            if (!ignoreFrame(endFrame)) {
-              totalFrames++;
-            }
-          }
-          log("Updated the image end frame (%d) to %d allow %d integrated frames", singleFrame,
-              endFrame, extraSettings.integrateFrames);
-        }
-
-        // Create a new image source with the correct frames
-        setSource(new IJImageSource(imp, singleFrame, endFrame - singleFrame));
-
-        // Store the image so the results can be added as an overlay
-        this.imp = imp;
-        this.imp.setOverlay(null);
-      }
     }
 
     // Allow interlaced data by wrapping the image source
@@ -5054,8 +4993,6 @@ public class PeakFit implements PlugInFilter {
       // All setup is already done so simply run
       run();
     }
-
-    addSingleFrameOverlay();
   }
 
   /**
@@ -5226,42 +5163,7 @@ public class PeakFit implements PlugInFilter {
     return cameraModel;
   }
 
-  private void addSingleFrameOverlay() {
-    // If a single frame was processed add the peaks as an overlay if they are in memory
-    ImagePlus localImp = this.imp;
-
-    if (fitMaxima && singleFrame > 0 && source instanceof IJImageSource) {
-      final String title = source.getName();
-      localImp = WindowManager.getImage(title);
-    }
-
-    if (singleFrame > 0 && localImp != null) {
-      MemoryPeakResults memoryResults = null;
-      for (final PeakResults r : this.results.toArray()) {
-        if (r instanceof MemoryPeakResults) {
-          memoryResults = (MemoryPeakResults) r;
-          break;
-        }
-      }
-      if (memoryResults == null || memoryResults.size() == 0) {
-        return;
-      }
-
-      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-      gd.enableYesNoCancel();
-      gd.hideCancelButton();
-      gd.addMessage("Add the fitted localisations as an overlay?");
-      gd.showDialog();
-      if (!gd.wasOKed()) {
-        return;
-      }
-
-      overlayResults(localImp, memoryResults, singleFrame);
-      localImp.getWindow().toFront();
-    }
-  }
-
-  private static void overlayResults(ImagePlus localImp, MemoryPeakResults memoryResults,
+  private static Overlay overlayResults(ImagePlus localImp, MemoryPeakResults memoryResults,
       int singleFrame) {
     final LUT lut = LutHelper.createLut(LutColour.ICE);
     final Overlay o = new Overlay();
@@ -5279,6 +5181,7 @@ public class PeakFit implements PlugInFilter {
       o.add(roi);
     });
     localImp.setOverlay(o);
+    return o;
   }
 
   /**
@@ -5290,30 +5193,6 @@ public class PeakFit implements PlugInFilter {
   private int getNumberOfThreads(int totalFrames) {
     final int t = Math.max(1, (int) (settings.fractionOfThreads * Prefs.getThreads()));
     return Math.min(totalFrames, t);
-  }
-
-  /**
-   * Check if the frame should be ignored (relevant when using interlaced data).
-   *
-   * @param frame the frame
-   * @return True if the frame should be ignored
-   */
-  private boolean ignoreFrame(int frame) {
-    if (!extraSettings.interlacedData) {
-      return false;
-    }
-
-    // Check if the frame is allowed:
-    // Start
-    // |
-    // |----|Block|Skip|Block|Skip|Block|Skip
-    // Note the source data is still read so that the source is incremented.
-    if (frame < extraSettings.dataStart) {
-      return true;
-    }
-    final int frameInBlock =
-        (frame - extraSettings.dataStart) % (extraSettings.dataBlock + extraSettings.dataSkip);
-    return frameInBlock >= extraSettings.dataBlock;
   }
 
   private FitJob createJob(int startFrame, int endFrame, float[] data, Rectangle bounds,
