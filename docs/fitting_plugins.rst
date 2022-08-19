@@ -1560,7 +1560,7 @@ When the plugin is run it will process the image using multi-threaded code. Each
 
 Note that the image is not processed using ``ImageJ``'s standard multi-threaded plugin architecture for processing stacks. The SMLM fitting engine code is written so it can run outside of ``ImageJ`` as a Java library. The plugin just uses the configured ``ImageJ`` parameter for the available thread count.
 
-The number of threads used by the fit engine is :math:`\max (1, \lfloor t \times f \rfloor)` where :math:`t` is the availble thread count and :math:`f` is the fraction of threads to use. The default setting of 0.99 ensures a single thread is unused by the fit engine. This is then available for other tasks such as pre-processing the image frame data. This default can be configured using the :numref:`{name} <fitting_plugins:Additional Fitting Options>`.
+The number of threads used by the fit engine is :math:`\max (1, \lfloor t \times f \rfloor)` where :math:`t` is the available thread count and :math:`f` is the fraction of threads to use. The default setting of 0.99 ensures a single thread is unused by the fit engine. This is then available for other tasks such as pre-processing the image frame data. This default can be configured using the :numref:`{name} <fitting_plugins:Additional Fitting Options>`.
 
 Progress is shown on the ``ImageJ`` progress bar. The plugin can be stopped using the ``Escape`` key. If stopped early the plugin will still correctly close any open output files and the partial results will be saved.
 
