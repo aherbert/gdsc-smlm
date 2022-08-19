@@ -2016,15 +2016,17 @@ Fit Maxima
 
 Fits a 2D Gaussian to identified maxima.
 
-This plugin uses the same algorithm as the ``Peak Fit`` plugin to fit maxima. Candidates are taken from any results set held in memory with a valid image source (i.e. fitting a list of selected maxima can be performed on the original data). Candidates are grouped per time frame; for each frame the candidates are processed in ranked order until a number of successive fits fails or no candidates remain.
+This plugin uses the same algorithm as the :numref:`{name} <fitting_plugins:Peak Fit>` plugin to fit maxima. Candidates are taken from any results set held in memory with a valid image source (i.e. fitting a list of selected maxima can be performed on the original data). Candidates are grouped per time frame; for each frame the candidates are processed in ranked order until a number of successive fits fails or no candidates remain.
 
 Optionally the input candidate positions can be fit across all frames in the input image using the ``Fit across all frames`` option. This feature can be used for example to identify fiducial markers on a single frame, save the positions to a results set and subsequently fit them across the entire image using ``Fit Maxima``.
 
 Candidates can be identified using the ``Spot Finder`` plugin (see section :numref:`%s <fitting_plugins:Spot Finder>`). Running the ``Spot Finder`` and ``Fit Maxima`` plugins will produce the same results as using the ``Peak Fit`` plugin. However separating the two steps allows processing to be performed on the candidates. For example the ``Trace Molecules`` plugin can be used to join up candidates in successive frames and fit the combined stack. These are identified internally as spanning multiple frames by tagging an end frame onto the result. The ``Fit Maxima`` plugin will not fit any results that span multiple frames; these will be sent directly through to the result output.
 
-The fit configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exist then a default set of settings will be created.
+The fit configuration is the same as in the ``Peak Fit`` plugin. As with the ``Peak Fit`` plugin the current settings are loaded when the plugin is initialised. If no settings exist then a default set of settings will be created. Note that the settings include the options for the candidate spot filter. Although not used to directly identify candidates the settings are used by the fitting engine for example to smooth input data for PSF parameter estimates and set bounds on neighbour regions.
 
 When the plugin runs all the settings will be saved to the existing settings.
+
+Note that the ``Fit Maxima`` plugin does not support the preview mode available in the ``Peak Fit`` plugin. The plugin will ignore any ROI crop region since candidates are predefined. To fit a crop requires pre-cropping of the candidates using the :numref:`{name} <results_plugins:ROI Crop Results>` plugin.
 
 
 .. index:: ! Gaussian Fit

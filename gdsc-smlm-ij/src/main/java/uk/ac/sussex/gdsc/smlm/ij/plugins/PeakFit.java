@@ -1658,7 +1658,8 @@ public class PeakFit implements PlugInFilter {
 
     time = -1;
 
-    if (!initialiseImage(imageSource, getBounds(imp), false)) {
+    // Note: No bounds for Fit Maxima
+    if (!initialiseImage(imageSource, fitMaxima ? null : getBounds(imp), false)) {
       IJ.error(TITLE, "Failed to initialise the source image: " + imageSource.getName());
       return DONE;
     }
@@ -2034,6 +2035,9 @@ public class PeakFit implements PlugInFilter {
     if (maximaIdentification) {
       helpKey = "spot-finder";
       gd.addMessage("Identify candidate maxima");
+    } else if (fitMaxima) {
+      helpKey = "fit-maxima";
+      gd.addMessage("Fit 2D Gaussian to pre-identified maxima:\n" + settings.inputOption);
     } else {
       helpKey = "peak-fit";
       gd.addMessage("Fit 2D Gaussian to identified maxima");
@@ -2059,6 +2063,8 @@ public class PeakFit implements PlugInFilter {
 
     addPsfOptions(gd, fitConfigurationProvider);
     addDataFilterOptions(gd, fitEngineConfigurationProvider);
+    // Note: Search width may not be required for fitMaxima mode.
+    // Include it anyway for now to prevent side-effects if it is not configured.
     addSearchOptions(gd, fitEngineConfigurationProvider);
     addBorderOptions(gd, fitEngineConfigurationProvider);
     addFittingOptions(gd, fitEngineConfigurationProvider);
