@@ -2083,13 +2083,9 @@ public class PeakFit implements PlugInFilter {
       addFitSolverOptions(gd, fitEngineConfigurationProvider, source.getBounds(), bounds,
           optionFlags);
 
-      // gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-      // FitProtosHelper.getName(fitConfig.getFitSolver()));
       if (extraOptions) {
         gd.addCheckbox("Fit_background", fitConfig.isBackgroundFitting());
       }
-
-      // Parameters specific to each Fit solver are collected in a second dialog
 
       gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
       gd.addNumericField("Pass_rate", config.getPassRate(), 2);
