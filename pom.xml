@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>gdsc-smlm-parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>pom</packaging>
 
   <name>GDSC SMLM library for single molecule localisation microscopy</name>
