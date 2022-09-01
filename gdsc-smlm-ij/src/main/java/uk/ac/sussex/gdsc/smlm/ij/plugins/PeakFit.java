@@ -712,7 +712,7 @@ public class PeakFit implements PlugInFilter {
       }
 
       // Do not use set() as we support merging a partial PSF
-      fitConfig.mergePsf(psf);
+      PeakFit.mergePsf(fitConfig, psf);
 
       textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
     }
@@ -1990,6 +1990,30 @@ public class PeakFit implements PlugInFilter {
       }
     }
     return PSFType.UNRECOGNIZED;
+  }
+
+  /**
+   * Merge the PSF settings into the fit configuration.
+   *
+   * <p>Note that this does not strictly perform a merge of the proto objects using
+   * {@link FitConfiguration#mergePsf(PSF)}. That method will set any unary value if the argument
+   * PSF is not the default value. However it will append any parameters to the existing parameter
+   * list. As a modification to this behaviour if the input PSF argument has parameters the current
+   * parameters are removed. This thus replaces any current settings with any non-default settings
+   * in the argument PSF.
+   * 
+   * <p>This method is used specifically in plugins that update the current settings using a
+   * template that may contain a partial PSF.
+   *
+   * @param fitConfig the fit config
+   * @param psf the psf
+   */
+  static void mergePsf(FitConfiguration fitConfig, PSF psf) {
+    if (psf.getParametersCount() != 0) {
+      fitConfig.setPsf(fitConfig.getPsf().toBuilder().clearParameters().mergeFrom(psf).build());
+    } else {
+      fitConfig.mergePsf(psf);
+    }
   }
 
   private int showDialog(ImagePlus imp) {

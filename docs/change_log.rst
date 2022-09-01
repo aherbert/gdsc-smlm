@@ -9,6 +9,8 @@ Version 1.0.1
 
 Patch release of GDSC SMLM.
 
+- Correct application of templates with PSF settings.
+
 Requires Java 8.
 
 

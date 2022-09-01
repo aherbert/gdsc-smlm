@@ -495,7 +495,7 @@ public class Configuration implements PlugIn {
     }
 
     // Do not use set() as we support merging a partial PSF
-    fitConfig.mergePsf(psf);
+    PeakFit.mergePsf(fitConfig, psf);
 
     textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }

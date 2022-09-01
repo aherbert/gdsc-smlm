@@ -918,7 +918,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     }
 
     // Do not use set() as we support merging a partial PSF
-    fitConfig.mergePsf(psf);
+    PeakFit.mergePsf(fitConfig, psf);
 
     textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }
