@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
@@ -62,6 +63,8 @@ public class Configuration implements PlugIn {
 
   private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
+
+  private ExtendedGenericDialog gd;
 
   // All the fields that will be updated when reloading the configuration file
   private Choice textCameraType;
@@ -167,7 +170,7 @@ public class Configuration implements PlugIn {
 
     final CalibrationReader calibrationReader = fitConfig.getCalibrationReader();
 
-    ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(HelpUrls.getUrl("fit-configuration"));
     gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
@@ -522,6 +525,10 @@ public class Configuration implements PlugIn {
     textSearch.setText(String.valueOf(config.getSearch()));
     textBorder.setText(String.valueOf(config.getBorder()));
     textFitting.setText(String.valueOf(config.getFitting()));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Smoothing"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Search_width"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Border_width"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Fitting_width"));
     textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
     textFailuresLimit.setText(String.valueOf(config.getFailuresLimit()));
     textPassRate.setText(String.valueOf(config.getPassRate()));
@@ -529,6 +536,7 @@ public class Configuration implements PlugIn {
     textNeighbourHeightThreshold.setText(String.valueOf(config.getNeighbourHeightThreshold()));
     textResidualsThreshold.setText(String.valueOf(config.getResidualsThreshold()));
     textDuplicateDistance.setText(String.valueOf(config.getDuplicateDistance()));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Duplicate_distance"));
 
     // Filtering
     textSmartFilter.setState(fitConfig.isSmartFilter());

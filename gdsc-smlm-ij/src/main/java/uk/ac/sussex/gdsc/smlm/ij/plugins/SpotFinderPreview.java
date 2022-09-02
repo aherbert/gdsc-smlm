@@ -59,6 +59,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -950,9 +951,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
           .getDataFilterMethod(1, settings.defaultDataFilterMethod).ordinal()]);
       textSmooth2
           .setText(String.valueOf(config.getDataFilterParameterValue(1, settings.defaultSmooth)));
-      // XXX - What about the Absolute/Relative flag?
+      gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Smoothing_2"));
     }
     textSearch.setText(String.valueOf(config.getSearch()));
     textBorder.setText(String.valueOf(config.getBorder()));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Smoothing"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Search_width"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Border_width"));
   }
 }

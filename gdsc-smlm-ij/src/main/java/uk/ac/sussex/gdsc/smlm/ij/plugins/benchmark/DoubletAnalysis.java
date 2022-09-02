@@ -64,6 +64,7 @@ import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -196,6 +197,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   FitEngineConfiguration config;
   private FitConfiguration filterFitConfig;
 
+  private ExtendedGenericDialog gd;
   private Choice textPsf;
   private Choice textDataFilterType;
   private Choice textDataFilter;
@@ -1766,6 +1768,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       ch.next().addItemListener(this);
       final Checkbox b = (Checkbox) gd.getCheckboxes().get(0);
       b.addItemListener(this);
+      this.gd = gd;
       textPsf = ch.next();
       textDataFilterType = ch.next();
       textDataFilter = ch.next();
@@ -3251,6 +3254,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         textSearch.setText(String.valueOf(config2.getSearch()));
         textBorder.setText(String.valueOf(config2.getBorder()));
         textFitting.setText(String.valueOf(config2.getFitting()));
+        notifyRelativeParameterListeners();
         textFitSolver.select(FitProtosHelper.getName(fitConfig2.getFitSolver()));
 
         // Copy settings not in the dialog for the fit solver
@@ -3293,6 +3297,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         textSearch.setText(String.valueOf(config.getSearch()));
         textBorder.setText(String.valueOf(config.getBorder()));
         textFitting.setText(String.valueOf(config.getFitting()));
+        notifyRelativeParameterListeners();
         textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
         textMatchDistance.setText(String.valueOf(settings.matchDistance));
         textLowerDistance.setText(String.valueOf(settings.lowerDistance));
@@ -3300,5 +3305,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         textLowerFactor.setText(String.valueOf(settings.lowerSignalFactor));
       }
     }
+  }
+
+  /**
+   * Notify all the relative parameter listeners. This will update the displayed absolute/relative
+   * text in the GUI.
+   */
+  private void notifyRelativeParameterListeners() {
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Smoothing"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Search_width"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Border_width"));
+    gd.notifyOptionCollectedListeners(new OptionCollectedEvent("Fitting_width"));
   }
 }
