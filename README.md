@@ -75,7 +75,7 @@ you will have to install these to your local Maven repository before building:
 
         cd ../gdsc-test
         mvn install
-        cd gdsc-ij-parent
+        cd ../gdsc-ij-parent
         mvn install
         cd ../gdsc-core
         mvn install
