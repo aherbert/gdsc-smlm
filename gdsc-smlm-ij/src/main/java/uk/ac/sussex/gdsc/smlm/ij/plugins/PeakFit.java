@@ -2009,7 +2009,7 @@ public class PeakFit implements PlugInFilter {
    * list. As a modification to this behaviour if the input PSF argument has parameters the current
    * parameters are removed. This thus replaces any current settings with any non-default settings
    * in the argument PSF.
-   * 
+   *
    * <p>This method is used specifically in plugins that update the current settings using a
    * template that may contain a partial PSF.
    *

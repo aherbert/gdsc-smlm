@@ -343,26 +343,27 @@ class PerPixelCameraModelTest {
   void testLocate() {
     final int w = 10;
     final int h = 20;
-    final float[] b = createData(w, h, 100);
-    final float[] g = createData(w, h, 3);
-    final float[] v = createData(w, h, 7);
+    final float[] b = createFixedData(w, h, 100);
+    final float[] g = createFixedData(w, h, 3);
+    final float[] v = createFixedData(w, h, 7);
     final PerPixelCameraModel model =
         PerPixelCameraModel.create(new Rectangle(0, 0, w, h), b, g, v);
 
     Assertions.assertTrue(model.locate(new NullCameraModel()).isEmpty());
 
     final PerPixelCameraModel model2 = PerPixelCameraModel.create(new Rectangle(0, 0, w - 1, h - 1),
-        createData(w - 1, h - 1, 123), createData(w - 1, h - 1, 4), createData(w - 1, h - 1, 8));
+        createFixedData(w - 1, h - 1, 123), createFixedData(w - 1, h - 1, 4),
+        createFixedData(w - 1, h - 1, 8));
     Assertions.assertTrue(model.locate(model2).isEmpty());
 
-    float[] b2 = createData(w + 1, h, b[0]);
-    float[] g2 = createData(w + 1, h, g[0]);
-    float[] v2 = createData(w + 1, h, v[0]);
+    float[] b2 = createFixedData(w + 1, h, b[0]);
+    float[] g2 = createFixedData(w + 1, h, g[0]);
+    float[] v2 = createFixedData(w + 1, h, v[0]);
     Assertions.assertTrue(model
         .locate(PerPixelCameraModel.create(new Rectangle(0, 0, w + 1, h), b2, g2, v2)).isEmpty());
-    b2 = createData(w, h + 1, b[0]);
-    g2 = createData(w, h + 1, g[0]);
-    v2 = createData(w, h + 1, v[0]);
+    b2 = createFixedData(w, h + 1, b[0]);
+    g2 = createFixedData(w, h + 1, g[0]);
+    v2 = createFixedData(w, h + 1, v[0]);
     Assertions.assertTrue(model
         .locate(PerPixelCameraModel.create(new Rectangle(0, 0, w, h + 1), b2, g2, v2)).isEmpty());
 
@@ -402,7 +403,7 @@ class PerPixelCameraModelTest {
     assertLocate(model, 2 + ox - 1, 3 + oy - 1, 7, 6, 2 - 1, 3 - 1, 2 + ox - 1, 3 + oy - 1);
   }
 
-  private static float[] createData(int w, int h, float value) {
+  private static float[] createFixedData(int w, int h, float value) {
     final float[] d = new float[w * h];
     Arrays.fill(d, value);
     return d;
