@@ -1093,14 +1093,14 @@ public class JumpDistanceAnalysis {
   }
 
   /**
-   * Sort the arrays by the size of the diffusion coefficient.
+   * Sort the arrays by the size of the diffusion coefficient in descending order.
    *
    * @param diffusionCoefficients The diffusion coefficient array
    * @param fractions The fraction of the population array
    */
   public static void sort(double[] diffusionCoefficients, double[] fractions) {
     // Sort by coefficient size
-    SortUtils.sortData(fractions, diffusionCoefficients, true, false);
+    SortUtils.sortData(fractions, diffusionCoefficients, true, true);
   }
 
   private void saveFitCurve(double[][] fit, double[][] jdHistogram) {

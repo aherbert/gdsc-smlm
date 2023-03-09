@@ -217,7 +217,7 @@ class JumpDistanceAnalysisTest {
   @SeededTest
   void canFitDual0_4Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.4); }
   @SeededTest
-  void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5); }
+  void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5, true); }
   @SeededTest
   void canFitDual0_5Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.5); }
   @SeededTest
@@ -239,7 +239,11 @@ class JumpDistanceAnalysisTest {
   // @formatter:on
 
   private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
+    fitDualPopulation(seed, mle, fraction, false);
+  }
+
+  private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction, boolean force) {
+    Assumptions.assumeTrue(force || TestSettings.allow(TestComplexity.MAXIMUM));
     final UniformRandomProvider rg = RngFactory.create(seed.get());
 
     final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
@@ -669,7 +673,7 @@ class JumpDistanceAnalysisTest {
    * Create random jump distances.
    *
    * @param n Number of jump distances
-   * @param dc Diffusion rate (should be ascending order of magnitude)
+   * @param dc Diffusion rate
    * @param fraction Fraction of population (will be updated with the actual fractions, normalised
    *        to sum to 1)
    * @return The jump distances
