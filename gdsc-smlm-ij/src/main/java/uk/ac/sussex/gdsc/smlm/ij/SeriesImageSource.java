@@ -1613,7 +1613,7 @@ public class SeriesImageSource extends ImageSource {
   /**
    * {@inheritDoc}
    *
-   * @throws DataException If there was an error duing the sequential read
+   * @throws DataException If there was an error during the sequential read
    */
   @Override
   protected Object nextRawFrame() {
