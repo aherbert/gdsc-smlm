@@ -650,7 +650,7 @@ The analysis requires the following parameters:
 Analysis
 ~~~~~~~~
 
-When the plugin runs it will analyse each directory of images in turn. The mean and variance of each pixel is recorded to a tif image named ``perPixel<directory>.tif``. These can be reloaded by the plugin for fast analysis of precomputed data using the ``Re-use processed data`` option. For the zero exposure image the mean and standard deviation statistics of the computed offset and and variance data is shown in the ``ImageJ`` log::
+When the plugin runs it will analyse each directory of images in turn. The mean and variance of each pixel is recorded to a tif image named ``perPixel<directory>.tif``. These can be reloaded by the plugin for fast analysis of precomputed data using the ``Re-use processed data`` option. For the zero exposure image the mean and standard deviation statistics of the computed offset and variance data is shown in the ``ImageJ`` log::
 
     photon000 Offset = 99.97 +/- 10.04. Variance = 57.04 +/- 59.31
 
