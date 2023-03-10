@@ -84,7 +84,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    */
   public BoundedNonLinearConjugateGradientOptimizer(final Formula updateFormula,
       ConvergenceChecker<PointValuePair> checker) {
-    this(updateFormula, checker, new BrentSolver(), new IdentityPreconditioner());
+    this(updateFormula, checker, new BrentSolver(), IdentityPreconditioner.INSTANCE);
   }
 
   /**
@@ -142,7 +142,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    */
   public BoundedNonLinearConjugateGradientOptimizer(final Formula updateFormula,
       ConvergenceChecker<PointValuePair> checker, final UnivariateSolver lineSearchSolver) {
-    this(updateFormula, checker, lineSearchSolver, new IdentityPreconditioner());
+    this(updateFormula, checker, lineSearchSolver, IdentityPreconditioner.INSTANCE);
   }
 
   /**
@@ -455,6 +455,9 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
   /** Default identity preconditioner. */
   public static class IdentityPreconditioner implements Preconditioner {
+    /** An instance. */
+    static final IdentityPreconditioner INSTANCE = new IdentityPreconditioner();
+
     @Override
     public double[] precondition(double[] variables, double[] direction) {
       return direction.clone();
