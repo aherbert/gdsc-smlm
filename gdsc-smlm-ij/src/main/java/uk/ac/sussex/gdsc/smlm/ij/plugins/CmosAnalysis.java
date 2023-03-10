@@ -69,10 +69,12 @@ import uk.ac.sussex.gdsc.core.data.SiPrefix;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.io.CustomTiffEncoder;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.ArrayMoment;
 import uk.ac.sussex.gdsc.core.math.IntegerArrayMoment;
 import uk.ac.sussex.gdsc.core.math.RollingArrayMoment;
@@ -126,6 +128,7 @@ public class CmosAnalysis implements PlugIn {
     String modelName;
     boolean rollingAlgorithm;
     boolean reuseProcessedData;
+    boolean logFileProgress;
     double offset;
     double variance;
     double gain;
@@ -177,6 +180,7 @@ public class CmosAnalysis implements PlugIn {
       modelName = source.modelName;
       rollingAlgorithm = source.rollingAlgorithm;
       reuseProcessedData = source.reuseProcessedData;
+      logFileProgress = source.logFileProgress;
       offset = source.offset;
       variance = source.variance;
       gain = source.gain;
@@ -734,6 +738,7 @@ public class CmosAnalysis implements PlugIn {
         + "Otherwise the camera is assumed to produce a maximum of 16-bit unsigned data.", 80));
     gd.addCheckbox("Rolling_algorithm", settings.rollingAlgorithm);
     gd.addCheckbox("Re-use_processed_data", settings.reuseProcessedData);
+    gd.addCheckbox("Log_file_progress", settings.logFileProgress);
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -743,6 +748,7 @@ public class CmosAnalysis implements PlugIn {
     setThreads((int) gd.getNextNumber());
     settings.rollingAlgorithm = gd.getNextBoolean();
     settings.reuseProcessedData = gd.getNextBoolean();
+    settings.logFileProgress = gd.getNextBoolean();
 
     return true;
   }
@@ -771,6 +777,8 @@ public class CmosAnalysis implements PlugIn {
     boolean error = false;
     int width = 0;
     int height = 0;
+    final TrackProgress trackProgress =
+        settings.logFileProgress ? SimpleImageJTrackProgress.getInstance() : null;
 
     for (int n = 0; n < nSubDirs; n++) {
       ImageJUtils.showSlowProgress(n, nSubDirs);
@@ -809,6 +817,7 @@ public class CmosAnalysis implements PlugIn {
       if (!found) {
         // Open the series
         final SeriesImageSource source = new SeriesImageSource(sd.name, sd.path.getPath());
+        source.setTrackProgress(trackProgress);
         if (!source.open()) {
           error = true;
           IJ.error(TITLE, "Failed to open image series: " + sd.path.getPath());

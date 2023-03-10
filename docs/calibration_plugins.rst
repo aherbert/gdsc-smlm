@@ -646,6 +646,8 @@ The analysis requires the following parameters:
 
        If the processed data exists then the plugin will use it rather than perform the analysis again. For example this can be used to repeat analysis of a camera after adding more directories with additional exposure data; or it can be used to show the output plots of a previously analysed camera.
 
+   * - Log file progress
+     - If **true** the plugin will write details of the image files to the ``ImageJ`` log.
 
 Analysis
 ~~~~~~~~
