@@ -1691,7 +1691,7 @@ public class SeriesImageSource extends ImageSource {
   private TiffImage openImage(int id, String path) {
     TiffImage tiffImage = null;
 
-    // We only need the meta data for the first image. We then assume check
+    // We only need the meta data for the first image. We then assume
     // all other images in the series match the pixel type and width of the first.
     final boolean pixelInfoOnly = id != 0;
 
@@ -1723,8 +1723,10 @@ public class SeriesImageSource extends ImageSource {
           tiffImage = new TiffImage(info, (ss instanceof ByteArraySeekableStream) ? ss : null);
         }
       }
-    } catch (final IOException ignored) {
-      // Ignore
+    } catch (final IOException ex) {
+      if (trackProgress.isLog()) {
+        trackProgress.log("Failed to open '%s': %s", path, ExceptionUtils.getStackTrace(ex));
+      }
     } finally {
       closeInputStream(ss);
     }
