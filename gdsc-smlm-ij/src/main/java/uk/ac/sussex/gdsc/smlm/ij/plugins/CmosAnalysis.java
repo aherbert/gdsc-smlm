@@ -1010,6 +1010,9 @@ public class CmosAnalysis implements PlugIn {
     measuredStack.addSlice("Variance", variance);
     measuredStack.addSlice("Gain", gain);
 
+    ImageJUtils
+        .log("Analysis time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
+
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Save the sCMOS camera model?");
     if (settings.modelDirectory == null) {
@@ -1025,9 +1028,6 @@ public class CmosAnalysis implements PlugIn {
       saveCameraModel(width, height, bias, gain, variance);
     }
     IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
-
-    ImageJUtils
-        .log("Analysis time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
   }
 
   private static void showHistogram(String name, double[] values, int bins, Statistics stats,
