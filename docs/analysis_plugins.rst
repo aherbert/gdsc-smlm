@@ -1616,6 +1616,14 @@ The residence times for the length of time spent in each component can be displa
 The histograms are overlaid with the fitted exponential function. Bootstrapping is used on the data to produce a 95% confidence interval for the mean residence time.
 
 
+.. index:: ! Residence Time Analysis
+
+Residence Time Analysis
+-----------------------
+
+The ``Residence Time Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All contiguous localisations from each track are extracted into a dataset of trackss. The tracks are filtered to non-diffusing particles. The residence times of the bound particles are analysed to identify the dissociation rate.
+
+
 .. index:: ! OPTICS
 
 OPTICS
