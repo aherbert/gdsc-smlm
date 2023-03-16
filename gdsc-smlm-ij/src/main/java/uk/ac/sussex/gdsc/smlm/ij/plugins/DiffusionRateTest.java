@@ -68,7 +68,6 @@ import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
-import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CreateDataSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.DiffusionType;
@@ -623,7 +622,7 @@ public class DiffusionRateTest implements PlugIn {
       values[i] /= factor;
     }
     String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
-    final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
+    final double[][] jdHistogram = MathUtils.cumulativeHistogram(values, true);
     final DiffusionType diffusionType = getDiffusionType(settings.getDiffusionType());
     if (diffusionType == DiffusionType.GRID_WALK) {
       // In this case with a large simulation size the jumps are all
@@ -725,7 +724,7 @@ public class DiffusionRateTest implements PlugIn {
     // --------------------
     final double[] values = jumpDistances.values();
     String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
-    final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
+    final double[][] jdHistogram = MathUtils.cumulativeHistogram(values, true);
     Plot jdPlot = new Plot(title2, "Distance (um^^2^^)", "Cumulative Probability");
     jdPlot.addPoints(jdHistogram[0], jdHistogram[1], Plot.LINE);
     ImageJUtils.display(title2, jdPlot, windowOrganiser);
