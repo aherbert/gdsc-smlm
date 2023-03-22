@@ -16,7 +16,7 @@ Minor release of GDSC SMLM.
 
 
 Version 1.0.2
------------
+-------------
 
 Patch release of GDSC SMLM.
 
