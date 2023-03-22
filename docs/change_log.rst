@@ -10,9 +10,11 @@ Version 1.1
 
 Minor release of GDSC SMLM.
 
-* Fix the Trace Diffusion plugin to use descending diffusion coefficients for multi-population
-  models. This corrects selection of the model using the minimum relative difference between
-  successive coefficients.
+* Fix the :numref:`{name} <analysis_plugins:Trace Diffusion>` plugin to use descending diffusion
+  coefficients for multi-population models. This corrects selection of the model using the minimum
+  relative difference between successive coefficients.
+* Added the :numref:`{name} <analysis_plugins:Residence Time Analysis>` plugin to fit residence
+  times of stationary (bound) molecules.
 
 
 Version 1.0.2

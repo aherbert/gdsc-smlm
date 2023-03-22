@@ -259,6 +259,9 @@ Analysis Plugins
    * - :ref:`analysis_plugins:Track Population Analysis`
      - Analyses the local diffusion of tracks within a window and classifies tracks into sub-populations based on diffusion metrics.
 
+   * - :ref:`analysis_plugins:Residence Time Analysis`
+     - Analyses the residence time of stationary (bound) molecules.
+
    * - :ref:`analysis_plugins:OPTICS`
      - Runs the OPTICS algorithm to perform interactive density-based clustering of localisation data.
 

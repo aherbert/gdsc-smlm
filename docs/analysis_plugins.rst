@@ -1621,7 +1621,156 @@ The histograms are overlaid with the fitted exponential function. Bootstrapping 
 Residence Time Analysis
 -----------------------
 
-The ``Residence Time Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All contiguous localisations from each track are extracted into a dataset of trackss. The tracks are filtered to non-diffusing particles. The residence times of the bound particles are analysed to identify the dissociation rate.
+The ``Residence Time Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All localisations from each track are extracted into a dataset of tracks. The tracks are filtered to non-diffusing particles. The residence times of the bound particles are analysed to identify the dissociation rate.
+
+Note that it is possible to image bound molecules at a low frame rate such that any freely diffusing molecules are blurred by their motion and only immobile molecules will be observed. However a low frame rate reduces the resolution of the residence time histogram. Instead the molecules can be imaged at a higher frame rate which will include freely diffusing molecules. These can be filtered using their larger jump distances. The remaining bound molecules residence times will have a higher resolution which enables better fitting of the dissociation rate. Very high frame rates may not be possible due to the increased illumination required to image the localisations and the effect of photo-bleaching.
+
+The residence time is fit using the survival function for an exponential model (this is the complementary cumulative distribution function) with weights for the population fractions:
+
+.. math::
+
+    P(T >= t) = \sum_i w_i \exp(-k_i t)
+
+where :math:`k_i` is the dissociation rate for the population and the sum of the weights is 1. Fitting supports a 1 or 2 population model. The 1 population model assumes all bound molecules are in the same state. The 2 population model assumes that bound molecules have two states, and each state has a different dissociation rate. For example specific binding and non-specific binding may have a slower dissociation rate for the specific binding as the molecule is used to perform a function; if non-specific binding occurs then the molecule will dissociate faster as it has no function to perform.
+
+The residence time *t* is not continuous as the data contain residence times in frames. Maximum likelihood fitting is performed by assigning observations a probability using the difference of the survival function at the start and end of the frame time, e.g. the duration of frame :math:`f` uses :math:`P(f) = P(T >= f \Delta t) - P(T >= (f+1) \Delta t)` where :math:`\Delta t` is the frame exposure time.
+
+The observed dissociation rate :math:`k_{obs}` is a combination of the binding dissociation rate :math:`k_b` and the apparent dissociation rate :math:`k_a` due to technical imaging limitations such as photo-bleaching and diffusion of the bound complex. The observed rate is a combination of these two exponential processes:
+
+.. math::
+
+    k_{obs} = k_b + k_a
+
+The plugin allows the apparent dissociation rate to be entered and the mean residence time is computed as:
+
+.. math::
+
+    \tau = \frac{1}{k_{obs} - k_a}
+
+The apparent dissociation rate can be obtained from control experiments using molecules known to be non-transiently bound, for example using histone proteins bound to chromosomal DNA.
+
+When the plugin runs a dialog is presented that allows multiple datasets to be selected. All datasets must have the same calibration for exposure time and pixel size. A second dialog is then displayed to configure the analysis options. The following parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Min size
+     - The minimum number of localisations in a track. Use this to exclude single localisations or short tracks. The residence time histogram is computed using the track duration beyond this minimum threshold.
+
+   * - Mean distance
+     - The maximum allowed mean distance between neighbouring localisations of a track. This should be set using a value approximately above the localisation precision (assuming non-diffusing molecules). If the molecules are slowly diffusing in their bound phase then this threshold should be raised.
+
+   * - Max distance
+     - The maximum allowed distance between neighbouring localisations of a track. Use this to filter tracks where the molecule jumps location between successive time points.
+
+   * - Apparent residence time
+     - The apparent residence time (due to imaging limitations). Used to correct the observed residence time.
+
+   * - Bootstrap repeats
+     - The number of bootstrap repeats used to create a 95% confidence interval.
+
+   * - Bootstrap seed
+     - Random seed for the bootstrap repeats (hexidecimal input).
+
+The analysis extracts the tracks and filters them to stationary molecules. A histogram of residence times is created and fit using the exponential model (see :numref:`Figure %s <fig_residence_time_analysis_histogram>`). Fit progress is recorded in the ``ImageJ`` log window. Bootstrapping is optionally used on the data to produce a 95% confidence interval for the fit parameters. 
+
+.. _fig_residence_time_analysis_histogram:
+.. figure:: images/residence_time_analysis_histogram.png
+    :align: center
+    :figwidth: 80%
+
+    Residence time histogram.
+
+    The histogram was simulated using n = 5000; k0 = 0.2/sec; k1 = 5.0/sec; f0 = 0.15; exposure time = 50ms. The histogram is overlaid with the 1 and 2 population model.
+
+A summary table is shown containing the model parameters. The following columns are reported:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Field
+     - Description
+
+   * - Title
+     - The title of the input data.
+
+   * - Samples
+     - The number of samples in the residence time histogram. Corresponds to the number of stationary molecules.
+
+   * - Time
+     - The frame exposure time.
+
+   * - n
+     - The number of populations in the model.
+
+   * - k
+     - The dissociation rate for each population in the model.
+
+   * - CI
+     - The 95% confidence interval for each dissociation rate.
+
+   * - fraction
+     - The population weight.
+
+   * - CI
+     - The 95% confidence interval for each fraction.
+
+   * - ka
+     - The user-provided apparent residence time (used to correct the observed residence time).
+
+   * - Residence time
+     - The corrected mean residence time for each population in the model.
+
+   * - CI
+     - The 95% confidence interval for each residence time.
+
+   * - LL
+     - The log-likelihood of the model (higher is better).
+
+   * - AIC
+     - The Akaike information criterion (AIC) for the model. This adjusts the log-likelihood score using the number of fitted parameters (lower is better).
+
+   * - BIC
+     - The Bayesian information criterion (BIC) for the model. This adjusts the log-likelihood score using the number of fitted parameters and sample size (lower is better). The BIC generally penalises free parameters more strongly than the AIC.
+
+Simulation
+~~~~~~~~~~
+
+If the ``Shift`` key is held when executing the plugin then a simulation of residence times is performed. This will not require input localisation data and directly creates a residence time histogram.
+
+The following parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Seed
+     - Random seed for the simulation (hexidecimal input).
+
+   * - Samples
+     - The number of samples.
+
+   * - k0
+     - The dissociation rate for the first population.
+
+   * - k1
+     - The dissociation rate for the second population.
+
+   * - f0
+     - The fraction for the first population. Must be in the range (0, 1]. Set to 1 to have a single population.
+
+   * - Exposure time
+     - The frame exposure time.
+
+The simulation allows experimenting with the exposure time and number of samples required to obtain satisfactory results for the populations of bound molecules.
 
 
 .. index:: ! OPTICS
@@ -2040,9 +2189,7 @@ The following options are available:
 Drawing Cluster Centroids
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that the
-``Draw Clusters``
-plugin will draw all the members of a cluster on the image. If you wish to draw only the centroids then you should either:
+Note that the ``Draw Clusters`` plugin will draw all the members of a cluster on the image. If you wish to draw only the centroids then you should either:
 
 *   Load the centroids from a pre-processed file as a single localisation with a unique ID
 *   Run a clustering algorithm (``Trace Molecules`` or ``Cluster Molecules``) and then select an appropriate centroids dataset that is stored in memory
@@ -2059,9 +2206,7 @@ Density Image
 Analyses the local density around each localisation and outputs an image using the
 density score. Can optionally filter localisations based on the density score into a new results set.
 
-The
-Density Image
-plugin counts the number of localisations in the neighbourhood of each localisation. The score is then used to create an image of the density of localisations. The following options are available:
+The ``Density Image`` plugin counts the number of localisations in the neighbourhood of each localisation. The score is then used to create an image of the density of localisations. The following options are available:
 
 .. list-table::
    :widths: 20 80
