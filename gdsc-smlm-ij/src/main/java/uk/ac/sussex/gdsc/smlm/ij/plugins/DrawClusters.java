@@ -41,9 +41,12 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.IntStream;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetLineRoi;
@@ -405,6 +408,10 @@ public class DrawClusters implements PlugIn {
       for (int k = 0; k < trace.size(); k++) {
         if (!set.add(trace.get(k).getFrame())) {
           // Already seen
+          ImageJPluginLoggerHelper.getLogger(DrawClusters.class).warning(() -> String.format(
+              "Dataset is not traced. ID %d has multiple localisations in the same frame: %s",
+              trace.getId(), Arrays.toString(
+                  IntStream.range(0, trace.size()).map(x -> trace.get(x).getFrame()).toArray())));
           return false;
         }
       }
