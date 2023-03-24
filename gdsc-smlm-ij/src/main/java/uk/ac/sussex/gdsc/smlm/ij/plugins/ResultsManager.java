@@ -71,6 +71,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
@@ -112,23 +113,31 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
  */
 public class ResultsManager implements PlugIn {
   /** Use this to add extra options to the dialog. */
-  public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
+  public static final int FLAG_EXTRA_OPTIONS = 0x01;
   /** Use this to add the results directory to the file results dialog. */
-  public static final int FLAG_RESULTS_DIRECTORY = 0x00000002;
+  public static final int FLAG_RESULTS_DIRECTORY = 0x02;
   /** Use this to add the results file to the file results dialog. */
-  public static final int FLAG_RESULTS_FILE = 0x00000004;
+  public static final int FLAG_RESULTS_FILE = 0x04;
   /** Use this to avoid adding the section header to the dialog. */
-  public static final int FLAG_NO_SECTION_HEADER = 0x00000008;
+  public static final int FLAG_NO_SECTION_HEADER = 0x08;
   /** Use this to add a choice of table format to the dialog. */
-  public static final int FLAG_TABLE_FORMAT = 0x00000010;
+  public static final int FLAG_TABLE_FORMAT = 0x10;
   /** Use this to remove the None option from the results image options. */
-  public static final int FLAG_IMAGE_REMOVE_NONE = 0x00000020;
+  public static final int FLAG_IMAGE_REMOVE_NONE = 0x20;
   /** Use this to avoid adding the LUT option to the results image options. */
-  public static final int FLAG_IMAGE_NO_LUT = 0x00000040;
+  public static final int FLAG_IMAGE_NO_LUT = 0x40;
+  /** Use this to add the distance calibration to the results name. */
+  static final int FLAG_NAME_DISTANCE_CALIBRATION = 0x80;
+  /** Use this to add the time calibration to the results name. */
+  static final int FLAG_NAME_TIME_CALIBRATION = 0x100;
 
+  /** The Constant TITLE. */
   private static final String TITLE = "Peak Results Manager";
+
+  /** The Constant logger. */
   private static final Logger logger = ImageJPluginLoggerHelper.getLogger(ResultsManager.class);
 
+  /** The Constant LAST_SELECTED. */
   private static final AtomicReference<List<String>> LAST_SELECTED = new AtomicReference<>();
 
   /** An empty array of load options. */
@@ -146,13 +155,19 @@ public class ResultsManager implements PlugIn {
   /** The input none. */
   static final String INPUT_NONE = "[None]";
 
+  /** The results settings. */
   private ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
+
+  /** The extra options. */
   private boolean extraOptions;
 
   /** Flag set to true when the input dialog selected to load from file input. */
   private boolean fileInput;
 
+  /** The om directory. */
   private String omDirectory;
+
+  /** The om files. */
   private File[] omFiles;
 
   /** The plugin settings. */
@@ -165,12 +180,24 @@ public class ResultsManager implements PlugIn {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
+    /** The input option. */
     String inputOption;
+
+    /** The input filename. */
     String inputFilename;
+
+    /** The input nm per pixel. */
     double inputNmPerPixel;
+
+    /** The input gain. */
     double inputGain;
+
+    /** The input exposure time. */
     double inputExposureTime;
 
+    /**
+     * Instantiates a new settings.
+     */
     Settings() {
       // Set defaults
       inputOption = "";
@@ -180,6 +207,11 @@ public class ResultsManager implements PlugIn {
       inputExposureTime = Prefs.get(PrefsKey.inputExposureTime, 0);
     }
 
+    /**
+     * Instantiates a new settings.
+     *
+     * @param source the source
+     */
     Settings(Settings source) {
       inputOption = source.inputOption;
       inputFilename = source.inputFilename;
@@ -188,6 +220,11 @@ public class ResultsManager implements PlugIn {
       inputExposureTime = source.inputExposureTime;
     }
 
+    /**
+     * Copy.
+     *
+     * @return the settings
+     */
     Settings copy() {
       return new Settings(this);
     }
@@ -264,8 +301,11 @@ public class ResultsManager implements PlugIn {
    * Class that allows the current results held in memory to be listed.
    */
   static class MemoryResultsList extends ArrayList<String> {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 20190719L;
 
+    /** The name map. */
     private final Map<String, String> nameMap = new HashMap<>();
 
     /**
@@ -279,7 +319,8 @@ public class ResultsManager implements PlugIn {
         if (filter.test(results)) {
           final String name = results.getName();
           add(name);
-          nameMap.put(name, ResultsManager.getName(results));
+          nameMap.put(name, ResultsManager.getName(results,
+              FLAG_NAME_DISTANCE_CALIBRATION | FLAG_NAME_TIME_CALIBRATION));
         }
       }
     }
@@ -482,6 +523,11 @@ public class ResultsManager implements PlugIn {
     return md;
   }
 
+  /**
+   * Run clear memory.
+   *
+   * @param arg the arg
+   */
   private static void runClearMemory(String arg) {
     if (MemoryPeakResults.isMemoryEmpty()) {
       IJ.error(TITLE, "There are no fitting results in memory");
@@ -553,18 +599,42 @@ public class ResultsManager implements PlugIn {
     ImageJUtils.log("Cleared %s (%s, %s)", count, sets, memory);
   }
 
+  /**
+   * Can show deviations.
+   *
+   * @param results the results
+   * @return true, if successful
+   */
   private static boolean canShowDeviations(MemoryPeakResults results) {
     return results.hasDeviations();
   }
 
+  /**
+   * Can show end frame.
+   *
+   * @param results the results
+   * @return true, if successful
+   */
   private static boolean canShowEndFrame(MemoryPeakResults results) {
     return results.hasEndFrame();
   }
 
+  /**
+   * Can show id.
+   *
+   * @param results the results
+   * @return true, if successful
+   */
   private static boolean canShowId(MemoryPeakResults results) {
     return results.hasId();
   }
 
+  /**
+   * Can show category.
+   *
+   * @param results the results
+   * @return true, if successful
+   */
   private static boolean canShowCategory(MemoryPeakResults results) {
     return results.hasCategory();
   }
@@ -591,6 +661,18 @@ public class ResultsManager implements PlugIn {
     return null;
   }
 
+  /**
+   * Adds the image J table results.
+   *
+   * @param resultsList the results list
+   * @param resultsSettings the results settings
+   * @param showDeviations the show deviations
+   * @param showEndFrame the show end frame
+   * @param showZ the show Z
+   * @param showId the show id
+   * @param showCategory the show category
+   * @return the image J table peak results
+   */
   private static ImageJTablePeakResults addImageJTableResults(PeakResultsList resultsList,
       ResultsTableSettings resultsSettings, boolean showDeviations, boolean showEndFrame,
       boolean showZ, boolean showId, boolean showCategory) {
@@ -662,6 +744,15 @@ public class ResultsManager implements PlugIn {
     }
   }
 
+  /**
+   * Adds the file results.
+   *
+   * @param resultsList the results list
+   * @param showDeviations the show deviations
+   * @param showEndFrame the show end frame
+   * @param showId the show id
+   * @param showCategory the show category
+   */
   private void addFileResults(PeakResultsList resultsList, boolean showDeviations,
       boolean showEndFrame, boolean showId, boolean showCategory) {
     final ResultsFileSettings resultsFileSettings = this.resultsSettings.getResultsFileSettings();
@@ -746,6 +837,11 @@ public class ResultsManager implements PlugIn {
     return null;
   }
 
+  /**
+   * Show dialog.
+   *
+   * @return true, if successful
+   */
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(HelpUrls.getUrl("results-manager"));
@@ -956,6 +1052,12 @@ public class ResultsManager implements PlugIn {
     }
   }
 
+  /**
+   * Adds the image results options.
+   *
+   * @param gd the gd
+   * @param resultsSettings the results settings
+   */
   private void addImageResultsOptions(final ExtendedGenericDialog gd,
       final Builder resultsSettings) {
     addImageResultsOptions(gd, resultsSettings, (extraOptions) ? FLAG_EXTRA_OPTIONS : 0);
@@ -1405,7 +1507,34 @@ public class ResultsManager implements PlugIn {
    * @return The name
    */
   static String getName(MemoryPeakResults memoryResults) {
-    return memoryResults.getName() + " [" + memoryResults.size() + "]";
+    return new StringBuilder(256).append(memoryResults.getName()).append(" [")
+        .append(memoryResults.size()).append(']').toString();
+  }
+
+  /**
+   * Get the name of the results for use in dialogs.
+   *
+   * @param memoryResults the memory results
+   * @param flags the flags
+   * @return The name
+   */
+  static String getName(MemoryPeakResults memoryResults, int flags) {
+    StringBuilder sb = new StringBuilder(256);
+    sb.append(memoryResults.getName()).append(" [").append(memoryResults.size());
+    if (flags != 0) {
+      // Add calibration if present
+      CalibrationReader cal = memoryResults.getCalibrationReader();
+      if (cal != null) {
+        if (BitFlagUtils.anySet(flags, FLAG_NAME_DISTANCE_CALIBRATION) && cal.hasNmPerPixel()) {
+          sb.append(", ").append(MathUtils.rounded(cal.getNmPerPixel())).append("nm/px");
+        }
+        if (BitFlagUtils.anySet(flags, FLAG_NAME_TIME_CALIBRATION) && cal.hasExposureTime()) {
+          sb.append(", ").append(MathUtils.rounded(cal.getExposureTime())).append("ms/frame");
+        }
+      }
+    }
+    sb.append(']');
+    return sb.toString();
   }
 
   /**
@@ -1591,6 +1720,12 @@ public class ResultsManager implements PlugIn {
     return "";
   }
 
+  /**
+   * Collect options.
+   *
+   * @param reader the reader
+   * @param options the options
+   */
   private static void collectOptions(PeakResultsReader reader, ResultOption[] options) {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage("Options required for file format: " + reader.getFormat().getName());
@@ -1657,6 +1792,12 @@ public class ResultsManager implements PlugIn {
     }
   }
 
+  /**
+   * Gets the option name.
+   *
+   * @param option the option
+   * @return the option name
+   */
   private static String getOptionName(ResultOption option) {
     return option.name.replace(' ', '_');
   }
@@ -1849,6 +1990,11 @@ public class ResultsManager implements PlugIn {
     }
   }
 
+  /**
+   * Load.
+   *
+   * @param path the path
+   */
   private static void load(String path) {
     // Record this as a single load of the results manager.
     // This should support any dialogs that are presented in loadInputResults(...)
@@ -1953,6 +2099,13 @@ public class ResultsManager implements PlugIn {
     IJ.showStatus("Saved " + TextUtils.pleural(count, "dataset"));
   }
 
+  /**
+   * Save.
+   *
+   * @param resultsSettings the results settings
+   * @param source the source
+   * @return true, if successful
+   */
   private static boolean save(ResultsFileSettings resultsSettings, MemoryPeakResults source) {
     // Assume the directory exists
     String resultsFilename;
