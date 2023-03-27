@@ -541,7 +541,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Wrap the PreprocessedPeakResult as a Coordinate.
    */
-  private static class MultiPathPoint extends BasePoint {
+  public static class MultiPathPoint extends BasePoint {
     static final int SPOT = -1;
     static final int SINGLE = 0;
     static final int MULTI = 1;

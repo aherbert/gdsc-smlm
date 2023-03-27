@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Filter results using a single component of the multi filter.
  */
-interface MultiFilterComponent {
+public interface MultiFilterComponent {
   /**
    * Validate the peak.
    *

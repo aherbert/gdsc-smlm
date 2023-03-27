@@ -1,0 +1,56 @@
+{
+  "2.1" : [ {
+    "extension" : "revapi.differences",
+    "id" : "intentional-api-changes",
+    "configuration" : {
+      "differences" : [ {
+        "ignore" : true,
+        "code" : "java.method.addedToInterface",
+        "new" : "method com.google.common.hash.PrimitiveSink com.google.common.hash.PrimitiveSink::putBytes(java.nio.ByteBuffer)",
+        "justification" : "This new method from a dependency is not used by the GDSC code."
+      }, {
+        "ignore" : true,
+        "code" : "java.field.constantValueChanged",
+        "old" : "field ij.ImageJ.BUILD",
+        "new" : "field ij.ImageJ.BUILD",
+        "justification" : "The ImageJ build value has changed due to an ImageJ version update."
+      }, {
+        "ignore" : true,
+        "code" : "java.field.constantValueChanged",
+        "old" : "field ij.ImageJ.VERSION",
+        "new" : "field ij.ImageJ.VERSION",
+        "justification" : "The ImageJ version value has changed due to an ImageJ version update."
+      }, {
+        "ignore" : true,
+        "code" : "java.class.defaultSerializationChanged",
+        "old" : "class ij.gui.Roi",
+        "new" : "class ij.gui.Roi",
+        "justification" : "Serialization of an ImageJ ROI is not used by the GDSC code to persist state. ROIs can be saved/restored using ImageJ RoiEncoder and RoiDecoder classes via a byte[]."
+      }, {
+        "ignore": true,
+        "code": "java.method.visibilityIncreased",
+        "old": "method void uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations.Localisation::<init>()",
+        "new": "method void uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations.Localisation::<init>()",
+        "oldVisibility": "private",
+        "newVisibility": "public",
+        "justification": "Class has been made public as it is specified by the return type of LoadLocalisations."
+      }, {
+        "ignore": true,
+        "code": "java.method.finalMethodAddedToNonFinalClass",
+        "new": "method void com.google.protobuf.GeneratedMessageV3.Builder<BuilderType extends com.google.protobuf.GeneratedMessageV3.Builder<BuilderType>>::mergeUnknownLengthDelimitedField(int, com.google.protobuf.ByteString)",
+        "justification": "Google protobufs are generated classes and should not be manually extended."
+      }, {
+        "ignore": true,
+        "code": "java.method.finalMethodAddedToNonFinalClass",
+        "new": "method void com.google.protobuf.GeneratedMessageV3.Builder<BuilderType extends com.google.protobuf.GeneratedMessageV3.Builder<BuilderType>>::mergeUnknownVarintField(int, int)",
+        "justification": "Google protobufs are generated classes and should not be manually extended."
+      }, {
+        "ignore": true,
+        "code": "java.class.nonPublicPartOfAPI",
+        "old": "interface com.google.protobuf.MutabilityOracle",
+        "new": "interface com.google.protobuf.MutabilityOracle",
+        "justification": "This is a Google protobufs class not used by the GDSC code."
+      } ]
+    }
+  } ]
+}

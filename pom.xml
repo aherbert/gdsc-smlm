@@ -344,6 +344,37 @@ Software for single molecule localisation microscopy (SMLM)
           <excludeFromFailureFile>${gdsc.parent.dir}/src/conf/pmd/exclude.properties</excludeFromFailureFile>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.revapi</groupId>
+        <artifactId>revapi-maven-plugin</artifactId>
+        <version>0.15.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.revapi</groupId>
+            <artifactId>revapi-java</artifactId>
+            <version>0.28.1</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <!-- For reporting do not ignore the "intentional-api-changes" so they are included -->
+          <analysisConfigurationFiles>
+            <configurationFile>
+              <path>${gdsc.parent.dir}/src/conf/revapi/api-changes.json</path>
+              <roots>
+                <!-- Path(s) to configuration in the JSON config file -->
+                <root>2.1</root>
+              </roots>
+            </configurationFile>
+          </analysisConfigurationFiles>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <resources>
       <resource>
@@ -366,7 +397,24 @@ Software for single molecule localisation microscopy (SMLM)
           <minimumPriority>3</minimumPriority>
           <excludeFromFailureFile>${gdsc.parent.dir}/src/conf/pmd/exclude.properties</excludeFromFailureFile>
         </configuration>
-      </plugin>  
+      </plugin>
+      <plugin>
+        <groupId>org.revapi</groupId>
+        <artifactId>revapi-maven-plugin</artifactId>
+        <version>0.15.0</version>
+        <configuration>
+          <!-- For reporting do not ignore the "intentional-api-changes" so they are included -->
+          <analysisConfigurationFiles>
+            <configurationFile>
+              <path>${gdsc.parent.dir}/src/conf/revapi/api-changes.json</path>
+              <roots>
+                <!-- Path(s) to configuration in the JSON config file -->
+                <root>2.1</root>
+              </roots>
+            </configurationFile>
+          </analysisConfigurationFiles>
+        </configuration>
+      </plugin>
     </plugins>
   </reporting>
 

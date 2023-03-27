@@ -117,7 +117,7 @@ public class LoadLocalisations implements PlugIn {
   /**
    * The localisation.
    */
-  private static class Localisation {
+  public static class Localisation {
     /** The time. */
     int time;
     /** The id. */
@@ -138,6 +138,13 @@ public class LoadLocalisations implements PlugIn {
     float sy = -1;
     /** The precision. */
     float precision = -1;
+
+    /**
+     * Create an instance.
+     */
+    public Localisation() {
+      // Do nothing
+    }
   }
 
   /**
