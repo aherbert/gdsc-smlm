@@ -388,7 +388,7 @@ class ResidenceTimeFittingTest {
   @SeededTest
   void canFitDual0_1Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.1); }
   @SeededTest
-  void canFitDual0_2Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.2, true); }
+  void canFitDual0_2Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.2); }
   @SeededTest
   void canFitDual0_3Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.3); }
   @SeededTest
@@ -405,6 +405,12 @@ class ResidenceTimeFittingTest {
   void canFitDual0_9Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.9); }
   // @formatter:on
 
+  @Test
+  void canFitDual0_2PopulationMLEFixedSeed() {
+    // Ensure the dual-population fit is performed at least once
+    fitDualPopulation(null, 0.25, 0.2, 1236478126821268L);
+  }
+
   // @SeededTest
   void canFitDualPopulation(RandomSeed seed) {
     // Debug limit
@@ -415,18 +421,18 @@ class ResidenceTimeFittingTest {
     for (;;) {
       s *= 1.5;
       System.out.printf("scale %s%n", s);
-      fitDualPopulation(seed, s, 0.2, true);
+      fitDualPopulation(seed, s, 0.2, 1);
     }
   }
 
   private void fitDualPopulation(RandomSeed seed, double scale, double fraction) {
-    fitDualPopulation(seed, scale, fraction, false);
+    fitDualPopulation(seed, scale, fraction, 0);
   }
 
-  private void fitDualPopulation(RandomSeed seed, double scale, double fraction, boolean force) {
-    Assumptions.assumeTrue(force || TestSettings.allow(TestComplexity.MAXIMUM));
-    final UniformRandomProvider rng = RngFactory.create(seed.get());
-    // final UniformRandomProvider rng = RngFactory.create(0xdeadbeef);
+  private void fitDualPopulation(RandomSeed seed, double scale, double fraction, long longSeed) {
+    Assumptions.assumeTrue(longSeed != 0 || TestSettings.allow(TestComplexity.MAXIMUM));
+    final UniformRandomProvider rng =
+        seed != null ? RngFactory.create(seed.get()) : RngFactory.create(longSeed);
 
     final String title = String.format("Dual=%.1f", fraction);
     AssertionError error = null;

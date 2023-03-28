@@ -217,7 +217,7 @@ class JumpDistanceAnalysisTest {
   @SeededTest
   void canFitDual0_4Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.4); }
   @SeededTest
-  void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5, true); }
+  void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5); }
   @SeededTest
   void canFitDual0_5Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.5); }
   @SeededTest
@@ -238,13 +238,20 @@ class JumpDistanceAnalysisTest {
   void canFitDual0_9Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.9); }
   // @formatter:on
 
-  private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction) {
-    fitDualPopulation(seed, mle, fraction, false);
+  @Test
+  void canFitDual0_5PopulationMLEFixedSeed() {
+    // Ensure the dual-population fit is performed at least once
+    fitDualPopulation(null, true, 0.5, 1236478126821268L);
   }
 
-  private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction, boolean force) {
-    Assumptions.assumeTrue(force || TestSettings.allow(TestComplexity.MAXIMUM));
-    final UniformRandomProvider rg = RngFactory.create(seed.get());
+  private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction) {
+    fitDualPopulation(seed, mle, fraction, 0);
+  }
+
+  private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction, long longSeed) {
+    Assumptions.assumeTrue(longSeed != 0 || TestSettings.allow(TestComplexity.MAXIMUM));
+    final UniformRandomProvider rg =
+        seed != null ? RngFactory.create(seed.get()) : RngFactory.create(longSeed);
 
     final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
     AssertionError error = null;
