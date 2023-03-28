@@ -1170,16 +1170,16 @@ public class CmosAnalysis implements PlugIn {
       // Check for bad data
       final int size = bias.length;
       int errors = 0;
-      for (int i = 0; i < size && errors < 100; i++) {
+      for (int i = 0; i < size && errors < 10; i++) {
         if (!Double.isFinite(bias[i])) {
           ImageJUtils.log("Pixel [%d,%d] Bias %s", i % width, i / width, bias[i]);
           errors++;
         }
-        if (!(gain[i] <= Double.MAX_VALUE && gain[i] > 0)) {
+        if (!(gain[i] <= Float.MAX_VALUE && gain[i] > 0)) {
           ImageJUtils.log("Pixel [%d,%d] Gain %s", i % width, i / width, gain[i]);
           errors++;
         }
-        if (!(variance[i] <= Double.MAX_VALUE && variance[i] >= 0)) {
+        if (!(variance[i] <= Float.MAX_VALUE && variance[i] >= 0)) {
           ImageJUtils.log("Pixel [%d,%d] Variance %s", i % width, i / width, variance[i]);
           errors++;
         }
