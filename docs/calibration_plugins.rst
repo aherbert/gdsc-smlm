@@ -649,6 +649,9 @@ The analysis requires the following parameters:
    * - Log file progress
      - If **true** the plugin will write details of the image files to the ``ImageJ`` log.
 
+   * - Histogram bins
+     - The number of bins to use on the histograms. Set to zero to auto-scale the bin width.
+
 Analysis
 ~~~~~~~~
 

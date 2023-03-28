@@ -129,6 +129,7 @@ public class CmosAnalysis implements PlugIn {
     boolean rollingAlgorithm;
     boolean reuseProcessedData;
     boolean logFileProgress;
+    int histogramBins;
     double offset;
     double variance;
     double gain;
@@ -143,6 +144,7 @@ public class CmosAnalysis implements PlugIn {
       // Set defaults
       directory = Prefs.get(PrefsKey.sCMOSAnalysisDirectory, "");
       reuseProcessedData = true;
+      histogramBins = 200;
 
       // The simulation can default roughly to the values displayed
       // in the Huang sCMOS paper supplementary figure 1:
@@ -181,6 +183,7 @@ public class CmosAnalysis implements PlugIn {
       rollingAlgorithm = source.rollingAlgorithm;
       reuseProcessedData = source.reuseProcessedData;
       logFileProgress = source.logFileProgress;
+      histogramBins = source.histogramBins;
       offset = source.offset;
       variance = source.variance;
       gain = source.gain;
@@ -739,6 +742,7 @@ public class CmosAnalysis implements PlugIn {
     gd.addCheckbox("Rolling_algorithm", settings.rollingAlgorithm);
     gd.addCheckbox("Re-use_processed_data", settings.reuseProcessedData);
     gd.addCheckbox("Log_file_progress", settings.logFileProgress);
+    gd.addNumericField("Histogram_bins", settings.histogramBins);
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -749,6 +753,7 @@ public class CmosAnalysis implements PlugIn {
     settings.rollingAlgorithm = gd.getNextBoolean();
     settings.reuseProcessedData = gd.getNextBoolean();
     settings.logFileProgress = gd.getNextBoolean();
+    settings.histogramBins = (int) gd.getNextNumber();
 
     return true;
   }
@@ -994,7 +999,7 @@ public class CmosAnalysis implements PlugIn {
         MathUtils.rounded(statsGain.getStandardDeviation()));
 
     // Histogram of offset, variance and gain
-    final int bins = 2 * HistogramPlot.getBinsSturgesRule(pixelGain.length);
+    final int bins = settings.histogramBins;
     final WindowOrganiser wo = new WindowOrganiser();
     showHistogram("Offset (ADU)", pixelOffset, bins, statsOffset, wo);
     showHistogram("Variance (ADU^^2^^)", pixelVariance, bins, statsVariance, wo);
