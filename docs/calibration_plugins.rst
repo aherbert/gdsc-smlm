@@ -667,7 +667,7 @@ When all the images have been processed the gain is computed for each pixel. The
 
     Gain Mean = 2.153 +/- 0.4506
 
-The plugin will then ask for a filename to save the per-pixel model. This is saved into the specified directory as a 3 frame stack of 32-bit float data representing the offset, variance and gain for each pixel. The slices are appropriately labelled. This model can be loaded by the ``Camera Model Manager`` plugin (see :numref:`%s <calibration_plugins:Camera Model Manager>`) for use in fitting of localisation data. It is recommended to set the model directory for all output models to the same directory and appropriately name the model after the camera.
+The plugin will then ask for a filename to save the per-pixel model. The model can be optionally cropped. The model is saved into the specified directory as a 3 frame stack of 32-bit float data representing the offset, variance and gain for each pixel. The slices are appropriately labelled. This model can be loaded by the ``Camera Model Manager`` plugin (see :numref:`%s <calibration_plugins:Camera Model Manager>`) for use in fitting of localisation data. It is recommended to set the model directory for all output models to the same directory and appropriately name the model after the camera.
 
 The ``sCMOS Analysis`` plugin will show summary histograms of the computed pixel offset, variance and gain. These histograms are equivalent to those shown in Huang `et al` (2013) supplementary figure 1.
 

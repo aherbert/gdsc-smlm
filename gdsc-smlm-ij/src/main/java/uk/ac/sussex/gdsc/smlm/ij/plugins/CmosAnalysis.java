@@ -24,17 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.io.FileSaver;
-import ij.io.Opener;
-import ij.plugin.PlugIn;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -48,11 +42,14 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
@@ -64,15 +61,37 @@ import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.ImageRoi;
+import ij.gui.Overlay;
+import ij.gui.Plot;
+import ij.gui.Roi;
+import ij.gui.RoiListener;
+import ij.io.FileSaver;
+import ij.io.Opener;
+import ij.measure.Measurements;
+import ij.plugin.PlugIn;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import uk.ac.sussex.gdsc.core.data.IntegerType;
 import uk.ac.sussex.gdsc.core.data.SiPrefix;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.io.CustomTiffEncoder;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.roi.RoiHelper;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.ArrayMoment;
@@ -91,6 +110,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplers;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 
 /**
@@ -126,6 +146,10 @@ public class CmosAnalysis implements PlugIn {
     String directory;
     String modelDirectory;
     String modelName;
+    int originX;
+    int originY;
+    int width;
+    int height;
     boolean rollingAlgorithm;
     boolean reuseProcessedData;
     boolean logFileProgress;
@@ -180,6 +204,10 @@ public class CmosAnalysis implements PlugIn {
       directory = source.directory;
       modelDirectory = source.modelDirectory;
       modelName = source.modelName;
+      originX = source.originX;
+      originY = source.originY;
+      width = source.width;
+      height = source.height;
       rollingAlgorithm = source.rollingAlgorithm;
       reuseProcessedData = source.reuseProcessedData;
       logFileProgress = source.logFileProgress;
@@ -367,7 +395,7 @@ public class CmosAnalysis implements PlugIn {
               Files.newOutputStream(Paths.get(out, String.format("image%06d.tif", start)));
           BufferedOutputStream bos = new BufferedOutputStream(os)) {
         file.write(bos);
-      } catch (IOException ex) {
+      } catch (final IOException ex) {
         throw new ConcurrentRuntimeException("Failed to save image", ex);
       }
     }
@@ -518,9 +546,12 @@ public class CmosAnalysis implements PlugIn {
     if (TextUtils.isNullOrEmpty(dir)) {
       return;
     }
+    // Reset the crop if the analysis directory changes
+    if (!dir.equals(settings.directory)) {
+      settings.originX = settings.originY = settings.width = settings.height = 0;
+    }
     settings.directory = dir;
     settings.save();
-    Prefs.set(PrefsKey.sCMOSAnalysisDirectory, dir);
 
     final boolean simulate = "simulate".equals(arg);
     if (simulate || extraOptions) {
@@ -784,6 +815,7 @@ public class CmosAnalysis implements PlugIn {
     int height = 0;
     final TrackProgress trackProgress =
         settings.logFileProgress ? SimpleImageJTrackProgress.getInstance() : null;
+    ImagePlus lastMeanVar = null;
 
     for (int n = 0; n < nSubDirs; n++) {
       ImageJUtils.showSlowProgress(n, nSubDirs);
@@ -792,7 +824,6 @@ public class CmosAnalysis implements PlugIn {
       ImageJUtils.showStatus(() -> "Analysing " + sd.name);
       final StopWatch sw = StopWatch.createStarted();
 
-      // Option to reuse data
       final File file = new File(settings.directory, "perPixel" + sd.name + ".tif");
       boolean found = false;
       if (settings.reuseProcessedData && file.exists()) {
@@ -816,6 +847,7 @@ public class CmosAnalysis implements PlugIn {
           data[2 * n] = SimpleArrayUtils.toDouble((float[]) stack.getPixels(1));
           data[2 * n + 1] = SimpleArrayUtils.toDouble((float[]) stack.getPixels(2));
           found = true;
+          lastMeanVar = imp;
         }
       }
 
@@ -927,7 +959,8 @@ public class CmosAnalysis implements PlugIn {
         final ImageStack stack = new ImageStack(width, height);
         stack.addSlice("Mean", SimpleArrayUtils.toFloat(data[2 * n]));
         stack.addSlice("Variance", SimpleArrayUtils.toFloat(data[2 * n + 1]));
-        IJ.save(new ImagePlus("PerPixel", stack), file.getPath());
+        lastMeanVar = new ImagePlus("PerPixel", stack);
+        IJ.save(lastMeanVar, file.getPath());
       }
 
       final Statistics s = Statistics.create(data[2 * n]);
@@ -1018,7 +1051,7 @@ public class CmosAnalysis implements PlugIn {
     ImageJUtils
         .log("Analysis time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
 
-    final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+    final NonBlockingExtendedGenericDialog egd = new NonBlockingExtendedGenericDialog(TITLE);
     egd.addMessage("Save the sCMOS camera model?");
     if (settings.modelDirectory == null) {
       settings.modelDirectory = settings.directory;
@@ -1026,11 +1059,47 @@ public class CmosAnalysis implements PlugIn {
     }
     egd.addStringField("Model_name", settings.modelName, 30);
     egd.addDirectoryField("Model_directory", settings.modelDirectory);
+    // Configure crop
+    final int ox = MathUtils.clip(0, width - 1, settings.originX);
+    final int oy = MathUtils.clip(0, height - 1, settings.originY);
+    final int w = MathUtils.clip(1, width - ox, settings.width <= 0 ? width : settings.width);
+    final int h = MathUtils.clip(1, height - oy, settings.height <= 0 ? height : settings.height);
+    final TextField textOriginX = egd.addAndGetNumericField("Origin_x", ox, 0);
+    final TextField textOriginY = egd.addAndGetNumericField("Origin_y", oy, 0);
+    final TextField textWidth = egd.addAndGetNumericField("Width", w, 0);
+    final TextField textHeight = egd.addAndGetNumericField("Height", h, 0);
+    if (ImageJUtils.isShowGenericDialog()) {
+      final Consumer<Rectangle> action = r -> {
+        textOriginX.setText(Integer.toString(r.x));
+        textOriginY.setText(Integer.toString(r.y));
+        textWidth.setText(Integer.toString(r.width));
+        textHeight.setText(Integer.toString(r.height));
+      };
+      final ImagePlus cropImp = lastMeanVar;
+      egd.addAndGetButton("Crop", e -> {
+        // Do not perform the work on the event dispatcher thread
+        ForkJoinPool.commonPool().submit(() -> {
+          final Rectangle crop = new Rectangle(Integer.parseInt(textOriginX.getText()),
+              Integer.parseInt(textOriginY.getText()), Integer.parseInt(textWidth.getText()),
+              Integer.parseInt(textHeight.getText()));
+          final ImagePlus imp = cropImp.duplicate();
+          imp.setTitle(cropImp.getTitle());
+          showCropDialog(bias, gain, variance, imp, crop, action);
+        });
+      });
+      final Rectangle reset = new Rectangle(width, height);
+      egd.addAndGetButton("Reset", e -> action.accept(reset));
+    }
     egd.showDialog();
     if (!egd.wasCanceled()) {
       settings.modelName = egd.getNextString();
       settings.modelDirectory = egd.getNextString();
-      saveCameraModel(width, height, bias, gain, variance);
+      settings.originX = (int) egd.getNextNumber();
+      settings.originY = (int) egd.getNextNumber();
+      settings.width = (int) egd.getNextNumber();
+      settings.height = (int) egd.getNextNumber();
+      saveCameraModel(width, height, bias, gain, variance,
+          new Rectangle(settings.originX, settings.originY, settings.width, settings.height));
     }
     IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
   }
@@ -1147,13 +1216,18 @@ public class CmosAnalysis implements PlugIn {
    * @param bias the bias
    * @param gain the gain
    * @param variance the variance
+   * @param crop the crop
    */
-  private void saveCameraModel(int width, int height, float[] bias, float[] gain,
-      float[] variance) {
+  private void saveCameraModel(int width, int height, float[] bias, float[] gain, float[] variance,
+      Rectangle crop) {
     PerPixelCameraModel cameraModel;
     try {
-      cameraModel = new PerPixelCameraModel(width, height, bias, gain, variance);
-    } catch (IllegalArgumentException ex) {
+      // Crop
+      cameraModel = new PerPixelCameraModel(crop.x, crop.y, crop.width, crop.height,
+          ImageJImageConverter.getData(bias, width, height, crop, null),
+          ImageJImageConverter.getData(gain, width, height, crop, null),
+          ImageJImageConverter.getData(variance, width, height, crop, null));
+    } catch (final IllegalArgumentException ex) {
       ImageJUtils.log("Invalid per-pixel camera model: %s", ex.getMessage());
 
       // Save raw data
@@ -1168,20 +1242,22 @@ public class CmosAnalysis implements PlugIn {
       new FileSaver(imp).saveAsTiffStack(filename);
 
       // Check for bad data
-      final int size = bias.length;
       int errors = 0;
-      for (int i = 0; i < size && errors < 10; i++) {
-        if (!Double.isFinite(bias[i])) {
-          ImageJUtils.log("Pixel [%d,%d] Bias %s", i % width, i / width, bias[i]);
-          errors++;
-        }
-        if (!(gain[i] <= Float.MAX_VALUE && gain[i] > 0)) {
-          ImageJUtils.log("Pixel [%d,%d] Gain %s", i % width, i / width, gain[i]);
-          errors++;
-        }
-        if (!(variance[i] <= Float.MAX_VALUE && variance[i] >= 0)) {
-          ImageJUtils.log("Pixel [%d,%d] Variance %s", i % width, i / width, variance[i]);
-          errors++;
+      for (int y = 0; y < crop.height && errors < 10; y++) {
+        for (int x = 0; x < crop.width && errors < 10; x++) {
+          final int i = (crop.y + y) * width + crop.x + x;
+          if (!Float.isFinite(bias[i])) {
+            ImageJUtils.log("Pixel [%d,%d] Bias %s", crop.x + x, crop.y + y, bias[i]);
+            errors++;
+          }
+          if (!(gain[i] <= Float.MAX_VALUE && gain[i] > 0)) {
+            ImageJUtils.log("Pixel [%d,%d] Gain %s", crop.x + x, crop.y + y, gain[i]);
+            errors++;
+          }
+          if (!(variance[i] <= Float.MAX_VALUE && variance[i] >= 0)) {
+            ImageJUtils.log("Pixel [%d,%d] Variance %s", crop.x + x, crop.y + y, variance[i]);
+            errors++;
+          }
         }
       }
 
@@ -1192,5 +1268,102 @@ public class CmosAnalysis implements PlugIn {
         new File(settings.modelDirectory, settings.modelName).getPath())) {
       IJ.error(TITLE, "Failed to save model to file");
     }
+  }
+
+  /**
+   * Show a dialog to allow interactive cropping of the camera model.
+   *
+   * @param bias the bias
+   * @param gain the gain
+   * @param variance the variance
+   * @param imp the last mean-variance image in the image series
+   * @param crop the current camera model crop
+   * @param action consumer for the crop (when it is updated)
+   */
+  private static void showCropDialog(float[] bias, float[] gain, float[] variance, ImagePlus imp,
+      Rectangle crop, Consumer<Rectangle> action) {
+    // Create mask of bad pixels
+    final byte[] pixels = new byte[bias.length];
+    for (int i = 0; i < pixels.length; i++) {
+      if (!Float.isFinite(bias[i]) || !(gain[i] <= Float.MAX_VALUE && gain[i] > 0)
+          || !(variance[i] <= Float.MAX_VALUE && variance[i] >= 0)) {
+        pixels[i] = 1;
+      }
+    }
+
+    final int width = imp.getWidth();
+    final int height = imp.getHeight();
+    final ByteProcessor bp = new ByteProcessor(width, height, pixels);
+    // Find largest bounding region
+    final Roi roi = RoiHelper.largestBoundingRoi(bp, width / 2, height / 2);
+
+    // Draw on image as red overlay
+    final ColorProcessor cp = new ColorProcessor(width, height);
+    cp.setColor(Color.RED);
+    cp.fillOutside(roi);
+    final Overlay o = new Overlay();
+    final ImageRoi imageRoi = new ImageRoi(0, 0, cp);
+    imageRoi.setZeroTransparent(true);
+    imageRoi.setOpacity(0.5);
+    o.add(imageRoi);
+    imp.setOverlay(o);
+
+    // Use the bad pixel region if the image is not already cropped
+    if (crop.width == width && crop.height == height) {
+      imp.setRoi(roi);
+      action.accept(roi.getBounds());
+    } else {
+      imp.setRoi(new Roi(crop));
+    }
+
+    final RoiListener l = (ImagePlus i, int id) -> {
+      if (i != null && i.getID() == imp.getID()) {
+        action.accept(i.getRoi().getBounds());
+      }
+    };
+    Roi.addRoiListener(l);
+
+    imp.show();
+
+    // Get the intensity limits of the image
+    final ImageProcessor ip = imp.getImageStack().getProcessor(1);
+    ip.resetMinAndMax();
+    // Min of the crop
+    ip.setRoi(imp.getRoi());
+    final ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.MIN_MAX, null);
+
+    final NonBlockingExtendedGenericDialog gd =
+        new NonBlockingExtendedGenericDialog(TITLE + " crop");
+    gd.addMessage("Crop the camera model.\n \nThe last mean and variance image is shown:\n"
+        + imp.getTitle() + "\n \nKnown bad model pixels were used to outline the\n"
+        + "largest valid central region on the image.\n \nCrop using an ROI on the image\n"
+        + "or use the foreground intensity.");
+    final TextField textForeground =
+        gd.addAndGetSlider("Foreground", ip.getMin(), ip.getMax(), stats.min);
+    textForeground.addTextListener(e -> {
+      final float v = Float.parseFloat(textForeground.getText());
+      // Find the largest bounding region for pixels above the threshold
+      ForkJoinPool.commonPool().submit(() -> {
+        final float[] values = (float[]) ip.getPixels();
+        for (int i = 0; i < pixels.length; i++) {
+          pixels[i] = (byte) (values[i] >= v ? 0 : 1);
+        }
+        imp.setRoi(RoiHelper.largestBoundingRoi(bp, width / 2, height / 2));
+      });
+    });
+    imp.getWindow().addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+        gd.windowClosing(null);
+      }
+    });
+    gd.hideCancelButton();
+    gd.setOKLabel("Done");
+    gd.showDialog();
+
+    // Clean-up
+    Roi.removeRoiListener(l);
+    imp.changes = false;
+    imp.close();
   }
 }
