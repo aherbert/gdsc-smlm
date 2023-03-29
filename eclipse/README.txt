@@ -49,20 +49,17 @@ then do a manual install:
    Eclipse project
 ---
 
-Create a symbolic link on the filesystem to set-up the folders that are expected by ImageJ.
+To run the code execute the 'main' function in the Smlm_Plugin class within the gdsc-smlm-ij_
+project. This will:
 
-Windows:
+- Configure the ImageJ plugins path to the build path
+- Run ImageJ
+- Register all the GDSC SMLM plugins in ImageJ and show a GDSC SMLM plugins window
 
-    GDSC-SMLM>mklink /D gdsc-smlm-ij\plugins gdsc-smlm-ij\target\classes
-    symbolic link created for plugins <<===>> target\classes
-
-Linux:
-
-    [GDSC-SMLM] % ln -s gdsc-smlm-ij/target/classes gdsc-smlm-ij/plugins
 
 Create a new Run configuration in the gdsc-smlm-ij_ project.
 
-Select ij.ImageJ as the main class.
+Select Smlm_Plugin as the main class.
 
 Run the code.
 

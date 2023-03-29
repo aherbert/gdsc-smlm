@@ -23,6 +23,11 @@
  * #L%
  */
 
+import java.io.File;
+import java.net.URISyntaxException;
+
+import ij.IJ;
+import ij.ImageJ;
 import ij.plugin.PlugIn;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmTools;
 
@@ -31,10 +36,13 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmTools;
  *
  * <p><strong>This class is not included in the packaged uk.ac.sussex.gdsc.smlm jar.</strong>
  *
- * <p>This class allows the project to be run in debug mode from an IDE (e.g. Eclipse). The Maven
- * output directory will be target/classes. Create a symbolic link to that directory from the
- * project root and name it plugins. Optionally create a link to the macros directory to allow the
- * toolset to be loaded:
+ * <p>This class can run ImageJ and load all the GDSC SMLM plugins using the {@link #main(String[])}
+ * function to launch a Java application.
+ *
+ * <p>Alternatively this class allows the project to be run in from an IDE (e.g. Eclipse) using
+ * ImageJ's detection of classes in the plugins folder. The Maven output directory will be
+ * target/classes. Create a symbolic link to that directory from the project root and name it
+ * plugins. Optionally create a link to the macros directory to allow the toolset to be loaded:
  *
  * <pre>
  * ${root}/plugins -&gt; ${root}/target/classes
@@ -56,5 +64,35 @@ public class Smlm_PlugIn implements PlugIn {
   public void run(String arg) {
     // Create the SMLM Tools plugin.
     new SmlmTools();
+  }
+
+
+  /**
+   * Main method for debugging.
+   *
+   * For debugging, it is convenient to have a method that starts ImageJ and calls the plugin, e.g.
+   * after setting breakpoints.
+   *
+   * @param args unused
+   * @throws URISyntaxException if the URL cannot be converted to a URI
+   */
+  public static void main(String[] args) throws URISyntaxException {
+    // Set the base directory for plugins
+    // see: https://stackoverflow.com/a/7060464/1207769
+    Class<Smlm_PlugIn> clazz = Smlm_PlugIn.class;
+    java.net.URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
+    File file = new File(url.toURI());
+    // Note: This returns the base path. ImageJ will find plugins in here that have an
+    // underscore in the name. But it will not search recursively through the
+    // package structure to find plugins. Adding this at least puts it on ImageJ's
+    // classpath so plugins not satisfying these requirements can be loaded.
+    System.setProperty("plugins.dir", file.getAbsolutePath());
+
+    // Start ImageJ and exit when closed
+    ImageJ imagej = new ImageJ();
+    imagej.exitWhenQuitting(true);
+
+    // Run the plugin
+    IJ.runPlugIn(clazz.getName(), "");
   }
 }
