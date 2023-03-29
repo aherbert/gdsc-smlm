@@ -121,7 +121,7 @@ Software for single molecule localisation microscopy (SMLM)
     <xstream.version>1.4.20</xstream.version>
     <ejml.version>0.24</ejml.version>
     <JTransforms.version>3.1</JTransforms.version>
-    <protobuf.version>3.16.3</protobuf.version>
+    <protobuf.version>3.22.2</protobuf.version>
     <jsoup.version>1.15.3</jsoup.version>
     <mfl-core.version>0.5.6</mfl-core.version>
 
@@ -378,6 +378,16 @@ Software for single molecule localisation microscopy (SMLM)
               </roots>
             </configurationFile>
           </analysisConfigurationFiles>
+          <analysisConfiguration>
+            <revapi.filter>
+              <elements>
+                <exclude>
+                  <item>class .*Protos</item>
+                  <item>class .*Protos\..*</item>
+                </exclude>>
+              </elements>
+            </revapi.filter>
+          </analysisConfiguration>
         </configuration>
         <executions>
           <execution>
