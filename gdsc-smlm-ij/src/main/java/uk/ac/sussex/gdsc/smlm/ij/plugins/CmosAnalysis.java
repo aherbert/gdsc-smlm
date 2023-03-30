@@ -44,6 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -102,6 +103,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
@@ -1340,16 +1342,40 @@ public class CmosAnalysis implements PlugIn {
         + "or use the foreground intensity.");
     final TextField textForeground =
         gd.addAndGetSlider("Foreground", ip.getMin(), ip.getMax(), stats.min);
+
+    // Dynamically update the ROI using the slider.
+    // Maintain a queue of the next value to process and use only
+    // 1 thread to compute until the value stops changing.
+    final SoftLock lock = new SoftLock();
+    final AtomicReference<String> nextValue = new AtomicReference<>();
     textForeground.addTextListener(e -> {
-      final float v = Float.parseFloat(textForeground.getText());
-      // Find the largest bounding region for pixels above the threshold
-      ForkJoinPool.commonPool().submit(() -> {
-        final float[] values = (float[]) ip.getPixels();
-        for (int i = 0; i < pixels.length; i++) {
-          pixels[i] = (byte) (values[i] >= v ? 0 : 1);
+      // queue change
+      nextValue.set(textForeground.getText());
+      if (lock.acquire()) {
+        try {
+          ForkJoinPool.commonPool().submit(() -> {
+            try {
+              for (String next = nextValue.getAndSet(null); next != null;
+                  next = nextValue.getAndSet(null)) {
+                final float v = Float.parseFloat(next);
+                // Find the largest bounding region for pixels above the threshold
+                final float[] values = (float[]) ip.getPixels();
+                for (int i = 0; i < pixels.length; i++) {
+                  pixels[i] = (byte) (values[i] >= v ? 0 : 1);
+                }
+                imp.setRoi(RoiHelper.largestBoundingRoi(bp, width / 2, height / 2));
+              }
+            } finally {
+              lock.release();
+            }
+          });
+        } catch (final RejectedExecutionException ex) {
+          // Something is wrong with the ForkJoinPool,
+          // just re-throw after releasing the lock.
+          lock.release();
+          throw ex;
         }
-        imp.setRoi(RoiHelper.largestBoundingRoi(bp, width / 2, height / 2));
-      });
+      }
     });
     imp.getWindow().addWindowListener(new WindowAdapter() {
       @Override
