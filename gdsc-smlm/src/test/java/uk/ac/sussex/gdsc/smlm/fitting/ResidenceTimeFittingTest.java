@@ -406,7 +406,7 @@ class ResidenceTimeFittingTest {
   // @formatter:on
 
   @Test
-  void canFitDual0_2PopulationMLEFixedSeed() {
+  void canFitDual0_2PopulationFixedSeed() {
     // Ensure the dual-population fit is performed at least once
     fitDualPopulation(null, 0.25, 0.2, 1236478126821268L);
   }

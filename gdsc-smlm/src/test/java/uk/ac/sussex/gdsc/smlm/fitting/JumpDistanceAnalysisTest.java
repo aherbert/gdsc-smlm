@@ -174,7 +174,7 @@ class JumpDistanceAnalysisTest {
 
   // @formatter:off
   @SeededTest
-  void canFitSinglePopulationMLE(RandomSeed seed)  { fitSinglePopulation(seed, true);  }
+  void canFitSinglePopulationMle(RandomSeed seed)  { fitSinglePopulation(seed, true);  }
   @SeededTest
   void canFitSinglePopulation(RandomSeed seed) { fitSinglePopulation(seed, false); }
   // @formatter:on
@@ -201,45 +201,45 @@ class JumpDistanceAnalysisTest {
 
   // @formatter:off
   @SeededTest
-  void canFitDual0_1PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.1); }
+  void canFitDual0_1PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.1); }
   @SeededTest
   void canFitDual0_1Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.1); }
   @SeededTest
-  void canFitDual0_2PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.2); }
+  void canFitDual0_2PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.2); }
   @SeededTest
   void canFitDual0_2Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.2); }
   @SeededTest
-  void canFitDual0_3PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.3); }
+  void canFitDual0_3PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.3); }
   @SeededTest
   void canFitDual0_3Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.3); }
   @SeededTest
-  void canFitDual0_4PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.4); }
+  void canFitDual0_4PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.4); }
   @SeededTest
   void canFitDual0_4Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.4); }
   @SeededTest
-  void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5); }
+  void canFitDual0_5PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.5); }
   @SeededTest
   void canFitDual0_5Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.5); }
   @SeededTest
-  void canFitDual0_6PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.6); }
+  void canFitDual0_6PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.6); }
   @SeededTest
   void canFitDual0_6Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.6); }
   @SeededTest
-  void canFitDual0_7PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.7); }
+  void canFitDual0_7PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.7); }
   @SeededTest
   void canFitDual0_7Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.7); }
   @SeededTest
-  void canFitDual0_8PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.8); }
+  void canFitDual0_8PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.8); }
   @SeededTest
   void canFitDual0_8Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.8); }
   @SeededTest
-  void canFitDual0_9PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.9); }
+  void canFitDual0_9PopulationMle(RandomSeed seed) { fitDualPopulation(seed, true,  0.9); }
   @SeededTest
   void canFitDual0_9Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.9); }
   // @formatter:on
 
   @Test
-  void canFitDual0_5PopulationMLEFixedSeed() {
+  void canFitDual0_5PopulationMleFixedSeed() {
     // Ensure the dual-population fit is performed at least once
     fitDualPopulation(null, true, 0.5, 1236478126821268L);
   }
