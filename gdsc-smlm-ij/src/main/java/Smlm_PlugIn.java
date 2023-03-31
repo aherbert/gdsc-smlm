@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmTools;
  *
  * <p><strong>This class is not included in the packaged uk.ac.sussex.gdsc.smlm jar.</strong>
  *
- * <p>This class can run ImageJ and load all the GDSC SMLM plugins using the {@link #main(String[])}
+ * <p>This class can run ImageJ and load all the GDSC plugins using the {@link #main(String[])}
  * function to launch a Java application.
  *
  * <p>Alternatively this class allows the project to be run in from an IDE (e.g. Eclipse) using
@@ -70,8 +70,8 @@ public class Smlm_PlugIn implements PlugIn {
   /**
    * Main method for debugging.
    *
-   * For debugging, it is convenient to have a method that starts ImageJ and calls the plugin, e.g.
-   * after setting breakpoints.
+   * <p>For debugging, it is convenient to have a method that starts ImageJ and calls the plugin,
+   * e.g. after setting breakpoints.
    *
    * @param args unused
    * @throws URISyntaxException if the URL cannot be converted to a URI
