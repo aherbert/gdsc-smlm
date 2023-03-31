@@ -121,7 +121,7 @@ Software for single molecule localisation microscopy (SMLM)
     <xstream.version>1.4.20</xstream.version>
     <ejml.version>0.24</ejml.version>
     <JTransforms.version>3.1</JTransforms.version>
-    <protobuf.version>3.22.2</protobuf.version>
+    <protobuf.version>3.16.3</protobuf.version>
     <jsoup.version>1.15.3</jsoup.version>
     <mfl-core.version>0.5.6</mfl-core.version>
 
@@ -129,6 +129,8 @@ Software for single molecule localisation microscopy (SMLM)
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <os-maven-plugin.version>1.6.0</os-maven-plugin.version>
 
+    <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
+    <revapi-java.version>0.28.1</revapi-java.version>
   </properties>
 
   <dependencies>
@@ -359,15 +361,8 @@ Software for single molecule localisation microscopy (SMLM)
       <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
-        <version>0.15.0</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.revapi</groupId>
-            <artifactId>revapi-java</artifactId>
-            <version>0.28.1</version>
-          </dependency>
-        </dependencies>
         <configuration>
+          <skip>true</skip>
           <!-- For reporting do not ignore the "intentional-api-changes" so they are included -->
           <analysisConfigurationFiles>
             <configurationFile>
@@ -384,6 +379,9 @@ Software for single molecule localisation microscopy (SMLM)
                 <exclude>
                   <item>class .*Protos</item>
                   <item>class .*Protos\..*</item>
+                  <item>class com\.google\.protobuf.*</item>
+                  <item>method com\.google\.protobuf.*</item>
+                  <item>interface com\.google\.protobuf.*</item>
                 </exclude>>
               </elements>
             </revapi.filter>
@@ -423,8 +421,8 @@ Software for single molecule localisation microscopy (SMLM)
       <plugin>
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
-        <version>0.15.0</version>
         <configuration>
+          <skip>true</skip>
           <!-- For reporting do not ignore the "intentional-api-changes" so they are included -->
           <analysisConfigurationFiles>
             <configurationFile>
@@ -435,6 +433,19 @@ Software for single molecule localisation microscopy (SMLM)
               </roots>
             </configurationFile>
           </analysisConfigurationFiles>
+          <analysisConfiguration>
+            <revapi.filter>
+              <elements>
+                <exclude>
+                  <item>class .*Protos</item>
+                  <item>class .*Protos\..*</item>
+                  <item>class com\.google\.protobuf.*</item>
+                  <item>method com\.google\.protobuf.*</item>
+                  <item>interface com\.google\.protobuf.*</item>
+                </exclude>>
+              </elements>
+            </revapi.filter>
+          </analysisConfiguration>
         </configuration>
       </plugin>
     </plugins>
