@@ -23,12 +23,11 @@
  * #L%
  */
 
-import java.io.File;
-import java.net.URISyntaxException;
-
 import ij.IJ;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
+import java.io.File;
+import java.net.URISyntaxException;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmTools;
 
 /**
