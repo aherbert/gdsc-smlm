@@ -79,13 +79,10 @@ public class PeakResultTableModelJTable extends JTable {
 
     if (event.getFirstRow() == TableModelEvent.HEADER_ROW) {
       // The whole thing changed so resize the columns
-      SwingUtilities.invokeLater(new Runnable() {
-        @Override
-        public void run() {
-          // This is null when the table is first created
-          if (tca != null) {
-            tca.adjustColumns();
-          }
+      SwingUtilities.invokeLater(() -> {
+        // This is null when the table is first created
+        if (tca != null) {
+          tca.adjustColumns();
         }
       });
     }
