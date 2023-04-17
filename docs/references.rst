@@ -55,6 +55,10 @@ Ester M, Kriegel HP, Sander J & Xu X (1996).
 A density-based algorithm for discovering clusters in large spatial databases with noise.
 *Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96)* AAAI Press. pp. 226–231.
 
+Etheridge TJ, Carr AM & Herbert AD (2022)
+GDSC SMLM: Single-molecule localisation microscopy software for ImageJ [version 1; peer review: 1 approved].
+*Wellcome Open Res* 7:241.
+
 Heel M & Schatz M (2005)
 Fourier shell correlation threshold criteria.
 *Journal of Structural Biology* 151(3): 250–262.
