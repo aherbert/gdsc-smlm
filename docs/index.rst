@@ -3,17 +3,21 @@
 GDSC Single Molecule Light Microscopy (SMLM) ImageJ Plugins
 ===========================================================
 
-.. image:: https://api.travis-ci.com/aherbert/gdsc-smlm.svg?branch=master
-    :target: https://travis-ci.com/aherbert/gdsc-smlm
+.. image:: https://github.com/aherbert/gdsc-smlm/actions/workflows/build.yml/badge.svg
+    :target: https://github.com/aherbert/gdsc-smlm/actions/workflows/build.yml
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/github/aherbert/gdsc-smlm/badge.svg?branch=master
-    :target: https://coveralls.io/github/aherbert/gdsc-smlm?branch=master
+.. image:: https://codecov.io/gh/aherbert/gdsc-smlm/branch/master/graph/badge.svg
+    :target: https://app.codecov.io/gh/aherbert/gdsc-smlm
     :alt: Coverage Status
 
 .. image:: https://readthedocs.org/projects/gdsc-smlm/badge/?version=latest
     :target: https://gdsc-smlm.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+
+.. image:: https://maven-badges.herokuapp.com/maven-central/uk.ac.sussex.gdsc/gdsc-smlm/badge.svg
+    :target: https://maven-badges.herokuapp.com/maven-central/uk.ac.sussex.gdsc/gdsc-smlm/
+    :alt: Maven Central
 
 .. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg
     :target: https://www.gnu.org/licenses/gpl-3.0
