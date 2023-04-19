@@ -15,6 +15,8 @@ Minor release of GDSC SMLM.
   relative difference between successive coefficients.
 * Added the :numref:`{name} <analysis_plugins:Residence Time Analysis>` plugin to fit residence
   times of stationary (bound) molecules.
+* Fix the :numref:`{name} <results_plugins:Save Localisations>` plugin error when the PSF is
+  undefined.
 
 
 Version 1.0.2

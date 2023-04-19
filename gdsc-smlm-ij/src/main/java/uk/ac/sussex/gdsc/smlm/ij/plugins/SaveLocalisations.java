@@ -335,11 +335,13 @@ public class SaveLocalisations implements PlugIn {
     }
 
     final PSF psf = results.getPsf();
-    for (int i = 0; i < psf.getParametersCount(); i++) {
-      final PSFParameter param = psf.getParameters(i);
-      final int index = i + PeakResult.STANDARD_PARAMETERS;
-      put(fields, new FloatField("P" + i, param.getName(), UnitType.from(param.getUnit()),
-          r -> r.getParameter(index)));
+    if (psf != null && psf.getParametersList() != null) {
+      for (int i = 0; i < psf.getParametersCount(); i++) {
+        final PSFParameter param = psf.getParameters(i);
+        final int index = i + PeakResult.STANDARD_PARAMETERS;
+        put(fields, new FloatField("P" + i, param.getName(), UnitType.from(param.getUnit()),
+            r -> r.getParameter(index)));
+      }
     }
     return fields;
   }
