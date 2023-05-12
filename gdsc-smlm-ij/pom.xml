@@ -129,4 +129,30 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>revapi-skip</id>
+      <!-- Allow compatibility check to be skipped.
+
+        Note: revapi can be run in this module and should pass. This profile is
+        a workaround for the GH CI build where the plugin is flakey at
+        resolving transitive dependencies and generates missing class errors, e.g.
+
+        [ERROR] error: cannot access IdentityArrayList
+           class file for sun.awt.util.IdentityArrayList not found
+      -->
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.revapi</groupId>
+            <artifactId>revapi-maven-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>

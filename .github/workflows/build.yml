@@ -28,7 +28,8 @@ jobs:
     - name: Purge maven snapshots
       run: mvn -B --no-transfer-progress dependency:purge-local-repository -DmanualInclude="uk.ac.sussex.gdsc:gdsc-ij-parent,uk.ac.sussex.gdsc:gdsc-smlm,uk.ac.sussex.gdsc:gdsc-smlm-ij"
     - name: Build
-      run: mvn -V -B --no-transfer-progress -P jacoco verify jacoco:report
+      # Note: revapi is skipped only in the modules containing the profile
+      run: mvn -V -B --no-transfer-progress -P jacoco,revapi-skip verify jacoco:report
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
