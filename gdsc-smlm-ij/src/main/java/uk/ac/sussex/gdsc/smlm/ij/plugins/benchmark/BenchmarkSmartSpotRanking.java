@@ -451,7 +451,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
               sumB += region[k];
               count++;
             }
-            b = sumB / (count * 2);// Account for averaging
+            b = sumB / (count * 2); // Account for averaging
           }
 
           final double signal = sum - b * size;

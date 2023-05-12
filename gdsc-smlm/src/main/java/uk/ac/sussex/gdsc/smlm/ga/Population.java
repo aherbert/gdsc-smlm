@@ -32,12 +32,10 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgress;
  * Contains a population of individuals that may crossover and mutate to evolve.
  *
  * <p>For simplicity the individuals have one chromosome sequence.
- *
- * @param <T> the generic type
- */
-/*
  * An extension would be to have an Individual class that has many Chromosomes, each is allowed to
  * crossover with its matching pair and then segregation occurs to new individuals.
+ *
+ * @param <T> the generic type
  */
 public class Population<T extends Comparable<T>> {
   private List<? extends Chromosome<T>> individuals;

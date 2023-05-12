@@ -372,8 +372,8 @@ public class PsfCreator implements PlugInFilter {
     if ("nm".equals(unit) || unit.startsWith("nanomet")) {
       return units;
     }
-    if ("\u00B5m".equals(unit) || // Sanitised version of um
-        unit.startsWith("micron")) {
+    // Sanitised version of um
+    if ("\u00B5m".equals(unit) || unit.startsWith("micron")) {
       return units * 1000;
     }
     return 0;

@@ -101,7 +101,7 @@ class PoissonLikelihoodWrapperTest {
   double[] testcx1Options = new double[] {4.9, 5.3};
   double[] testcy1Options = new double[] {4.8, 5.2};
   double[] testcz1Options = new double[] {-1.5, 1.0};
-  double[][] testw1Options = new double[][] {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
+  double[][] testw1Options = new double[][] {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7}};
   double[] testangle1Options = new double[] {Math.PI / 5, Math.PI / 3};
 
   double[] testbackground;

@@ -116,7 +116,7 @@ class ScmosLikelihoodWrapperTest {
   private final double[] testcx1Options = {4.9, 5.3};
   private final double[] testcy1Options = {4.8, 5.2};
   private final double[] testcz1Options = {-1.5, 1.0};
-  private final double[][] testw1Options = {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7},};
+  private final double[][] testw1Options = {{1.1, 1.4}, {1.1, 1.7}, {1.5, 1.2}, {1.3, 1.7}};
 
   private double[] testbackground;
   private double[] testsignal1;

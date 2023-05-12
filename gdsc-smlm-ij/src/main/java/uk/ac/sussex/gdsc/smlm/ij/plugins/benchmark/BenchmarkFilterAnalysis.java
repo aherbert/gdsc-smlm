@@ -472,7 +472,7 @@ public class BenchmarkFilterAnalysis
         // Scores using integer scoring
         "TP", "FP", "FN", "Precision", "Recall", "F1", "Jaccard",
         // Scores using fractional scoring
-        "fTP", "fFP", "fFN", "fPrecision", "fRecall", "fF1", "fJaccard",};
+        "fTP", "fFP", "fFN", "fPrecision", "fRecall", "fF1", "fJaccard"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());

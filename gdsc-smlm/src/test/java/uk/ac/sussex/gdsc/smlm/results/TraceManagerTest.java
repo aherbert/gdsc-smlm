@@ -178,7 +178,7 @@ class TraceManagerTest {
     RandomUtils.shuffle(positions, rand);
 
     // Offsets for movement around the 2x2 region
-    final int[][] offsets = new int[][] {{0, 0}, {0, 1}, {1, 0}, {1, 1},};
+    final int[][] offsets = new int[][] {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
 
     final Trace[] expected = new Trace[molecules];
     for (int j = 0; j < expected.length; j++) {

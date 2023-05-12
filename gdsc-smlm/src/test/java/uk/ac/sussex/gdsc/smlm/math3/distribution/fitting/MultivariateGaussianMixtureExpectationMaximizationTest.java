@@ -435,7 +435,7 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
                 new MultivariateGaussianDistribution(new double[2],
                     new double[][] {{1, 0}, {0, 2}}),
                 new MultivariateGaussianDistribution(new double[2],
-                    new double[][] {{1, 0}, {0, 2}}),});
+                    new double[][] {{1, 0}, {0, 2}})});
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       fitter.fit(initialMixture2, maxIterations, DEFAULT_CONVERGENCE_CHECKER);
     });

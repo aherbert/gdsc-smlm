@@ -295,8 +295,10 @@ public class GaussianFilter extends BaseWeightedFilter {
     // not including broadening by downscale & upscale
     final int readFrom = (writeFrom - kRadius < 0) ? 0 : writeFrom - kRadius;
     final int readTo = (writeTo + kRadius > length) ? length : writeTo + kRadius;
-    final int newLength = doDownscaling ? // line length for convolution
-        (readTo - readFrom + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1) : length;
+    // line length for convolution
+    final int newLength =
+        doDownscaling ? (readTo - readFrom + reduceBy - 1) / reduceBy + 2 * (UPSCALE_K_RADIUS + 1)
+            : length;
     // input point corresponding to cache index 0
     final int unscaled0 = readFrom - (UPSCALE_K_RADIUS + 1) * reduceBy;
     // the following is relevant for upscaling only

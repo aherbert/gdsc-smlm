@@ -143,7 +143,7 @@ class ResidenceTimeFittingTest {
 
   @ParameterizedTest
   @CsvSource({"1, 1", "1, 2", "1, 0.5", "0.5, 1", "0.5, 2", "0.5, 0.5", "0.75, 0.5", "0.75, 1.5",
-      "1.5, 2",})
+      "1.5, 2"})
   void testRate(double k, double resolution) {
     // This is the computed assuming a geometric distribution histogram.
     final double mean = 1 / k;
@@ -186,7 +186,7 @@ class ResidenceTimeFittingTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"0.1, 3, 0.5", "2, 4, 0.25",})
+  @CsvSource({"0.1, 3, 0.5", "2, 4, 0.25"})
   void testModel2(double k0, double k1, double f0) {
     final ExponentialDistribution d0 = new ExponentialDistribution(null, 1 / k0);
     final ExponentialDistribution d1 = new ExponentialDistribution(null, 1 / k1);
@@ -217,7 +217,7 @@ class ResidenceTimeFittingTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"0.1, 50, 1", "1.5, 50, 0.125", "1.5, 100, 0.25",})
+  @CsvSource({"0.1, 50, 1", "1.5, 50, 0.125", "1.5, 100, 0.25"})
   void testFunction1(double k0, int size, double resolution) {
     // Create data
     final UniformRandomProvider rng = RngFactory.create(0xbeefc0de);
@@ -256,7 +256,7 @@ class ResidenceTimeFittingTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"0.1, 3, 0.5, 200, 0.125", "2, 4, 0.25, 200, 0.0625",})
+  @CsvSource({"0.1, 3, 0.5, 200, 0.125", "2, 4, 0.25, 200, 0.0625"})
   void testFunction2(double k0, double k1, double f0, int size, double resolution) {
     // Create data
     final double f1 = 1 - f0;
