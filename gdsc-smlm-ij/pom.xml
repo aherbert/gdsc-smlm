@@ -110,18 +110,6 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
       <artifactId>mfl-core</artifactId>
       <version>${mfl-core.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.jogamp.gluegen</groupId>
-      <artifactId>gluegen-rt-main</artifactId>
-      <optional>true</optional>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jogamp.jogl</groupId>
-      <artifactId>jogl-all-main</artifactId>
-      <optional>true</optional>
-      <scope>runtime</scope>
-    </dependency>
   </dependencies>
 
   <build>
