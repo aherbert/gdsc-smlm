@@ -1,5 +1,5 @@
 {
-  "2.1" : [ {
+  "1.1" : [ {
     "extension" : "revapi.differences",
     "id" : "intentional-api-changes",
     "configuration" : {
