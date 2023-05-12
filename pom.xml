@@ -409,14 +409,14 @@ Software for single molecule localisation microscopy (SMLM)
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>
-          <skip>true</skip>
+          <skip>false</skip>
           <!-- For reporting do not ignore the "intentional-api-changes" so they are included -->
           <analysisConfigurationFiles>
             <configurationFile>
               <path>${gdsc.parent.dir}/src/conf/revapi/api-changes.json</path>
               <roots>
                 <!-- Path(s) to configuration in the JSON config file -->
-                <root>2.1</root>
+                <root>1.1</root>
               </roots>
             </configurationFile>
           </analysisConfigurationFiles>
@@ -424,10 +424,14 @@ Software for single molecule localisation microscopy (SMLM)
             <revapi.filter>
               <elements>
                 <exclude>
+                  <!-- Ignore changes to ImageJ methods.
+                    The GDSC SMLM code aims to run within the latest ImageJ. -->
+                  <item>method .* ij\..*</item>
+                  <!-- Ignore changes to generated code -->
                   <item>class .*Protos</item>
                   <item>class .*Protos\..*</item>
                   <item>class com\.google\.protobuf.*</item>
-                  <item>method com\.google\.protobuf.*</item>
+                  <item>method .* com\.google\.protobuf.*</item>
                   <item>interface com\.google\.protobuf.*</item>
                 </exclude>>
               </elements>
