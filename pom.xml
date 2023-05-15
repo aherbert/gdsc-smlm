@@ -119,11 +119,7 @@ Software for single molecule localisation microscopy (SMLM)
     <!-- Dependency versions -->
     <gdsc.core.version>2.1-SNAPSHOT</gdsc.core.version>
     <xstream.version>1.4.20</xstream.version>
-    <ejml.version>0.24</ejml.version>
     <JTransforms.version>3.1</JTransforms.version>
-    <!-- This is managed in pom-scijava 34.1.1.
-         It is not manged by the current inherited pom-scijava.  -->
-    <protobuf.version>3.16.3</protobuf.version>
     <jsoup.version>1.15.3</jsoup.version>
     <mfl-core.version>0.5.6</mfl-core.version>
 
@@ -154,7 +150,6 @@ Software for single molecule localisation microscopy (SMLM)
     <dependency>
       <groupId>com.googlecode.efficient-java-matrix-library</groupId>
       <artifactId>ejml</artifactId>
-      <version>${ejml.version}</version>
     </dependency>
     <dependency>
       <groupId>com.github.wendykierp</groupId>
@@ -165,12 +160,10 @@ Software for single molecule localisation microscopy (SMLM)
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java-util</artifactId>
-      <version>${protobuf.version}</version>
     </dependency>
 
     <!-- Managed dependencies -->

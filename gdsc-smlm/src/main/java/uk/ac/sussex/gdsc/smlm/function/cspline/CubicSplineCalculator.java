@@ -25,8 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import uk.ac.sussex.gdsc.core.data.TrivalueProvider;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;

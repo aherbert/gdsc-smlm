@@ -28,8 +28,8 @@ import java.util.logging.Logger;
 import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 

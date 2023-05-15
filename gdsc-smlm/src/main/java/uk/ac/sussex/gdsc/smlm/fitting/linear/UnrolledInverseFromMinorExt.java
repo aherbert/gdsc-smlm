@@ -58,7 +58,7 @@ public final class UnrolledInverseFromMinorExt {
    * Invert the matrix and return the diagonal.
    *
    * @param mat the matrix
-   * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+   * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
   public static double[] inv(DenseMatrix64F mat) {
     double max = Math.abs(mat.data[0]);
@@ -91,7 +91,7 @@ public final class UnrolledInverseFromMinorExt {
    *
    * @param mat the 2x2 matrix
    * @param scale the scale (set to the maximum of the matrix data, or 1)
-   * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+   * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
   public static double[] inv2(DenseMatrix64F mat, double scale) {
     final double[] data = mat.data;
@@ -119,7 +119,7 @@ public final class UnrolledInverseFromMinorExt {
    *
    * @param mat the 3x3 matrix
    * @param scale the scale (set to the maximum of the matrix data, or 1)
-   * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+   * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
   public static double[] inv3(DenseMatrix64F mat, double scale) {
     final double[] data = mat.data;
@@ -154,7 +154,7 @@ public final class UnrolledInverseFromMinorExt {
    *
    * @param mat the 4x4 matrix
    * @param scale the scale (set to the maximum of the matrix data, or 1)
-   * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+   * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
   public static double[] inv4(DenseMatrix64F mat, double scale) {
     final double[] data = mat.data;
@@ -205,7 +205,7 @@ public final class UnrolledInverseFromMinorExt {
    *
    * @param mat the 5x5 matrix
    * @param scale the scale (set to the maximum of the matrix data, or 1)
-   * @return the diagonal of the inverse (or null if there is no det_reciperminant)
+   * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
   public static double[] inv5(DenseMatrix64F mat, double scale) {
     final double[] data = mat.data;

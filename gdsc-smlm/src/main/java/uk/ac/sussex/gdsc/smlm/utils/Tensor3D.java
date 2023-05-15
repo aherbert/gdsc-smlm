@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.utils;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.EigenDecomposition;
+import org.ejml.interfaces.decomposition.EigenDecomposition;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
