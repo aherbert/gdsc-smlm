@@ -130,9 +130,6 @@ Software for single molecule localisation microscopy (SMLM)
     <!-- Other maven plugin versions -->
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <os-maven-plugin.version>1.6.0</os-maven-plugin.version>
-
-    <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
-    <revapi-java.version>0.28.1</revapi-java.version>
   </properties>
 
   <dependencies>
