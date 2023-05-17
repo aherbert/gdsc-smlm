@@ -305,15 +305,6 @@ Software for single molecule localisation microscopy (SMLM)
         <configuration>
           <excludes>**\/*Protos.java</excludes>
         </configuration>
-        <executions>
-          <execution>
-            <id>verify</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>

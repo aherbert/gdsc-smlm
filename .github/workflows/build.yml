@@ -29,7 +29,7 @@ jobs:
       run: mvn -B --no-transfer-progress dependency:purge-local-repository -DmanualInclude="uk.ac.sussex.gdsc:gdsc-ij-parent,uk.ac.sussex.gdsc:gdsc-smlm,uk.ac.sussex.gdsc:gdsc-smlm-ij"
     - name: Build
       # Note: revapi is skipped only in the modules containing the profile
-      run: mvn -V -B --no-transfer-progress -P jacoco,revapi-skip verify jacoco:report
+      run: mvn -V -B --no-transfer-progress -P jacoco,revapi-skip checkstyle:check verify jacoco:report
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
