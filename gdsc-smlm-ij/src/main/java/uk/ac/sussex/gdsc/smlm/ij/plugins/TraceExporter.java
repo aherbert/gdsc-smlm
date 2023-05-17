@@ -37,10 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
@@ -759,6 +759,7 @@ public class TraceExporter implements PlugIn {
   }
 
   private static void handleException(Exception ex) {
-    Logger.getLogger(TraceExporter.class.getName()).log(Level.SEVERE, "Failed to export", ex);
+    ImageJPluginLoggerHelper.getLogger(TraceExporter.class).log(Level.SEVERE, "Failed to export",
+        ex);
   }
 }

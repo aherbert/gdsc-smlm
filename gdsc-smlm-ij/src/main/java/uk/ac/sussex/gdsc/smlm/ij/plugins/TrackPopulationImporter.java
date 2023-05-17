@@ -36,9 +36,9 @@ import java.nio.file.Paths;
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.apache.commons.rng.core.util.NumberFactory;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomLong2IntOpenHashMap;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -162,7 +162,7 @@ public class TrackPopulationImporter implements PlugIn {
       }
 
       final BitSet assigned = assignCategory(data, resultMap, categoryMap);
-      Logger.getLogger(TrackPopulationImporter.class.getName()).log(Level.INFO,
+      ImageJPluginLoggerHelper.getLogger(TrackPopulationImporter.class).log(Level.INFO,
           () -> String.format("Assigned %d/%d", assigned.cardinality(), data.length));
 
       // Set all other categories to zero (optional)
@@ -330,8 +330,8 @@ public class TrackPopulationImporter implements PlugIn {
 
   private static void handleException(Exception ex) {
     IJ.error(TITLE, "Failed to import: " + ex.getMessage());
-    Logger.getLogger(TrackPopulationImporter.class.getName()).log(Level.SEVERE, "Failed to import",
-        ex);
+    ImageJPluginLoggerHelper.getLogger(TrackPopulationImporter.class).log(Level.SEVERE,
+        "Failed to import", ex);
   }
 
   /**

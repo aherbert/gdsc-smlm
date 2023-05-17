@@ -28,7 +28,7 @@ import ij3d.ImageJ_3D_Viewer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 
 /**
  * Utility class for the {@link ImageJ_3D_Viewer}.
@@ -53,7 +53,7 @@ final class ImageJ3DViewerUtils {
     try {
       version = ImageJ_3D_Viewer.getJava3DVersion();
     } catch (final Throwable thrown) {
-      Logger.getLogger(ImageJ3DViewerUtils.class.getName()).log(Level.SEVERE,
+      ImageJPluginLoggerHelper.getLogger(ImageJ3DViewerUtils.class).log(Level.SEVERE,
           "Java 3D is not available", thrown);
     } finally {
       JAVA_3D_VERSION = version;

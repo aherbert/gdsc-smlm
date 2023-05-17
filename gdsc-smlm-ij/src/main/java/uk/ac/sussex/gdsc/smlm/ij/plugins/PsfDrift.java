@@ -49,13 +49,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -973,7 +973,8 @@ public class PsfDrift implements PlugIn {
     try {
       jobs.put(job);
     } catch (final InterruptedException ex) {
-      Logger.getLogger(PsfDrift.class.getName()).log(Level.SEVERE, "Unexpected interruption", ex);
+      ImageJPluginLoggerHelper.getLogger(PsfDrift.class).log(Level.SEVERE,
+          "Unexpected interruption", ex);
       Thread.currentThread().interrupt();
     }
   }

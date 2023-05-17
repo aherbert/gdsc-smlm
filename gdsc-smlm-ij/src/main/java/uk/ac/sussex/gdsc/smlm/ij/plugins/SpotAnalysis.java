@@ -80,7 +80,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -90,6 +89,7 @@ import javax.swing.event.ListSelectionListener;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
@@ -1098,7 +1098,7 @@ public class SpotAnalysis extends PlugInFrame
       }
     } catch (final IOException ex) {
       // Q. Add better handling of errors?
-      Logger.getLogger(getClass().getName()).log(Level.WARNING, ex,
+      ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING, ex,
           () -> "Failed to save traces to results directory: " + resultsDirectory);
     }
   }

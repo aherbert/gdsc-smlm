@@ -46,10 +46,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntConsumer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -909,7 +909,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     try {
       jobs.put(index);
     } catch (final InterruptedException ex) {
-      Logger.getLogger(BenchmarkSmartSpotRanking.class.getName()).log(Level.WARNING,
+      ImageJPluginLoggerHelper.getLogger(BenchmarkSmartSpotRanking.class).log(Level.WARNING,
           "Unexpected interruption", ex);
       Thread.currentThread().interrupt();
     }

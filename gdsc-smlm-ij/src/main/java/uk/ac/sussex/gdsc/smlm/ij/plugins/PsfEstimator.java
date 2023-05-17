@@ -36,13 +36,13 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.TestUtils;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -509,8 +509,8 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
           return ABORTED;
         }
       } catch (final Exception ex) {
-        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error while estimating the PSF",
-            ex);
+        ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING,
+            "Error while estimating the PSF", ex);
         return EXCEPTION;
       }
     }

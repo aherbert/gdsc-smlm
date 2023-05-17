@@ -40,7 +40,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
@@ -57,6 +56,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.GUIFilterSettings;
@@ -343,7 +343,8 @@ public class CreateFilters implements PlugIn, ItemListener {
         saxParser.parse(new InputSource(new StringReader(xml)),
             new AttributeSubstitutionHandler(sb, attributeSubstitutions));
       } catch (final IOException | ParserConfigurationException | SAXException ex) {
-        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to log filter", ex);
+        ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING, "Failed to log filter",
+            ex);
         return;
       }
       xml = sb.toString();

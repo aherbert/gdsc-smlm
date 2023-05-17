@@ -663,8 +663,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           out.newLine();
         }
       } catch (final IOException ex) {
-        Logger.getLogger(getClass().getName()).log(Level.WARNING,
-            "Failed to save trace distances: " + settings.distancesFilename, ex);
+        ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING, ex,
+            () -> "Failed to save trace distances: " + settings.distancesFilename);
       }
     }
   }
@@ -692,8 +692,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         out.newLine();
       }
     } catch (final IOException ex) {
-      Logger.getLogger(getClass().getName()).log(Level.WARNING,
-          "Failed to save MSD file: " + filename.toString(), ex);
+      ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING, ex,
+          () -> "Failed to save MSD file: " + filename.toString());
     }
   }
 
@@ -727,8 +727,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         }
       }
     } catch (final IOException ex) {
-      Logger.getLogger(getClass().getName()).log(Level.WARNING,
-          "Failed to save statistics: " + filename, ex);
+      ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING, ex,
+          () -> "Failed to save statistics: " + filename);
     }
   }
 
@@ -753,8 +753,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         out.newLine();
       }
     } catch (final IOException ex) {
-      Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to save fit: " + filename,
-          ex);
+      ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING, ex,
+          () -> "Failed to save fit: " + filename);
     }
   }
 

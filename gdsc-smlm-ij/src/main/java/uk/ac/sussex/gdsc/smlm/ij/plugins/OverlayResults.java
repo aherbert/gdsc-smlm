@@ -45,9 +45,9 @@ import java.awt.event.ItemListener;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
@@ -183,7 +183,7 @@ public class OverlayResults implements PlugIn {
           drawOverlay(index);
         } catch (final InterruptedException ex) {
           running = false;
-          Logger.getLogger(OverlayResults.class.getName()).log(Level.WARNING,
+          ImageJPluginLoggerHelper.getLogger(OverlayResults.class).log(Level.WARNING,
               "Unexpected intteruption", ex);
           Thread.currentThread().interrupt();
         }
@@ -464,7 +464,8 @@ public class OverlayResults implements PlugIn {
       try {
         thread.join(0);
       } catch (final InterruptedException ex) {
-        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unexpected interruption", ex);
+        ImageJPluginLoggerHelper.getLogger(getClass()).log(Level.WARNING, "Unexpected interruption",
+            ex);
         Thread.currentThread().interrupt();
       }
     }

@@ -74,7 +74,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
@@ -88,6 +87,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -6891,7 +6891,7 @@ public class BenchmarkFilterAnalysis
         try {
           thread.join();
         } catch (final InterruptedException ex) {
-          Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING,
+          ImageJPluginLoggerHelper.getLogger(BenchmarkFilterAnalysis.class).log(Level.WARNING,
               "Interrupted!", ex);
           Thread.currentThread().interrupt();
           throw new ConcurrentRuntimeException("Unexpected interruption", ex);
@@ -6969,7 +6969,7 @@ public class BenchmarkFilterAnalysis
         try {
           thread.join();
         } catch (final InterruptedException ex) {
-          Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING,
+          ImageJPluginLoggerHelper.getLogger(BenchmarkFilterAnalysis.class).log(Level.WARNING,
               "Interrupted!", ex);
           Thread.currentThread().interrupt();
           throw new ConcurrentRuntimeException("Unexpected interruption", ex);
@@ -6997,8 +6997,8 @@ public class BenchmarkFilterAnalysis
     try {
       jobs.put(job);
     } catch (final InterruptedException ex) {
-      Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING, "Interrupted!",
-          ex);
+      ImageJPluginLoggerHelper.getLogger(BenchmarkFilterAnalysis.class).log(Level.WARNING,
+          "Interrupted!", ex);
       Thread.currentThread().interrupt();
       throw new ConcurrentRuntimeException("Unexpected interruption", ex);
     }
