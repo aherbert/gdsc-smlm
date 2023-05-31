@@ -918,19 +918,19 @@ public class CmosAnalysis implements PlugIn {
 
         if (error) {
           // Kill the workers
-          workers.stream().forEach(worker -> worker.finished = true);
+          workers.forEach(worker -> worker.finished = true);
           // Clear the queue
           jobs.clear();
           // Signal any waiting workers
-          workers.stream().forEach(worker -> jobs.add(ImageWorker.STOP_SIGNAL));
+          workers.forEach(worker -> jobs.add(ImageWorker.STOP_SIGNAL));
           // Cancel by interruption. We set the finished flag so the ImageWorker should
           // ignore the interrupt.
-          futures.stream().forEach(future -> future.cancel(true));
+          futures.forEach(future -> future.cancel(true));
           break;
         }
 
         // Finish all the worker threads cleanly
-        workers.stream().forEach(worker -> jobs.add(ImageWorker.STOP_SIGNAL));
+        workers.forEach(worker -> jobs.add(ImageWorker.STOP_SIGNAL));
 
         // Wait for all to finish
         ConcurrencyUtils.waitForCompletionUnchecked(futures);

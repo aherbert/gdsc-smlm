@@ -240,7 +240,7 @@ public class DensityEstimator implements PlugIn {
     final Statistics stats = new Statistics();
     final float[] frame = new float[total];
     final float[] density = new float[total];
-    densities.stream().forEach(fd -> {
+    densities.forEach(fd -> {
       for (int i = 0; i < fd.counts.length; i++) {
         final double d = (fd.counts[i] / fd.values[i]) * scale;
         frame[stats.getN()] = fd.frame;

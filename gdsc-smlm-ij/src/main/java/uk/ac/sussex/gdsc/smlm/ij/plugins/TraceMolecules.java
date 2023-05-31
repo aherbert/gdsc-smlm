@@ -1083,7 +1083,7 @@ public class TraceMolecules implements PlugIn {
         settings.getMaxTimeThreshold(), settings.getOptimiserSteps());
 
     // Convert distance threshold back to nm
-    results.stream().forEach(x -> x[0] = c.convert(x[0]));
+    results.forEach(x -> x[0] = c.convert(x[0]));
     SimpleArrayUtils.apply(distanceThresholds, c::convert);
 
     // Compute fractional difference from the true value:
