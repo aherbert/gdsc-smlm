@@ -79,7 +79,10 @@ public class TiffSeriesViewer implements PlugIn {
    */
   private static class Settings {
     static final String[] MODE = {"Directory", "File"};
-    static final String[] OUTPUT_MODE = {"Image", "Files"};
+    static final String[] OUTPUT_MODE = {"Image", "Files", "Validate"};
+    static final int INPUT_DIRECTORY = 0;
+    static final int OUTPUT_FILES = 1;
+    static final int OUTPUT_VALIDATE = 2;
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
@@ -222,7 +225,7 @@ public class TiffSeriesViewer implements PlugIn {
           }
 
           private boolean collectOptions(boolean silent) {
-            if (settings.outputMode == 0) {
+            if (settings.outputMode != Settings.OUTPUT_FILES) {
               // Nothing to do
               return false;
             }
@@ -264,7 +267,7 @@ public class TiffSeriesViewer implements PlugIn {
     settings.save();
 
     SeriesImageSource source;
-    if (settings.inputMode == 0) {
+    if (settings.inputMode == Settings.INPUT_DIRECTORY) {
       final SeriesOpener series = new SeriesOpener(settings.inputDirectory);
       if (series.getNumberOfImages() == 0) {
         IJ.error(TITLE, "No images in the selected directory:\n" + settings.inputDirectory);
@@ -285,6 +288,8 @@ public class TiffSeriesViewer implements PlugIn {
     }
     ImageJUtils.showStatus("Opening TIFF ...");
     final TrackProgressAdapter progress = new TrackProgressAdapter() {
+      private final boolean logProgress = settings.logProgress;
+
       @Override
       public void progress(double fraction) {
         IJ.showProgress(fraction);
@@ -297,7 +302,7 @@ public class TiffSeriesViewer implements PlugIn {
 
       @Override
       public void log(String format, Object... args) {
-        if (settings.logProgress) {
+        if (logProgress) {
           ImageJUtils.log(format, args);
         }
       }
@@ -309,10 +314,18 @@ public class TiffSeriesViewer implements PlugIn {
 
       @Override
       public boolean isLog() {
-        return settings.logProgress;
+        return logProgress;
       }
     };
     source.setTrackProgress(progress);
+    if (settings.outputMode == Settings.OUTPUT_VALIDATE) {
+      if (validate(source, progress)) {
+        ImageJUtils.finished(source.getName() + " valid");
+      } else {
+        IJ.error(TITLE, "Not a valid image series");
+      }
+      return;
+    }
     if (!source.open()) {
       IJ.error(TITLE, "Cannot open the image");
       return;
@@ -377,7 +390,7 @@ public class TiffSeriesViewer implements PlugIn {
    * Update the 1st label in the dialog.
    */
   void updateLabel() {
-    if (settings.inputMode == 0) {
+    if (settings.inputMode == Settings.INPUT_DIRECTORY) {
       label.setText(settings.inputDirectory);
     } else {
       label.setText(settings.inputFile);
@@ -388,12 +401,53 @@ public class TiffSeriesViewer implements PlugIn {
    * Update the 2nd label in the dialog.
    */
   void updateLabel2() {
-    if (settings.outputMode == 0) {
-      label2.setText("");
-    } else {
+    if (settings.outputMode == Settings.OUTPUT_FILES) {
       label2.setText(String.format("Slices per image = %d : %s", settings.imageCount,
           settings.outputDirectory));
+    } else {
+      label2.setText("");
     }
+  }
+
+  /**
+   * Validate the series. This method will open the series; get the last raw frame from each image;
+   * and close the series.
+   *
+   * @param source the source
+   * @param progress the progress
+   * @return true if valid
+   */
+  private static boolean validate(SeriesImageSource source, TrackProgressAdapter progress) {
+    if (!source.open()) {
+      progress.log("Failed to open image series: " + source.getName());
+      return false;
+    }
+    // All images have non-zero size
+    int frame = 0;
+    final int n = source.getSeriesSize();
+    try {
+      for (int i = 0; i < n; i++) {
+        ImageJUtils.showSlowProgress(i, n);
+        final int size = source.getImageSize(i);
+        if (size <= 0) {
+          final FileInfo[] fi = source.getFileInfo(i);
+          if (fi != null) {
+            progress.log("Unknown size for image: [%d] %s", i, fi[0].fileName);
+          } else {
+            progress.log("Unknown size for image: [%d]", i);
+          }
+          return false;
+        }
+        frame += size;
+        if (source.getRaw(frame) == null) {
+          return false;
+        }
+      }
+    } finally {
+      ImageJUtils.clearSlowProgress();
+      source.close();
+    }
+    return true;
   }
 
   /**

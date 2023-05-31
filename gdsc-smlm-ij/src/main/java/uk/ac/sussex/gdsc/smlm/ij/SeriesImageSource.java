@@ -779,7 +779,7 @@ public class SeriesImageSource extends ImageSource {
 
             // Check the image map is the correct size (only if we have sizes)
             if (indexMap != null
-                && (imageSize == null || indexMap.getSize() == getImageSize(currentImage))) {
+                && (imageSize == null || indexMap.getSize() == getRawImageSize(currentImage))) {
               // We need the first IFD to define the image pixel type and width/height
               final ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, true);
               // Do not pass the stream. A new one will be opened by the TiffImage
@@ -817,7 +817,7 @@ public class SeriesImageSource extends ImageSource {
             setError(new DataException("Dimension mismatch"));
             break;
           }
-          if (imageSize != null && image.getSize() != getImageSize(currentImage)) {
+          if (imageSize != null && image.getSize() != getRawImageSize(currentImage)) {
             setError(new DataException("Unexpected image size"));
             break;
           }
@@ -989,7 +989,7 @@ public class SeriesImageSource extends ImageSource {
               setError(new DataException("Dimension mismatch"));
               break;
             }
-            if (imageSize != null && image.getSize() != getImageSize(currentImage)) {
+            if (imageSize != null && image.getSize() != getRawImageSize(currentImage)) {
               setError(new DataException("Unexpected image size"));
               break;
             }
@@ -1400,10 +1400,10 @@ public class SeriesImageSource extends ImageSource {
   /**
    * Gets the image size.
    *
-   * @param index the index
+   * @param index the image index
    * @return the image size
    */
-  int getImageSize(int index) {
+  int getRawImageSize(int index) {
     return (index == 0) ? imageSize[index] : imageSize[index] - imageSize[index - 1];
   }
 
@@ -1707,7 +1707,7 @@ public class SeriesImageSource extends ImageSource {
       final IndexMap indexMap = td.getIndexMap();
 
       // Check the image map is the correct size (only if we have sizes)
-      if (indexMap != null && (imageSize == null || indexMap.getSize() == getImageSize(id))) {
+      if (indexMap != null && (imageSize == null || indexMap.getSize() == getRawImageSize(id))) {
         // We need the first IFD to define the image pixel type and width/height
         final ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, pixelInfoOnly);
         // A byte array seekable stream will ignore the close() method so we can re-use it
@@ -1819,7 +1819,10 @@ public class SeriesImageSource extends ImageSource {
   /**
    * Gets the number of images to buffer into memory.
    *
+   * <p>Note: This is not the number of images in the series.
+   *
    * @return the number of images
+   * @see #getSeriesSize()
    */
   public int getNumberOfImages() {
     return numberOfImages;
@@ -1844,6 +1847,15 @@ public class SeriesImageSource extends ImageSource {
   }
 
   /**
+   * Gets the number of images in the series.
+   *
+   * @return the series size
+   */
+  public int getSeriesSize() {
+    return imageData != null ? imageData.length : 0;
+  }
+
+  /**
    * Gets the a reference to the file info for image n in the series.
    *
    * @param index the image index
@@ -1857,5 +1869,20 @@ public class SeriesImageSource extends ImageSource {
       }
     }
     return null;
+  }
+
+  /**
+   * Gets the image size for image n in the series.
+   *
+   * <p>Note: This will return -1 if non-sequential access is not supported.
+   *
+   * @param index the image index
+   * @return the image size (or -1 if unknown)
+   */
+  public int getImageSize(int index) {
+    if (imageSize != null && index >= 0 && index < imageSize.length) {
+      return getRawImageSize(index);
+    }
+    return -1;
   }
 }

@@ -81,10 +81,12 @@ class SeriesImageSourceTest {
     }
     source.setReadHint(ReadHint.SEQUENTIAL);
     source.open();
+    Assertions.assertEquals(n, source.getSeriesSize());
     Assertions.assertEquals(width, source.getWidth());
     Assertions.assertEquals(height, source.getHeight());
     Assertions.assertEquals(depth * n, source.getFrames());
     for (int i = 0; i < stacks.length; i++) {
+      Assertions.assertEquals(-1, source.getImageSize(i), "Non-sequential mode should not be supported");
       for (int j = 0; j < depth; j++) {
         final float[] e = (float[]) stacks[i].getPixels(j + 1);
         final float[] o = source.next();
@@ -126,11 +128,13 @@ class SeriesImageSourceTest {
     }
     source.setReadHint(ReadHint.NONSEQUENTIAL);
     source.open();
+    Assertions.assertEquals(n, source.getSeriesSize());
     Assertions.assertEquals(width, source.getWidth());
     Assertions.assertEquals(height, source.getHeight());
     Assertions.assertEquals(depth * n, source.getFrames());
     final float[][] pixels = new float[n * depth][];
     for (int i = 0, k = 0; i < stacks.length; i++) {
+      Assertions.assertEquals(depth, source.getImageSize(i));
       for (int j = 0; j < depth; j++) {
         pixels[k++] = (float[]) stacks[i].getPixels(j + 1);
       }

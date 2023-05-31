@@ -504,7 +504,8 @@ The following parameters can be specified:
 
        - ``Image``: Open a virtual image.
        - ``Files``: Split the input image into a series of files.
+       - ``Validate``: Validate that the last frame from each image can be opened. This ensures each image is not truncated.
 
        The files option can be used to extract the image frames into small stack images. The number of slices per image and the output directory can be configured using the ``...`` button. This option is useful if the original input image is too large to read in ImageJ, for example if it is a BIG-TIFF with a size over 4GB.
 
-       Saving to a series of files can be stopped using the ``Escape`` key. 
+       Saving to a series of files can be stopped using the ``Escape`` key.

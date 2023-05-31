@@ -17,6 +17,8 @@ Minor release of GDSC SMLM.
   times of stationary (bound) molecules.
 * Fix the :numref:`{name} <results_plugins:Save Localisations>` plugin error when the PSF is
   undefined.
+* Update the :numref:`{name} <tools_plugins:TIFF Series Viewer>` plugin with a validate output
+  mode.
 
 
 Version 1.0.2
