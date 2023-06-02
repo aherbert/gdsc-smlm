@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
 
 /**
  * Contains methods for converting an image to float data. Simple wrapper around
- * uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
+ * {@link ImageConverter};
  */
 public final class ImageJImageConverter {
   /**
