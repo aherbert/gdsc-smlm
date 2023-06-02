@@ -19,6 +19,8 @@ Minor release of GDSC SMLM.
   undefined.
 * Update the :numref:`{name} <tools_plugins:TIFF Series Viewer>` plugin with a validate output
   mode.
+* Update the view model action in the :numref:`{name} <calibration_plugins:Camera Model Manager>`
+  plugin. Allow display of histograms of the model pixel data; and outlier pixels.
 
 
 Version 1.0.2

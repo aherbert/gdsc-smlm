@@ -1106,6 +1106,22 @@ public class CmosAnalysis implements PlugIn {
 
   private static void showHistogram(String name, double[] values, int bins, Statistics stats,
       WindowOrganiser wo) {
+    showHistogram(TITLE, name, values, bins, stats, wo);
+  }
+
+  /**
+   * Show a histogram of the values.
+   *
+   * @param title the title to prepend to the name
+   * @param name the name of the value
+   * @param values the values
+   * @param bins the number of histogram bins
+   * @param stats the summary statistics
+   * @param wo the window organiser used for the plot window
+   * @return the plot
+   */
+  static Plot showHistogram(String title, String name, double[] values, int bins, Statistics stats,
+      WindowOrganiser wo) {
     final DoubleData data = DoubleData.wrap(values);
     final double minWidth = 0;
     final int removeOutliers = 0;
@@ -1113,7 +1129,7 @@ public class CmosAnalysis implements PlugIn {
     final String label = String.format("Mean = %s +/- %s", MathUtils.rounded(stats.getMean()),
         MathUtils.rounded(stats.getStandardDeviation()));
 
-    final HistogramPlot histogramPlot = new HistogramPlotBuilder(TITLE, data, name)
+    final HistogramPlot histogramPlot = new HistogramPlotBuilder(title, data, name)
         .setMinBinWidth(minWidth).setRemoveOutliersOption(removeOutliers).setNumberOfBins(bins)
         .setPlotShape(shape).setPlotLabel(label).build();
 
@@ -1124,6 +1140,7 @@ public class CmosAnalysis implements PlugIn {
     plot.setLimits(limits[0], limits[1], 1, limits[3]);
     plot.setAxisYLog(true);
     plot.updateImage();
+    return plot;
   }
 
   private static <T> void put(BlockingQueue<T> jobs, T job) {

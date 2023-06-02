@@ -1154,7 +1154,28 @@ Prints the details of the current camera models to the ``ImageJ`` log. This incl
 View a Camera Model
 ~~~~~~~~~~~~~~~~~~~
 
-Presents a selection dialog to choose a camera model. The camera model data is then loaded from the data file and the offset (bias), variance and gain are shown as 3 slices in a stack. The plugin adds a 4\ :sup:`th` slice to the stack containing the normalised variance:
+Presents a selection dialog to choose a camera model and the following options:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Option
+     - Description
+
+   * - Model
+     - Name of the model.
+
+   * - Show histograms
+     - If **true** show histograms of the bias, gain and variance.
+
+   * - Histogram bins
+     - The number of histogram bins. Set to 0 for auto.
+
+   * - Outlier analysis
+     - If **true** show a non-blocking dialog to configure lower and upper limits on the model data. Any pixels outside the limits can be added to the camera model image as an overlay; or saved to file.
+
+The camera model data is from the data file and the offset (bias), gain and variance are shown as 3 slices in a stack. The plugin adds a 4\ :sup:`th` slice to the stack containing the normalised variance:
 
 .. math::
 
@@ -1172,6 +1193,14 @@ The plugin will compute the mean and standard deviation of each of the camera mo
 
 The numbers in square brackets are the minimum and maximum of the property values.
 
+Outlier Analysis
+^^^^^^^^^^^^^^^^
+
+The outlier analysis dialog presents sliders to allow the lower and upper limits for the model to be selected. The initial limits are set assuming the bias and gain follow a normal distribution and the variance follows an exponential distribution. Limits use a threshold of 1e-5 to identify the values from the lower and upper tails of the distribution.
+
+The limits will be displayed on the histogram plots if available. The limits can be reset to the initial values, used to label outlier pixels on the displayed camera model, or saved to file. When the outliers are added as an overlay to the camera model the number of outlier pixels is recorded in the ``ImageJ`` log window.
+
+The colours for the lower and upper limits can be selected. These update on the plots immediately but an update to the overlay requires the overlay to be redrawn using the ``Overlay`` button. The colours can be reset to use the defaults by using the ``Delete`` key within the text field to clear the colour. Choosing a new colour with the ``...`` option button will begin with the default colour.
 
 ..
   No index

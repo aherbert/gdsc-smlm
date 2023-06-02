@@ -495,6 +495,12 @@ message CameraModelManagerSettings {
   int32 origin_y = 3;
   string image = 4;
   string selected = 5;
+  bool showHistograms = 6;
+  int32 histogramBins = 7;
+  bool showOutliers = 8;
+  string outlierFilename = 9;
+  int32 lowerColour = 10;
+  int32 upperColour = 11;
 }
 
 // Contains settings for the Camera Model Analysis plugin

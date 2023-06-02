@@ -30,31 +30,51 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
+import ij.gui.Plot;
+import ij.gui.PointRoi;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
+import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.TextField;
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.swing.SwingUtilities;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.statistics.distribution.ContinuousDistribution;
+import org.apache.commons.statistics.distribution.ExponentialDistribution;
+import org.apache.commons.statistics.distribution.NormalDistribution;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.ExtendedStatistics;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2IntOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CameraModelManagerSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CameraModelManagerSettings.Builder;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
@@ -65,6 +85,8 @@ import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 public class CameraModelManager implements PlugIn {
   private static final String TITLE = "Camera Model Manager";
   private static final String INFO_TAG = "Per-pixel camera model data";
+  private static final Color LOWER_COLOR = new Color(238, 119, 51); // Orange
+  private static final Color UPPER_COLOR = new Color(0, 153, 136); // Teal
 
   private static final AtomicReference<String> DIRECTORY = new AtomicReference<>("");
   private static final AtomicReference<String> FILENAME = new AtomicReference<>("");
@@ -474,6 +496,9 @@ public class CameraModelManager implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listCameraModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
+    gd.addCheckbox("Show_histograms", pluginSettings.getShowHistograms());
+    gd.addNumericField("Histogram_bins", pluginSettings.getHistogramBins());
+    gd.addCheckbox("Outlier_analysis", pluginSettings.getShowOutliers());
     gd.addHelp(HelpUrls.getUrl("camera-model-manager-view"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -481,6 +506,9 @@ public class CameraModelManager implements PlugIn {
     }
     final String name = gd.getNextChoice();
     pluginSettings.setSelected(name);
+    pluginSettings.setShowHistograms(gd.getNextBoolean());
+    pluginSettings.setHistogramBins(Math.max((int) gd.getNextNumber(), 0));
+    pluginSettings.setShowOutliers(gd.getNextBoolean());
 
     // Try and get the named resource
     final CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
@@ -504,9 +532,21 @@ public class CameraModelManager implements PlugIn {
       return;
     }
     ImageJUtils.log("Camera model: %s\n%s", name, resource);
+    final WindowOrganiser wo = new WindowOrganiser();
+    final Plot[] plots = new Plot[3];
+    final ExtendedStatistics[] stats = new ExtendedStatistics[3];
     for (int n = 1; n <= stack.getSize(); n++) {
-      logStats(stack.getSliceLabel(n), stack.getProcessor(n));
+      final ImageProcessor ip = stack.getProcessor(n);
+      final ExtendedStatistics s = logStats(stack.getSliceLabel(n), ip);
+      stats[n - 1] = s;
+      if (pluginSettings.getShowHistograms()) {
+        plots[n - 1] = CmosAnalysis.showHistogram(name, stack.getSliceLabel(n),
+            ImageJImageConverter.getDoubleData(ip, null),
+            // data,
+            pluginSettings.getHistogramBins(), s, wo);
+      }
     }
+    wo.tile();
 
     // Show normalised variance: var/g^2
     final float[] varG2 = new float[stack.getWidth() * stack.getHeight()];
@@ -545,12 +585,17 @@ public class CameraModelManager implements PlugIn {
     imp = WindowManager.getImage(name);
     if (imp == null) {
       cimp.show();
+      imp = cimp;
     } else {
       imp.setImage(cimp);
     }
+
+    if (pluginSettings.getShowOutliers()) {
+      doOutlierAnalysis(plots, stats, imp, pluginSettings);
+    }
   }
 
-  private static void logStats(String name, ImageProcessor ip) {
+  private static ExtendedStatistics logStats(String name, ImageProcessor ip) {
     final ExtendedStatistics stats = new ExtendedStatistics();
     if (ip instanceof FloatProcessor) {
       stats.add((float[]) ip.getPixels());
@@ -560,12 +605,272 @@ public class CameraModelManager implements PlugIn {
       }
     }
     logStats(name, stats);
+    return stats;
   }
 
   private static void logStats(String name, ExtendedStatistics stats) {
     ImageJUtils.log("%s : %s += %s : [%s to %s]", name, MathUtils.rounded(stats.getMean()),
         MathUtils.rounded(stats.getStandardDeviation()), MathUtils.rounded(stats.getMin()),
         MathUtils.rounded(stats.getMax()));
+  }
+
+  /**
+   * Do the outlier analysis.
+   *
+   * @param plots the plots (plots can be null)
+   * @param stats the statistics for the camera model data
+   * @param imp the image
+   * @param pluginSettings the plugin settings
+   */
+  private static void doOutlierAnalysis(Plot[] plots, ExtendedStatistics[] stats, ImagePlus imp,
+      Builder pluginSettings) {
+    // Identify outliers.
+    // Assume the same distribution as the simulation model (see CMOS analysis plugin)
+    // n=1,2 : Bias, Gain ~ normal
+    // n=3 : Variance ~ exponential
+    final ContinuousDistribution[] dist =
+        {NormalDistribution.of(stats[0].getMean(), stats[0].getStandardDeviation()),
+            NormalDistribution.of(stats[1].getMean(), stats[1].getStandardDeviation()),
+            ExponentialDistribution.of(stats[2].getMean())};
+
+    final boolean nonBlocking = ImageJUtils.isShowGenericDialog();
+    final ExtendedGenericDialog gd =
+        nonBlocking ? new NonBlockingExtendedGenericDialog("Outlier analysis: " + imp.getTitle())
+            : new ExtendedGenericDialog("Outlier analysis: " + imp.getTitle());
+    gd.addMessage("Identify outlier pixels");
+    gd.addHelp(HelpUrls.getUrl("camera-model-manager-view"));
+    final double threshold = 1e-5;
+    final ImageStack stack = imp.getImageStack();
+    final double[] limits = new double[6];
+    final LocalList<TextField> fields = new LocalList<>(6);
+    final Color[] colors = {getColor(pluginSettings.getLowerColour(), UPPER_COLOR),
+        getColor(pluginSettings.getUpperColour(), LOWER_COLOR)};
+    for (int i = 0; i < 3; i++) {
+      final double lower = dist[i].inverseCumulativeProbability(threshold);
+      final double upper = dist[i].inverseSurvivalProbability(threshold);
+      limits[i * 2] = lower;
+      limits[i * 2 + 1] = upper;
+      if (plots[i] != null) {
+        // Create a snapshot to allow redraw of the original plot
+        plots[i].savePlotObjects();
+      }
+      fields.add(bind(gd.addAndGetSlider("Lower_" + stack.getSliceLabel(i + 1), stats[i].getMin(),
+          stats[i].getMax(), lower), limits, i * 2, plots[i], colors));
+      fields.add(bind(gd.addAndGetSlider("Upper_" + stack.getSliceLabel(i + 1), stats[i].getMin(),
+          stats[i].getMax(), upper), limits, i * 2 + 1, plots[i], colors));
+    }
+    // Bind to colour selection events
+    addColorField(gd, "Lower_colour", colors, 0, nonBlocking, plots, limits, pluginSettings);
+    addColorField(gd, "Upper_colour", colors, 1, nonBlocking, plots, limits, pluginSettings);
+    if (nonBlocking) {
+      ((NonBlockingExtendedGenericDialog) gd).setImage(imp);
+      // Note: We cannot hide the cancel button as then the help button will close the dialog.
+      // This is a feature of the ImageJ GenericDialog actions for the buttons.
+      final double[] original = limits.clone();
+      gd.addAndGetButton("Reset", e -> SwingUtilities.invokeLater(() -> {
+        System.arraycopy(original, 0, limits, 0, original.length);
+        // Note: Setting the field will trigger an update to the histogram plot via an event
+        for (int i = 0; i < limits.length; i++) {
+          fields.unsafeGet(i).setText(Double.toString(limits[i]));
+        }
+      }));
+      gd.addAndGetButton("Overlay", e -> overlayOutliers(imp, limits, colors));
+      gd.addAndGetButton("Clear Overlay", e -> imp.setOverlay(null));
+      gd.addAndGetButton("Save", e -> saveOutliers(imp, limits, pluginSettings));
+      addLimits(plots, limits, colors);
+    }
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return;
+    }
+    // Read the dialog to collect/record possible macro settings.
+    for (int i = 0; i < limits.length; i++) {
+      limits[i] = gd.getNextNumber();
+    }
+    colors[0] = getColor(gd.getNextColor(), UPPER_COLOR);
+    colors[1] = getColor(gd.getNextColor(), LOWER_COLOR);
+    // Hash code is the colour value
+    pluginSettings.setLowerColour(colors[0].hashCode());
+    pluginSettings.setUpperColour(colors[1].hashCode());
+    if (!nonBlocking) {
+      // Run once to show the outliers
+      addLimits(plots, limits, colors);
+      overlayOutliers(imp, limits, colors);
+    }
+  }
+
+  private static TextField bind(TextField tf, double[] limits, int i, Plot plot, Color[] colors) {
+    tf.addTextListener(e -> {
+      try {
+        limits[i] = Double.parseDouble(tf.getText());
+        if (plot != null) {
+          SwingUtilities.invokeLater(() -> {
+            plot.restorePlotObjects();
+            final int j = (i >> 1) << 1;
+            addLimits(plot, limits[j], limits[j + 1], colors);
+          });
+        }
+      } catch (final NumberFormatException ignored) {
+        // Ignore the update
+      }
+    });
+    return tf;
+  }
+
+  private static void addLimits(Plot[] plots, double[] limits, Color[] colors) {
+    for (int i = 0; i < 3; i++) {
+      if (plots[i] != null) {
+        addLimits(plots[i], limits[i * 2], limits[i * 2 + 1], colors);
+      }
+    }
+  }
+
+  private static void addLimits(Plot plot, double lower, double upper, Color[] colors) {
+    plot.setColor(colors[0]);
+    plot.drawLine(lower, 0, lower, 1e10);
+    plot.setColor(colors[1]);
+    plot.drawLine(upper, 0, upper, 1e10);
+    plot.updateImage();
+  }
+
+  private static TextField addColorField(ExtendedGenericDialog gd, String label, Color[] colors,
+      int index, boolean nonBlocking, Plot[] plots, double[] limits, Builder pluginSettings) {
+    gd.addColorField(label, colors[index]);
+    if (nonBlocking) {
+      final Color original = colors[index];
+      final TextField tf = gd.getLastTextField();
+      tf.addTextListener(e -> {
+        colors[index] = Colors.decode(tf.getText(), original);
+        if (tf.isVisible()) {
+          addLimits(plots, limits, colors);
+          pluginSettings.setLowerColour(colors[0].hashCode());
+          pluginSettings.setUpperColour(colors[1].hashCode());
+          writeCameraModelManagerSettings(pluginSettings);
+        }
+      });
+      return tf;
+    }
+    return null;
+  }
+
+  private static Color getColor(int color, Color defaultValue) {
+    return color == 0 ? defaultValue : new Color(color);
+  }
+
+  private static Color getColor(Color color, Color defaultValue) {
+    return color == null ? defaultValue : color;
+  }
+
+  private static void overlayOutliers(ImagePlus imp, double[] limits, Color[] colors) {
+    final ImageStack stack = imp.getImageStack();
+    final int width = stack.getWidth();
+    final Overlay o = new Overlay();
+    for (int slice = 1; slice <= 3; slice++) {
+      final ImageProcessor ip = stack.getProcessor(slice);
+      final int n = ip.getPixelCount();
+      final float lower = (float) limits[2 * (slice - 1)];
+      final float upper = (float) limits[2 * (slice - 1) + 1];
+      float[] x = new float[100];
+      float[] y = new float[x.length];
+      float[] x2 = new float[100];
+      float[] y2 = new float[x.length];
+      int count = 0;
+      int count2 = 0;
+      for (int i = 0; i < n; i++) {
+        final float f = ip.getf(i);
+        if (f < lower) {
+          x[count] = i % width;
+          y[count] = i / width;
+          count++;
+          if (count == x.length) {
+            x = Arrays.copyOf(x, count * 2);
+            y = Arrays.copyOf(y, count * 2);
+          }
+        }
+        if (f > upper) {
+          x2[count2] = i % width;
+          y2[count2] = i / width;
+          count2++;
+          if (count2 == x2.length) {
+            x2 = Arrays.copyOf(x2, count2 * 2);
+            y2 = Arrays.copyOf(y2, count2 * 2);
+          }
+        }
+      }
+      ImageJUtils.log("%s outside [%s to %s] = %d + %d = %d", stack.getSliceLabel(slice), lower,
+          upper, count, count2, count + count2);
+      if (count != 0) {
+        final PointRoi roi = new PointRoi(x, y, count);
+        roi.setPosition(slice);
+        roi.setStrokeColor(colors[0]);
+        o.add(roi);
+      }
+      if (count2 != 0) {
+        final PointRoi roi = new PointRoi(x2, y2, count2);
+        roi.setPosition(slice);
+        roi.setStrokeColor(colors[1]);
+        o.add(roi);
+      }
+    }
+    imp.setOverlay(o);
+    imp.getWindow().toFront();
+  }
+
+  private static void saveOutliers(ImagePlus imp, double[] limits, Builder pluginSettings) {
+    final ImageStack stack = imp.getImageStack();
+    final int width = stack.getWidth();
+    final CustomInt2IntOpenHashMap map = new CustomInt2IntOpenHashMap();
+    for (int slice = 1; slice <= 3; slice++) {
+      final ImageProcessor ip = stack.getProcessor(slice);
+      final int n = ip.getPixelCount();
+      final float lower = (float) limits[2 * (slice - 1)];
+      final float upper = (float) limits[2 * (slice - 1) + 1];
+      final int bit = 1 << (slice - 1);
+      for (int i = 0; i < n; i++) {
+        final float f = ip.getf(i);
+        if (f < lower || f > upper) {
+          map.mergeInt(i, bit, (a, b) -> a | b);
+        }
+      }
+    }
+    if (map.isEmpty()) {
+      return;
+    }
+    final String filename =
+        ImageJUtils.getFilename("Outlier_filename", pluginSettings.getOutlierFilename());
+    if (filename == null) {
+      return;
+    }
+    pluginSettings.setOutlierFilename(filename);
+    writeCameraModelManagerSettings(pluginSettings);
+    final ImageProcessor ip1 = stack.getProcessor(1);
+    final ImageProcessor ip2 = stack.getProcessor(2);
+    final ImageProcessor ip3 = stack.getProcessor(3);
+    try (PrintWriter out = new PrintWriter(Files.newBufferedWriter(Paths.get(filename)))) {
+      out.print("x,y,outlier");
+      for (int slice = 1; slice <= 3; slice++) {
+        out.print(',');
+        out.print(stack.getSliceLabel(slice));
+      }
+      out.println();
+      // Unsorted output
+      map.forEach((int index, int v) -> {
+        out.print(index % width);
+        out.print(',');
+        out.print(index / width);
+        out.print(',');
+        out.print(v);
+        out.print(',');
+        out.print(ip1.getf(index));
+        out.print(',');
+        out.print(ip2.getf(index));
+        out.print(',');
+        out.print(ip3.getf(index));
+        out.println();
+      });
+    } catch (final IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private static void runPrintCameraModels(CameraModelSettings settings) {
