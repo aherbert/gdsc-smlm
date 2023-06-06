@@ -1057,6 +1057,7 @@ public class CmosAnalysis implements PlugIn {
         .log("Analysis time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
 
     final NonBlockingExtendedGenericDialog egd = new NonBlockingExtendedGenericDialog(TITLE);
+    egd.addHelp(HelpUrls.getUrl("scmos-analysis"));
     egd.addMessage("Save the sCMOS camera model?");
     Rectangle reset;
     if (badPixels != null) {
