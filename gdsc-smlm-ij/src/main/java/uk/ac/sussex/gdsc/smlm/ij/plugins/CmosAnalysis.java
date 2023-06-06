@@ -1078,17 +1078,16 @@ public class CmosAnalysis implements PlugIn {
         textHeight.setText(Integer.toString(r.height));
       };
       final ImagePlus cropImp = lastMeanVar;
-      egd.addAndGetButton("Crop", e -> {
-        // Do not perform the work on the event dispatcher thread
-        ForkJoinPool.commonPool().submit(() -> {
-          final Rectangle crop = new Rectangle(Integer.parseInt(textOriginX.getText()),
-              Integer.parseInt(textOriginY.getText()), Integer.parseInt(textWidth.getText()),
-              Integer.parseInt(textHeight.getText()));
-          final ImagePlus imp = cropImp.duplicate();
-          imp.setTitle(cropImp.getTitle());
-          showCropDialog(bias, gain, variance, imp, crop, action);
-        });
-      });
+      egd.addAndGetButton("Crop", e ->
+      // Do not perform the work on the event dispatcher thread
+      ForkJoinPool.commonPool().submit(() -> {
+        final Rectangle crop = new Rectangle(Integer.parseInt(textOriginX.getText()),
+            Integer.parseInt(textOriginY.getText()), Integer.parseInt(textWidth.getText()),
+            Integer.parseInt(textHeight.getText()));
+        final ImagePlus imp = cropImp.duplicate();
+        imp.setTitle(cropImp.getTitle());
+        showCropDialog(bias, gain, variance, imp, crop, action);
+      }));
       final Rectangle reset = new Rectangle(width, height);
       egd.addAndGetButton("Reset", e -> action.accept(reset));
     }
