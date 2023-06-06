@@ -167,6 +167,8 @@ public class CmosAnalysis implements PlugIn {
     Settings() {
       // Set defaults
       directory = Prefs.get(PrefsKey.sCMOSAnalysisDirectory, "");
+      modelDirectory = Prefs.get(PrefsKey.sCMOSModelDirectory, "");
+      modelName = "sCMOS Camera";
       reuseProcessedData = true;
       histogramBins = 200;
 
@@ -242,6 +244,7 @@ public class CmosAnalysis implements PlugIn {
     void save() {
       INSTANCE.set(this);
       Prefs.set(PrefsKey.sCMOSAnalysisDirectory, directory);
+      Prefs.set(PrefsKey.sCMOSModelDirectory, modelDirectory);
     }
 
     /**
@@ -1053,9 +1056,8 @@ public class CmosAnalysis implements PlugIn {
 
     final NonBlockingExtendedGenericDialog egd = new NonBlockingExtendedGenericDialog(TITLE);
     egd.addMessage("Save the sCMOS camera model?");
-    if (settings.modelDirectory == null) {
+    if (TextUtils.isNullOrEmpty(settings.modelDirectory)) {
       settings.modelDirectory = settings.directory;
-      settings.modelName = "sCMOS Camera";
     }
     egd.addStringField("Model_name", settings.modelName, 30);
     egd.addDirectoryField("Model_directory", settings.modelDirectory);
@@ -1098,6 +1100,7 @@ public class CmosAnalysis implements PlugIn {
       settings.originY = (int) egd.getNextNumber();
       settings.width = (int) egd.getNextNumber();
       settings.height = (int) egd.getNextNumber();
+      settings.save();
       saveCameraModel(width, height, bias, gain, variance,
           new Rectangle(settings.originX, settings.originY, settings.width, settings.height));
     }

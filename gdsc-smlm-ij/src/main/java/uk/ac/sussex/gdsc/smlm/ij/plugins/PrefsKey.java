@@ -116,4 +116,6 @@ class PrefsKey {
 
   /** gdsc.smlm.sCMOSAnalysisDirectory */
   static final String sCMOSAnalysisDirectory = "gdsc.smlm.sCMOSAnalysisDirectory";
+  /** gdsc.smlm.sCMOSModelDirectory */
+  static final String sCMOSModelDirectory = "gdsc.smlm.sCMOSModelDirectory";
 }
