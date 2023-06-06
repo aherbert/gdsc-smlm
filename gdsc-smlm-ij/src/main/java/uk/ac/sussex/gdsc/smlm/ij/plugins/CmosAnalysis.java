@@ -1058,14 +1058,14 @@ public class CmosAnalysis implements PlugIn {
 
     final NonBlockingExtendedGenericDialog egd = new NonBlockingExtendedGenericDialog(TITLE);
     egd.addMessage("Save the sCMOS camera model?");
-    Rectangle bounds;
+    Rectangle reset;
     if (badPixels != null) {
       egd.addMessage("Note: The model contains bad pixels and a crop is required.\n"
           + "Use the crop button to select the crop region.");
-      bounds = RoiHelper.largestBoundingRoi(new ByteProcessor(width, height, badPixels.clone()),
+      reset = RoiHelper.largestBoundingRoi(new ByteProcessor(width, height, badPixels.clone()),
           width / 2, height / 2).getBounds();
     } else {
-      bounds = new Rectangle(width, height);
+      reset = new Rectangle(width, height);
     }
     if (TextUtils.isNullOrEmpty(settings.modelDirectory)) {
       settings.modelDirectory = settings.directory;
@@ -1077,7 +1077,7 @@ public class CmosAnalysis implements PlugIn {
     final int oy = MathUtils.clip(0, height - 1, settings.originY);
     final int w = MathUtils.clip(1, width - ox, settings.width <= 0 ? width : settings.width);
     final int h = MathUtils.clip(1, height - oy, settings.height <= 0 ? height : settings.height);
-    bounds = bounds.intersection(new Rectangle(ox, oy, w, h));
+    final Rectangle bounds = reset.intersection(new Rectangle(ox, oy, w, h));
     final TextField textOriginX = egd.addAndGetNumericField("Origin_x", bounds.x, 0);
     final TextField textOriginY = egd.addAndGetNumericField("Origin_y", bounds.y, 0);
     final TextField textWidth = egd.addAndGetNumericField("Width", bounds.width, 0);
@@ -1100,7 +1100,6 @@ public class CmosAnalysis implements PlugIn {
         imp.setTitle(cropImp.getTitle());
         showCropDialog(bias, gain, variance, imp, crop, action, badPixels);
       }));
-      final Rectangle reset = new Rectangle(width, height);
       egd.addAndGetButton("Reset", e -> action.accept(reset));
     }
     egd.showDialog();
