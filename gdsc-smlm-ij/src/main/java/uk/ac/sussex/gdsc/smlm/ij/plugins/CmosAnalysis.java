@@ -45,10 +45,9 @@ import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Color;
+import java.awt.Label;
 import java.awt.Rectangle;
 import java.awt.TextField;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -70,6 +69,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.SwingUtilities;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
@@ -1051,11 +1051,22 @@ public class CmosAnalysis implements PlugIn {
     measuredStack.addSlice("Variance", variance);
     measuredStack.addSlice("Gain", gain);
 
+    final byte[] badPixels = findBadPixels(bias, gain, variance);
+
     ImageJUtils
         .log("Analysis time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
 
     final NonBlockingExtendedGenericDialog egd = new NonBlockingExtendedGenericDialog(TITLE);
     egd.addMessage("Save the sCMOS camera model?");
+    Rectangle bounds;
+    if (badPixels != null) {
+      egd.addMessage("Note: The model contains bad pixels and a crop is required.\n"
+          + "Use the crop button to select the crop region.");
+      bounds = RoiHelper.largestBoundingRoi(new ByteProcessor(width, height, badPixels.clone()),
+          width / 2, height / 2).getBounds();
+    } else {
+      bounds = new Rectangle(width, height);
+    }
     if (TextUtils.isNullOrEmpty(settings.modelDirectory)) {
       settings.modelDirectory = settings.directory;
     }
@@ -1066,10 +1077,11 @@ public class CmosAnalysis implements PlugIn {
     final int oy = MathUtils.clip(0, height - 1, settings.originY);
     final int w = MathUtils.clip(1, width - ox, settings.width <= 0 ? width : settings.width);
     final int h = MathUtils.clip(1, height - oy, settings.height <= 0 ? height : settings.height);
-    final TextField textOriginX = egd.addAndGetNumericField("Origin_x", ox, 0);
-    final TextField textOriginY = egd.addAndGetNumericField("Origin_y", oy, 0);
-    final TextField textWidth = egd.addAndGetNumericField("Width", w, 0);
-    final TextField textHeight = egd.addAndGetNumericField("Height", h, 0);
+    bounds = bounds.intersection(new Rectangle(ox, oy, w, h));
+    final TextField textOriginX = egd.addAndGetNumericField("Origin_x", bounds.x, 0);
+    final TextField textOriginY = egd.addAndGetNumericField("Origin_y", bounds.y, 0);
+    final TextField textWidth = egd.addAndGetNumericField("Width", bounds.width, 0);
+    final TextField textHeight = egd.addAndGetNumericField("Height", bounds.height, 0);
     if (ImageJUtils.isShowGenericDialog()) {
       final Consumer<Rectangle> action = r -> {
         textOriginX.setText(Integer.toString(r.x));
@@ -1086,7 +1098,7 @@ public class CmosAnalysis implements PlugIn {
             Integer.parseInt(textHeight.getText()));
         final ImagePlus imp = cropImp.duplicate();
         imp.setTitle(cropImp.getTitle());
-        showCropDialog(bias, gain, variance, imp, crop, action);
+        showCropDialog(bias, gain, variance, imp, crop, action, badPixels);
       }));
       final Rectangle reset = new Rectangle(width, height);
       egd.addAndGetButton("Reset", e -> action.accept(reset));
@@ -1298,34 +1310,34 @@ public class CmosAnalysis implements PlugIn {
    * @param imp the last mean-variance image in the image series
    * @param crop the current camera model crop
    * @param action consumer for the crop (when it is updated)
+   * @param badPixels the bad pixels (can be null)
    */
   private static void showCropDialog(float[] bias, float[] gain, float[] variance, ImagePlus imp,
-      Rectangle crop, Consumer<Rectangle> action) {
-    // Create mask of bad pixels
-    final byte[] pixels = new byte[bias.length];
-    for (int i = 0; i < pixels.length; i++) {
-      if (!Float.isFinite(bias[i]) || !(gain[i] <= Float.MAX_VALUE && gain[i] > 0)
-          || !(variance[i] <= Float.MAX_VALUE && variance[i] >= 0)) {
-        pixels[i] = 1;
-      }
-    }
-
+      Rectangle crop, Consumer<Rectangle> action, byte[] badPixels) {
     final int width = imp.getWidth();
     final int height = imp.getHeight();
-    final ByteProcessor bp = new ByteProcessor(width, height, pixels);
-    // Find largest bounding region
-    final Roi roi = RoiHelper.largestBoundingRoi(bp, width / 2, height / 2);
+    ByteProcessor bp;
+    Roi roi;
+    if (badPixels != null) {
+      bp = new ByteProcessor(width, height, badPixels.clone());
+      // Find largest bounding region
+      roi = RoiHelper.largestBoundingRoi(bp, width / 2, height / 2);
 
-    // Draw on image as red overlay
-    final ColorProcessor cp = new ColorProcessor(width, height);
-    cp.setColor(Color.RED);
-    cp.fillOutside(roi);
-    final Overlay o = new Overlay();
-    final ImageRoi imageRoi = new ImageRoi(0, 0, cp);
-    imageRoi.setZeroTransparent(true);
-    imageRoi.setOpacity(0.5);
-    o.add(imageRoi);
-    imp.setOverlay(o);
+      // Draw on image as red overlay
+      final ColorProcessor cp = new ColorProcessor(width, height);
+      cp.setColor(Color.RED);
+      cp.fillOutside(roi);
+      final Overlay o = new Overlay();
+      final ImageRoi imageRoi = new ImageRoi(0, 0, cp);
+      imageRoi.setZeroTransparent(true);
+      imageRoi.setOpacity(0.5);
+      o.add(imageRoi);
+      imp.setOverlay(o);
+    } else {
+      bp = new ByteProcessor(width, height);
+      roi = new Roi(0, 0, width, height);
+    }
+    final byte[] pixels = (byte[]) bp.getPixels();
 
     // Use the bad pixel region if the image is not already cropped
     if (crop.width == width && crop.height == height) {
@@ -1334,15 +1346,7 @@ public class CmosAnalysis implements PlugIn {
     } else {
       imp.setRoi(new Roi(crop));
     }
-
-    final RoiListener l = (ImagePlus i, int id) -> {
-      if (i != null && i.getID() == imp.getID()) {
-        action.accept(i.getRoi().getBounds());
-      }
-    };
-    Roi.addRoiListener(l);
-
-    imp.show();
+    final Roi original = (Roi) imp.getRoi().clone();
 
     // Get the intensity limits of the image
     final ImageProcessor ip = imp.getImageStack().getProcessor(1);
@@ -1353,12 +1357,30 @@ public class CmosAnalysis implements PlugIn {
 
     final NonBlockingExtendedGenericDialog gd =
         new NonBlockingExtendedGenericDialog(TITLE + " crop");
+    gd.setImage(imp);
     gd.addMessage("Crop the camera model.\n \nThe last mean and variance image is shown:\n"
         + imp.getTitle() + "\n \nKnown bad model pixels were used to outline the\n"
         + "largest valid central region on the image.\n \nCrop using an ROI on the image\n"
         + "or use the foreground intensity.");
     final TextField textForeground =
         gd.addAndGetSlider("Foreground", ip.getMin(), ip.getMax(), stats.min);
+    gd.addMessage("");
+    final Label label = (Label) gd.getMessage();
+    gd.addAndGetButton("Reset",
+        e -> SwingUtilities.invokeLater(() -> imp.setRoi((Roi) original.clone())));
+
+    final Consumer<Rectangle> labelAction =
+        r -> label.setText(String.format("%,d px", r.width * r.height));
+    labelAction.accept(imp.getRoi().getBounds());
+    final Consumer<Rectangle> combinedAction = action.andThen(labelAction);
+    final RoiListener l = (ImagePlus i, int id) -> {
+      if (i != null && i.getID() == imp.getID()) {
+        combinedAction.accept(i.getRoi().getBounds());
+      }
+    };
+    Roi.addRoiListener(l);
+
+    imp.show();
 
     // Dynamically update the ROI using the slider.
     // Maintain a queue of the next value to process and use only
@@ -1394,12 +1416,6 @@ public class CmosAnalysis implements PlugIn {
         }
       }
     });
-    imp.getWindow().addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosing(WindowEvent e) {
-        gd.windowClosing(null);
-      }
-    });
     gd.hideCancelButton();
     gd.setOKLabel("Done");
     gd.showDialog();
@@ -1408,5 +1424,26 @@ public class CmosAnalysis implements PlugIn {
     Roi.removeRoiListener(l);
     imp.changes = false;
     imp.close();
+  }
+
+  /**
+   * Create mask of bad pixels. Returns null if there are no bad pixels.
+   *
+   * @param bias the bias
+   * @param gain the gain
+   * @param variance the variance
+   * @return the mask (or null)
+   */
+  private static byte[] findBadPixels(float[] bias, float[] gain, float[] variance) {
+    final byte[] pixels = new byte[bias.length];
+    boolean found = false;
+    for (int i = 0; i < pixels.length; i++) {
+      if (!Float.isFinite(bias[i]) || !(gain[i] <= Float.MAX_VALUE && gain[i] > 0)
+          || !(variance[i] <= Float.MAX_VALUE && variance[i] >= 0)) {
+        pixels[i] = 1;
+        found = true;
+      }
+    }
+    return found ? pixels : null;
   }
 }
