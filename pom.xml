@@ -148,22 +148,10 @@ Software for single molecule localisation microscopy (SMLM)
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-      <artifactId>ejml</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.github.wendykierp</groupId>
       <artifactId>JTransforms</artifactId>
       <version>${JTransforms.version}</version>
       <!-- <classifier>with-dependencies</classifier> -->
-    </dependency>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java-util</artifactId>
     </dependency>
 
     <!-- Managed dependencies -->
@@ -180,8 +168,20 @@ Software for single molecule localisation microscopy (SMLM)
       <artifactId>commons-rng-sampling</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
+      <artifactId>ejml</artifactId>
+    </dependency>
+    <dependency>
       <groupId>it.unimi.dsi</groupId>
       <artifactId>fastutil-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java-util</artifactId>
     </dependency>
 
     <!-- TESTING -->
