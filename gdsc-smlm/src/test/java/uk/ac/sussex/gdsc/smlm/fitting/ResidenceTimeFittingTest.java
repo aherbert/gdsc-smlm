@@ -541,6 +541,10 @@ class ResidenceTimeFittingTest {
     final double[] data = createData(rng, samples, r, fraction);
     final int[] h = DataSample.toBins(data, resolution);
 
+    Assumptions.assumeTrue(h.length > 1,
+        () -> String.format("Simulation did not generate enough timepoints: %d, %s, %s, %s",
+            samples, Arrays.toString(r), Arrays.toString(fraction), resolution));
+
     final ResidenceTimeFitting rta = ResidenceTimeFitting.of(resolution, h);
     // rta.setLogger(logger);
     final Pair<FitResult, Model> fit = rta.fit(n);
