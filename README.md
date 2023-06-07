@@ -92,8 +92,10 @@ you will have to install these to your local Maven repository before building:
         mvn package
 
    This will produce a gdsc-smlm-ij_-[VERSION].jar file in the target directory
-   of the gdsc-smlm-ij module.	All dependencies are copied into the
-   target/dependencies directory of the module.
+   of the gdsc-smlm-ij module.  Dependencies can be copied into the
+   target/dependencies directory using:
+
+        mvn dependency:copy-dependencies
 
 1. Installation into a Fiji/ImageJ2 install can be performed using the scijava
 maven goal to populate the application:
@@ -135,20 +137,9 @@ directory of ImageJ.
         xstream
         xpp3_min
 
-   To enable use of the 3D viewer also add the Java3D libraries and the native
-   libraries for your platform. This is unnecessary if using Fiji as the correct
-   libraries are present. The libraries required are:
+   This excludes the 3D_Viewer functionality. View the dependencies using:
 
-        3D_Viewer
-        j3dcore
-        j3dutils
-        jogl-all
-        jogl-all-*-natives-[platform]
-        gluegen-rt
-        gluegen-rt-main
-        gluegen-rt-*-natives-[platform]
-        vecmath-*-scijava-2.jar
-        VIB-lib
+        mvn dependency:tree
 
 1. The plugins will now appear under the 'Plugins > GDSC SMLM' menu in ImageJ.
 
