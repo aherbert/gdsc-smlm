@@ -20,6 +20,18 @@
         "oldVisibility": "private",
         "newVisibility": "public",
         "justification": "Class has been made public as it is specified by the return type of LoadLocalisations."
+      }, {
+        "code": "java.method.visibilityIncreased",
+        "new": "method int uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource::getImageSize(int)",
+        "oldVisibility": "package",
+        "newVisibility": "public",
+        "justification": "Method has been made public for use in the TiffSeriesViewer."
+      }, {
+        "code": "java.method.visibilityIncreased",
+        "new": "method void it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<V>::ensureCapacity(int)",
+        "oldVisibility": "private",
+        "newVisibility": "public",
+        "justification": "Allow this change in a dependency"
       } ]
     }
   } ]
