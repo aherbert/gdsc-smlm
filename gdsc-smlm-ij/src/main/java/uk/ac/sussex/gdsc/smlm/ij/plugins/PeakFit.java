@@ -4790,7 +4790,7 @@ public class PeakFit implements PlugInFilter {
       Rectangle sourceBounds, Rectangle cropBounds, boolean initialise) {
     if (fitConfig.getCalibrationReader().isScmos() && fitConfig.getFitSolver() != FitSolver.MLE) {
       fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
-      if (!checkCameraModel(fitConfig, sourceBounds, cropBounds, true)) {
+      if (!checkCameraModel(fitConfig, sourceBounds, cropBounds, initialise)) {
         return false;
       }
     }
