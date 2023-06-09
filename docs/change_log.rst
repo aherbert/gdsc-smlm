@@ -21,6 +21,8 @@ Minor release of GDSC SMLM.
   mode.
 * Update the view model action in the :numref:`{name} <calibration_plugins:Camera Model Manager>`
   plugin. Allow display of histograms of the model pixel data; and outlier pixels.
+* Fix the :numref:`{name} <fitting_plugins:Fit Configuration>` plugin to allow templates with a
+  sCMOS camera.
 
 
 Version 1.0.2

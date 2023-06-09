@@ -29,6 +29,7 @@ import ij.plugin.PlugIn;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
@@ -46,6 +47,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -332,6 +334,9 @@ public class Configuration implements PlugIn {
         ParameterUtils.isPositive("Width factor", fitConfig.getMaxWidthFactor());
         ParameterUtils.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
       }
+
+      // Validation methods may throw exceptions, so place within the try-catch
+      validateCameraModelOptions(fitConfig);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -390,6 +395,18 @@ public class Configuration implements PlugIn {
     }
 
     return true;
+  }
+
+  /**
+   * Load the camera model if applicable.
+   *
+   * @param fitConfig the fit config
+   * @throws IllegalStateException if no camera model exists for the camera type
+   */
+  private static void validateCameraModelOptions(FitConfiguration fitConfig) {
+    if (fitConfig.getCalibrationReader().isScmos()) {
+      fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
+    }
   }
 
   /**
