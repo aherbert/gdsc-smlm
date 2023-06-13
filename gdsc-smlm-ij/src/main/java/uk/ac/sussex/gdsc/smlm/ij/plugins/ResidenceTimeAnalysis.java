@@ -318,7 +318,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addSlider("Min_size", 2, 20, settings.minSize);
     gd.addNumericField("Mean_distance", settings.meanDistance, 2, 6, "nm");
     gd.addNumericField("Max_distance", settings.maxDistance, 2, 6, "nm");
-    gd.addNumericField("Apparent_dissociation_rate", settings.apparentDissociationRate, -3);
+    gd.addNumericField("Apparent_dissociation_rate", settings.apparentDissociationRate, -3, 6, "sec^-1");
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
     gd.addStringField("Bootstrap_seed", settings.bootstrapSeed, 20);
 
