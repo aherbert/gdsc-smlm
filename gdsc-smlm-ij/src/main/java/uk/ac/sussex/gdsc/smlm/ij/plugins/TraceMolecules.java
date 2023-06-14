@@ -93,6 +93,10 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
  */
 public class TraceMolecules implements PlugIn {
+  private static final String NAME_TRACE = "Trace";
+  private static final String NAME_DYNAMIC_TRACE = "Dynamic Trace";
+  private static final String NAME_CLUSTER = "Cluster";
+
   private static final double MIN_BLINKING_RATE = 1; // Should never be <= 0
 
   private static final AtomicReference<TextWindow> SUMMARY_TABLE = new AtomicReference<>();
@@ -134,7 +138,6 @@ public class TraceMolecules implements PlugIn {
   private Settings pluginSettings;
   /** The clustering settings. */
   private ClusteringSettings.Builder settings;
-  private MemoryPeakResults results;
   /** Store exposure time in seconds. */
   private double exposureTime;
 
@@ -258,6 +261,16 @@ public class TraceMolecules implements PlugIn {
     }
   }
 
+  private Object getAlgorithm() {
+    if (outputName.startsWith(NAME_CLUSTER)) {
+      return getClusteringAlgorithm(settings.getClusteringAlgorithm());
+    }
+    if (outputName.startsWith(NAME_TRACE)) {
+      return getTraceMode(settings.getTraceMode());
+    }
+    return "DMTT";
+  }
+
   private static TraceMode getTraceMode(int traceMode) {
     if (traceMode < 0 || traceMode >= TraceMode.values().length) {
       return TraceMode.LATEST_FORERUNNER;
@@ -284,13 +297,14 @@ public class TraceMolecules implements PlugIn {
 
     Trace[] traces;
     int totalFiltered = 0;
+    MemoryPeakResults results;
     if ("dynamic".equals(arg)) {
       // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
       // Dynamic Mutliple Target Tracing
       // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-      outputName = "Dynamic Trace";
+      outputName = NAME_DYNAMIC_TRACE;
 
-      if (!showDynamicTraceDialog()) {
+      if (!showDynamicTraceDialog() || (results = loadResults()) == null) {
         return;
       }
 
@@ -301,9 +315,9 @@ public class TraceMolecules implements PlugIn {
       // -=-=-=-=-=
       // Clustering
       // -=-=-=-=-=
-      outputName = "Cluster";
+      outputName = NAME_CLUSTER;
 
-      if (!showClusterDialog()) {
+      if (!showClusterDialog() || (results = loadResults()) == null) {
         return;
       }
 
@@ -316,7 +330,7 @@ public class TraceMolecules implements PlugIn {
         limitTimeThreshold(settings.getPulseInterval());
       }
 
-      final List<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
+      final List<Cluster> clusters = engine.findClusters(convertToClusterPoints(results),
           getDistance(settings.getDistanceThreshold(), results.getCalibration()),
           timeThresholdInFrames());
 
@@ -325,14 +339,14 @@ public class TraceMolecules implements PlugIn {
         return;
       }
 
-      traces = convertToTraces(clusters);
+      traces = convertToTraces(results, clusters);
     } else {
       // -=-=-=-
       // Tracing
       // -=-=-=-
-      outputName = "Trace";
+      outputName = NAME_TRACE;
 
-      if (!showDialog()) {
+      if (!showDialog() || (results = loadResults()) == null) {
         return;
       }
 
@@ -345,7 +359,7 @@ public class TraceMolecules implements PlugIn {
 
       if (settings.getOptimise()) {
         // Optimise before configuring for a pulse interval
-        runOptimiser(manager);
+        runOptimiser(manager, results);
       }
 
       if (settings.getSplitPulses()) {
@@ -384,11 +398,11 @@ public class TraceMolecules implements PlugIn {
     sortByTime(traces);
 
     if (settings.getSaveTraces()) {
-      saveTraces(traces);
+      saveTraces(results, traces);
     }
 
-    summarise(createSummaryTable(), traces, totalFiltered, settings.getDistanceThreshold(),
-        timeThresholdInSeconds());
+    summarise(results.getName(), createSummaryTable(), traces, totalFiltered,
+        settings.getDistanceThreshold(), timeThresholdInSeconds());
 
     IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(),
         tracedResults.size(), totalFiltered));
@@ -423,10 +437,6 @@ public class TraceMolecules implements PlugIn {
     }
   }
 
-  private List<ClusterPoint> convertToClusterPoints() {
-    return convertToClusterPoints(results);
-  }
-
   /**
    * Convert a list of peak results into points for the clustering engine.
    *
@@ -440,10 +450,6 @@ public class TraceMolecules implements PlugIn {
         counter.getAndIncrement(), result.getXPosition(), result.getYPosition(),
         result.getIntensity(), result.getFrame(), result.getEndFrame())));
     return points;
-  }
-
-  private Trace[] convertToTraces(List<Cluster> clusters) {
-    return convertToTraces(results, clusters);
   }
 
   /**
@@ -530,7 +536,7 @@ public class TraceMolecules implements PlugIn {
     return result.toArray(new Trace[0]);
   }
 
-  private void saveTraces(Trace[] traces) {
+  private void saveTraces(MemoryPeakResults results, Trace[] traces) {
     pluginSettings.filename =
         saveTraces(results, traces, createSettingsComment(), pluginSettings.filename, 0);
   }
@@ -555,7 +561,7 @@ public class TraceMolecules implements PlugIn {
     String title = "Traces_File";
     if (id > 0) {
       title += id;
-      final String regex = "\\.[0-9]+\\.";
+      final String regex = "\\.\\d+\\.";
       if (filename.matches(regex)) {
         filename = filename.replaceAll(regex, "." + (id) + ".");
       } else {
@@ -592,7 +598,7 @@ public class TraceMolecules implements PlugIn {
         settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames());
   }
 
-  private void summarise(Consumer<String> output, Trace[] traces, int filtered,
+  private void summarise(String name, Consumer<String> output, Trace[] traces, int filtered,
       double distanceThreshold, double timeThreshold) {
     IJ.showStatus("Calculating summary ...");
 
@@ -622,7 +628,9 @@ public class TraceMolecules implements PlugIn {
         }
         stats[TOTAL_T_OFF].add(timeOff);
       }
-      final double signal = trace.getSignal() / results.getGain();
+      // Previously this divided the signal by the gain of the input results.
+      // Now signal is reported in the native units.
+      final double signal = trace.getSignal();
       stats[TOTAL_SIGNAL].add(signal);
       stats[SIGNAL_PER_FRAME].add(signal / trace.size());
       stats[DWELL_TIME]
@@ -634,11 +642,8 @@ public class TraceMolecules implements PlugIn {
 
     // Add to the summary table
     final StringBuilder sb = new StringBuilder(256);
-    sb.append(results.getName()).append('\t')
-        .append(
-            "Cluster".equals(outputName) ? getClusteringAlgorithm(settings.getClusteringAlgorithm())
-                : getTraceMode(settings.getTraceMode()))
-        .append('\t').append(MathUtils.rounded(getExposureTimeInMilliSeconds(), 3)).append('\t')
+    sb.append(name).append('\t').append(getAlgorithm()).append('\t')
+        .append(MathUtils.rounded(getExposureTimeInMilliSeconds(), 3)).append('\t')
         .append(MathUtils.rounded(distanceThreshold, 3)).append('\t')
         .append(MathUtils.rounded(timeThreshold, 3));
     if (settings.getSplitPulses()) {
@@ -774,22 +779,27 @@ public class TraceMolecules implements PlugIn {
 
     gd.showDialog();
 
-    if (gd.wasCanceled() || !readDialog(gd)) {
-      return false;
-    }
+    return !gd.wasCanceled() && readDialog(gd);
+  }
 
+  /**
+   * Load the results and configure the exposure time from the calibration.
+   *
+   * @return the memory peak results
+   */
+  private MemoryPeakResults loadResults() {
     // Load the results
-    results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
+    final MemoryPeakResults results =
+        ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(pluginTitle, "No results could be loaded");
       IJ.showStatus("");
-      return false;
+      return null;
     }
 
     // Store exposure time in seconds
     exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
-
-    return true;
+    return results;
   }
 
   private boolean readDialog(ExtendedGenericDialog gd) {
@@ -880,22 +890,7 @@ public class TraceMolecules implements PlugIn {
 
     gd.showDialog();
 
-    if (gd.wasCanceled() || !readClusterDialog(gd)) {
-      return false;
-    }
-
-    // Load the results
-    results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
-    if (MemoryPeakResults.isEmpty(results)) {
-      IJ.error(pluginTitle, "No results could be loaded");
-      IJ.showStatus("");
-      return false;
-    }
-
-    // Store exposure time in seconds
-    exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
-
-    return true;
+    return !gd.wasCanceled() && readClusterDialog(gd);
   }
 
   private void readSettings() {
@@ -992,22 +987,7 @@ public class TraceMolecules implements PlugIn {
 
     gd.showDialog();
 
-    if (gd.wasCanceled() || !readDynamicTraceDialog(gd)) {
-      return false;
-    }
-
-    // Load the results
-    results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
-    if (MemoryPeakResults.isEmpty(results)) {
-      IJ.error(pluginTitle, "No results could be loaded");
-      IJ.showStatus("");
-      return false;
-    }
-
-    // Store exposure time in seconds
-    exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
-
-    return true;
+    return !gd.wasCanceled() && readDynamicTraceDialog(gd);
   }
 
   private boolean readDynamicTraceDialog(ExtendedGenericDialog gd) {
@@ -1058,10 +1038,10 @@ public class TraceMolecules implements PlugIn {
         .setDisableIntensityModel(settings.getDisableIntensityModel()).build();
   }
 
-  private void runOptimiser(TraceManager manager) {
+  private void runOptimiser(TraceManager manager, MemoryPeakResults peakResults) {
     // Get an estimate of the number of molecules without blinking
     final Statistics stats = new Statistics();
-    final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+    final PrecisionResultProcedure pp = new PrecisionResultProcedure(peakResults);
     pp.getPrecision();
     stats.add(pp.precisions);
 
@@ -1075,7 +1055,7 @@ public class TraceMolecules implements PlugIn {
 
     // Convert the distance threshold from nm to native units
     final Converter c =
-        CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
+        CalibrationHelper.getDistanceConverter(peakResults.getCalibration(), DistanceUnit.NM);
     final double dMin = c.convertBack(settings.getMinDistanceThreshold());
     final double dMax = c.convertBack(settings.getMaxDistanceThreshold());
 
@@ -1265,7 +1245,7 @@ public class TraceMolecules implements PlugIn {
   /**
    * Runs the tracing algorithm using distances and time thresholds between min and max with the
    * configured number of steps. Steps are spaced using a logarithmic scale.
-   *
+   * 
    * <p>Returns a list of [distance,time,N traces]
    *
    * @param manager the manager
@@ -1297,7 +1277,7 @@ public class TraceMolecules implements PlugIn {
         final int n = manager.traceMolecules(d, t);
         resultsList.add(new double[] {d, t, n, getBlinkingRate(manager.getTraces())});
         if (debugMode) {
-          summarise(IJ::log, manager.getTraces(), manager.getTotalFiltered(), d, t);
+          summarise("debugMode", IJ::log, manager.getTraces(), manager.getTotalFiltered(), d, t);
         }
       }
     }
