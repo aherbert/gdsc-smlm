@@ -755,6 +755,18 @@ This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`
 The plugin will trace the localisations and store the results in memory with a suffix ``Dynamic Traced``. Two additional datasets are created: all single localisations which could not be joined are given a suffix ``Cluster Singles``; all clusters are given a suffix ``Clusters``. The ``Cluster Singles`` plus ``Clusters`` datasets equal the ``Clustered`` dataset.
 
 
+.. index:: ! Trace Molecules (Multi)
+
+Trace Molecules (Multi)
+-----------------------
+
+This plugin allows the :ref:`analysis_plugins:Trace Molecules`, :ref:`analysis_plugins:Cluster Molecules` and :ref:`analysis_plugins:Dynamic Trace Molecules` plugins to be run with multiple input datasets. Each dataset will be analysed separately. This can be used to perform the same analysis on multiple datasets.
+
+When the plugin runs a dialog is presented that allows the datasets to be selected. Then a dialog will provide a choice of the trace or cluster analysis. The plugin will then show the dialog for the selected analysis mode. See the relevant plugin's documentation for details of the options. Note that some analysis options used for a single input dataset are not available.
+
+See also :ref:`analysis_plugins:Trace Diffusion (Multi)`. Note that the ``Trace Diffusion`` plugin is intended for tracing using no time gaps between molecules, requires all input datasets to have the same time and distance calibration and will aggregate all datasets into a single superset for jump distance analysis.
+
+
 .. index:: ! Trace Diffusion
 
 Trace Diffusion
@@ -1379,6 +1391,8 @@ When the plugin runs a dialog is presented that allows the datasets to be select
 When the ``Trace Diffusion`` plugin is executed it will not have the ``Input`` option as the results have already been selected. If multiple datasets are chosen the dataset name in the results table will be named using the first dataset plus the number of additional datasets, e.g. ``Dataset 1 + 6 others``.
 
 Note that the plugin supports the ``ImageJ`` recorder to allow running within an ``ImageJ`` macro.
+
+See also :ref:`analysis_plugins:Trace Molecules (Multi)` which performs tracing on multiple datasets; each dataset is traced individually and no aggregate analysis is performed.
 
 
 .. index:: ! Trace Length Analysis

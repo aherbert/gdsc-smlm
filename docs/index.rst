@@ -258,6 +258,9 @@ Analysis Plugins
    * - :ref:`analysis_plugins:Dynamic Trace Molecules`
      - Traces localisations through time and collates them into traces using a probability model to connect localisations.
 
+   * - :ref:`analysis_plugins:Trace Molecules (Multi)`
+     - Allows the ``Trace Molecules``, ``Cluster Molecules`` and ``Dynamic Trace Molecules`` plugins to be run with multiple input datasets.
+
    * - :ref:`analysis_plugins:Trace Diffusion`
      - Trace molecules through consecutive frames. Mean-squared displacement analysis is performed on the traces to calculate a diffusion coefficient.
 
