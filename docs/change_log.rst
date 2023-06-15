@@ -17,10 +17,11 @@ Minor release of GDSC SMLM.
   times of stationary (bound) molecules.
 * Fix the :numref:`{name} <results_plugins:Save Localisations>` plugin error when the PSF is
   undefined.
-* Update the :numref:`{name} <tools_plugins:TIFF Series Viewer>` plugin with a validate output
+* Update the :numref:`{name} <tools_plugins:TIFF Series Viewer>` plugin with a ``Validate`` output
   mode.
-* Update the view model action in the :numref:`{name} <calibration_plugins:Camera Model Manager>`
-  plugin. Allow display of histograms of the model pixel data; and outlier pixels.
+* Update the ``View a camera model`` action in the
+  :numref:`{name} <calibration_plugins:Camera Model Manager>` plugin. Allow display of histograms
+  of the model pixel data; and outlier pixels.
 * Fix the :numref:`{name} <fitting_plugins:Fit Configuration>` plugin to allow templates with a
   sCMOS camera.
 * Added :numref:`{name} <analysis_plugins:Trace Molecules (Multi)>` to support multiple dataset
