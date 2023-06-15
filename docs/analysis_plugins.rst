@@ -762,9 +762,9 @@ Trace Molecules (Multi)
 
 This plugin allows the :ref:`analysis_plugins:Trace Molecules`, :ref:`analysis_plugins:Cluster Molecules` and :ref:`analysis_plugins:Dynamic Trace Molecules` plugins to be run with multiple input datasets. Each dataset will be analysed separately. This can be used to perform the same analysis on multiple datasets.
 
-When the plugin runs a dialog is presented that allows the datasets to be selected. Then a dialog will provide a choice of the trace or cluster analysis. The plugin will then show the dialog for the selected analysis mode. See the relevant plugin's documentation for details of the options. Note that some analysis options used for a single input dataset are not available.
+When the plugin runs a dialog allows the choice of analysis mode. Then a dialog is presented that allows the datasets to be selected. The plugin will then show the dialog for the selected analysis mode. See the relevant plugin's documentation for details of the options. Note that some output options used for a single input dataset are not available.
 
-See also :ref:`analysis_plugins:Trace Diffusion (Multi)`. Note that the ``Trace Diffusion`` plugin is intended for tracing using no time gaps between molecules, requires all input datasets to have the same time and distance calibration and will aggregate all datasets into a single superset for jump distance analysis.
+See also :ref:`analysis_plugins:Trace Diffusion (Multi)`. Note that the ``Trace Diffusion (Multi)`` plugin is intended for tracing using no time gaps in the trace of a molecule, requires all input datasets to have the same time and distance calibration and will aggregate all datasets into a single superset for jump distance analysis. In contrast, the analysis performed on each dataset by ``Trace Molecules (Multi)`` is separate and there are no restrictions on matching calibration; all trace modes allow for time gaps in the trace of an individual molecule.
 
 
 .. index:: ! Trace Diffusion

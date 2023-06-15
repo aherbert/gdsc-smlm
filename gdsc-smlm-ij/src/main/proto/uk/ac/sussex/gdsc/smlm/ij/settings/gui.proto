@@ -260,6 +260,8 @@ message ClusteringSettings {
   bool disable_intensity_model = 43;
   // Flag to disable the local diffusion model
   bool disable_local_diffusion_model = 44;
+  // Analysis mode for multiple input datasets
+  int32 analysis_mode = 45;
 }
 
 // Contains the settings for the events in the OPTICS GUI

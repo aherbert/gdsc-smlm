@@ -23,6 +23,8 @@ Minor release of GDSC SMLM.
   plugin. Allow display of histograms of the model pixel data; and outlier pixels.
 * Fix the :numref:`{name} <fitting_plugins:Fit Configuration>` plugin to allow templates with a
   sCMOS camera.
+* Added :numref:`{name} <analysis_plugins:Trace Molecules (Multi)>` to support multiple dataset
+  analysis.
 
 
 Version 1.0.2

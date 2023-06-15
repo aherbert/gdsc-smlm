@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -63,6 +64,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -70,8 +72,10 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -93,9 +97,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
  */
 public class TraceMolecules implements PlugIn {
-  private static final String NAME_TRACE = "Trace";
-  private static final String NAME_DYNAMIC_TRACE = "Dynamic Trace";
-  private static final String NAME_CLUSTER = "Cluster";
+  private static final String TITLE = "Trace Molecules";
 
   private static final double MIN_BLINKING_RATE = 1; // Should never be <= 0
 
@@ -117,6 +119,8 @@ public class TraceMolecules implements PlugIn {
   private static final int DWELL_TIME = 7;
 
   private static final boolean[] INTEGER_DISPLAY;
+  // Used for the multiMode option
+  private static final AtomicReference<List<String>> SELECTED_REF = new AtomicReference<>();
 
   static {
     INTEGER_DISPLAY = new boolean[NAMES.length];
@@ -131,8 +135,6 @@ public class TraceMolecules implements PlugIn {
   }
 
   private String pluginTitle = "Trace or Cluster Molecules";
-  /** The output name set using either "Cluster" or "Trace" depending on the run mode. */
-  private String outputName;
 
   /** The plugin settings. */
   private Settings pluginSettings;
@@ -153,6 +155,22 @@ public class TraceMolecules implements PlugIn {
   private boolean debugMode;
   private boolean altKeyDown;
   private boolean optimiseBlinkingRate;
+  private boolean multiMode;
+
+  private enum AnalysisMode implements NamedObject {
+    TRACE("Trace"), CLUSTER("Cluster"), DYNAMIC_TRACE("Dynamic Trace");
+
+    private final String objectName;
+
+    private AnalysisMode(String objectName) {
+      this.objectName = objectName;
+    }
+
+    @Override
+    public String getName() {
+      return objectName;
+    }
+  }
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -261,11 +279,11 @@ public class TraceMolecules implements PlugIn {
     }
   }
 
-  private Object getAlgorithm() {
-    if (outputName.startsWith(NAME_CLUSTER)) {
+  private Object getAlgorithm(AnalysisMode mode) {
+    if (mode == AnalysisMode.CLUSTER) {
       return getClusteringAlgorithm(settings.getClusteringAlgorithm());
     }
-    if (outputName.startsWith(NAME_TRACE)) {
+    if (mode == AnalysisMode.TRACE) {
       return getTraceMode(settings.getTraceMode());
     }
     return "DMTT";
@@ -295,117 +313,152 @@ public class TraceMolecules implements PlugIn {
     }
     altKeyDown = ImageJUtils.isExtraOptions();
 
-    Trace[] traces;
-    int totalFiltered = 0;
-    MemoryPeakResults results;
-    if ("dynamic".equals(arg)) {
-      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-      // Dynamic Mutliple Target Tracing
-      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-      outputName = NAME_DYNAMIC_TRACE;
-
-      if (!showDynamicTraceDialog() || (results = loadResults()) == null) {
+    final LocalList<MemoryPeakResults> allResults = new LocalList<>();
+    AnalysisMode mode;
+    if ("multi".equals(arg)) {
+      if (!showMultiDialog(allResults)) {
         return;
       }
-
-      final DmttConfiguration config = createDmttConfiguration();
-      traces =
-          new DynamicMultipleTargetTracing(results).traceMolecules(config).toArray(new Trace[0]);
-    } else if ("cluster".equals(arg)) {
-      // -=-=-=-=-=
-      // Clustering
-      // -=-=-=-=-=
-      outputName = NAME_CLUSTER;
-
-      if (!showClusterDialog() || (results = loadResults()) == null) {
-        return;
-      }
-
-      final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
-          getClusteringAlgorithm(settings.getClusteringAlgorithm()),
-          SimpleImageJTrackProgress.getInstance());
-
-      if (settings.getSplitPulses()) {
-        engine.setPulseInterval(settings.getPulseInterval());
-        limitTimeThreshold(settings.getPulseInterval());
-      }
-
-      final List<Cluster> clusters = engine.findClusters(convertToClusterPoints(results),
-          getDistance(settings.getDistanceThreshold(), results.getCalibration()),
-          timeThresholdInFrames());
-
-      if (clusters == null) {
-        ImageJUtils.log("Aborted");
-        return;
-      }
-
-      traces = convertToTraces(results, clusters);
+      mode = AnalysisMode.values()[settings.getAnalysisMode()];
     } else {
-      // -=-=-=-
-      // Tracing
-      // -=-=-=-
-      outputName = NAME_TRACE;
+      mode = getAnalysisMode(arg);
+    }
 
-      if (!showDialog() || (results = loadResults()) == null) {
+    // Show correct dialog
+    if (mode == AnalysisMode.DYNAMIC_TRACE) {
+      if (!showDynamicTraceDialog(allResults)) {
         return;
       }
-
-      final TraceManager manager = new TraceManager(results);
-      manager.setTraceMode(getTraceMode(settings.getTraceMode()));
-      manager.setActivationFrameInterval(settings.getPulseInterval());
-      manager.setActivationFrameWindow(settings.getPulseWindow());
-      manager.setDistanceExclusion(
-          getDistance(settings.getDistanceExclusion(), results.getCalibration()));
-
-      if (settings.getOptimise()) {
-        // Optimise before configuring for a pulse interval
-        runOptimiser(manager, results);
+    } else if (mode == AnalysisMode.CLUSTER) {
+      if (!showClusterDialog(allResults)) {
+        return;
       }
-
-      if (settings.getSplitPulses()) {
-        manager.setPulseInterval(settings.getPulseInterval());
-        limitTimeThreshold(settings.getPulseInterval());
-      }
-
-      manager.setTracker(SimpleImageJTrackProgress.getInstance());
-      manager.traceMolecules(getDistance(settings.getDistanceThreshold(), results.getCalibration()),
-          timeThresholdInFrames());
-      traces = manager.getTraces();
-      totalFiltered = manager.getTotalFiltered();
+    } else if (!showDialog(allResults)) {
+      return;
     }
 
-    // --=-=-=-=-=-
-    // Results processing
-    // --=-=-=-=-=-
+    // Perform analysis for each input dataset.
+    // When processing multiple datasets some of the output options are not available.
+    // This is controlled by the multiMode flag.
+    for (int i = 0; i < allResults.size(); i++) {
+      final MemoryPeakResults results = allResults.get(i);
+      if (allResults.size() > 1) {
+        ImageJUtils.showSlowProgress(i, allResults.size());
+      }
 
-    outputName += (outputName.endsWith("e") ? "" : "e") + "d";
-    saveResults(results, traces, outputName);
+      // Store exposure time in seconds
+      exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
 
-    // Save singles + single localisations in a trace
-    saveCentroidResults(results, getSingles(traces), outputName + " Singles");
-    final Trace[] multiTraces = getTraces(traces);
-    saveResults(results, multiTraces, outputName + " Multi");
+      Trace[] traces;
+      int totalFiltered = 0;
+      if (mode == AnalysisMode.DYNAMIC_TRACE) {
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        // Dynamic Multiple Target Tracing
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        final DmttConfiguration config = createDmttConfiguration();
+        traces =
+            new DynamicMultipleTargetTracing(results).traceMolecules(config).toArray(new Trace[0]);
+      } else if (mode == AnalysisMode.CLUSTER) {
+        // -=-=-=-=-=
+        // Clustering
+        // -=-=-=-=-=
+        final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
+            getClusteringAlgorithm(settings.getClusteringAlgorithm()),
+            SimpleImageJTrackProgress.getInstance());
 
-    // Save centroids
-    outputName += " Centroids";
-    final MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
+        if (settings.getSplitPulses()) {
+          engine.setPulseInterval(settings.getPulseInterval());
+          limitTimeThreshold(settings.getPulseInterval());
+        }
 
-    // Save traces separately
-    saveCentroidResults(results, multiTraces, outputName + " Multi");
+        final List<Cluster> clusters = engine.findClusters(convertToClusterPoints(results),
+            getDistance(settings.getDistanceThreshold(), results.getCalibration()),
+            timeThresholdInFrames());
 
-    // Sort traces by time to assist the results source in extracting frames sequentially.
-    // Do this before saving to assist in debugging using the saved traces file.
-    sortByTime(traces);
+        if (clusters == null) {
+          ImageJUtils.log("Aborted");
+          IJ.showProgress(-1);
+          ImageJUtils.finished("Aborted");
+          return;
+        }
 
-    if (settings.getSaveTraces()) {
-      saveTraces(results, traces);
+        traces = convertToTraces(results, clusters);
+      } else {
+        // -=-=-=-
+        // Tracing
+        // -=-=-=-
+        final TraceManager manager = new TraceManager(results);
+        manager.setTraceMode(getTraceMode(settings.getTraceMode()));
+        manager.setActivationFrameInterval(settings.getPulseInterval());
+        manager.setActivationFrameWindow(settings.getPulseWindow());
+        manager.setDistanceExclusion(
+            getDistance(settings.getDistanceExclusion(), results.getCalibration()));
+
+        if (!multiMode && settings.getOptimise()) {
+          // Optimise before configuring for a pulse interval
+          runOptimiser(manager, results);
+        }
+
+        if (settings.getSplitPulses()) {
+          manager.setPulseInterval(settings.getPulseInterval());
+          limitTimeThreshold(settings.getPulseInterval());
+        }
+
+        manager.setTracker(SimpleImageJTrackProgress.getInstance());
+        manager.traceMolecules(
+            getDistance(settings.getDistanceThreshold(), results.getCalibration()),
+            timeThresholdInFrames());
+        traces = manager.getTraces();
+        totalFiltered = manager.getTotalFiltered();
+      }
+
+      // --=-=-=-=-=-
+      // Results processing
+      // --=-=-=-=-=-
+
+      String outputName = mode.getName();
+      outputName += (outputName.endsWith("e") ? "" : "e") + "d";
+      saveResults(results, traces, outputName);
+
+      // Save singles + single localisations in a trace
+      saveCentroidResults(results, getSingles(traces), outputName + " Singles");
+      final Trace[] multiTraces = getTraces(traces);
+      saveResults(results, multiTraces, outputName + " Multi");
+
+      // Save centroids
+      outputName += " Centroids";
+      final MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
+
+      // Save traces separately
+      saveCentroidResults(results, multiTraces, outputName + " Multi");
+
+      // Sort traces by time to assist the results source in extracting frames sequentially.
+      // Do this before saving to assist in debugging using the saved traces file.
+      sortByTime(traces);
+
+      if (!multiMode && settings.getSaveTraces()) {
+        saveTraces(results, traces);
+      }
+
+      summarise(results.getName(), mode, createSummaryTable(), traces, totalFiltered,
+          settings.getDistanceThreshold(), timeThresholdInSeconds());
+
+      IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(),
+          tracedResults.size(), totalFiltered));
     }
+    if (allResults.size() > 1) {
+      IJ.showProgress(-1);
+      IJ.showStatus(pluginTitle + " finished " + allResults.size() + " datasets");
+    }
+  }
 
-    summarise(results.getName(), createSummaryTable(), traces, totalFiltered,
-        settings.getDistanceThreshold(), timeThresholdInSeconds());
-
-    IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(),
-        tracedResults.size(), totalFiltered));
+  private static AnalysisMode getAnalysisMode(String arg) {
+    if ("dynamic".equals(arg)) {
+      return AnalysisMode.DYNAMIC_TRACE;
+    } else if ("cluster".equals(arg)) {
+      return AnalysisMode.CLUSTER;
+    }
+    return AnalysisMode.TRACE;
   }
 
   private static double getDistance(double distanceThreshold, CalibrationOrBuilder calibration) {
@@ -598,15 +651,26 @@ public class TraceMolecules implements PlugIn {
         settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames());
   }
 
-  private void summarise(String name, Consumer<String> output, Trace[] traces, int filtered,
-      double distanceThreshold, double timeThreshold) {
+  /**
+   * Summarise the results.
+   *
+   * @param name the name (use null for debug mode which disables histogram and save options)
+   * @param mode the mode
+   * @param output the output
+   * @param traces the traces
+   * @param filtered the filtered
+   * @param distanceThreshold the distance threshold
+   * @param timeThreshold the time threshold
+   */
+  private void summarise(String name, AnalysisMode mode, Consumer<String> output, Trace[] traces,
+      int filtered, double distanceThreshold, double timeThreshold) {
     IJ.showStatus("Calculating summary ...");
 
+    final boolean extras =
+        name != null && !multiMode && (settings.getShowHistograms() || settings.getSaveTraceData());
     final Statistics[] stats = new Statistics[NAMES.length];
     for (int i = 0; i < stats.length; i++) {
-      stats[i] =
-          (settings.getShowHistograms() || settings.getSaveTraceData()) ? new StoredDataStatistics()
-              : new Statistics();
+      stats[i] = extras ? new StoredDataStatistics() : new Statistics();
     }
     int singles = 0;
     for (final Trace trace : traces) {
@@ -642,8 +706,8 @@ public class TraceMolecules implements PlugIn {
 
     // Add to the summary table
     final StringBuilder sb = new StringBuilder(256);
-    sb.append(name).append('\t').append(getAlgorithm()).append('\t')
-        .append(MathUtils.rounded(getExposureTimeInMilliSeconds(), 3)).append('\t')
+    sb.append(name != null ? name : "debugMode").append('\t').append(getAlgorithm(mode))
+        .append('\t').append(MathUtils.rounded(getExposureTimeInMilliSeconds(), 3)).append('\t')
         .append(MathUtils.rounded(distanceThreshold, 3)).append('\t')
         .append(MathUtils.rounded(timeThreshold, 3));
     if (settings.getSplitPulses()) {
@@ -666,7 +730,7 @@ public class TraceMolecules implements PlugIn {
     }
     output.accept(sb.toString());
 
-    if (settings.getShowHistograms()) {
+    if (extras && settings.getShowHistograms()) {
       IJ.showStatus("Calculating histograms ...");
 
       final WindowOrganiser windowOrganiser = new WindowOrganiser();
@@ -685,7 +749,7 @@ public class TraceMolecules implements PlugIn {
       windowOrganiser.tile();
     }
 
-    if (settings.getSaveTraceData()) {
+    if (extras && settings.getSaveTraceData()) {
       saveTraceData(stats);
     }
 
@@ -749,14 +813,70 @@ public class TraceMolecules implements PlugIn {
     }
   }
 
-  private boolean showDialog() {
-    pluginTitle = outputName + " Molecules";
+  private boolean showMultiDialog(List<MemoryPeakResults> allResults) {
+    multiMode = true;
+
+    // Select analysis mode
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
+    gd.addHelp(HelpUrls.getUrl("trace-molecules-multi"));
+
+    readSettings();
+
+    final String[] analysisModes = SettingsManager.getNames((Object[]) AnalysisMode.values());
+    gd.addChoice("Analysis_mode", analysisModes, settings.getAnalysisMode());
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return false;
+    }
+    settings.setAnalysisMode(gd.getNextChoiceIndex());
+
+    // Show a list box containing all the results.
+    // This should remember the last set of chosen items.
+    final MultiDialog md = ResultsManager.createMultiDialog(TITLE, TraceMolecules::isCalibrated);
+    md.setSelected(SELECTED_REF.get());
+    md.setHelpUrl(HelpUrls.getUrl("trace-molecules-multi"));
+
+    md.showDialog();
+
+    if (md.wasCancelled()) {
+      return false;
+    }
+
+    final List<String> selected = md.getSelectedResults();
+    if (selected.isEmpty()) {
+      IJ.error(TITLE, "No results were selected");
+      return false;
+    }
+    SELECTED_REF.set(selected);
+
+    for (final String name : selected) {
+      final MemoryPeakResults r = MemoryPeakResults.getResults(name);
+      if (r != null) {
+        allResults.add(r);
+      }
+    }
+
+    return !allResults.isEmpty();
+  }
+
+  private static boolean isCalibrated(MemoryPeakResults results) {
+    final CalibrationReader reader = results.getCalibrationReader();
+    if (reader != null) {
+      return reader.hasNmPerPixel() && reader.hasExposureTime() && reader.hasDistanceUnit();
+    }
+    return false;
+  }
+
+  private boolean showDialog(List<MemoryPeakResults> allResults) {
+    pluginTitle = AnalysisMode.TRACE.getName() + " Molecules";
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addHelp(HelpUrls.getUrl("trace-molecules"));
 
     readSettings();
 
-    ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
+    if (!multiMode) {
+      ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
+    }
 
     gd.addNumericField("Distance_Threshold", settings.getDistanceThreshold(), 2, 6, "nm");
     gd.addNumericField("Distance_Exclusion", settings.getDistanceExclusion(), 2, 6, "nm");
@@ -764,22 +884,45 @@ public class TraceMolecules implements PlugIn {
     gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
     final String[] traceModes =
         SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
-    gd.addChoice("Trace_mode", traceModes,
-        traceModes[getTraceMode(settings.getTraceMode()).ordinal()]);
+    gd.addChoice("Trace_mode", traceModes, getTraceMode(settings.getTraceMode()).ordinal());
     gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
     gd.addNumericField("Pulse_window", settings.getPulseWindow(), 0, 6, "Frames");
     gd.addCheckbox("Split_pulses", settings.getSplitPulses());
-    gd.addCheckbox("Optimise", settings.getOptimise());
-    gd.addCheckbox("Save_traces", settings.getSaveTraces());
-    gd.addCheckbox("Show_histograms", settings.getShowHistograms());
-    gd.addCheckbox("Save_trace_data", settings.getSaveTraceData());
+    if (!multiMode) {
+      gd.addCheckbox("Optimise", settings.getOptimise());
+      gd.addCheckbox("Save_traces", settings.getSaveTraces());
+      gd.addCheckbox("Show_histograms", settings.getShowHistograms());
+      gd.addCheckbox("Save_trace_data", settings.getSaveTraceData());
+    }
     if (altKeyDown) {
       gd.addCheckbox("Debug", pluginSettings.inputDebugMode);
     }
+    return showDialog(gd, this::readDialog, allResults);
+  }
 
+  /**
+   * Show the dialog, read with the provided predicate, load the results sepcified in the plugin
+   * settings and add them to the list of all the results.
+   *
+   * @param gd the dialog
+   * @param readDialog the read dialog method
+   * @param allResults the all results list
+   * @return true, if successful
+   */
+  private boolean showDialog(ExtendedGenericDialog gd, Predicate<ExtendedGenericDialog> readDialog,
+      List<MemoryPeakResults> allResults) {
     gd.showDialog();
-
-    return !gd.wasCanceled() && readDialog(gd);
+    if (gd.wasCanceled() || !readDialog.test(gd)) {
+      return false;
+    }
+    if (!multiMode) {
+      final MemoryPeakResults results = loadResults();
+      if (results == null) {
+        return false;
+      }
+      allResults.add(results);
+    }
+    return true;
   }
 
   /**
@@ -796,14 +939,13 @@ public class TraceMolecules implements PlugIn {
       IJ.showStatus("");
       return null;
     }
-
-    // Store exposure time in seconds
-    exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
     return results;
   }
 
   private boolean readDialog(ExtendedGenericDialog gd) {
-    pluginSettings.inputOption = ResultsManager.getInputSource(gd);
+    if (!multiMode) {
+      pluginSettings.inputOption = ResultsManager.getInputSource(gd);
+    }
     settings.setDistanceThreshold(gd.getNextNumber());
     settings.setDistanceExclusion(gd.getNextNumber());
     settings.setTimeThreshold(gd.getNextNumber());
@@ -812,10 +954,12 @@ public class TraceMolecules implements PlugIn {
     settings.setPulseInterval((int) gd.getNextNumber());
     settings.setPulseWindow((int) gd.getNextNumber());
     settings.setSplitPulses(gd.getNextBoolean());
-    settings.setOptimise(gd.getNextBoolean());
-    settings.setSaveTraces(gd.getNextBoolean());
-    settings.setShowHistograms(gd.getNextBoolean());
-    settings.setSaveTraceData(gd.getNextBoolean());
+    if (!multiMode) {
+      settings.setOptimise(gd.getNextBoolean());
+      settings.setSaveTraces(gd.getNextBoolean());
+      settings.setShowHistograms(gd.getNextBoolean());
+      settings.setSaveTraceData(gd.getNextBoolean());
+    }
     if (altKeyDown) {
       debugMode = pluginSettings.inputDebugMode = gd.getNextBoolean();
     }
@@ -864,38 +1008,41 @@ public class TraceMolecules implements PlugIn {
     return true;
   }
 
-  private boolean showClusterDialog() {
-    pluginTitle = outputName + " Molecules";
+  private boolean showClusterDialog(List<MemoryPeakResults> allResults) {
+    pluginTitle = AnalysisMode.CLUSTER.getName() + " Molecules";
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addHelp(HelpUrls.getUrl("cluster-molecules"));
 
     readSettings();
 
-    ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
+    if (!multiMode) {
+      ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
+    }
 
     gd.addNumericField("Distance_Threshold", settings.getDistanceThreshold(), 2, 6, "nm");
     gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
     gd.addChoice("Time_unit", SettingsManager.getTimeUnitNames(), settings.getTimeUnit().ordinal());
     final String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
     gd.addChoice("Clustering_algorithm", algorithm,
-        algorithm[getClusteringAlgorithm(settings.getClusteringAlgorithm()).ordinal()]);
+        getClusteringAlgorithm(settings.getClusteringAlgorithm()).ordinal());
     gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
     gd.addCheckbox("Split_pulses", settings.getSplitPulses());
-    gd.addCheckbox("Save_clusters", settings.getSaveTraces());
-    gd.addCheckbox("Show_histograms", settings.getShowHistograms());
-    gd.addCheckbox("Save_cluster_data", settings.getSaveTraceData());
+    if (!multiMode) {
+      gd.addCheckbox("Save_clusters", settings.getSaveTraces());
+      gd.addCheckbox("Show_histograms", settings.getShowHistograms());
+      gd.addCheckbox("Save_cluster_data", settings.getSaveTraceData());
+    }
     if (altKeyDown) {
       gd.addCheckbox("Debug", pluginSettings.inputDebugMode);
     }
-
-    gd.showDialog();
-
-    return !gd.wasCanceled() && readClusterDialog(gd);
+    return showDialog(gd, this::readClusterDialog, allResults);
   }
 
   private void readSettings() {
-    settings = SettingsManager.readClusteringSettings(0).toBuilder();
-    pluginSettings = Settings.load();
+    if (settings == null) {
+      settings = SettingsManager.readClusteringSettings(0).toBuilder();
+      pluginSettings = Settings.load();
+    }
   }
 
   private void writeSettings() {
@@ -904,16 +1051,20 @@ public class TraceMolecules implements PlugIn {
   }
 
   private boolean readClusterDialog(ExtendedGenericDialog gd) {
-    pluginSettings.inputOption = ResultsManager.getInputSource(gd);
+    if (!multiMode) {
+      pluginSettings.inputOption = ResultsManager.getInputSource(gd);
+    }
     settings.setDistanceThreshold(gd.getNextNumber());
     settings.setTimeThreshold(gd.getNextNumber());
     settings.setTimeUnit(SettingsManager.getTimeUnitValues()[gd.getNextChoiceIndex()]);
     settings.setClusteringAlgorithm(gd.getNextChoiceIndex());
     settings.setPulseInterval((int) gd.getNextNumber());
     settings.setSplitPulses(gd.getNextBoolean());
-    settings.setSaveTraces(gd.getNextBoolean());
-    settings.setShowHistograms(gd.getNextBoolean());
-    settings.setSaveTraceData(gd.getNextBoolean());
+    if (!multiMode) {
+      settings.setSaveTraces(gd.getNextBoolean());
+      settings.setShowHistograms(gd.getNextBoolean());
+      settings.setSaveTraceData(gd.getNextBoolean());
+    }
     if (altKeyDown) {
       debugMode = pluginSettings.inputDebugMode = gd.getNextBoolean();
     }
@@ -943,14 +1094,16 @@ public class TraceMolecules implements PlugIn {
     return true;
   }
 
-  private boolean showDynamicTraceDialog() {
-    pluginTitle = outputName + " Molecules";
+  private boolean showDynamicTraceDialog(List<MemoryPeakResults> allResults) {
+    pluginTitle = AnalysisMode.DYNAMIC_TRACE.getName() + " Molecules";
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addHelp(HelpUrls.getUrl("dynamic-trace-molecules"));
 
     readSettings();
 
-    ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
+    if (!multiMode) {
+      ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
+    }
 
     // Dynamic Multiple Target Tracing
     final TextField tfD = gd.addAndGetNumericField("Diffusion_coefficient",
@@ -981,17 +1134,18 @@ public class TraceMolecules implements PlugIn {
       cbDld.setState(config.isDisableLocalDiffusionModel());
       cbDim.setState(config.isDisableIntensityModel());
     });
-    gd.addCheckbox("Save_traces", settings.getSaveTraces());
-    gd.addCheckbox("Show_histograms", settings.getShowHistograms());
-    gd.addCheckbox("Save_trace_data", settings.getSaveTraceData());
-
-    gd.showDialog();
-
-    return !gd.wasCanceled() && readDynamicTraceDialog(gd);
+    if (!multiMode) {
+      gd.addCheckbox("Save_traces", settings.getSaveTraces());
+      gd.addCheckbox("Show_histograms", settings.getShowHistograms());
+      gd.addCheckbox("Save_trace_data", settings.getSaveTraceData());
+    }
+    return showDialog(gd, this::readDynamicTraceDialog, allResults);
   }
 
   private boolean readDynamicTraceDialog(ExtendedGenericDialog gd) {
-    pluginSettings.inputOption = ResultsManager.getInputSource(gd);
+    if (!multiMode) {
+      pluginSettings.inputOption = ResultsManager.getInputSource(gd);
+    }
     settings.setDiffusionCoefficentMaximum(gd.getNextNumber());
     settings.setTemporalWindow((int) gd.getNextNumber());
     settings.setLocalDiffusionWeight(gd.getNextNumber());
@@ -1000,9 +1154,11 @@ public class TraceMolecules implements PlugIn {
     settings.setDisappearanceThreshold((int) gd.getNextNumber());
     settings.setDisableLocalDiffusionModel(gd.getNextBoolean());
     settings.setDisableIntensityModel(gd.getNextBoolean());
-    settings.setSaveTraces(gd.getNextBoolean());
-    settings.setShowHistograms(gd.getNextBoolean());
-    settings.setSaveTraceData(gd.getNextBoolean());
+    if (!multiMode) {
+      settings.setSaveTraces(gd.getNextBoolean());
+      settings.setShowHistograms(gd.getNextBoolean());
+      settings.setSaveTraceData(gd.getNextBoolean());
+    }
 
     writeSettings();
 
@@ -1139,8 +1295,7 @@ public class TraceMolecules implements PlugIn {
     gd.addSlider("Steps", 1, 20, settings.getOptimiserSteps());
     gd.addNumericField("Blinking_rate", settings.getBlinkingRate(), 2);
     final String[] plotNames = SettingsManager.getNames((Object[]) OptimiserPlot.values());
-    gd.addChoice("Plot", plotNames,
-        plotNames[OptimiserPlot.get(settings.getOptimiserPlot()).ordinal()]);
+    gd.addChoice("Plot", plotNames, OptimiserPlot.get(settings.getOptimiserPlot()).ordinal());
     if (altKeyDown) {
       gd.addCheckbox("Optimise_blinking", pluginSettings.inputOptimiseBlinkingRate);
     }
@@ -1245,7 +1400,7 @@ public class TraceMolecules implements PlugIn {
   /**
    * Runs the tracing algorithm using distances and time thresholds between min and max with the
    * configured number of steps. Steps are spaced using a logarithmic scale.
-   * 
+   *
    * <p>Returns a list of [distance,time,N traces]
    *
    * @param manager the manager
@@ -1277,7 +1432,8 @@ public class TraceMolecules implements PlugIn {
         final int n = manager.traceMolecules(d, t);
         resultsList.add(new double[] {d, t, n, getBlinkingRate(manager.getTraces())});
         if (debugMode) {
-          summarise("debugMode", IJ::log, manager.getTraces(), manager.getTotalFiltered(), d, t);
+          summarise(null, AnalysisMode.TRACE, IJ::log, manager.getTraces(),
+              manager.getTotalFiltered(), d, t);
         }
       }
     }
