@@ -37,6 +37,7 @@ import ij.process.FloatProcessor;
 import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Checkbox;
+import java.awt.Rectangle;
 import java.awt.TextField;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
@@ -44,12 +45,16 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -72,10 +77,13 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -194,6 +202,7 @@ public class TraceMolecules implements PlugIn {
     boolean inputOptimiseBlinkingRate;
     boolean[] displayHistograms;
     String filename;
+    boolean disableCombinedDataset;
 
     Settings() {
       inputOption = Prefs.get(KEY_INPUT_OPTION, "");
@@ -214,6 +223,7 @@ public class TraceMolecules implements PlugIn {
       inputOptimiseBlinkingRate = source.inputOptimiseBlinkingRate;
       displayHistograms = source.displayHistograms.clone();
       filename = source.filename;
+      disableCombinedDataset = source.disableCombinedDataset;
     }
 
     Settings copy() {
@@ -279,6 +289,56 @@ public class TraceMolecules implements PlugIn {
     }
   }
 
+  /**
+   * Contains the calibration that allows multiple results to be combined.
+   */
+  private static class CalibrationKey {
+    private final double nmPerPixel;
+    private final double exposureTime;
+    private final DistanceUnit distanceUnit;
+
+    CalibrationKey(double nmPerPixel, double exposureTime, DistanceUnit distanceUnit) {
+      this.nmPerPixel = nmPerPixel;
+      this.exposureTime = exposureTime;
+      this.distanceUnit = distanceUnit;
+    }
+
+    static CalibrationKey of(CalibrationReader cr) {
+      if (cr != null) {
+        final double nmPerPixel = cr.getNmPerPixel();
+        final double exposureTime = cr.getExposureTime();
+        if (nmPerPixel > 0 && exposureTime > 0 && cr.hasDistanceUnit()) {
+          return new CalibrationKey(nmPerPixel, exposureTime, cr.getDistanceUnit());
+        }
+      }
+      return null;
+    }
+
+    CalibrationProtos.Calibration toCalibration() {
+      final CalibrationWriter cw = new CalibrationWriter();
+      cw.setNmPerPixel(nmPerPixel);
+      cw.setExposureTime(exposureTime);
+      cw.setDistanceUnit(distanceUnit);
+      return cw.getCalibration();
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(nmPerPixel, exposureTime, distanceUnit);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof CalibrationKey) {
+        final CalibrationKey other = (CalibrationKey) obj;
+        return Double.doubleToLongBits(exposureTime) == Double.doubleToLongBits(other.exposureTime)
+            && Double.doubleToLongBits(nmPerPixel) == Double.doubleToLongBits(other.nmPerPixel)
+            && distanceUnit == other.distanceUnit;
+      }
+      return false;
+    }
+  }
+
   private Object getAlgorithm(AnalysisMode mode) {
     if (mode == AnalysisMode.CLUSTER) {
       return getClusteringAlgorithm(settings.getClusteringAlgorithm());
@@ -340,6 +400,10 @@ public class TraceMolecules implements PlugIn {
     // Perform analysis for each input dataset.
     // When processing multiple datasets some of the output options are not available.
     // This is controlled by the multiMode flag.
+    // Save results and the traces under a hashable calibration to create a combined dataset.
+    final HashMap<CalibrationKey, List<Pair<MemoryPeakResults, Trace[]>>> analysisResults =
+        new HashMap<>();
+
     for (int i = 0; i < allResults.size(); i++) {
       final MemoryPeakResults results = allResults.get(i);
       if (allResults.size() > 1) {
@@ -415,6 +479,10 @@ public class TraceMolecules implements PlugIn {
       // --=-=-=-=-=-
       // Results processing
       // --=-=-=-=-=-
+      final CalibrationKey key = CalibrationKey.of(results.getCalibrationReader());
+      if (key != null) {
+        analysisResults.computeIfAbsent(key, k -> new LocalList<>()).add(Pair.of(results, traces));
+      }
 
       String outputName = mode.getName();
       outputName += (outputName.endsWith("e") ? "" : "e") + "d";
@@ -448,6 +516,7 @@ public class TraceMolecules implements PlugIn {
     }
     if (allResults.size() > 1) {
       IJ.showProgress(-1);
+      saveCombinedDatasets(mode, analysisResults);
       IJ.showStatus(pluginTitle + " finished " + allResults.size() + " datasets");
     }
   }
@@ -824,11 +893,13 @@ public class TraceMolecules implements PlugIn {
 
     final String[] analysisModes = SettingsManager.getNames((Object[]) AnalysisMode.values());
     gd.addChoice("Analysis_mode", analysisModes, settings.getAnalysisMode());
+    gd.addCheckbox("Disable_combined_dataset", pluginSettings.disableCombinedDataset);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
     settings.setAnalysisMode(gd.getNextChoiceIndex());
+    pluginSettings.disableCombinedDataset = gd.getNextBoolean();
 
     // Show a list box containing all the results.
     // This should remember the last set of chosen items.
@@ -1888,5 +1959,63 @@ public class TraceMolecules implements PlugIn {
       range = 1;
     }
     return range * width / (width - orig);
+  }
+
+  private void saveCombinedDatasets(AnalysisMode mode,
+      final HashMap<CalibrationKey, List<Pair<MemoryPeakResults, Trace[]>>> analysisResults) {
+    if (pluginSettings.disableCombinedDataset) {
+      return;
+    }
+    analysisResults.forEach((k, v) -> {
+      if (v.size() > 1) {
+        final List<MemoryPeakResults> results =
+            v.stream().map(Pair::getLeft).collect(Collectors.toList());
+        final String combinedName = createCombinedName(results, mode);
+        final Trace[] all =
+            v.stream().map(Pair::getRight).flatMap(Arrays::stream).toArray(Trace[]::new);
+        final MemoryPeakResults r = TraceManager.toPeakResults(all, k.toCalibration(), true);
+        r.setName(combinedName);
+        r.setBounds(results.stream().map(MemoryPeakResults::getBounds).reduce(new Rectangle(),
+            Rectangle::union));
+        r.setCalibration(createCombinedCalibration(r, results));
+        r.setPsf(results.stream().map(MemoryPeakResults::getPsf)
+            .reduce((a, b) -> Objects.equals(a, b) ? a : null).orElse(null));
+        MemoryPeakResults.addResults(r);
+      }
+    });
+  }
+
+  private static String createCombinedName(List<MemoryPeakResults> results, AnalysisMode mode) {
+    final StringBuilder sb = new StringBuilder(256).append(results.get(0).getName()).append(" + ")
+        .append(TextUtils.pleural(results.size() - 1, "other")).append(' ').append(mode.getName());
+    // Change: trace -> traced; cluster -> clustered
+    if (sb.charAt(sb.length() - 1) != 'e') {
+      sb.append('e');
+    }
+    return sb.append('d').toString();
+  }
+
+  private static CalibrationProtos.Calibration createCombinedCalibration(MemoryPeakResults r,
+      List<MemoryPeakResults> results) {
+    final CalibrationWriter cw = r.getCalibrationWriter();
+    final CalibrationReader cr = results.get(0).getCalibrationReader();
+    // Add to the writer when the calibration is the same across all results
+    cw.setIntensityUnit(results.stream().map(x -> x.getCalibrationReader().getIntensityUnit())
+        .reduce(cr.getIntensityUnit(), (a, b) -> a == b ? a : cw.getIntensityUnit()));
+    cw.setCameraType(results.stream().map(x -> x.getCalibrationReader().getCameraType())
+        .reduce(cr.getCameraType(), (a, b) -> a == b ? a : cw.getCameraType()));
+    cw.setCountPerPhoton(
+        results.stream().mapToDouble(x -> x.getCalibrationReader().getCountPerPhoton())
+            .reduce(cr.getCountPerPhoton(), (a, b) -> a == b ? a : cw.getCountPerPhoton()));
+    cw.setQuantumEfficiency(
+        results.stream().mapToDouble(x -> x.getCalibrationReader().getQuantumEfficiency())
+            .reduce(cr.getQuantumEfficiency(), (a, b) -> a == b ? a : cw.getQuantumEfficiency()));
+    cw.setBias(results.stream().mapToDouble(x -> x.getCalibrationReader().getBias())
+        .reduce(cr.getBias(), (a, b) -> a == b ? a : cw.getBias()));
+    cw.setCameraModelName(results.stream().map(x -> x.getCalibrationReader().getCameraModelName())
+        .reduce(cr.getCameraModelName(), (a, b) -> a.equals(b) ? a : cw.getCameraModelName()));
+    cw.setPrecisionMethod(results.stream().map(x -> x.getCalibrationReader().getPrecisionMethod())
+        .reduce(cr.getPrecisionMethod(), (a, b) -> a == b ? a : cw.getPrecisionMethod()));
+    return cw.getCalibration();
   }
 }
