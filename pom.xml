@@ -120,12 +120,13 @@ Software for single molecule localisation microscopy (SMLM)
     <gdsc.core.version>2.1-SNAPSHOT</gdsc.core.version>
     <xstream.version>1.4.20</xstream.version>
     <JTransforms.version>3.1</JTransforms.version>
-    <jsoup.version>1.15.3</jsoup.version>
-    <mfl-core.version>0.5.6</mfl-core.version>
+    <jsoup.version>1.16.1</jsoup.version>
+    <mfl-core.version>0.5.14</mfl-core.version>
 
     <!-- Other maven plugin versions -->
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
-    <os-maven-plugin.version>1.6.0</os-maven-plugin.version>
+    <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
+
   </properties>
 
   <dependencies>
