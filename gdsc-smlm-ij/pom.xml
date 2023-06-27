@@ -113,7 +113,6 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-statistics-distribution</artifactId>
-      <version>1.0</version>
     </dependency>
   </dependencies>
 
