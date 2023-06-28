@@ -6,7 +6,7 @@
   <parent>
     <groupId>uk.ac.sussex.gdsc</groupId>
     <artifactId>gdsc-smlm-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
   </parent>
 
   <artifactId>gdsc-smlm-ij_</artifactId>
@@ -103,7 +103,7 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
     <dependency>
       <groupId>uk.ac.sussex.gdsc</groupId>
       <artifactId>gdsc-smlm</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>us.hebi.matlab.mat</groupId>
