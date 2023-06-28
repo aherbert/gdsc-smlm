@@ -1,11 +1,11 @@
 
 /*-
  * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
+ * Genome Damage and Stability Centre SMLM ImageJ Package
  *
- * Software for single molecule localisation microscopy (SMLM)
+ * Software for single molecule localisation microscopy (SMLM) in ImageJ
  * %%
- * Copyright (C) 2011 - 2022 Alex Herbert
+ * Copyright (C) 2011 - 2023 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as

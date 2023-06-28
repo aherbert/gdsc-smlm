@@ -18,7 +18,7 @@ Contains routines for:
 - PSF modelling from bead calibration images
 - Camera noise modelling from calibration images
 
-Copyright (C) 2011-2022 Alex Herbert
+Copyright (C) 2011-2023 Alex Herbert
 MRC Genome Damage and Stability Centre
 University of Sussex, UK
 
