@@ -5,6 +5,12 @@ Change Log
    :local:
 
 
+Version 1.2
+-----------
+
+Minor release of GDSC SMLM.
+
+
 Version 1.1
 -----------
 
