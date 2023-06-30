@@ -32,10 +32,13 @@ The code is hosted on GitHub_.
 Citation
 --------
 
-| Etheridge TJ, Carr AM and Herbert AD.
 | **GDSC SMLM: Single-molecule localisation microscopy software for ImageJ** [version 1; peer review: 1 approved].
+| Etheridge TJ, Carr AM and Herbert AD.
 | *Wellcome Open Res* 2022, **7:241**
-| `doi.org/10.12688/wellcomeopenres.18327.1 <https://doi.org/10.12688/wellcomeopenres.18327.1>`_
+
+.. image:: https://img.shields.io/badge/doi-10.12688%2Fwellcomeopenres.18327.1-blue
+    :target: https://doi.org/10.12688/wellcomeopenres.18327.1
+    :alt: DOI 10.12688/wellcomeopenres.18327.1
 
 .. index:: ! Overview
 
