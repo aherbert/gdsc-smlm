@@ -10,6 +10,8 @@ Version 1.2
 
 Minor release of GDSC SMLM.
 
+* Update to GDSC Core 2.2
+
 
 Version 1.1
 -----------
