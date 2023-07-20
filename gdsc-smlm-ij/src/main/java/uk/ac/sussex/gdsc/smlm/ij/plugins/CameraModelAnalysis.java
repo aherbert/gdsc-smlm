@@ -43,13 +43,13 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import org.apache.commons.statistics.distribution.GammaDistribution;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
@@ -752,8 +752,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
           upper = settings.getPhotons() + 3 * Math.sqrt(settings.getPhotons());
         }
 
-        final GammaDistribution gamma = new GammaDistribution(null, upper, gain,
-            GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+        final GammaDistribution gamma = GammaDistribution.of(upper, gain);
         final int maxc = (int) gamma.inverseCumulativeProbability(0.999);
 
         final int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));

@@ -32,12 +32,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
+import org.apache.commons.statistics.distribution.PoissonDistribution;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -585,7 +585,7 @@ class ScmosLikelihoodWrapperTest {
   void cumulativeProbabilityIsOneWithRealDataForCountAbove8() {
     for (final double mu : photons) {
       // Determine upper limit for a Poisson
-      double max = new PoissonDistribution(mu).inverseCumulativeProbability(P_LIMIT);
+      double max = PoissonDistribution.of(mu).inverseCumulativeProbability(P_LIMIT);
 
       // Determine lower limit
       final double sd = Math.sqrt(mu);
@@ -625,7 +625,7 @@ class ScmosLikelihoodWrapperTest {
 
   private static void instanceLikelihoodMatches(final double mu, boolean test) {
     // Determine upper limit for a Poisson
-    final int limit = new PoissonDistribution(mu).inverseCumulativeProbability(P_LIMIT);
+    final int limit = PoissonDistribution.of(mu).inverseCumulativeProbability(P_LIMIT);
 
     // Map to observed values using the gain and offset
     final double max = limit * G;

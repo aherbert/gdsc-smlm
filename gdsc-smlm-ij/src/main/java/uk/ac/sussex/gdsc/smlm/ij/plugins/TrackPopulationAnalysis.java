@@ -81,7 +81,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import org.apache.commons.math3.distribution.FDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory;
@@ -103,6 +102,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
+import org.apache.commons.statistics.distribution.FDistribution;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -3171,7 +3171,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // numeratorDegreesOfFreedom = numberOfParameters2 - numberOfParameters1
       // denominatorDegreesOfFreedom = numberOfPoints - numberOfParameters2
       denominatorDegreesOfFreedom = (int) MathUtils.sum(weight) - 3;
-      distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
+      distribution = FDistribution.of(1, denominatorDegreesOfFreedom);
       useT1Fraction = settings.useT1Fraction;
     }
 
@@ -3218,7 +3218,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Set the weights and degrees of freedom
       final RealMatrix weightMatrix = new DiagonalMatrix(weights, false);
       final int denominatorDegreesOfFreedom = (int) MathUtils.sum(weights) - 3;
-      final FDistribution distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
+      final FDistribution distribution = FDistribution.of(1, denominatorDegreesOfFreedom);
       fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
     }
 

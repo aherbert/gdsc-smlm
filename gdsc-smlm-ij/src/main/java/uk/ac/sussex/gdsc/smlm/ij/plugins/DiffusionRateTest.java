@@ -45,10 +45,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.statistics.distribution.GammaDistribution;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -671,7 +671,7 @@ public class DiffusionRateTest implements PlugIn {
     final double k = dimensions / 2.0;
     final double mean = 4 * estimatedD;
 
-    final GammaDistribution dist = new GammaDistribution(null, k, mean);
+    final GammaDistribution dist = GammaDistribution.of(k, mean);
 
     final double[] y = new double[x.length];
     for (int i = 0; i < x.length; i++) {
@@ -744,7 +744,7 @@ public class DiffusionRateTest implements PlugIn {
     final double k = dimensions / 2.0;
     final double mean = 4 * estimatedD;
 
-    final GammaDistribution dist = new GammaDistribution(null, k, mean);
+    final GammaDistribution dist = GammaDistribution.of(k, mean);
 
     final double[] y = new double[x.length];
     for (int i = 0; i < x.length; i++) {

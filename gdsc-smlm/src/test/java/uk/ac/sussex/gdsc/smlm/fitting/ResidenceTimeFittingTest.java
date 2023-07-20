@@ -34,13 +34,13 @@ import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.distribution.GeometricDistribution;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AliasMethodDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.ZigguratSampler;
+import org.apache.commons.statistics.distribution.ExponentialDistribution;
+import org.apache.commons.statistics.distribution.GeometricDistribution;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -147,7 +147,7 @@ class ResidenceTimeFittingTest {
   void testRate(double k, double resolution) {
     // This is the computed assuming a geometric distribution histogram.
     final double mean = 1 / k;
-    final ExponentialDistribution exp = new ExponentialDistribution(null, mean);
+    final ExponentialDistribution exp = ExponentialDistribution.of(mean);
     // 99.99 percentile of exponential is 9.21
     final double N = 1_000_000_000 * resolution;
     final int[] n = new int[(int) (12 / resolution)];
@@ -160,7 +160,7 @@ class ResidenceTimeFittingTest {
   @ParameterizedTest
   @ValueSource(doubles = {0.1, 3})
   void testModel1(double k0) {
-    final ExponentialDistribution d = new ExponentialDistribution(null, 1 / k0);
+    final ExponentialDistribution d = ExponentialDistribution.of(1 / k0);
     final Model m = new Model() {
       @Override
       public int getSize() {
@@ -188,8 +188,8 @@ class ResidenceTimeFittingTest {
   @ParameterizedTest
   @CsvSource({"0.1, 3, 0.5", "2, 4, 0.25"})
   void testModel2(double k0, double k1, double f0) {
-    final ExponentialDistribution d0 = new ExponentialDistribution(null, 1 / k0);
-    final ExponentialDistribution d1 = new ExponentialDistribution(null, 1 / k1);
+    final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
+    final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
     final double f1 = 1 - f0;
     final Model m = new Model() {
       @Override
@@ -233,14 +233,13 @@ class ResidenceTimeFittingTest {
     for (double s = 1.0 / 4; s <= 4; s *= 2) {
       final double k = k0 * s;
       final double ll = f.ll(k);
-      final ExponentialDistribution de = new ExponentialDistribution(null, 1 / k);
+      final ExponentialDistribution de = ExponentialDistribution.of(1 / k);
       double e = 0;
       for (int i = 0; i < x.length; i++) {
         e += de.logDensity(x[i]);
       }
       TestAssertions.assertTest(e, ll, testExp, () -> "rate = " + k);
-      final GeometricDistribution dg =
-          new GeometricDistribution(null, -Math.expm1(-k * resolution));
+      final GeometricDistribution dg = GeometricDistribution.of(-Math.expm1(-k * resolution));
       e = 0;
       double e2 = 0;
       final double logr = Math.log(resolution);
@@ -278,17 +277,15 @@ class ResidenceTimeFittingTest {
       final double ka = k0 * s;
       final double kb = k1 * s;
       final double ll = f.ll(ka, kb, f0);
-      final ExponentialDistribution de0 = new ExponentialDistribution(null, 1 / ka);
-      final ExponentialDistribution de1 = new ExponentialDistribution(null, 1 / kb);
+      final ExponentialDistribution de0 = ExponentialDistribution.of(1 / ka);
+      final ExponentialDistribution de1 = ExponentialDistribution.of(1 / kb);
       double e = 0;
       for (int i = 0; i < x.length; i++) {
         e += Math.log(f0 * de0.density(x[i]) + f1 * de1.density(x[i]));
       }
       TestAssertions.assertTest(e, ll, Math.abs(e) < 5 ? testExp1 : testExp);
-      final GeometricDistribution dg0 =
-          new GeometricDistribution(null, -Math.expm1(-ka * resolution));
-      final GeometricDistribution dg1 =
-          new GeometricDistribution(null, -Math.expm1(-kb * resolution));
+      final GeometricDistribution dg0 = GeometricDistribution.of(-Math.expm1(-ka * resolution));
+      final GeometricDistribution dg1 = GeometricDistribution.of(-Math.expm1(-kb * resolution));
       e = 0;
       double e2 = 0;
       for (int i = 0; i < n.length; i++) {

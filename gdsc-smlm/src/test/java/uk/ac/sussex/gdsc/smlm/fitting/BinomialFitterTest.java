@@ -25,10 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import java.util.logging.Logger;
-import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
+import org.apache.commons.statistics.distribution.BinomialDistribution;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -280,7 +280,7 @@ class BinomialFitterTest {
 
   private static int[] createData(UniformRandomProvider rg, int n, double p,
       boolean zeroTruncated) {
-    final BinomialDistribution bd = new BinomialDistribution(null, n, p);
+    final BinomialDistribution bd = BinomialDistribution.of(n, p);
     final DiscreteSampler sampler =
         new InverseTransformDiscreteSampler(rg, pvalue -> bd.inverseCumulativeProbability(pvalue));
 

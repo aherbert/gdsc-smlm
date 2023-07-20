@@ -29,8 +29,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.util.Precision;
+import org.apache.commons.statistics.distribution.PoissonDistribution;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -598,7 +598,7 @@ class PoissonLikelihoodWrapperTest {
 
   private void cumulativeProbabilityIsOneFromLikelihood(final double mu) {
     // Determine upper limit for a Poisson
-    final int limit = new PoissonDistribution(mu).inverseCumulativeProbability(0.999);
+    final int limit = PoissonDistribution.of(mu).inverseCumulativeProbability(0.999);
 
     // Expand to allow for the gain
     final int n = (int) Math.ceil(limit / alpha);

@@ -46,8 +46,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.statistics.distribution.BinomialDistribution;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
@@ -282,7 +282,7 @@ public class PcPalmClusters implements PlugIn {
 
       ImageJUtils.log("Optimal fit : N=%d, p=%s", n, MathUtils.rounded(p));
 
-      final BinomialDistribution dist = new BinomialDistribution(n, p);
+      final BinomialDistribution dist = BinomialDistribution.of(n, p);
 
       // A zero-truncated binomial was fitted.
       // pi is the adjustment factor for the probability density.
@@ -884,7 +884,7 @@ public class PcPalmClusters implements PlugIn {
     final double[] x = new double[trials + 1];
     final double[] y = new double[trials + 1];
 
-    final BinomialDistribution dist = new BinomialDistribution(trials, pvalue);
+    final BinomialDistribution dist = BinomialDistribution.of(trials, pvalue);
 
     final int startIndex = 1;
 

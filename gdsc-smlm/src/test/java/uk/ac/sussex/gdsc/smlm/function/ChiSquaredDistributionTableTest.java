@@ -24,9 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.statistics.distribution.ChiSquaredDistribution;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Assertions;
@@ -62,7 +62,7 @@ class ChiSquaredDistributionTableTest {
       double obs;
       double exp;
       double chi = 0;
-      final ChiSquaredDistribution d = new ChiSquaredDistribution(null, df);
+      final ChiSquaredDistribution d = ChiSquaredDistribution.of(df);
 
       obs = ChiSquaredDistributionTable.computePValue(chi, df);
       exp = d.cumulativeProbability(chi);

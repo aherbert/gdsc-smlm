@@ -27,10 +27,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import org.apache.commons.statistics.distribution.PoissonDistribution;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -564,7 +564,7 @@ class GradientCalculatorSpeedTest {
     for (final double u : new double[] {0.79, 2.5, 5.32}) {
       double ll = 0;
       double oll = 0;
-      final PoissonDistribution pd = new PoissonDistribution(u);
+      final PoissonDistribution pd = PoissonDistribution.of(u);
 
       // The likelihood and logLikelihood computation are delegated to the PoissonCalculator.
       // However these are tested here to check they are correct for the observations.

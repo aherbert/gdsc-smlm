@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -51,6 +50,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.apache.commons.statistics.distribution.BinomialDistribution;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
@@ -476,7 +476,7 @@ public class BinomialFitter {
      * @return the probability function
      */
     public double[] getP(double pvalue) {
-      final BinomialDistribution dist = new BinomialDistribution(trials, pvalue);
+      final BinomialDistribution dist = BinomialDistribution.of(trials, pvalue);
 
       // Optionally ignore x=0 since we cannot see a zero size cluster.
       // This is done by re-normalising the cumulative probability excluding x=0

@@ -25,8 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
-import org.apache.commons.math3.distribution.ChiSquaredDistribution;
-import org.apache.commons.math3.special.Gamma;
+import org.apache.commons.statistics.distribution.ChiSquaredDistribution;
 
 /**
  * Computes probability values from the Chi-squared distribution
@@ -174,7 +173,7 @@ public final class ChiSquaredDistributionTable {
    * @return the chi squared
    */
   public static double getChiSquared(double pvalue, int degreesOfFreedom) {
-    return new ChiSquaredDistribution(null, degreesOfFreedom).inverseCumulativeProbability(pvalue);
+    return ChiSquaredDistribution.of(degreesOfFreedom).inverseCumulativeProbability(pvalue);
   }
 
   /**
@@ -189,10 +188,7 @@ public final class ChiSquaredDistributionTable {
    * @return the q-value
    */
   public static double computeQValue(double chiSquared, int degreesOfFreedom) {
-    if (chiSquared <= 0) {
-      return 1;
-    }
-    return Gamma.regularizedGammaQ(degreesOfFreedom / 2.0, chiSquared / 2.0);
+    return ChiSquaredDistribution.of(degreesOfFreedom).survivalProbability(chiSquared);
   }
 
   /**
@@ -206,9 +202,6 @@ public final class ChiSquaredDistributionTable {
    * @return the p-value
    */
   public static double computePValue(double chiSquared, int degreesOfFreedom) {
-    if (chiSquared <= 0) {
-      return 0;
-    }
-    return Gamma.regularizedGammaP(degreesOfFreedom / 2.0, chiSquared / 2.0);
+    return ChiSquaredDistribution.of(degreesOfFreedom).cumulativeProbability(chiSquared);
   }
 }

@@ -33,8 +33,8 @@ import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.statistics.distribution.PoissonDistribution;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -84,7 +84,7 @@ class PoissonCalculatorTest {
   void canComputeLikelihoodForIntegerData() {
     final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (final double u : photons) {
-      final PoissonDistribution pd = new PoissonDistribution(u);
+      final PoissonDistribution pd = PoissonDistribution.of(u);
       for (int x = 0; x < 100; x++) {
         double expected = pd.probability(x);
         double observed = PoissonCalculator.likelihood(u, x);
@@ -102,7 +102,7 @@ class PoissonCalculatorTest {
   void canComputeFastLikelihoodForIntegerData() {
     final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-4, 0);
     for (final double u : photons) {
-      final PoissonDistribution pd = new PoissonDistribution(u);
+      final PoissonDistribution pd = PoissonDistribution.of(u);
       for (int x = 0; x < 100; x++) {
         double expected = pd.probability(x);
         double observed = PoissonCalculator.fastLikelihood(u, x);
@@ -121,7 +121,7 @@ class PoissonCalculatorTest {
     final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-4, 0);
     final FastLog fastLog = FastLogFactory.getFastLog();
     for (final double u : photons) {
-      final PoissonDistribution pd = new PoissonDistribution(u);
+      final PoissonDistribution pd = PoissonDistribution.of(u);
       for (int x = 0; x < 100; x++) {
         double expected = pd.probability(x);
         double observed = PoissonCalculator.fastLikelihood(u, x, fastLog);
@@ -173,7 +173,7 @@ class PoissonCalculatorTest {
   private static void cumulativeProbabilityIsOneWithRealDataForCountAbove4(int function) {
     for (final double mu : photons) {
       // Determine upper limit for a Poisson
-      final double max = new PoissonDistribution(mu).inverseCumulativeProbability(P_LIMIT);
+      final double max = PoissonDistribution.of(mu).inverseCumulativeProbability(P_LIMIT);
 
       // Determine lower limit
       final double sd = Math.sqrt(mu);

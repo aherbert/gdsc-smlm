@@ -24,17 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunction;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.Pair;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.statistics.distribution.ExponentialDistribution;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.BrownianDiffusionFunction;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.ExponentialDataFunction;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.FbmDiffusionFunction;
@@ -175,12 +174,12 @@ class TrackPopulationAnalysisTest {
 
   @Test
   void canComputeExponentialLogLikelihood() {
-    final RandomGenerator rng = new RandomGeneratorAdapter(RngFactory.createWithFixedSeed());
+    final UniformRandomProvider rng = RngFactory.createWithFixedSeed();
     final double delta = 1e-6;
     for (final double mean : new double[] {2, 10}) {
       // Create exponential data
-      ExponentialDistribution ed = new ExponentialDistribution(rng, mean);
-      final double[] values = ed.sample(1000);
+      ExponentialDistribution ed = ExponentialDistribution.of(mean);
+      final double[] values = ed.createSampler(rng).samples(1000).toArray();
       // Discretise
       final double factor = mean / 10;
       for (int i = 0; i < values.length; i++) {
@@ -192,7 +191,7 @@ class TrackPopulationAnalysisTest {
       // Test with different means
       for (final double du : new double[] {-0.1, 0, 0.1}) {
         final double mu = mean + du;
-        ed = new ExponentialDistribution(rng, mu);
+        ed = ExponentialDistribution.of(mu);
         double ll = 0;
         for (final double x : values) {
           ll += ed.logDensity(x);
