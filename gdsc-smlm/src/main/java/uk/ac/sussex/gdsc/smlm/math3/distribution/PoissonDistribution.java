@@ -31,12 +31,16 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
  * remove the sampling functionality and requirement for the random generator; allow the mean to be
  * altered using properties; use {@link java.lang.Math} and remove the {@code FastMath} dependency.
  *
+ * <p>Note: This class has been deprecated in favour of the new Apache Commons Statistics
+ * implementation.
+ *
  * @see <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution
  *      (Wikipedia)</a>
  * @see <a href="http://mathworld.wolfram.com/PoissonDistribution.html">Poisson distribution
  *      (MathWorld)</a>
+ * @deprecated Use {@link org.apache.commons.statistics.distribution.PoissonDistribution}
  */
-// TODO - replace with the Commons Statistics implementation when v1.0 is released.
+@Deprecated
 public final class PoissonDistribution {
   /** Mean of the distribution. */
   private double mean;
