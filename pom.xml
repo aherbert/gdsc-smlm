@@ -169,6 +169,10 @@ Software for single molecule localisation microscopy (SMLM)
       <artifactId>commons-rng-sampling</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-statistics-distribution</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.googlecode.efficient-java-matrix-library</groupId>
       <artifactId>ejml</artifactId>
     </dependency>
