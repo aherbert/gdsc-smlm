@@ -853,6 +853,8 @@ public abstract class ImageModel {
     return Math.sqrt(6 * diffusionRateInPixelsPerStep);
   }
 
+  // TODO - Deprecate RealDistribution for o.a.c.statistics.distribution.ContinuousDistribution
+
   /**
    * Gets the photon distribution used for the fluorophore.
    *
