@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
@@ -589,7 +588,7 @@ public abstract class ImageModel {
       // to allow running again with a different shape parameter / photon budget.
 
       // Ensure the custom distribution is scaled to the correct photon budget
-      final double photonScale = photonBudget / photonDistribution.getNumericalMean();
+      final double photonScale = photonBudget / photonDistribution.getMean();
 
       // Generate photons sampling from the photon budget
       for (int i = 0; i < nMolecules; i++) {
@@ -853,21 +852,52 @@ public abstract class ImageModel {
     return Math.sqrt(6 * diffusionRateInPixelsPerStep);
   }
 
-  // TODO - Deprecate RealDistribution for o.a.c.statistics.distribution.ContinuousDistribution
-
   /**
    * Gets the photon distribution used for the fluorophore.
    *
-   * @return the photon distribution used for the fluorophore.
+   * <p>The model no longer uses {@link org.apache.commons.math3.distribution.RealDistribution}.
+   * This method has been changed to always returns {@code null}. This return value was previously
+   * used to indicate no distribution.
+   *
+   * @return {@code null}
+   * @deprecated The underlying photon distribution is no longer available.
    */
-  public RealDistribution getPhotonDistribution() {
-    return photonDistribution;
+  @Deprecated
+  public org.apache.commons.math3.distribution.RealDistribution getPhotonDistribution() {
+    return null;
+  }
+
+  /**
+   * Set the distribution used to generate the photon budget of a fluorophore.
+   *
+   * <p>Note: The model no longer uses
+   * {@link org.apache.commons.math3.distribution.RealDistribution}. The argument is wrapped to a
+   * {@link RealDistribution}.
+   *
+   * @param photonDistribution the photon distribution to set
+   * @deprecated Use {@link #setPhotonDistribution(RealDistribution)}
+   */
+  @Deprecated
+  public void setPhotonDistribution(
+      org.apache.commons.math3.distribution.RealDistribution photonDistribution) {
+    this.photonDistribution = new RealDistribution() {
+      @Override
+      public double getMean() {
+        return photonDistribution.getNumericalMean();
+      }
+
+      @Override
+      public double sample() {
+        return photonDistribution.sample();
+      }
+    };
   }
 
   /**
    * Set the distribution used to generate the photon budget of a fluorophore.
    *
    * @param photonDistribution the photon distribution to set
+   * @since 1.2
    */
   public void setPhotonDistribution(RealDistribution photonDistribution) {
     this.photonDistribution = photonDistribution;

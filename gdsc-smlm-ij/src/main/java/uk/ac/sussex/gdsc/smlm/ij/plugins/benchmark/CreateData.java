@@ -67,10 +67,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.distribution.UniformRealDistribution;
+// import org.apache.commons.math3.distribution.ExponentialDistribution;
+// import org.apache.commons.math3.distribution.GammaDistribution;
+// import org.apache.commons.math3.distribution.RealDistribution;
+// import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
@@ -83,6 +83,9 @@ import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSamp
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
+import org.apache.commons.statistics.distribution.ContinuousDistribution;
+import org.apache.commons.statistics.distribution.GammaDistribution;
+import org.apache.commons.statistics.distribution.UniformContinuousDistribution;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -181,6 +184,7 @@ import uk.ac.sussex.gdsc.smlm.model.MoleculeModel;
 import uk.ac.sussex.gdsc.smlm.model.PsfModel;
 import uk.ac.sussex.gdsc.smlm.model.PsfModelGradient1Function;
 import uk.ac.sussex.gdsc.smlm.model.RadialFalloffIllumination;
+import uk.ac.sussex.gdsc.smlm.model.RealDistribution;
 import uk.ac.sussex.gdsc.smlm.model.SpatialDistribution;
 import uk.ac.sussex.gdsc.smlm.model.SpatialIllumination;
 import uk.ac.sussex.gdsc.smlm.model.SphericalDistribution;
@@ -2070,7 +2074,17 @@ public class CreateData implements PlugIn {
             final EmpiricalDistribution dist = new EmpiricalDistribution(binCount,
                 new RandomGeneratorAdapter(createRandomGenerator()));
             dist.load(values);
-            return dist;
+            return new RealDistribution() {
+              @Override
+              public double getMean() {
+                return dist.getNumericalMean();
+              }
+
+              @Override
+              public double sample() {
+                return dist.sample();
+              }
+            };
           }
         } catch (final IOException | NullArgumentException | NumberFormatException ignored) {
           // Ignore
@@ -2080,14 +2094,15 @@ public class CreateData implements PlugIn {
           settings.getPhotonDistributionFile());
     } else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.getPhotonDistribution())) {
       if (settings.getPhotonsPerSecond() < settings.getPhotonsPerSecondMaximum()) {
-        return new UniformRealDistribution(new RandomGeneratorAdapter(createRandomGenerator()),
-            settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum());
+        final UniformContinuousDistribution dist = UniformContinuousDistribution
+            .of(settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum());
+        return toRealDistribution(dist);
       }
     } else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.getPhotonDistribution())) {
       final double scaleParameter = settings.getPhotonsPerSecond() / settings.getPhotonShape();
-      return new GammaDistribution(new RandomGeneratorAdapter(createRandomGenerator()),
-          settings.getPhotonShape(), scaleParameter,
-          ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+      final GammaDistribution dist =
+          GammaDistribution.of(settings.getPhotonShape(), scaleParameter);
+      return toRealDistribution(dist);
     } else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.getPhotonDistribution())) {
       // No distribution required
       return null;
@@ -2095,6 +2110,22 @@ public class CreateData implements PlugIn {
 
     settings.setPhotonDistribution(PHOTON_DISTRIBUTION[PHOTON_FIXED]);
     return null;
+  }
+
+  private RealDistribution toRealDistribution(final ContinuousDistribution dist) {
+    final double mean = dist.getMean();
+    final ContinuousDistribution.Sampler sampler = dist.createSampler(createRandomGenerator());
+    return new RealDistribution() {
+      @Override
+      public double getMean() {
+        return mean;
+      }
+
+      @Override
+      public double sample() {
+        return sampler.sample();
+      }
+    };
   }
 
   private List<LocalisationModelSet> combineSimulationSteps(List<LocalisationModel> localisations) {
