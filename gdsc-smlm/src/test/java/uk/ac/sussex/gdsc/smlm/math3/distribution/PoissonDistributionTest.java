@@ -44,7 +44,7 @@ class PoissonDistributionTest {
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
       final double mean = rng.nextDouble() * i;
-      final org.apache.commons.math3.distribution.PoissonDistribution pd =
+      final org.apache.commons.statistics.distribution.PoissonDistribution pd =
           createReferencePoissonDistribution(mean);
       fpd.setMean(mean);
       final int lower = (int) Math.floor(Math.max(0, mean - 5 * Math.sqrt(mean)));
@@ -63,7 +63,7 @@ class PoissonDistributionTest {
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
       final double mean = rng.nextDouble() * i;
-      final org.apache.commons.math3.distribution.PoissonDistribution pd =
+      final org.apache.commons.statistics.distribution.PoissonDistribution pd =
           createReferencePoissonDistribution(mean);
       fpd.setMean(mean);
       final int lower = (int) Math.floor(Math.max(0, mean - 5 * Math.sqrt(mean)));
@@ -82,7 +82,7 @@ class PoissonDistributionTest {
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
       final double mean = rng.nextDouble() * i;
-      final org.apache.commons.math3.distribution.PoissonDistribution pd =
+      final org.apache.commons.statistics.distribution.PoissonDistribution pd =
           createReferencePoissonDistribution(mean);
       fpd.setMean(mean);
       for (int j = 0; j <= 10; j++) {
@@ -93,13 +93,9 @@ class PoissonDistributionTest {
     }
   }
 
-  private static org.apache.commons.math3.distribution.PoissonDistribution
+  private static org.apache.commons.statistics.distribution.PoissonDistribution
       createReferencePoissonDistribution(final double mean) {
-    final org.apache.commons.math3.distribution.PoissonDistribution pd =
-        new org.apache.commons.math3.distribution.PoissonDistribution(null, mean,
-            org.apache.commons.math3.distribution.PoissonDistribution.DEFAULT_EPSILON,
-            org.apache.commons.math3.distribution.PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-    return pd;
+    return org.apache.commons.statistics.distribution.PoissonDistribution.of(mean);
   }
 
   @Test
@@ -128,7 +124,6 @@ class PoissonDistributionTest {
     final double mean = 1.23;
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(-1));
-    Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(Integer.MAX_VALUE));
     Assertions.assertEquals(-mean, fpd.logProbability(0));
   }
 

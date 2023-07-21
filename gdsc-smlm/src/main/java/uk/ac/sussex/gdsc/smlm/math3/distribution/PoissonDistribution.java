@@ -19,8 +19,6 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
-import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.math3.util.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
@@ -31,22 +29,25 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
  * remove the sampling functionality and requirement for the random generator; allow the mean to be
  * altered using properties; use {@link java.lang.Math} and remove the {@code FastMath} dependency.
  *
- * <p>Note: This class has been deprecated in favour of the new Apache Commons Statistics
- * implementation.
+ * <p>Note: This class has been superseded by the Apache Commons Statistics implementation.
+ * Cumulative probability computations are delegated. The probability and log probability
+ * computation are maintained to provide zero memory allocation computation of values for a
+ * single-use mean. The mean is specified using the class setters.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution
  *      (Wikipedia)</a>
  * @see <a href="http://mathworld.wolfram.com/PoissonDistribution.html">Poisson distribution
  *      (MathWorld)</a>
- * @deprecated Use {@link org.apache.commons.statistics.distribution.PoissonDistribution}
+ * @see org.apache.commons.statistics.distribution.PoissonDistribution
  */
-@Deprecated
 public final class PoissonDistribution {
+  /** 0.5 * ln(2 * pi). Computed to 25-digits precision. */
+  private static final double HALF_LOG_TWO_PI = 0.9189385332046727417803297;
   /** Mean of the distribution. */
   private double mean;
 
   /**
-   * Creates a new Poisson distribution with specified mean.
+   * Creates a new Poisson distribution with the specified mean.
    *
    * @param mean the Poisson mean
    * @throws IllegalArgumentException if {@code mean <= 0}.
@@ -95,8 +96,7 @@ public final class PoissonDistribution {
    * @return the value of the probability mass function at {@code x}
    */
   public double probability(int x) {
-    final double logProbability = logProbability(x);
-    return logProbability == Double.NEGATIVE_INFINITY ? 0 : Math.exp(logProbability);
+    return Math.exp(logProbability(x));
   }
 
   /**
@@ -109,15 +109,13 @@ public final class PoissonDistribution {
    * @return the logarithm of the value of the probability mass function at {@code x}
    */
   public double logProbability(int x) {
-    if (x < 0 || x == Integer.MAX_VALUE) {
+    if (x < 0) {
       return Double.NEGATIVE_INFINITY;
-    }
-    if (x == 0) {
+    } else if (x == 0) {
       return -mean;
     }
     return -SaddlePointExpansionCopy.getStirlingError(x)
-        - SaddlePointExpansionCopy.getDeviancePart(x, mean) - 0.5 * Math.log(MathUtils.TWO_PI)
-        - 0.5 * Math.log(x);
+        - SaddlePointExpansionCopy.getDeviancePart(x, mean) - HALF_LOG_TWO_PI - 0.5 * Math.log(x);
   }
 
   /**
@@ -128,15 +126,14 @@ public final class PoissonDistribution {
    * @param x the point at which the CDF is evaluated
    * @return the probability that a random variable with this distribution takes a value less than
    *         or equal to {@code x}
+   * @deprecated Use
+   *             {@link org.apache.commons.statistics.distribution.PoissonDistribution#cumulativeProbability(int)}
    */
+  @Deprecated
   public double cumulativeProbability(int x) {
-    if (x < 0) {
-      return 0;
-    }
-    if (x == Integer.MAX_VALUE) {
-      return 1;
-    }
-    return Gamma.regularizedGammaQ((double) x + 1, mean, 1e-12, Integer.MAX_VALUE);
+    // Delegate
+    return org.apache.commons.statistics.distribution.PoissonDistribution.of(mean)
+        .cumulativeProbability(x);
   }
 
   /**
@@ -157,55 +154,13 @@ public final class PoissonDistribution {
    * @param probability the cumulative probability
    * @return the smallest {@code p}-quantile of this distribution
    * @throws IllegalArgumentException if {@code p < 0} or {@code p > 1}
+   * @deprecated Use
+   *             {@link org.apache.commons.statistics.distribution.PoissonDistribution#inverseCumulativeProbability(double)}
    */
+  @Deprecated
   public int inverseCumulativeProbability(final double probability) {
-    ValidationUtils.checkArgument(probability >= 0 && probability <= 1, "Invalid probability: %f",
-        probability);
-    if (probability == 0) {
-      return 0;
-    }
-    if (probability == 1) {
-      return Integer.MAX_VALUE;
-    }
-
-    // Use the one-sided Chebyshev inequality to narrow the bracket.
-    final double mu = mean;
-    final double sigma = Math.sqrt(mean);
-
-    double range = Math.sqrt((1.0 - probability) / probability);
-    final double tmp = mu - range * sigma;
-
-    // Using -1 ensures cumulativeProbability(lower) < p, which
-    // is required for the solving step.
-    final int lower = (tmp > -1) ? ((int) Math.ceil(tmp)) - 1 : -1;
-
-    range = 1.0 / range;
-    final int upper = (int) Math.floor(mu + range * sigma);
-
-    return solveInverseCumulativeProbability(probability, lower, upper);
-  }
-
-  /**
-   * This is a utility function used by {@link #inverseCumulativeProbability(double)}. It assumes
-   * {@code 0 < p < 1} and that the inverse cumulative probability lies in the bracket {@code
-   * (lower, upper]}. The implementation does simple bisection to find the smallest
-   * {@code p}-quantile {@code inf{x in Z | P(X<=x) >= p}}.
-   *
-   * @param probability the cumulative probability
-   * @param lower a value satisfying {@code cumulativeProbability(lower) < p}
-   * @param upper a value satisfying {@code p <= cumulativeProbability(upper)}
-   * @return the smallest {@code p}-quantile of this distribution
-   */
-  private int solveInverseCumulativeProbability(final double probability, int lower, int upper) {
-    while (lower + 1 < upper) {
-      final int mid = (lower + upper) >> 1;
-      final double pm = cumulativeProbability(mid);
-      if (pm >= probability) {
-        upper = mid;
-      } else {
-        lower = mid;
-      }
-    }
-    return upper;
+    // Delegate
+    return org.apache.commons.statistics.distribution.PoissonDistribution.of(mean)
+        .inverseCumulativeProbability(probability);
   }
 }

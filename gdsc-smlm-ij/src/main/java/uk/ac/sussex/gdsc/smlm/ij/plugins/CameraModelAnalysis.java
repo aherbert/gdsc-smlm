@@ -50,6 +50,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.statistics.distribution.GammaDistribution;
+import org.apache.commons.statistics.distribution.PoissonDistribution;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
@@ -78,7 +79,6 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonPoissonFunction;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CameraModelAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
@@ -97,8 +97,6 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   private static final double PROBABILITY_DELTA = 1e-6;
   /** The lower limit on the cumulative probability. */
   private static final double LOWER = 1e-6;
-  /** The upper limit on the cumulative probability. */
-  private static final double UPPER = 1 - LOWER;
 
   private static final double SIMPSON_RELATIVE_ACCURACY = 1e-4;
   private static final double SIMPSON_ABSOLUTE_ACCURACY = 1e-8;
@@ -700,8 +698,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   private static double[][] convolveHistogram(CameraModelAnalysisSettings settings) {
 
     // Find the range of the Poisson
-    final PoissonDistribution poisson = new PoissonDistribution(settings.getPhotons());
-    final int maxn = poisson.inverseCumulativeProbability(UPPER);
+    final PoissonDistribution poisson = PoissonDistribution.of(settings.getPhotons());
+    final int maxn = poisson.inverseSurvivalProbability(LOWER);
 
     final double gain = getGain(settings);
     final double noise = getReadNoise(settings);

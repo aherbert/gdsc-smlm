@@ -93,17 +93,17 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   private static final int[] DEFAULT_TINY_LIMITS;
 
   static {
-    final PoissonDistribution pd = new PoissonDistribution(1);
     DEFAULT_LIMITS = new int[101];
     for (int i = 1; i < DEFAULT_LIMITS.length; i++) {
-      DEFAULT_LIMITS[i] = computeLimit(pd, i, DEFAULT_CUMULATIVE_PROBABILITY);
+      DEFAULT_LIMITS[i] = org.apache.commons.statistics.distribution.PoissonDistribution.of(i)
+          .inverseCumulativeProbability(DEFAULT_CUMULATIVE_PROBABILITY);
       // System.out.printf("[%d] = %d scale=%d\n", i, defaultLimits[i], getScale(Math.sqrt(i)));
     }
 
     // Use exponent of the mean down to -20
     DEFAULT_TINY_LIMITS = new int[21];
     for (int i = 1; i < DEFAULT_TINY_LIMITS.length; i++) {
-      DEFAULT_TINY_LIMITS[i] = computeTinyLimit(pd, -i, DEFAULT_CUMULATIVE_PROBABILITY);
+      DEFAULT_TINY_LIMITS[i] = computeTinyLimit(-i, DEFAULT_CUMULATIVE_PROBABILITY);
       // System.out.printf("[%d] = %d : p(0) = %g : cumul = %s : next = %g\n", i,
       // defaultTinyLimits[i],
       // pd.probability(0), pd.cumulativeProbability(defaultTinyLimits[i]),
@@ -251,32 +251,16 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   /**
    * Compute the limit of a usable probability above 0.
    *
-   * @param pd the pd
-   * @param mean the mean
-   * @param cumulativeProbability the cumulative probability
-   * @return the limit
-   */
-  private static int computeLimit(PoissonDistribution pd, double mean,
-      double cumulativeProbability) {
-    pd.setMeanUnsafe(mean);
-    return pd.inverseCumulativeProbability(cumulativeProbability);
-  }
-
-  /**
-   * Compute the limit of a usable probability above 0.
-   *
-   * @param pd the pd
    * @param exp the exponent of the mean (in base 2)
    * @param cumulativeProbability the cumulative probability
    * @return the limit
    */
-  private static int computeTinyLimit(PoissonDistribution pd, int exp,
-      double cumulativeProbability) {
+  private static int computeTinyLimit(int exp, double cumulativeProbability) {
     // Fill all bits of the mantissa
     final long bits = 0xffffffffffffffL;
     final double mean = Double.longBitsToDouble(bits | (long) (exp + 1023) << 52);
-    pd.setMeanUnsafe(mean);
-    return pd.inverseCumulativeProbability(cumulativeProbability);
+    return org.apache.commons.statistics.distribution.PoissonDistribution.of(mean)
+        .inverseCumulativeProbability(cumulativeProbability);
   }
 
   /**
@@ -434,22 +418,25 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
         ex = tinyLimits.length - 1;
       }
       if (tinyLimits[ex] == 0) {
-        tinyLimits[ex] = computeTinyLimit(pd, -ex, cumulativeProbability);
+        tinyLimits[ex] = computeTinyLimit(-ex, cumulativeProbability);
       }
       maxx = tinyLimits[ex];
     } else {
       final int x = (int) Math.ceil(theta);
       if (x < limits.length) {
         if (limits[x] == 0) {
-          limits[x] = computeLimit(pd, x, cumulativeProbability);
+          limits[x] = org.apache.commons.statistics.distribution.PoissonDistribution.of(x)
+              .inverseCumulativeProbability(cumulativeProbability);
         }
         maxx = limits[x];
       } else {
         // For large mean the distribution will be far from zero.
         // In this case use a 2-tailed limit.
         final double lower = (1 - cumulativeProbability) / 2;
-        minx = computeLimit(pd, x, lower);
-        maxx = computeLimit(pd, x, 1 - lower);
+        org.apache.commons.statistics.distribution.PoissonDistribution lpd =
+            org.apache.commons.statistics.distribution.PoissonDistribution.of(x);
+        minx = lpd.inverseCumulativeProbability(lower);
+        maxx = lpd.inverseSurvivalProbability(lower);
       }
     }
 
