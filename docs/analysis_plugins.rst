@@ -1799,6 +1799,12 @@ The following parameters can be set:
    * - Exposure time
      - The frame exposure time.
 
+   * - Bootstrap repeats
+     - The number of bootstrap repeats used to create a 95% confidence interval.
+
+   * - Bootstrap seed
+     - Random seed for the bootstrap repeats (hexidecimal input).
+
 The simulation allows experimenting with the exposure time and number of samples required to obtain satisfactory results for the populations of bound molecules.
 
 
