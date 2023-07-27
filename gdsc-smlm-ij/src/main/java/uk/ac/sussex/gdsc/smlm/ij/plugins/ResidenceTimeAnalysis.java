@@ -59,9 +59,9 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.utils.Hex;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Seed;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -105,13 +105,13 @@ public class ResidenceTimeAnalysis implements PlugIn {
     double k1;
     double f0;
     double exposureTime;
-    byte[] seed;
+    Seed seed;
     int minSize;
     double meanDistance;
     double maxDistance;
     double apparentDissociationRate;
     int bootstrapRepeats;
-    byte[] bootstrapSeed;
+    Seed bootstrapSeed;
 
     Settings() {
       // Set defaults
@@ -120,12 +120,12 @@ public class ResidenceTimeAnalysis implements PlugIn {
       k1 = 5;
       f0 = 0.15;
       exposureTime = 50;
-      seed = Hex.decode("1c0f4f6003fc7f01");
+      seed = Seed.from("1c0f4f6003fc7f01");
       minSize = 2;
       meanDistance = 100;
       maxDistance = 400;
       bootstrapRepeats = 100;
-      bootstrapSeed = Hex.decode("fdfcf7c90ee01f9e");
+      bootstrapSeed = Seed.from("fdfcf7c90ee01f9e");
     }
 
     Settings(Settings source) {
@@ -321,7 +321,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addNumericField("Apparent_dissociation_rate", settings.apparentDissociationRate, -3, 6,
         "sec^-1");
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
-    gd.addHexField("Bootstrap_seed", settings.bootstrapSeed);
+    gd.addHexField("Bootstrap_seed", settings.bootstrapSeed.toBytes());
 
     gd.showDialog();
     if (gd.wasCanceled() || gd.invalidNumber()) {
@@ -332,7 +332,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.maxDistance = gd.getNextNumber();
     settings.apparentDissociationRate = gd.getNextNumber();
     settings.bootstrapRepeats = (int) gd.getNextNumber();
-    settings.bootstrapSeed = gd.getNextHexBytes();
+    settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
 
     return !gd.invalidNumber();
   }
@@ -515,14 +515,14 @@ public class ResidenceTimeAnalysis implements PlugIn {
     // Saved by reference so just save now
     settings.save();
 
-    gd.addHexField("Seed", settings.seed);
+    gd.addHexField("Seed", settings.seed.toBytes());
     gd.addNumericField("Samples", settings.samples, 0);
     gd.addNumericField("k0", settings.k0, -2, 6, "/sec");
     gd.addNumericField("k1", settings.k1, -2, 6, "/sec");
     gd.addNumericField("f0", settings.f0, 3, 6, "");
     gd.addNumericField("Exposure_time", settings.exposureTime, 2, 6, "msec");
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
-    gd.addHexField("Bootstrap_seed", settings.bootstrapSeed);
+    gd.addHexField("Bootstrap_seed", settings.bootstrapSeed.toBytes());
 
     gd.showDialog();
 
@@ -530,14 +530,14 @@ public class ResidenceTimeAnalysis implements PlugIn {
       return false;
     }
 
-    settings.seed = gd.getNextHexBytes();
+    settings.seed = Seed.from(gd.getNextHexBytes());
     settings.samples = (int) Math.abs(gd.getNextNumber());
     settings.k0 = gd.getNextNumber();
     settings.k1 = gd.getNextNumber();
     settings.f0 = gd.getNextNumber();
     settings.exposureTime = gd.getNextNumber();
     settings.bootstrapRepeats = (int) gd.getNextNumber();
-    settings.bootstrapSeed = gd.getNextHexBytes();
+    settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
 
     return !gd.invalidNumber();
   }
@@ -551,7 +551,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
   private int[] createSimulatation(StringBuilder sb) {
     final double m0 = 1 / settings.k0;
     ValidationUtils.checkStrictlyPositive(m0, "Mean residence time 0");
-    final UniformRandomProvider rng = createRng(settings.seed);
+    final UniformRandomProvider rng = createRng(settings.seed.toBytes());
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
     DoubleSupplier gen;
     final double t = settings.exposureTime / 1000;
@@ -564,13 +564,12 @@ public class ResidenceTimeAnalysis implements PlugIn {
       ValidationUtils.checkStrictlyPositive(m1, "Mean residence time 1");
       sb.append(
           String.format("Simulation: seed=%s, n=%d, k0=%s, k1=%s, f0=%s, time=%s (m0=%s, m1=%s)",
-              new String(Hex.encode(settings.seed)), settings.samples, settings.k0, settings.k1, f0,
-              t, m0, m1));
+              settings.seed, settings.samples, settings.k0, settings.k1, f0, t, m0, m1));
       logger.info(sb::toString);
       gen = () -> exp.sample() * (rng.nextDouble() < f0 ? m0 : m1);
     } else {
-      sb.append(String.format("Simulation: seed=%s, n=%d, k0=%s, time=%s (m0=%s)",
-          new String(Hex.encode(settings.seed)), settings.samples, settings.k0, t, m0));
+      sb.append(String.format("Simulation: seed=%s, n=%d, k0=%s, time=%s (m0=%s)", settings.seed,
+          settings.samples, settings.k0, t, m0));
       logger.info(sb::toString);
       final ZigguratSampler.Exponential exp = ZigguratSampler.Exponential.of(rng, m0);
       gen = exp::sample;
@@ -706,10 +705,10 @@ public class ResidenceTimeAnalysis implements PlugIn {
    */
   private int[][] createBootstrapCounts(int[] counts, final int samples, Logger logger) {
     if (settings.bootstrapRepeats > 1) {
-      logger.info(() -> String.format("Bootstrapping: seed=%s, repeats=%d",
-          new String(Hex.encode(settings.bootstrapSeed)), settings.bootstrapRepeats));
+      logger.info(() -> String.format("Bootstrapping: seed=%s, repeats=%d", settings.bootstrapSeed,
+          settings.bootstrapRepeats));
       final long start = System.nanoTime();
-      final UniformRandomProvider rng = createRng(settings.bootstrapSeed);
+      final UniformRandomProvider rng = createRng(settings.bootstrapSeed.toBytes());
       final double[] probabilities =
           Arrays.stream(counts).mapToDouble(i -> (double) i / samples).toArray();
       final DiscreteSampler s = AliasMethodDiscreteSampler.of(rng, probabilities);
