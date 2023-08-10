@@ -716,9 +716,11 @@ public class ResidenceTimeAnalysis implements PlugIn {
     // Get an approximation for the search for the quantiles
     // cdf[i] = time (i+1) * exposureTime
     final double et = exposureTime / 1000;
-    // QQ plot using the quantile definition k / (n + 1)
+    // QQ plot using the quantile definition (k - 1/3) / (n + 1/3).
+    // See https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot#Heuristics
     final int n = Arrays.stream(counts).sum();
-    final double n1 = n + 1.0;
+    final double a = 1.0 / 3;
+    final double na = n + a;
     int k = 0;
     final DoubleArrayList x = new DoubleArrayList();
     final DoubleArrayList y = new DoubleArrayList();
@@ -731,7 +733,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
       }
       y.add((i + 1) * et);
       k += counts[i];
-      final double q = (n - k) / n1;
+      // For the survival function we subtract from 1
+      final double q = 1 - (k - a) / na;
       // Raise bracket
       while (m.sf(upper) > q) {
         upper += et;
@@ -741,15 +744,19 @@ public class ResidenceTimeAnalysis implements PlugIn {
       x.add(z);
     }
     final Plot plot = new Plot("Residence Time QQ n=" + m.getSize(), "Model (sec)", "Data (sec)");
-    plot.setLogScaleX();
-    plot.setLogScaleY();
     plot.setColor(Color.BLUE);
     plot.addPoints(x.toDoubleArray(), y.toDoubleArray(), Plot.CIRCLE);
     plot.setColor(Color.RED);
     final double min = Math.min(et, y.getDouble(0)) / 2;
-    final double max = Math.max(x.getDouble(x.size() - 1), y.getDouble(y.size() - 1)) + et;
+    final double maxx = x.getDouble(x.size() - 1);
+    final double maxy = y.getDouble(y.size() - 1);
+    final double max = Math.max(maxx, maxy) + et;
     plot.drawLine(min, min, max, max);
-    plot.setLimits(min, max, min, max);
+    // For a log scale we must set the limits manually.
+    // Currently disabled but setting the limits allows it to be set using More... > Set Range...
+    //plot.setLogScaleX();
+    //plot.setLogScaleY();
+    plot.setLimits(min, maxx, min, maxy);
     ImageJUtils.display(plot.getTitle(), plot);
   }
 
