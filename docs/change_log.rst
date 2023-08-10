@@ -11,6 +11,8 @@ Version 1.2
 Minor release of GDSC SMLM.
 
 * Update to GDSC Core 2.2
+* Update the :numref:`{name} <analysis_plugins:Residence Time Analysis>` plugin to allow
+  filtering of the counts histogram to remove long residence times.
 
 
 Version 1.1

@@ -109,6 +109,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     int minSize;
     double meanDistance;
     double maxDistance;
+    double maxTraceLength;
+    int minBinCount;
     double apparentDissociationRate;
     int bootstrapRepeats;
     Seed bootstrapSeed;
@@ -138,6 +140,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
       minSize = source.minSize;
       meanDistance = source.meanDistance;
       maxDistance = source.maxDistance;
+      maxTraceLength = source.maxTraceLength;
+      minBinCount = source.minBinCount;
       apparentDissociationRate = source.apparentDissociationRate;
       bootstrapRepeats = source.bootstrapRepeats;
       bootstrapSeed = source.bootstrapSeed;
@@ -209,7 +213,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
 
     // Here results are all calibrated with the same exposure time and pixel pitch.
     // Convert results to residence times with options to exclude non-stationary objects.
-    final int[] counts = extractResidenceTimes(allResults);
+    int[] counts = extractResidenceTimes(allResults);
+    counts = filterCounts(counts);
 
     String title = allResults.get(0).getName();
     if (allResults.size() > 1) {
@@ -318,6 +323,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addSlider("Min_size", 2, 20, settings.minSize);
     gd.addNumericField("Mean_distance", settings.meanDistance, 2, 6, "nm");
     gd.addNumericField("Max_distance", settings.maxDistance, 2, 6, "nm");
+    gd.addNumericField("Max_trace_length", settings.maxTraceLength, 2, 6, "sec");
+    gd.addNumericField("Min_bin_count", settings.minBinCount, 0);
     gd.addNumericField("Apparent_dissociation_rate", settings.apparentDissociationRate, -3, 6,
         "sec^-1");
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
@@ -330,6 +337,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.minSize = (int) gd.getNextNumber();
     settings.meanDistance = gd.getNextNumber();
     settings.maxDistance = gd.getNextNumber();
+    settings.maxTraceLength = (int) gd.getNextNumber();
+    settings.minBinCount = (int) gd.getNextNumber();
     settings.apparentDissociationRate = gd.getNextNumber();
     settings.bootstrapRepeats = (int) gd.getNextNumber();
     settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
@@ -503,7 +512,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
       return;
     }
     final StringBuilder sb = new StringBuilder(256);
-    final int[] counts = createSimulatation(sb);
+    int[] counts = createSimulatation(sb);
+    counts = filterCounts(counts);
     runAnalysis(sb.toString(), settings.exposureTime, counts);
   }
 
@@ -521,6 +531,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addNumericField("k1", settings.k1, -2, 6, "/sec");
     gd.addNumericField("f0", settings.f0, 3, 6, "");
     gd.addNumericField("Exposure_time", settings.exposureTime, 2, 6, "msec");
+    gd.addNumericField("Max_trace_length", settings.maxTraceLength, 2, 6, "sec");
+    gd.addNumericField("Min_bin_count", settings.minBinCount, 0);
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
     gd.addHexField("Bootstrap_seed", settings.bootstrapSeed.toBytes());
 
@@ -536,6 +548,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.k1 = gd.getNextNumber();
     settings.f0 = gd.getNextNumber();
     settings.exposureTime = gd.getNextNumber();
+    settings.maxTraceLength = (int) gd.getNextNumber();
+    settings.minBinCount = (int) gd.getNextNumber();
     settings.bootstrapRepeats = (int) gd.getNextNumber();
     settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
 
@@ -793,5 +807,32 @@ public class ResidenceTimeAnalysis implements PlugIn {
    */
   private static Level getTimingLogLevel() {
     return IJ.debugMode ? Level.INFO : Level.FINE;
+  }
+
+  /**
+   * Filter the histogram of counts. Uses the max trace length, and/or the min bin count to set the
+   * last valid bin, to truncate the histogram.
+   *
+   * @param counts the counts
+   * @return the new counts
+   */
+  private int[] filterCounts(int[] counts) {
+    int limit = counts.length;
+    int minBinCount = settings.minBinCount;
+    if (settings.maxTraceLength > 0) {
+      // trace length (sec) / exposure time (ms)
+      limit = Math.min(limit, (int) Math.round(settings.maxTraceLength * 1e3 / settings.exposureTime));
+      // Always clip to the last bin containing a count of 1.
+      minBinCount = Math.max(1, minBinCount);
+    }
+    if (minBinCount > 0) {
+      while (limit > 0 && counts[limit - 1] < minBinCount) {
+        limit--;
+      }
+    }
+    if (counts.length > limit) {
+      counts = Arrays.copyOf(counts, limit);
+    }
+    return counts;
   }
 }

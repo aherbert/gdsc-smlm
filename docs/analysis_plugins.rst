@@ -1696,6 +1696,12 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
    * - Max distance
      - The maximum allowed distance between neighbouring localisations of a track. Use this to filter tracks where the molecule jumps location between successive time points.
 
+   * - Max trace length
+     - The maximum length of tracks. Used to truncate the residence time histogram.
+
+   * - Min bin count
+     - The minimum histogram bin count. The tail of the histogram is truncated to the first bin above this threshold.
+
    * - Apparent residence time
      - The apparent residence time (due to imaging limitations). Used to correct the observed residence time.
 
@@ -1798,6 +1804,12 @@ The following parameters can be set:
 
    * - Exposure time
      - The frame exposure time.
+
+   * - Max trace length
+     - The maximum length of tracks. Used to truncate the residence time histogram.
+
+   * - Min bin count
+     - The minimum histogram bin count. The tail of the histogram is truncated to the first bin above this threshold.
 
    * - Bootstrap repeats
      - The number of bootstrap repeats used to create a 95% confidence interval.
