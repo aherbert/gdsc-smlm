@@ -28,6 +28,7 @@ import ij.IJ;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.numbers.rootfinder.BrentSolver;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AliasMethodDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
@@ -114,6 +116,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     double apparentDissociationRate;
     int bootstrapRepeats;
     Seed bootstrapSeed;
+    boolean showQQplot;
 
     Settings() {
       // Set defaults
@@ -145,6 +148,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
       apparentDissociationRate = source.apparentDissociationRate;
       bootstrapRepeats = source.bootstrapRepeats;
       bootstrapSeed = source.bootstrapSeed;
+      showQQplot = source.showQQplot;
     }
 
     Settings copy() {
@@ -204,10 +208,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     final List<MemoryPeakResults> allResults = new ArrayList<>();
 
     // Option to pick multiple input datasets together using a list box.
-    if (!showMultiDialog(allResults)) {
-      return;
-    }
-    if (!showDialog()) {
+    if (!showMultiDialog(allResults) || !showDialog()) {
       return;
     }
 
@@ -251,12 +252,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
       }
     }
 
-    if (allResults.isEmpty()) {
-      return false;
-    }
-
     // Check calibration exists for the first set of results
-    if (!checkCalibration(allResults.get(0))) {
+    if (allResults.isEmpty() || !checkCalibration(allResults.get(0))) {
       return false;
     }
 
@@ -329,6 +326,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
         "sec^-1");
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
     gd.addHexField("Bootstrap_seed", settings.bootstrapSeed.toBytes());
+    gd.addCheckbox("Show_QQ_plot", settings.showQQplot);
 
     gd.showDialog();
     if (gd.wasCanceled() || gd.invalidNumber()) {
@@ -342,6 +340,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.apparentDissociationRate = gd.getNextNumber();
     settings.bootstrapRepeats = (int) gd.getNextNumber();
     settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
+    settings.showQQplot = gd.getNextBoolean();
 
     return !gd.invalidNumber();
   }
@@ -535,6 +534,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addNumericField("Min_bin_count", settings.minBinCount, 0);
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
     gd.addHexField("Bootstrap_seed", settings.bootstrapSeed.toBytes());
+    gd.addCheckbox("Show_QQ_plot", settings.showQQplot);
 
     gd.showDialog();
 
@@ -552,6 +552,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.minBinCount = (int) gd.getNextNumber();
     settings.bootstrapRepeats = (int) gd.getNextNumber();
     settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
+    settings.showQQplot = gd.getNextBoolean();
 
     return !gd.invalidNumber();
   }
@@ -694,9 +695,61 @@ public class ResidenceTimeAnalysis implements PlugIn {
           .append('\t').append(
               MathUtils.getBayesianInformationCriterion(r.getLogLikelihood(), r.getN(), r.getP()));
       summary.accept(sb.toString());
+
+      if (settings.showQQplot) {
+        showQQPlot(exposureTime, counts, m);
+      }
     }
     plot.setColor(Color.black);
     plot.addLegend(legend.toString(), "top-right");
+    ImageJUtils.display(plot.getTitle(), plot);
+  }
+
+  /**
+   * Show a QQ plot of the quantiles.
+   *
+   * @param exposureTime the exposure time (in milliseconds)
+   * @param counts the counts
+   * @param m the model
+   */
+  private static void showQQPlot(double exposureTime, int[] counts, Model m) {
+    // Get an approximation for the search for the quantiles
+    // cdf[i] = time (i+1) * exposureTime
+    final double et = exposureTime / 1000;
+    // QQ plot using the quantile definition k / (n + 1)
+    final int n = Arrays.stream(counts).sum();
+    final double n1 = n + 1.0;
+    int k = 0;
+    final DoubleArrayList x = new DoubleArrayList();
+    final DoubleArrayList y = new DoubleArrayList();
+    // Moving bracket for the quantile
+    double upper = et;
+    final BrentSolver solver = new BrentSolver(1e-4, 1e-6, 1e-6);
+    for (int i = 0; i < counts.length; i++) {
+      if (counts[i] == 0) {
+        continue;
+      }
+      y.add((i + 1) * et);
+      k += counts[i];
+      final double q = (n - k) / n1;
+      // Raise bracket
+      while (m.sf(upper) > q) {
+        upper += et;
+      }
+      // Find
+      final double z = solver.findRoot(xx -> m.sf(xx) - q, upper - et, upper);
+      x.add(z);
+    }
+    final Plot plot = new Plot("Residence Time QQ n=" + m.getSize(), "Model (sec)", "Data (sec)");
+    plot.setLogScaleX();
+    plot.setLogScaleY();
+    plot.setColor(Color.BLUE);
+    plot.addPoints(x.toDoubleArray(), y.toDoubleArray(), Plot.CIRCLE);
+    plot.setColor(Color.RED);
+    final double min = Math.min(et, y.getDouble(0)) / 2;
+    final double max = Math.max(x.getDouble(x.size() - 1), y.getDouble(y.size() - 1)) + et;
+    plot.drawLine(min, min, max, max);
+    plot.setLimits(min, max, min, max);
     ImageJUtils.display(plot.getTitle(), plot);
   }
 
@@ -821,7 +874,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     int minBinCount = settings.minBinCount;
     if (settings.maxTraceLength > 0) {
       // trace length (sec) / exposure time (ms)
-      limit = Math.min(limit, (int) Math.round(settings.maxTraceLength * 1e3 / settings.exposureTime));
+      limit =
+          Math.min(limit, (int) Math.round(settings.maxTraceLength * 1e3 / settings.exposureTime));
       // Always clip to the last bin containing a count of 1.
       minBinCount = Math.max(1, minBinCount);
     }

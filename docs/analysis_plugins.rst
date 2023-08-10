@@ -1711,6 +1711,9 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
    * - Bootstrap seed
      - Random seed for the bootstrap repeats (hexidecimal input).
 
+   * - Show QQ plot
+     - Display a quantile-quantile plot of the model against the data distribution. The quantile for the model is taken using the cumulative probability of the data as k / (n + 1).
+
 The analysis extracts the tracks and filters them to stationary molecules. A histogram of residence times is created and fit using the exponential model (see :numref:`Figure %s <fig_residence_time_analysis_histogram>`). Fit progress is recorded in the ``ImageJ`` log window. Bootstrapping is optionally used on the data to produce a 95% confidence interval for the fit parameters. 
 
 .. _fig_residence_time_analysis_histogram:
@@ -1816,6 +1819,9 @@ The following parameters can be set:
 
    * - Bootstrap seed
      - Random seed for the bootstrap repeats (hexidecimal input).
+
+   * - Show QQ plot
+     - Display a quantile-quantile plot of the model against the data distribution. The quantile for the model is taken using the cumulative probability of the data as k / (n + 1).
 
 The simulation allows experimenting with the exposure time and number of samples required to obtain satisfactory results for the populations of bound molecules.
 
