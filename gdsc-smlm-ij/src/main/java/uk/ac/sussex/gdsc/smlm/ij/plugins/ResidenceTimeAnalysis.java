@@ -750,13 +750,13 @@ public class ResidenceTimeAnalysis implements PlugIn {
     final double min = Math.min(et, y.getDouble(0)) / 2;
     final double maxx = x.getDouble(x.size() - 1);
     final double maxy = y.getDouble(y.size() - 1);
-    final double max = Math.max(maxx, maxy) + et;
-    plot.drawLine(min, min, max, max);
+    final double max = Math.max(maxx, maxy);
+    plot.drawLine(min, min, max * 2, max * 2);
     // For a log scale we must set the limits manually.
     // Currently disabled but setting the limits allows it to be set using More... > Set Range...
-    //plot.setLogScaleX();
-    //plot.setLogScaleY();
-    plot.setLimits(min, maxx, min, maxy);
+    // plot.setLogScaleX();
+    // plot.setLogScaleY();
+    plot.setLimits(min, maxx * 1.025, min, maxy * 1.025);
     ImageJUtils.display(plot.getTitle(), plot);
   }
 
