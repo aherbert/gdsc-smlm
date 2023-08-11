@@ -373,7 +373,7 @@ public class PsfCreator implements PlugInFilter {
       return units;
     }
     // Sanitised version of um
-    if ("\u00B5m".equals(unit) || unit.startsWith("micron")) {
+    if ("um".equals(unit) || "μm".equals(unit) || unit.startsWith("micron")) {
       return units * 1000;
     }
     return 0;

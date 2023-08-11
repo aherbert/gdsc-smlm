@@ -86,7 +86,8 @@ class SeriesImageSourceTest {
     Assertions.assertEquals(height, source.getHeight());
     Assertions.assertEquals(depth * n, source.getFrames());
     for (int i = 0; i < stacks.length; i++) {
-      Assertions.assertEquals(-1, source.getImageSize(i), "Non-sequential mode should not be supported");
+      Assertions.assertEquals(-1, source.getImageSize(i),
+          "Non-sequential mode should not be supported");
       for (int j = 0; j < depth; j++) {
         final float[] e = (float[]) stacks[i].getPixels(j + 1);
         final float[] o = source.next();

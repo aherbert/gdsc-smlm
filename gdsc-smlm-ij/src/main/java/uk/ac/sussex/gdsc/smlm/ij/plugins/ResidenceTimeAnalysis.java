@@ -721,7 +721,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
       summary.accept(sb.toString());
 
       if (settings.showQQplot) {
-        showQQPlot(exposureTime, counts, m, wo);
+        showQqPlot(exposureTime, counts, m, wo);
       }
     }
     plot.setColor(Color.black);
@@ -873,9 +873,9 @@ public class ResidenceTimeAnalysis implements PlugIn {
    * @param exposureTime the exposure time (in milliseconds)
    * @param counts the counts
    * @param m the model
-   * @param wo
+   * @param wo the window organiser
    */
-  private static void showQQPlot(double exposureTime, int[] counts, Model m, WindowOrganiser wo) {
+  private static void showQqPlot(double exposureTime, int[] counts, Model m, WindowOrganiser wo) {
     // Get an approximation for the search for the quantiles
     // cdf[i] = time (i+1) * exposureTime
     final double et = exposureTime / 1000;

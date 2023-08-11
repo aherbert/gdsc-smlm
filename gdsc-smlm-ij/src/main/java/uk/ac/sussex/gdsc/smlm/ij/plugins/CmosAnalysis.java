@@ -1091,9 +1091,8 @@ public class CmosAnalysis implements PlugIn {
         textHeight.setText(Integer.toString(r.height));
       };
       final ImagePlus cropImp = lastMeanVar;
-      egd.addAndGetButton("Crop", e ->
       // Do not perform the work on the event dispatcher thread
-      ForkJoinPool.commonPool().submit(() -> {
+      egd.addAndGetButton("Crop", e -> ForkJoinPool.commonPool().submit(() -> {
         final Rectangle crop = new Rectangle(Integer.parseInt(textOriginX.getText()),
             Integer.parseInt(textOriginY.getText()), Integer.parseInt(textWidth.getText()),
             Integer.parseInt(textHeight.getText()));

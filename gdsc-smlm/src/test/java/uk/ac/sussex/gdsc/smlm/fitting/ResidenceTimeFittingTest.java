@@ -544,23 +544,23 @@ class ResidenceTimeFittingTest {
 
   // @formatter:off
   @SeededTest
-  void canFitDual0_1Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.1); }
+  void canFitDual0_1Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.1); }
   @SeededTest
-  void canFitDual0_2Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.2); }
+  void canFitDual0_2Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.2); }
   @SeededTest
-  void canFitDual0_3Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.3); }
+  void canFitDual0_3Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.3); }
   @SeededTest
-  void canFitDual0_4Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.4); }
+  void canFitDual0_4Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.4); }
   @SeededTest
-  void canFitDual0_5Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.25); }
+  void canFitDual0_5Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.25); }
   @SeededTest
-  void canFitDual0_6Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.6); }
+  void canFitDual0_6Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.6); }
   @SeededTest
-  void canFitDual0_7Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.7); }
+  void canFitDual0_7Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.7); }
   @SeededTest
-  void canFitDual0_8Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.8); }
+  void canFitDual0_8Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.8); }
   @SeededTest
-  void canFitDual0_9Population(RandomSeed seed)    { fitDualPopulation(seed, 0.25, 0.9); }
+  void canFitDual0_9Population(RandomSeed seed) { fitDualPopulation(seed, 0.25, 0.9); }
   // @formatter:on
 
   @Test
@@ -617,13 +617,13 @@ class ResidenceTimeFittingTest {
 
   // @formatter:off
   @SeededTest
-  void canFitTriple0_2_0_2Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.2); }
+  void canFitTriple0_2_0_2Population(RandomSeed s) { fitTriplePopulation(s, 0.125, 0.2, 0.2); }
   @SeededTest
-  void canFitTriple0_2_0_3Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.3); }
+  void canFitTriple0_2_0_3Population(RandomSeed s) { fitTriplePopulation(s, 0.125, 0.2, 0.3); }
   @SeededTest
-  void canFitTriple0_2_0_4Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.4); }
+  void canFitTriple0_2_0_4Population(RandomSeed s) { fitTriplePopulation(s, 0.125, 0.2, 0.4); }
   @SeededTest
-  void canFitTriple0_2_0_5Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.5); }
+  void canFitTriple0_2_0_5Population(RandomSeed s) { fitTriplePopulation(s, 0.125, 0.2, 0.5); }
   // @formatter:on
 
   @Test
