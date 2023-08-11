@@ -159,7 +159,7 @@ class ResidenceTimeFittingTest {
 
   @ParameterizedTest
   @ValueSource(doubles = {0.1, 3})
-  void testModel1(double k0) {
+  void testModel1Default(double k0) {
     final ExponentialDistribution d = ExponentialDistribution.of(1 / k0);
     final Model m = new Model() {
       @Override
@@ -180,14 +180,14 @@ class ResidenceTimeFittingTest {
     Assertions.assertEquals(1 / k0, m.getResidenceTime(0));
     final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-10);
     DoubleStream.iterate(0, x -> x + 0.5).limit(10).forEach(t -> {
-      final double e = 1 - d.cumulativeProbability(t);
+      final double e = d.survivalProbability(t);
       TestAssertions.assertTest(e, m.sf(t), test, () -> "sf: " + t);
     });
   }
 
   @ParameterizedTest
   @CsvSource({"0.1, 3, 0.5", "2, 4, 0.25"})
-  void testModel2(double k0, double k1, double f0) {
+  void testModel2Default(double k0, double k1, double f0) {
     final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
     final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
     final double f1 = 1 - f0;
@@ -211,7 +211,44 @@ class ResidenceTimeFittingTest {
     Assertions.assertEquals(1 / k1, m.getResidenceTime(1));
     final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-10);
     DoubleStream.iterate(0, x -> x + 0.5).limit(10).forEach(t -> {
-      final double e = 1 - (f0 * d0.cumulativeProbability(t) + f1 * d1.cumulativeProbability(t));
+      final double e = f0 * d0.survivalProbability(t) + f1 * d1.survivalProbability(t);
+      TestAssertions.assertTest(e, m.sf(t), test, () -> "sf: " + t);
+    });
+  }
+
+  @ParameterizedTest
+  @ValueSource(doubles = {0.1, 3})
+  void testModel1(double k0) {
+    final ExponentialDistribution d = ExponentialDistribution.of(1 / k0);
+    final Model m = new ResidenceTimeFitting.Model1(k0);
+    Assertions.assertEquals(1 / k0, m.getResidenceTime(0));
+    Assertions.assertEquals(1, m.getSize());
+    Assertions.assertEquals(k0, m.getRate(0));
+    Assertions.assertEquals(1, m.getFraction(0));
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-10);
+    DoubleStream.iterate(0, x -> x + 0.5).limit(10).forEach(t -> {
+      final double e = d.survivalProbability(t);
+      TestAssertions.assertTest(e, m.sf(t), test, () -> "sf: " + t);
+    });
+  }
+
+  @ParameterizedTest
+  @CsvSource({"0.1, 3, 0.5", "2, 4, 0.25"})
+  void testModel2(double k0, double k1, double f0) {
+    final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
+    final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
+    final double f1 = 1 - f0;
+    final Model m = new ResidenceTimeFitting.Model2(k0, k1, f0);
+    Assertions.assertEquals(1 / k0, m.getResidenceTime(0));
+    Assertions.assertEquals(1 / k1, m.getResidenceTime(1));
+    Assertions.assertEquals(2, m.getSize());
+    Assertions.assertEquals(k0, m.getRate(0));
+    Assertions.assertEquals(k1, m.getRate(1));
+    Assertions.assertEquals(f0, m.getFraction(0));
+    Assertions.assertEquals(f1, m.getFraction(1));
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-10);
+    DoubleStream.iterate(0, x -> x + 0.5).limit(10).forEach(t -> {
+      final double e = f0 * d0.survivalProbability(t) + f1 * d1.survivalProbability(t);
       TestAssertions.assertTest(e, m.sf(t), test, () -> "sf: " + t);
     });
   }

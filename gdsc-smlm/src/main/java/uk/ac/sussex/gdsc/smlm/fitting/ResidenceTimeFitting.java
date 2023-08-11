@@ -141,7 +141,7 @@ public final class ResidenceTimeFitting {
   /**
    * Single population model.
    */
-  private static class Model1 implements Model {
+  static class Model1 implements Model {
     /** The rate constant. */
     private final double rate;
 
@@ -170,12 +170,17 @@ public final class ResidenceTimeFitting {
       assert index == 0;
       return 1;
     }
+
+    @Override
+    public double sf(double t) {
+      return StdMath.exp(-rate * t);
+    }
   }
 
   /**
    * Dual population model.
    */
-  private static class Model2 implements Model {
+  static class Model2 implements Model {
     /** The rate constant for population 0. */
     private final double k0;
     /** The rate constant for population 1. */
@@ -217,6 +222,11 @@ public final class ResidenceTimeFitting {
       }
       assert index == 1;
       return 1 - f0;
+    }
+
+    @Override
+    public double sf(double t) {
+      return f0 * StdMath.exp(-k0 * t) + (1 - f0) * StdMath.exp(-k1 * t);
     }
   }
 
