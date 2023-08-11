@@ -60,6 +60,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -619,6 +620,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     final Plot plot = new Plot("Residence Time", "Time (ms)", "Frequency");
     final float[] x = SimpleArrayUtils.newArray(counts.length, 0f, (float) exposureTime);
     plot.addPoints(x, SimpleArrayUtils.toFloat(counts), Plot.BAR);
+    final WindowOrganiser wo = new WindowOrganiser();
 
     final ResidenceTimeFitting rt = ResidenceTimeFitting.of(exposureTime / 1000, counts);
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
@@ -698,67 +700,13 @@ public class ResidenceTimeAnalysis implements PlugIn {
       summary.accept(sb.toString());
 
       if (settings.showQQplot) {
-        showQQPlot(exposureTime, counts, m);
+        showQQPlot(exposureTime, counts, m, wo);
       }
     }
     plot.setColor(Color.black);
     plot.addLegend(legend.toString(), "top-right");
-    ImageJUtils.display(plot.getTitle(), plot);
-  }
-
-  /**
-   * Show a QQ plot of the quantiles.
-   *
-   * @param exposureTime the exposure time (in milliseconds)
-   * @param counts the counts
-   * @param m the model
-   */
-  private static void showQQPlot(double exposureTime, int[] counts, Model m) {
-    // Get an approximation for the search for the quantiles
-    // cdf[i] = time (i+1) * exposureTime
-    final double et = exposureTime / 1000;
-    // QQ plot using the quantile definition (k - 1/3) / (n + 1/3).
-    // See https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot#Heuristics
-    final int n = Arrays.stream(counts).sum();
-    final double a = 1.0 / 3;
-    final double na = n + a;
-    int k = 0;
-    final DoubleArrayList x = new DoubleArrayList();
-    final DoubleArrayList y = new DoubleArrayList();
-    // Moving bracket for the quantile
-    double upper = et;
-    final BrentSolver solver = new BrentSolver(1e-4, 1e-6, 1e-6);
-    for (int i = 0; i < counts.length; i++) {
-      if (counts[i] == 0) {
-        continue;
-      }
-      y.add((i + 1) * et);
-      k += counts[i];
-      // For the survival function we subtract from 1
-      final double q = 1 - (k - a) / na;
-      // Raise bracket
-      while (m.sf(upper) > q) {
-        upper += et;
-      }
-      // Find
-      final double z = solver.findRoot(xx -> m.sf(xx) - q, upper - et, upper);
-      x.add(z);
-    }
-    final Plot plot = new Plot("Residence Time QQ n=" + m.getSize(), "Model (sec)", "Data (sec)");
-    plot.setColor(Color.BLUE);
-    plot.addPoints(x.toDoubleArray(), y.toDoubleArray(), Plot.CIRCLE);
-    plot.setColor(Color.RED);
-    final double min = Math.min(et, y.getDouble(0)) / 2;
-    final double maxx = x.getDouble(x.size() - 1);
-    final double maxy = y.getDouble(y.size() - 1);
-    final double max = Math.max(maxx, maxy);
-    plot.drawLine(min, min, max * 2, max * 2);
-    // For a log scale we must set the limits manually.
-    // Currently disabled but setting the limits allows it to be set using More... > Set Range...
-    // plot.setLogScaleX();
-    // plot.setLogScaleY();
-    plot.setLimits(min, maxx * 1.025, min, maxy * 1.025);
-    ImageJUtils.display(plot.getTitle(), plot);
+    ImageJUtils.display(plot.getTitle(), plot, wo);
+    wo.tile();
   }
 
   private static Consumer<String> createSummaryTable() {
@@ -883,8 +831,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     int minBinCount = settings.minBinCount;
     if (settings.maxTraceLength > 0) {
       // trace length (sec) / exposure time (ms)
-      limit =
-          Math.min(limit, (int) Math.round(settings.maxTraceLength * 1e3 / exposureTime));
+      limit = Math.min(limit, (int) Math.round(settings.maxTraceLength * 1e3 / exposureTime));
       // Always clip to the last bin containing a count of 1.
       minBinCount = Math.max(1, minBinCount);
     }
@@ -897,5 +844,98 @@ public class ResidenceTimeAnalysis implements PlugIn {
       counts = Arrays.copyOf(counts, limit);
     }
     return counts;
+  }
+
+  /**
+   * Show a QQ plot of the quantiles.
+   *
+   * @param exposureTime the exposure time (in milliseconds)
+   * @param counts the counts
+   * @param m the model
+   * @param wo
+   */
+  private static void showQQPlot(double exposureTime, int[] counts, Model m, WindowOrganiser wo) {
+    // Get an approximation for the search for the quantiles
+    // cdf[i] = time (i+1) * exposureTime
+    final double et = exposureTime / 1000;
+    // QQ plot using the quantile definition (k - 1/3) / (n + 1/3).
+    // See https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot#Heuristics
+    final int n = Arrays.stream(counts).sum();
+    final double a = 1.0 / 3;
+    final double na = n + a;
+    int k = 0;
+    final DoubleArrayList x = new DoubleArrayList();
+    final DoubleArrayList y = new DoubleArrayList();
+    final DoubleArrayList xp = new DoubleArrayList();
+    // Moving bracket for the quantile
+    double upper = et;
+    final BrentSolver solver = new BrentSolver(1e-4, 1e-6, 1e-6);
+    for (int i = 0; i < counts.length; i++) {
+      if (counts[i] == 0) {
+        continue;
+      }
+      y.add((i + 1) * et);
+      k += counts[i];
+      // For the survival function we subtract from 1
+      final double p = (k - a) / na;
+      final double q = 1 - p;
+      // Raise bracket
+      while (m.sf(upper) > q) {
+        upper += et;
+      }
+      // Find
+      final double z = solver.findRoot(xx -> m.sf(xx) - q, upper - et, upper);
+      x.add(z);
+      xp.add(p);
+    }
+    final Plot plot = new Plot("Residence Time QQ n=" + m.getSize(), "Model (sec)", "Data (sec)");
+    plot.setColor(Color.BLUE);
+    plot.addPoints(x.toDoubleArray(), y.toDoubleArray(), Plot.CIRCLE);
+    plot.setColor(Color.RED);
+    final double min = Math.min(et, y.getDouble(0)) / 2;
+    final double maxx = x.getDouble(x.size() - 1);
+    final double maxy = y.getDouble(y.size() - 1);
+    final double max = Math.max(maxx, maxy);
+    plot.drawLine(min, min, max * 2, max * 2);
+    // For a log scale we must set the limits manually.
+    // Currently disabled but setting the limits allows it to be set using More... > Set Range...
+    // plot.setLogScaleX();
+    // plot.setLogScaleY();
+    plot.setLimits(min, maxx * 1.025, min, maxy * 1.025);
+    // Add known model quantiles
+    final double[] quantiles = {0.5, 0.75, 0.90, 0.95, 0.99};
+    final double[] cdf = xp.toDoubleArray();
+    final DoubleArrayList points = new DoubleArrayList();
+    for (final double p : quantiles) {
+      // Estimate the bracket
+      int index = Arrays.binarySearch(cdf, p);
+      if (index < 0) {
+        index = ~index;
+      }
+      double lo;
+      double hi;
+      if (index == 0) {
+        lo = 0;
+        hi = x.getDouble(index);
+      } else if (index == x.size()) {
+        lo = x.getDouble(index);
+        // The last point should correspond to ~99% of the distribution. For an exponential
+        // if we double the value it should bracket the quantile.
+        hi = lo * 2;
+      } else {
+        // Valid bracket
+        lo = x.getDouble(index - 1);
+        hi = x.getDouble(index);
+      }
+      final double q = 1 - p;
+      points.add(solver.findRoot(xx -> m.sf(xx) - q, lo, hi));
+    }
+    final float[] qp = SimpleArrayUtils.toFloat(points.toDoubleArray());
+    plot.setColor(new Color(0, 153, 136));
+    plot.addPoints(qp, qp, Plot.DIAMOND);
+    plot.setColor(Color.BLACK);
+    plot.addLabel(0, 0, Arrays.stream(quantiles).mapToObj(String::valueOf)
+        .collect(Collectors.joining(", ", "Quantiles: ", "")));
+    ImageJUtils.display(plot.getTitle(), plot, wo);
   }
 }
