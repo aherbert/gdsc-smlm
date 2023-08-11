@@ -53,6 +53,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.ResidenceTimeFitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.fitting.ResidenceTimeFitting.Function1;
 import uk.ac.sussex.gdsc.smlm.fitting.ResidenceTimeFitting.Function2;
+import uk.ac.sussex.gdsc.smlm.fitting.ResidenceTimeFitting.Function3;
 import uk.ac.sussex.gdsc.smlm.fitting.ResidenceTimeFitting.Model;
 import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
@@ -105,13 +106,12 @@ class ResidenceTimeFittingTest {
   void testFitThrows() {
     // OK with two non-zero values
     final ResidenceTimeFitting rta = ResidenceTimeFitting.of(1, new int[] {6, 1});
-    Assertions.assertThrows(IllegalArgumentException.class, () -> rta.fit(3));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> rta.fit(4));
   }
 
   @Test
   void testLogging() {
     final ResidenceTimeFitting rta = ResidenceTimeFitting.of(1, new int[] {16, 8, 4, 2, 1});
-    Assertions.assertThrows(IllegalArgumentException.class, () -> rta.fit(3));
     final Logger logger = new Logger("Test", null) {
       @Override
       public void info(Supplier<String> msg) {
@@ -119,7 +119,7 @@ class ResidenceTimeFittingTest {
       }
     };
     logger.setLevel(Level.INFO);
-    for (int i = 1; i <= 2; i++) {
+    for (int i = 1; i <= 3; i++) {
       final Pair<FitResult, Model> ra = rta.fit(i);
       final Pair<FitResult, Model> rb = rta.fit(i, logger);
       Assertions.assertEquals(ra.getLeft().getLogLikelihood(), rb.getLeft().getLogLikelihood());
@@ -217,6 +217,54 @@ class ResidenceTimeFittingTest {
   }
 
   @ParameterizedTest
+  @CsvSource({"0.1, 3, 5, 0.5, 0.25", "2, 4, 10, 0.25, 0.125"})
+  void testModel3Default(double k0, double k1, double k2, double f0, double f1) {
+    final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
+    final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
+    final ExponentialDistribution d2 = ExponentialDistribution.of(1 / k2);
+    final double f2 = 1 - (f0 + f1);
+    final Model m = new Model() {
+      @Override
+      public int getSize() {
+        return 3;
+      }
+
+      @Override
+      public double getRate(int index) {
+        switch (index) {
+          case 0:
+            return k0;
+          case 1:
+            return k1;
+          default:
+            return k2;
+        }
+      }
+
+      @Override
+      public double getFraction(int index) {
+        switch (index) {
+          case 0:
+            return f0;
+          case 1:
+            return f1;
+          default:
+            return f2;
+        }
+      }
+    };
+    Assertions.assertEquals(1 / k0, m.getResidenceTime(0));
+    Assertions.assertEquals(1 / k1, m.getResidenceTime(1));
+    Assertions.assertEquals(1 / k2, m.getResidenceTime(2));
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-10);
+    DoubleStream.iterate(0, x -> x + 0.5).limit(10).forEach(t -> {
+      final double e = f0 * d0.survivalProbability(t) + f1 * d1.survivalProbability(t)
+          + f2 * d2.survivalProbability(t);
+      TestAssertions.assertTest(e, m.sf(t), test, () -> "sf: " + t);
+    });
+  }
+
+  @ParameterizedTest
   @ValueSource(doubles = {0.1, 3})
   void testModel1(double k0) {
     final ExponentialDistribution d = ExponentialDistribution.of(1 / k0);
@@ -249,6 +297,32 @@ class ResidenceTimeFittingTest {
     final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-10);
     DoubleStream.iterate(0, x -> x + 0.5).limit(10).forEach(t -> {
       final double e = f0 * d0.survivalProbability(t) + f1 * d1.survivalProbability(t);
+      TestAssertions.assertTest(e, m.sf(t), test, () -> "sf: " + t);
+    });
+  }
+
+  @ParameterizedTest
+  @CsvSource({"0.1, 3, 5, 0.5, 0.25", "2, 4, 10, 0.25, 0.125"})
+  void testModel3(double k0, double k1, double k2, double f0, double f1) {
+    final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
+    final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
+    final ExponentialDistribution d2 = ExponentialDistribution.of(1 / k2);
+    final double f2 = 1 - (f0 + f1);
+    final Model m = new ResidenceTimeFitting.Model3(k0, k1, k2, f0, f1);
+    Assertions.assertEquals(1 / k0, m.getResidenceTime(0));
+    Assertions.assertEquals(1 / k1, m.getResidenceTime(1));
+    Assertions.assertEquals(1 / k2, m.getResidenceTime(2));
+    Assertions.assertEquals(3, m.getSize());
+    Assertions.assertEquals(k0, m.getRate(0));
+    Assertions.assertEquals(k1, m.getRate(1));
+    Assertions.assertEquals(k2, m.getRate(2));
+    Assertions.assertEquals(f0, m.getFraction(0));
+    Assertions.assertEquals(f1, m.getFraction(1));
+    Assertions.assertEquals(f2, m.getFraction(2));
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-10);
+    DoubleStream.iterate(0, x -> x + 0.5).limit(10).forEach(t -> {
+      final double e = f0 * d0.survivalProbability(t) + f1 * d1.survivalProbability(t)
+          + f2 * d2.survivalProbability(t);
       TestAssertions.assertTest(e, m.sf(t), test, () -> "sf: " + t);
     });
   }
@@ -333,6 +407,56 @@ class ResidenceTimeFittingTest {
       }
       TestAssertions.assertTest(e, ll, testExp2, () -> "rate = " + ka + " " + kb);
       TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + ka + " " + kb);
+    }
+  }
+
+  @ParameterizedTest
+  @CsvSource({"0.1, 3, 5, 0.5, 0.25, 200, 0.125", "2, 4, 10, 0.25, 0.5, 200, 0.0625"})
+  void testFunction3(double k0, double k1, double k2, double f0, double f1, int size,
+      double resolution) {
+    // Create data
+    final double f2 = 1 - (f0 + f1);
+    final UniformRandomProvider rng = RngFactory.create(0xdeadbeef);
+    final double[] x =
+        new DataSample(new double[] {1 / k0, 1 / k1, 1 / k2}, new double[] {f0, f1, f2})
+            .getSample(rng, size)[0];
+    final int[] n = DataSample.toBins(x, resolution);
+
+    final Function3 f = new Function3(n, resolution);
+
+    // The LL values are not a close match for direct computation using the log density.
+    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(0.3);
+    final DoubleDoubleBiPredicate testExp2 = Predicates.doublesAreRelativelyClose(1e-6);
+    final DoubleDoubleBiPredicate testGeo = Predicates.doublesAreRelativelyClose(1e-10);
+    for (double s = 1.0 / 4; s <= 4; s *= 2) {
+      final double ka = k0 * s;
+      final double kb = k1 * s;
+      final double kc = k2 * s;
+      final double ll = f.ll(ka, kb, kc, f0, f1, f2);
+      final ExponentialDistribution de0 = ExponentialDistribution.of(1 / ka);
+      final ExponentialDistribution de1 = ExponentialDistribution.of(1 / kb);
+      final ExponentialDistribution de2 = ExponentialDistribution.of(1 / kc);
+      double e = 0;
+      for (int i = 0; i < x.length; i++) {
+        e += Math.log(f0 * de0.density(x[i]) + f1 * de1.density(x[i]) + f2 * de2.density(x[i]));
+      }
+      TestAssertions.assertTest(e, ll, testExp);
+      final GeometricDistribution dg0 = GeometricDistribution.of(-Math.expm1(-ka * resolution));
+      final GeometricDistribution dg1 = GeometricDistribution.of(-Math.expm1(-kb * resolution));
+      final GeometricDistribution dg2 = GeometricDistribution.of(-Math.expm1(-kc * resolution));
+      e = 0;
+      double e2 = 0;
+      for (int i = 0; i < n.length; i++) {
+        // Scaled probability maps each continuous interval to a discrete PMF value: p / resolution
+        e += n[i] * Math.log(f0 * de0.probability(i * resolution, (i + 1) * resolution) / resolution
+            + f1 * de1.probability(i * resolution, (i + 1) * resolution) / resolution
+            + f2 * de2.probability(i * resolution, (i + 1) * resolution) / resolution);
+        e2 += n[i]
+            * Math.log((f0 * dg0.probability(i) + f1 * dg1.probability(i) + f2 * dg2.probability(i))
+                / resolution);
+      }
+      TestAssertions.assertTest(e, ll, testExp2, () -> "rate = " + ka + " " + kb + " " + kc);
+      TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + ka + " " + kb + " " + kc);
     }
   }
 
@@ -468,7 +592,7 @@ class ResidenceTimeFittingTest {
     final UniformRandomProvider rng =
         seed != null ? RngFactory.create(seed.get()) : RngFactory.create(longSeed);
 
-    final String title = String.format("Dual=%.1f", fraction);
+    final String title = String.format("Dual=%.2f", fraction);
     AssertionError error = null;
     for (int i = 0; i < RHO.length; i++) {
       NEXT_D: for (int j = i + 1; j < RHO.length; j++) {
@@ -486,6 +610,71 @@ class ResidenceTimeFittingTest {
         }
         if (error != null) {
           throw error;
+        }
+      }
+    }
+  }
+
+  // @formatter:off
+  @SeededTest
+  void canFitTriple0_2_0_2Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.2); }
+  @SeededTest
+  void canFitTriple0_2_0_3Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.3); }
+  @SeededTest
+  void canFitTriple0_2_0_4Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.4); }
+  @SeededTest
+  void canFitTriple0_2_0_5Population(RandomSeed seed)    { fitTriplePopulation(seed, 0.125, 0.2, 0.5); }
+  // @formatter:on
+
+  @Test
+  void canFitTriple0_2PopulationFixedSeed() {
+    // Ensure the triple-population fit is performed at least once
+    fitTriplePopulation(null, 0.25, 0.2, 0.3, 1236478126821268L);
+  }
+
+  // @SeededTest
+  void canFitTriplePopulation(RandomSeed seed) {
+    // Debug limit
+    // Triple population fitting is flakey and fails more than dual population
+    double s = 0.125;
+    for (;;) {
+      s *= 1.5;
+      System.out.printf("scale %s%n", s);
+      fitTriplePopulation(seed, s, 0.2, 0.2, 1);
+    }
+  }
+
+  private void fitTriplePopulation(RandomSeed seed, double scale, double f0, double f1) {
+    fitTriplePopulation(seed, scale, f0, f1, 0);
+  }
+
+  private void fitTriplePopulation(RandomSeed seed, double scale, double f0, double f1,
+      long longSeed) {
+    Assumptions.assumeTrue(longSeed != 0 || TestSettings.allow(TestComplexity.MAXIMUM));
+    final UniformRandomProvider rng =
+        seed != null ? RngFactory.create(seed.get()) : RngFactory.create(longSeed);
+
+    final double f2 = 1 - (f0 + f1);
+    final String title = String.format("Triple=%.2f,%.2f", f0, f1);
+    AssertionError error = null;
+    for (int i = 0; i < RHO.length; i++) {
+      for (int j = i + 1; j < RHO.length; j++) {
+        NEXT_D: for (int k = j + 1; k < RHO.length; k++) {
+          // Set resolution using the smallest residence time
+          final double resolution = scale * MathUtils.min(RHO[i], RHO[j], RHO[k]);
+          for (int samples = 5000, l = 0; l < 3; samples *= 2, l++) {
+            try {
+              fit(rng, title, samples, 3, new double[] {RHO[i], RHO[j], RHO[k]},
+                  new double[] {f0, f1, f2}, resolution);
+              error = null;
+              continue NEXT_D;
+            } catch (final AssertionError ex) {
+              error = ex;
+            }
+          }
+          if (error != null) {
+            throw error;
+          }
         }
       }
     }
@@ -858,10 +1047,7 @@ class ResidenceTimeFittingTest {
         return false;
       }
       for (int i = mean.length; i-- > 0;) {
-        if (that.mean[i] != this.mean[i]) {
-          return false;
-        }
-        if (that.fraction[i] != this.fraction[i]) {
+        if ((that.mean[i] != this.mean[i]) || (that.fraction[i] != this.fraction[i])) {
           return false;
         }
       }

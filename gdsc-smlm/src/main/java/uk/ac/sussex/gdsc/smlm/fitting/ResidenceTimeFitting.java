@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
@@ -189,7 +190,7 @@ public final class ResidenceTimeFitting {
     private final double f0;
 
     /**
-     * Create and instance.
+     * Create an instance.
      *
      * @param k0 the rate constant for 0
      * @param k1 the rate constant for 1
@@ -227,6 +228,76 @@ public final class ResidenceTimeFitting {
     @Override
     public double sf(double t) {
       return f0 * StdMath.exp(-k0 * t) + (1 - f0) * StdMath.exp(-k1 * t);
+    }
+  }
+
+  /**
+   * Triple population model.
+   */
+  static class Model3 implements Model {
+    /** The rate constant for population 0. */
+    private final double k0;
+    /** The rate constant for population 1. */
+    private final double k1;
+    /** The rate constant for population 2. */
+    private final double k2;
+    /** Fraction of population 0. */
+    private final double f0;
+    /** Fraction of population 1. */
+    private final double f1;
+    /** Fraction of population 3. */
+    private final double f2;
+
+    /**
+     * Create an instance.
+     *
+     * @param k0 the rate constant for 0
+     * @param k1 the rate constant for 1
+     * @param k2 the rate constant for 2
+     * @param f0 the fraction of population 0
+     * @param f1 the fraction of population 1
+     */
+    Model3(double k0, double k1, double k2, double f0, double f1) {
+      this.k0 = k0;
+      this.k1 = k1;
+      this.k2 = k2;
+      this.f0 = f0;
+      this.f1 = f1;
+      this.f2 = 1 - (f0 + f1);
+    }
+
+    @Override
+    public int getSize() {
+      return 3;
+    }
+
+    @Override
+    public double getRate(int index) {
+      if (index == 0) {
+        return k0;
+      }
+      if (index == 1) {
+        return k1;
+      }
+      assert index == 2;
+      return k2;
+    }
+
+    @Override
+    public double getFraction(int index) {
+      if (index == 0) {
+        return f0;
+      }
+      if (index == 1) {
+        return f1;
+      }
+      assert index == 2;
+      return f2;
+    }
+
+    @Override
+    public double sf(double t) {
+      return f0 * StdMath.exp(-k0 * t) + f1 * StdMath.exp(-k1 * t) + f2 * StdMath.exp(-k2 * t);
     }
   }
 
@@ -294,6 +365,8 @@ public final class ResidenceTimeFitting {
   static class Function2 {
     /** Count at each time point. */
     private final int[] count;
+    /** Points above zero where the count is non-zero. */
+    private final int[] xx;
     /** Time resolution. */
     private final double resolution;
     /** Total count. */
@@ -309,6 +382,7 @@ public final class ResidenceTimeFitting {
       this.count = n;
       this.resolution = resolution;
       total = Arrays.stream(n).sum();
+      xx = IntStream.range(1, n.length).filter(i -> n[i] != 0).toArray();
     }
 
     /**
@@ -330,11 +404,78 @@ public final class ResidenceTimeFitting {
       final double log1mp1 = -k1 * resolution;
       final double f0p0 = f0 * p0;
       final double f1p1 = (1 - f0) * p1;
-      // Special case for x=0
+      // Special case for x=0. Assumes count[0] > 0
       double sum = count[0] * Math.log(f0p0 + f1p1);
-      for (int x = 1; x < count.length; x++) {
+      for (final int x : xx) {
         sum +=
             count[x] * Math.log(f0p0 * StdMath.exp(log1mp0 * x) + f1p1 * StdMath.exp(log1mp1 * x));
+      }
+      // Since the exponential has been scaled by 'resolution' to map to the geometric,
+      // all p-values are too small for the equivalent exponential.
+      // Scale the p-values back: p / resolution => c * -log(resolution)
+      sum -= total * Math.log(resolution);
+      return sum;
+    }
+  }
+
+  /**
+   * Triple population fitting model.
+   */
+  static class Function3 {
+    /** Count at each time point. */
+    private final int[] count;
+    /** Points above zero where the count is non-zero. */
+    private final int[] xx;
+    /** Time resolution. */
+    private final double resolution;
+    /** Total count. */
+    private final int total;
+
+    /**
+     * Create an instance.
+     *
+     * @param n the count at each time point
+     * @param resolution the time resolution
+     */
+    Function3(int[] n, double resolution) {
+      this.count = n;
+      this.resolution = resolution;
+      total = Arrays.stream(n).sum();
+      xx = IntStream.range(1, n.length).filter(i -> n[i] != 0).toArray();
+    }
+
+    /**
+     * Compute the log-likelihood of the two rate constants.
+     *
+     * @param k0 the rate constant for the first population
+     * @param k1 the rate constant for the second population
+     * @param k2 the rate constant for the third population
+     * @param f0 the fraction of the first population
+     * @param f1 the fraction of the second population
+     * @param f2 the fraction of the third population
+     * @return the log-likelihood
+     */
+    double ll(double k0, double k1, double k2, double f0, double f1, double f2) {
+      // Compute a weighted sum of geometric distributions:
+      // P(x) = sum_i [ f_i (1 - p_i)^x * p_i ]
+      // = sum_i [ f_i exp(log(1-p_i)*x) * p_i ]
+      // This is logged and summed over all observations.
+      final double p0 = -Math.expm1(-k0 * resolution);
+      final double log1mp0 = -k0 * resolution;
+      final double p1 = -Math.expm1(-k1 * resolution);
+      final double log1mp1 = -k1 * resolution;
+      final double p2 = -Math.expm1(-k2 * resolution);
+      final double log1mp2 = -k2 * resolution;
+      // Normalise the fractions
+      final double f = f0 + f1 + f2;
+      final double f0p0 = f0 * p0 / f;
+      final double f1p1 = f1 * p1 / f;
+      final double f2p2 = f2 * p2 / f;
+      // Special case for x=0. Assumes count[0] > 0
+      double sum = count[0] * Math.log(f0p0 + f1p1 + f2p2);
+      for (final int x : xx) {
+        sum += count[x] * Math.log(f0p0 * StdMath.exp(log1mp0 * x) + f1p1 * StdMath.exp(log1mp1 * x)
+            + f2p2 * StdMath.exp(log1mp2 * x));
       }
       // Since the exponential has been scaled by 'resolution' to map to the geometric,
       // all p-values are too small for the equivalent exponential.
@@ -469,9 +610,11 @@ public final class ResidenceTimeFitting {
   /**
    * Fit a model with the specified number of populations to the data.
    *
-   * <p>Supports a 1 population or 2 population model.
+   * <p>Supports a 1, 2 or 3 population model.
    *
-   * <p>The following options are recognised: <ul>
+   * <p>The following options are recognised:
+   *
+   * <ul>
    *
    * <li>{@link java.util.logging.Logger}: Logger used to record fitting details.
    *
@@ -482,15 +625,18 @@ public final class ResidenceTimeFitting {
    * @param size the size
    * @param options the options
    * @return the result (or null if fitting failed)
-   * @throws IllegalArgumentException if {@code size} is not 1 or 2
+   * @throws IllegalArgumentException if {@code size} is not 1, 2 or 3
    */
   public Pair<FitResult, Model> fit(int size, Object... options) {
     ValidationUtils.checkStrictlyPositive(size);
-    ValidationUtils.checkArgument(size <= 2, "Unsupported size: %d", size);
+    ValidationUtils.checkArgument(size <= 3, "Unsupported size: %d", size);
     if (size == 1) {
       return fit1(options);
     }
-    return fit2(options);
+    if (size == 2) {
+      return fit2(options);
+    }
+    return fit3(options);
   }
 
   /**
@@ -671,6 +817,164 @@ public final class ResidenceTimeFitting {
         format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
 
     return Pair.of(fr, new Model2(k[0], k[1], f[0]));
+  }
+
+
+  /**
+   * Fit a 3 population model to the data.
+   *
+   * @param options the options
+   * @return the result (or null if fitting failed)
+   */
+  private Pair<FitResult, Model> fit3(Object[] options) {
+    final Logger logger = orElse(Logger.class, LoggerUtils.createIfNull(null), options);
+    final MaxEval maxEval = orElse(new MaxEval(20000), options);
+
+    // Create estimates
+    final double m = 1 / getRate();
+    final double m1 = m * 2;
+    final double m2 = m * 0.5;
+    final double m3 = m * 0.125;
+    // Must use a fraction for each population
+    final InitialGuess guess =
+        new InitialGuess(new double[] {1 / m1, 1 / m2, 1 / m3, 1.0 / 3, 1.0 / 3, 1.0 / 3});
+
+    // Note:
+    // Choice of fitting optimiser has been adapted from the JumpDistanceAnalysis plugin.
+    // This is a work-in-progress as it may not be suitable for real data. It works
+    // on simulated data where the time resolution allows a histogram with at least
+    // 2 bins to be created for the faster dissociation population and there are
+    // reasonable counts from each sub-population.
+
+    final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
+    // Initial step size used to bracket the minimum in the line search
+    // Use a smaller step size for the fraction component
+    final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
+        new double[] {0.1 / m1, 0.1 / m2, 0.1 / m3, 0.02, 0.02, 0.02});
+
+    final Function3 f3 = new Function3(count, resolution);
+    final ObjectiveFunction fun = new ObjectiveFunction(
+        point -> f3.ll(point[0], point[1], point[2], point[3], point[4], point[5]));
+
+    // Bound on rate set using the range of the residence times
+    // Limit fraction to the the (0, 1) interval.
+    final double hi = 1 / (1e-3 * resolution);
+    final double lo = 1 / (1e3 * (resolution * count.length));
+    final double[] lB = {lo, lo, lo, 1e-9, 1e-9, 1e-9};
+    final double[] uB = {hi, hi, hi, 1 - 1e-9, 1 - 1e-9, 1 - 1e-9};
+    final SimpleBounds bounds = new SimpleBounds(lB, uB);
+
+    int evaluations = 0;
+    PointValuePair bestSolution = null;
+
+    try {
+      bestSolution = powellOptimizer.optimize(fun, guess, bounds, step, GoalType.MAXIMIZE, maxEval);
+
+      evaluations = powellOptimizer.getEvaluations();
+      LoggerUtils.log(logger, Level.FINE, "Powell optimiser fit (N=3) : MLE = %f (%d evaluations)",
+          bestSolution.getValue(), powellOptimizer.getEvaluations());
+    } catch (final TooManyEvaluationsException | ConvergenceException ex) {
+      LoggerUtils.log(logger, Level.INFO, "Powell optimiser failed to fit (N=3) : %s",
+          ex.getMessage());
+    }
+
+    if (bestSolution == null) {
+      LoggerUtils.log(logger, Level.INFO, "Trying CMAES optimiser with restarts ...");
+
+      // Try a bounded CMAES optimiser since the Powell optimiser appears to be
+      // sensitive to the order of the parameters. It is not good when the fast particle
+      // is the minority fraction. Could this be due to too low an upper bound?
+
+      // The sigma determines the search range for the variables.
+      // It should be 1/3 of the initial search region.
+      final double[] s = new double[lB.length];
+      for (int i = 0; i < s.length; i++) {
+        s[i] = (uB[i] - lB[i]) / 3;
+      }
+      final OptimizationData sigma = new CMAESOptimizer.Sigma(s);
+      final OptimizationData popSize =
+          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(count.length))));
+
+      // Iterate this for stability in the initial guess.
+      // Note: The optimiser does not throw exceptions for too many evaluations; it returns
+      // the current optimum. So we manually check the evaluations and ignore the non-converged
+      // result.
+      final CMAESOptimizer cmaesOptimizer = createCmaesOptimizer();
+      final Predicate<CMAESOptimizer> converged =
+          opt -> opt.getEvaluations() < maxEval.getMaxEval();
+
+      for (int i = 0; i <= 3; i++) {
+        // Try from the initial guess
+        PointValuePair solution =
+            cmaesOptimizer.optimize(guess, fun, GoalType.MAXIMIZE, bounds, sigma, popSize, maxEval);
+        if (converged.test(cmaesOptimizer)
+            && (bestSolution == null || solution.getValue() > bestSolution.getValue())) {
+          evaluations = cmaesOptimizer.getEvaluations();
+          bestSolution = solution;
+          LoggerUtils.log(logger, Level.FINE,
+              "CMAES optimiser [%da] fit (N=3) : MLE = %f (%d evaluations)", i, solution.getValue(),
+              evaluations);
+        }
+
+        if (bestSolution == null) {
+          continue;
+        }
+
+        // Try from the current optimum
+        solution = cmaesOptimizer.optimize(new InitialGuess(bestSolution.getPointRef()), fun,
+            GoalType.MAXIMIZE, bounds, sigma, popSize, maxEval);
+        if (converged.test(cmaesOptimizer) && (solution.getValue() > bestSolution.getValue())) {
+          evaluations = cmaesOptimizer.getEvaluations();
+          bestSolution = solution;
+          LoggerUtils.log(logger, Level.FINE,
+              "CMAES optimiser [%db] fit (N=3) : MLE = %f (%d evaluations)", i, solution.getValue(),
+              evaluations);
+        }
+      }
+
+      if (bestSolution != null) {
+        try {
+          // Re-optimise with Powell?
+          final PointValuePair solution =
+              powellOptimizer.optimize(fun, new InitialGuess(bestSolution.getPointRef()), bounds,
+                  step, GoalType.MAXIMIZE, maxEval);
+          if (solution.getValue() > bestSolution.getValue()) {
+            evaluations = cmaesOptimizer.getEvaluations();
+            bestSolution = solution;
+            LoggerUtils.log(logger, Level.INFO,
+                "Powell optimiser re-fit (N=3) : MLE = %f (%d evaluations)",
+                bestSolution.getValue(), powellOptimizer.getEvaluations());
+          }
+        } catch (final TooManyEvaluationsException | ConvergenceException ignored) {
+          // No solution
+        }
+      }
+    }
+
+    if (bestSolution == null) {
+      LoggerUtils.log(logger, Level.INFO, "Failed to fit N=3");
+      return null;
+    }
+
+    final double[] fitParams = bestSolution.getPointRef();
+    final FitResult fr = new FitResult(Arrays.stream(count).sum(), 5, bestSolution.getValue());
+
+    final double[] k = Arrays.copyOf(fitParams, 3);
+    final double[] f = Arrays.copyOfRange(fitParams, 3, 6);
+    // Normalise the fractions
+    final double sum = Arrays.stream(f).sum();
+    for (int i = 0; i < f.length; i++) {
+      f[i] /= sum;
+    }
+
+    // Sort by size (ascending)
+    SortUtils.sortData(f, k, true, false);
+
+    final int eval = evaluations;
+    logger.info(() -> String.format("Fit (N=3) : %s (%s), MLE = %s (%d evaluations)", formatK(k),
+        format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
+
+    return Pair.of(fr, new Model3(k[0], k[1], k[2], f[0], f[1]));
   }
 
   private static CustomPowellOptimizer createCustomPowellOptimizer() {

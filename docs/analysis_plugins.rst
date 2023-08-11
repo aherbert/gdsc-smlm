@@ -1660,7 +1660,7 @@ The residence time is fit using the survival function for an exponential model (
 
     P(T >= t) = \sum_i w_i \exp(-k_i t)
 
-where :math:`k_i` is the dissociation rate for the population and the sum of the weights is 1. Fitting supports a 1 or 2 population model. The 1 population model assumes all bound molecules are in the same state. The 2 population model assumes that bound molecules have two states, and each state has a different dissociation rate. For example specific binding and non-specific binding may have a slower dissociation rate for the specific binding as the molecule is used to perform a function; if non-specific binding occurs then the molecule will dissociate faster as it has no function to perform.
+where :math:`k_i` is the dissociation rate for the population and the sum of the weights is 1. Fitting supports a 1, 2 or 3 population model. The 1 population model assumes all bound molecules are in the same state. The multi population models assume that bound molecules have multiple states, and each state has a different dissociation rate. For example specific binding and non-specific binding may have a slower dissociation rate for the specific binding as the molecule is used to perform a function; if non-specific binding occurs then the molecule will dissociate faster as it has no function to perform.
 
 The residence time *t* is not continuous as the data contain residence times in frames. Maximum likelihood fitting is performed by assigning observations a probability using the difference of the survival function at the start and end of the frame time, e.g. the duration of frame :math:`f` uses :math:`P(f) = P(T >= f \Delta t) - P(T >= (f+1) \Delta t)` where :math:`\Delta t` is the frame exposure time.
 
@@ -1695,6 +1695,9 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
 
    * - Max distance
      - The maximum allowed distance between neighbouring localisations of a track. Use this to filter tracks where the molecule jumps location between successive time points.
+
+   * - Max populations
+     - The maximum number of populations to fit. The best model should be chosen based on the log-likelihood based information criterion and the population parameters. Populations that have multiple fractions with a similar residence time should be ignored.
 
    * - Max trace length
      - The maximum length of tracks. Used to truncate the residence time histogram.
@@ -1807,6 +1810,9 @@ The following parameters can be set:
 
    * - Exposure time
      - The frame exposure time.
+
+   * - Max populations
+     - The maximum number of populations to fit. The best model should be chosen based on the log-likelihood based information criterion and the population parameters. Populations that have multiple fractions with a similar residence time should be ignored.
 
    * - Max trace length
      - The maximum length of tracks. Used to truncate the residence time histogram.

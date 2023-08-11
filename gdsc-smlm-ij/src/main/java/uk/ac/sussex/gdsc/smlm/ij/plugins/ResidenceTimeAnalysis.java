@@ -93,6 +93,20 @@ public class ResidenceTimeAnalysis implements PlugIn {
   // Used for the multiMode option
   private static final AtomicReference<List<String>> SELECTED_REF = new AtomicReference<>();
 
+  /**
+   * The ROI colors.
+   *
+   * <p>This is Paul Tol's Vibrant colour scheme (color-blind safe). It has been reordered for
+   * contrast between the initial colors. See https://personal.sron.nl/~pault/.
+   */
+  private static final Color[] COLORS = {new Color(0, 119, 187), // Blue
+      new Color(238, 119, 51), // Orange
+      new Color(0, 153, 136), // Teal
+      new Color(204, 51, 17), // Red
+      new Color(51, 187, 238), // Cyan
+      new Color(238, 51, 119) // Magenta
+  };
+
   /** The plugin settings. */
   Settings settings;
 
@@ -117,6 +131,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     double apparentDissociationRate;
     int bootstrapRepeats;
     Seed bootstrapSeed;
+    int maxPopulations;
     boolean showQQplot;
 
     Settings() {
@@ -132,6 +147,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
       maxDistance = 400;
       bootstrapRepeats = 100;
       bootstrapSeed = Seed.from("fdfcf7c90ee01f9e");
+      maxPopulations = 2;
     }
 
     Settings(Settings source) {
@@ -150,6 +166,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
       bootstrapRepeats = source.bootstrapRepeats;
       bootstrapSeed = source.bootstrapSeed;
       showQQplot = source.showQQplot;
+      maxPopulations = source.maxPopulations;
     }
 
     Settings copy() {
@@ -322,6 +339,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addSlider("Min_size", 2, 20, settings.minSize);
     gd.addNumericField("Mean_distance", settings.meanDistance, 2, 6, "nm");
     gd.addNumericField("Max_distance", settings.maxDistance, 2, 6, "nm");
+    gd.addSlider("Max_populations", 1, 3, settings.maxPopulations);
     gd.addNumericField("Max_trace_length", settings.maxTraceLength, 2, 6, "sec");
     gd.addNumericField("Min_bin_count", settings.minBinCount, 0);
     gd.addNumericField("Apparent_dissociation_rate", settings.apparentDissociationRate, -3, 6,
@@ -337,6 +355,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.minSize = (int) gd.getNextNumber();
     settings.meanDistance = gd.getNextNumber();
     settings.maxDistance = gd.getNextNumber();
+    settings.maxPopulations = (int) gd.getNextNumber();
     settings.maxTraceLength = (int) gd.getNextNumber();
     settings.minBinCount = (int) gd.getNextNumber();
     settings.apparentDissociationRate = gd.getNextNumber();
@@ -532,6 +551,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addNumericField("k1", settings.k1, -2, 6, "/sec");
     gd.addNumericField("f0", settings.f0, 3, 6, "");
     gd.addNumericField("Exposure_time", settings.exposureTime, 2, 6, "msec");
+    gd.addSlider("Max_populations", 1, 3, settings.maxPopulations);
     gd.addNumericField("Max_trace_length", settings.maxTraceLength, 2, 6, "sec");
     gd.addNumericField("Min_bin_count", settings.minBinCount, 0);
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
@@ -550,6 +570,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.k1 = gd.getNextNumber();
     settings.f0 = gd.getNextNumber();
     settings.exposureTime = gd.getNextNumber();
+    settings.maxPopulations = (int) gd.getNextNumber();
     settings.maxTraceLength = (int) gd.getNextNumber();
     settings.minBinCount = (int) gd.getNextNumber();
     settings.bootstrapRepeats = (int) gd.getNextNumber();
@@ -626,7 +647,6 @@ public class ResidenceTimeAnalysis implements PlugIn {
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
     final Consumer<String> summary = createSummaryTable();
     final int samples = Arrays.stream(counts).sum();
-    final Color[] colors = {Color.RED, Color.BLUE};
     final StringBuilder legend = new StringBuilder("Data");
 
     // Bootstrap should fit the same samples
@@ -641,7 +661,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
 
     final DoubleUnaryOperator residenceTime = createResidenceTimeFunction();
 
-    for (int n = 1; n <= 2; n++) {
+    final int max = MathUtils.clip(1, 3, settings.maxPopulations);
+    for (int n = 1; n <= max; n++) {
       final Pair<FitResult, Model> f = rt.fit(n, logger);
       if (f == null) {
         continue;
@@ -661,7 +682,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
         table[j] = sf;
         return p;
       }).toArray();
-      plot.setColor(colors[n - 1]);
+      plot.setColor(COLORS[n - 1]);
       plot.addPoints(t, SimpleArrayUtils.toFloat(yy), Plot.LINE);
       legend.append("\tn=").append(n);
 
@@ -889,9 +910,9 @@ public class ResidenceTimeAnalysis implements PlugIn {
       xp.add(p);
     }
     final Plot plot = new Plot("Residence Time QQ n=" + m.getSize(), "Model (sec)", "Data (sec)");
-    plot.setColor(Color.BLUE);
+    plot.setColor(COLORS[0]);
     plot.addPoints(x.toDoubleArray(), y.toDoubleArray(), Plot.CIRCLE);
-    plot.setColor(Color.RED);
+    plot.setColor(COLORS[1]);
     final double min = Math.min(et, y.getDouble(0)) / 2;
     final double maxx = x.getDouble(x.size() - 1);
     final double maxy = y.getDouble(y.size() - 1);
@@ -931,7 +952,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
       points.add(solver.findRoot(xx -> m.sf(xx) - q, lo, hi));
     }
     final float[] qp = SimpleArrayUtils.toFloat(points.toDoubleArray());
-    plot.setColor(new Color(0, 153, 136));
+    plot.setColor(COLORS[2]);
     plot.addPoints(qp, qp, Plot.DIAMOND);
     plot.setColor(Color.BLACK);
     plot.addLabel(0, 0, Arrays.stream(quantiles).mapToObj(String::valueOf)
