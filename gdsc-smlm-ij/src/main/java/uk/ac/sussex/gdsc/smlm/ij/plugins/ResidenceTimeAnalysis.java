@@ -215,14 +215,15 @@ public class ResidenceTimeAnalysis implements PlugIn {
     // Here results are all calibrated with the same exposure time and pixel pitch.
     // Convert results to residence times with options to exclude non-stationary objects.
     int[] counts = extractResidenceTimes(allResults);
-    counts = filterCounts(counts);
+    final double exposureTime = allResults.get(0).getCalibrationReader().getExposureTime();
+    counts = filterCounts(counts, exposureTime);
 
     String title = allResults.get(0).getName();
     if (allResults.size() > 1) {
       title += " + " + TextUtils.pleural(allResults.size() - 1, "other");
     }
 
-    runAnalysis(title, allResults.get(0).getCalibrationReader().getExposureTime(), counts);
+    runAnalysis(title, exposureTime, counts);
   }
 
   private static boolean showMultiDialog(List<MemoryPeakResults> allResults) {
@@ -512,7 +513,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     }
     final StringBuilder sb = new StringBuilder(256);
     int[] counts = createSimulatation(sb);
-    counts = filterCounts(counts);
+    counts = filterCounts(counts, settings.exposureTime);
     runAnalysis(sb.toString(), settings.exposureTime, counts);
   }
 
@@ -874,15 +875,16 @@ public class ResidenceTimeAnalysis implements PlugIn {
    * last valid bin, to truncate the histogram.
    *
    * @param counts the counts
+   * @param exposureTime the exposure time (in milliseconds)
    * @return the new counts
    */
-  private int[] filterCounts(int[] counts) {
+  private int[] filterCounts(int[] counts, double exposureTime) {
     int limit = counts.length;
     int minBinCount = settings.minBinCount;
     if (settings.maxTraceLength > 0) {
       // trace length (sec) / exposure time (ms)
       limit =
-          Math.min(limit, (int) Math.round(settings.maxTraceLength * 1e3 / settings.exposureTime));
+          Math.min(limit, (int) Math.round(settings.maxTraceLength * 1e3 / exposureTime));
       // Always clip to the last bin containing a count of 1.
       minBinCount = Math.max(1, minBinCount);
     }
