@@ -206,6 +206,31 @@ public class ResidenceTimeAnalysis implements PlugIn {
     double apply(T o, int i);
   }
 
+  /**
+   * Custom statistics class to collect mean, standard deviation and max.
+   */
+  private static class MyStatistics {
+    private final Statistics s = new Statistics();
+    private double max;
+
+    void add(double value) {
+      s.add(value);
+      max = max > value ? max : value;
+    }
+
+    double mean() {
+      return s.getMean();
+    }
+
+    double sd() {
+      return s.getStandardDeviation();
+    }
+
+    double max() {
+      return max;
+    }
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -375,7 +400,9 @@ public class ResidenceTimeAnalysis implements PlugIn {
   private int[] extractResidenceTimes(List<MemoryPeakResults> allResults) {
     final IntArrayList times = new IntArrayList();
     final Function<MemoryPeakResults, List<Trace>> traceFunction = createTraceFunction();
-    final double nmPerPixel = allResults.get(0).getNmPerPixel();
+    final CalibrationReader cr = allResults.get(0).getCalibrationReader();
+    final double nmPerPixel = cr.getNmPerPixel();
+    final double exposureTime = cr.getExposureTime() * 1e-3;
     final ToIntFunction<Trace> framesFunction = createFramesFunction(nmPerPixel);
 
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
@@ -383,9 +410,13 @@ public class ResidenceTimeAnalysis implements PlugIn {
       final List<Trace> traces = traceFunction.apply(r);
       final int before = times.size();
       final double[] max2 = {0, 0};
+      final MyStatistics frames = new MyStatistics();
+      final MyStatistics maxJumps = new MyStatistics();
+      final MyStatistics meanJumps = new MyStatistics();
       traces.forEach(trace -> {
         // Collect the largest jump distance and check for duplicate frames
         PeakResult p = trace.getHead();
+        double max = 0;
         for (int i = 1; i < trace.size(); i++) {
           final PeakResult result = trace.get(i);
           if (p.getFrame() == result.getFrame()) {
@@ -395,8 +426,12 @@ public class ResidenceTimeAnalysis implements PlugIn {
             return;
           }
           max2[0] = Math.max(max2[0], p.distance2(result));
+          max = Math.max(max, p.distance2(result));
           p = result;
         }
+        frames.add(trace.getTail().getFrame() - trace.getHead().getFrame() + 1);
+        maxJumps.add(Math.sqrt(max));
+        meanJumps.add(trace.getMeanDistance());
         max2[1] = Math.max(max2[1], trace.getMeanDistance());
 
         final int t = framesFunction.applyAsInt(trace);
@@ -404,12 +439,10 @@ public class ResidenceTimeAnalysis implements PlugIn {
           times.add(t);
         }
       });
-      logger.info(
-          () -> String.format("Dataset %s : %s : %s : Max jump = %s nm : Max mean jump = %s nm",
-              r.getName(), TextUtils.pleural(traces.size(), "trace"),
-              TextUtils.pleural(times.size() - before, "time"),
-              MathUtils.round(Math.sqrt(max2[0]) * nmPerPixel),
-              MathUtils.round(Math.sqrt(max2[1]) * nmPerPixel)));
+      logger.info(() -> String.format("Dataset %s : %s : %s : %s sec : %s nm : %s nm", r.getName(),
+          TextUtils.pleural(traces.size(), "trace"),
+          TextUtils.pleural(times.size() - before, "time"), format(frames, exposureTime, "Time"),
+          format(maxJumps, nmPerPixel, "Max jump"), format(meanJumps, nmPerPixel, "Mean jump")));
     }
 
     // Convert to histogram
@@ -518,10 +551,25 @@ public class ResidenceTimeAnalysis implements PlugIn {
     return t -> {
       if (t.size() > min && traceFilter.test(t)) {
         // frame length = end - start - offset
+        // (The shortest allowed trace should return 0)
         return t.getTail().getFrame() - t.getHead().getFrame() - min;
       }
       return -1;
     };
+  }
+
+  /**
+   * Format the statistics for display.
+   *
+   * @param stats the stats
+   * @param scale the scale
+   * @param name the name
+   * @return the string
+   */
+  private static String format(MyStatistics stats, double scale, String name) {
+    return new StringBuilder(name).append(" = ").append(MathUtils.round(stats.mean() * scale))
+        .append(" +/- ").append(MathUtils.round(stats.sd() * scale)).append(" (")
+        .append(MathUtils.round(stats.max() * scale)).append(")").toString();
   }
 
   /**
