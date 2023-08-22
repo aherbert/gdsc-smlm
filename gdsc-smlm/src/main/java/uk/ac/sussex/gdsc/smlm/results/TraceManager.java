@@ -253,12 +253,11 @@ public class TraceManager {
 
     // Used to track the highest frame containing spots for a trace
     maxTime = new int[localisations.length + 1];
-    final int[] traceIdToLocalisationsIndexMap = new int[localisations.length + 1];
 
     // Initialise the first traces using the first frame
     int nextIndex = indexes[localisations[0].time + 1]; // findNextStartTimeIndex(0);
     for (int index = 0; index < nextIndex; index++) {
-      localisations[index].trace = addTrace(index, traceIdToLocalisationsIndexMap, maxTime);
+      localisations[index].trace = addTrace(index, maxTime);
     }
 
     Assignment[] assigned = new Assignment[10];
@@ -287,7 +286,7 @@ public class TraceManager {
       // If no previous spots within the time threshold then create new traces
       if (pastEndIndex == currentEndIndex) {
         for (int index = currentIndex; index < nextIndex; index++) {
-          localisations[index].trace = addTrace(index, traceIdToLocalisationsIndexMap, maxTime);
+          localisations[index].trace = addTrace(index, maxTime);
         }
         continue;
       }
@@ -302,7 +301,7 @@ public class TraceManager {
       for (int index = currentIndex; index < nextIndex; index++) {
         final int traceId = findForerunner(index, pastEndIndex, currentEndIndex);
         if (traceId == 0) {
-          localisations[index].trace = addTrace(index, traceIdToLocalisationsIndexMap, maxTime);
+          localisations[index].trace = addTrace(index, maxTime);
         } else {
           // Tentatively assign
           assigned[assignedToTrace++] = new Assignment(index, minD, traceId);
@@ -358,7 +357,7 @@ public class TraceManager {
               int traceId = findAlternativeForerunner(index, pastEndIndex, currentEndIndex,
                   ignoreCount, ignore);
               if (traceId == 0) {
-                traceId = addTrace(index, traceIdToLocalisationsIndexMap, maxTime);
+                traceId = addTrace(index, maxTime);
                 // Mark to ignore
                 assigned[j].distance = -1;
               } else {
@@ -388,7 +387,7 @@ public class TraceManager {
     return getTotalTraces();
   }
 
-  private int addTrace(int index, int[] traceIdToLocalisationsIndexMap, int[] maxT) {
+  private int addTrace(int index, int[] maxT) {
     if (filterActivationFrames
         // Count the number of traces that will be filtered
         // (i.e. the time is not within an activation window)
@@ -397,7 +396,7 @@ public class TraceManager {
     }
 
     final int traceId = ++totalTraces;
-    traceIdToLocalisationsIndexMap[traceId] = index;
+    //traceIdToLocalisationsIndexMap[traceId] = index;
     maxT[traceId] = localisations[index].endTime;
     return traceId;
   }
