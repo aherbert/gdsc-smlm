@@ -92,7 +92,7 @@ public class TraceManager {
   private int[] maxTime;
   private int totalTraces;
   private int totalFiltered;
-  private float distanceThreshSqaured;
+  private float distanceThreshSquared;
   private float distanceExclusionSquared;
   private TrackProgress tracker;
   private int activationFrameInterval;
@@ -242,7 +242,7 @@ public class TraceManager {
     }
 
     totalTraces = totalFiltered = 0;
-    distanceThreshSqaured = (float) (distanceThreshold * distanceThreshold);
+    distanceThreshSquared = (float) (distanceThreshold * distanceThreshold);
     distanceExclusionSquared =
         (distanceExclusion >= distanceThreshold) ? (float) (distanceExclusion * distanceExclusion)
             : 0;
@@ -814,7 +814,7 @@ public class TraceManager {
     if (traceMode == TraceMode.EARLIEST_FORERUNNER) {
       for (int i = pastIndex; i < currentIndex; i++) {
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -834,7 +834,7 @@ public class TraceManager {
     } else if (traceMode == TraceMode.LATEST_FORERUNNER) {
       for (int i = currentIndex; i-- > pastIndex;) {
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -866,7 +866,7 @@ public class TraceManager {
       // traceMode == TraceMode.SINGLE_LINKAGE
 
       // Find the closest spot
-      minD = distanceThreshSqaured;
+      minD = distanceThreshSquared;
       int minI = -1;
       for (int i = pastIndex; i < currentIndex; i++) {
         final float d2 = spot.distance2(endLocalisations[i]);
@@ -909,7 +909,7 @@ public class TraceManager {
       currentT = endLocalisations[pastIndex].time;
       for (int i = pastIndex; i < currentIndex; i++) {
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -940,7 +940,7 @@ public class TraceManager {
       currentT = endLocalisations[currentIndex].time;
       for (int i = currentIndex; i-- > pastIndex;) {
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -981,7 +981,7 @@ public class TraceManager {
       // traceMode == TraceMode.SINGLE_LINKAGE
 
       // Find the closest spot
-      minD = distanceThreshSqaured;
+      minD = distanceThreshSquared;
       int minI = -1;
       for (int i = pastIndex; i < currentIndex; i++) {
         final float d2 = spot.distance2(endLocalisations[i]);
@@ -1067,7 +1067,7 @@ public class TraceManager {
         }
 
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -1103,7 +1103,7 @@ public class TraceManager {
         }
 
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -1138,7 +1138,7 @@ public class TraceManager {
       // traceMode == TraceMode.SINGLE_LINKAGE
 
       // Find the closest spot
-      minD = distanceThreshSqaured;
+      minD = distanceThreshSquared;
       int minI = -1;
       for (int i = pastIndex; i < currentIndex; i++) {
         if (ignore(i, ignoreCount, ignore)) {
@@ -1198,7 +1198,7 @@ public class TraceManager {
         }
 
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -1245,7 +1245,7 @@ public class TraceManager {
         }
 
         final float d2 = spot.distance2(endLocalisations[i]);
-        if (d2 <= distanceThreshSqaured) {
+        if (d2 <= distanceThreshSquared) {
           minD = d2;
           int trace = endLocalisations[i].trace;
 
@@ -1290,7 +1290,7 @@ public class TraceManager {
       // traceMode == TraceMode.SINGLE_LINKAGE
 
       // Find the closest spot
-      minD = distanceThreshSqaured;
+      minD = distanceThreshSquared;
       int minI = -1;
       for (int i = pastIndex; i < currentIndex; i++) {
         if (ignore(i, ignoreCount, ignore)) {
