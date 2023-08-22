@@ -409,7 +409,6 @@ public class ResidenceTimeAnalysis implements PlugIn {
     for (final MemoryPeakResults r : allResults) {
       final List<Trace> traces = traceFunction.apply(r);
       final int before = times.size();
-      final double[] max2 = {0, 0};
       final MyStatistics frames = new MyStatistics();
       final MyStatistics maxJumps = new MyStatistics();
       final MyStatistics meanJumps = new MyStatistics();
@@ -425,14 +424,12 @@ public class ResidenceTimeAnalysis implements PlugIn {
                 r.getName(), trace.getId()));
             return;
           }
-          max2[0] = Math.max(max2[0], p.distance2(result));
           max = Math.max(max, p.distance2(result));
           p = result;
         }
         frames.add(trace.getTail().getFrame() - trace.getHead().getFrame() + 1);
         maxJumps.add(Math.sqrt(max));
         meanJumps.add(trace.getMeanDistance());
-        max2[1] = Math.max(max2[1], trace.getMeanDistance());
 
         final int t = framesFunction.applyAsInt(trace);
         if (t >= 0) {
