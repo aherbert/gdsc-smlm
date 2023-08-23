@@ -25,12 +25,23 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.IntConsumer;
+import java.util.function.IntPredicate;
+import java.util.function.IntUnaryOperator;
+import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.match.Matchings;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -86,9 +97,9 @@ public class TraceManager {
 
   private final MemoryPeakResults results;
   private final Localisation[] localisations;
-  private final Localisation[] endLocalisations;
-  private final int[] indexes;
-  private final int[] endIndexes;
+  private Localisation[] endLocalisations;
+  private int[] indexes;
+  private int[] endIndexes;
   private int[] maxTime;
   private int totalTraces;
   private int totalFiltered;
@@ -140,6 +151,135 @@ public class TraceManager {
   }
 
   /**
+   * Contains a trajectory.
+   */
+  private static class Trajectory {
+    int id;
+    Localisation tail;
+
+    Trajectory(int id, Localisation point) {
+      this.id = id;
+      add(point);
+    }
+
+    void add(Localisation point) {
+      tail = point;
+      point.trace = id;
+    }
+
+    double distance2(Localisation other) {
+      final double dx = (double) tail.x - other.x;
+      final double dy = (double) tail.y - other.y;
+      return dx * dx + dy * dy;
+    }
+
+    int endTime() {
+      return tail.endTime;
+    }
+  }
+
+  /**
+   * Iterator over a single list.
+   */
+  private static class SingletonIterator implements Iterator<List<Trajectory>> {
+    private final List<Trajectory> traces;
+    private boolean hasNext = true;
+
+    /**
+     * Create an instance.
+     *
+     * @param traces the traces
+     */
+    SingletonIterator(List<Trajectory> traces) {
+      this.traces = traces;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return hasNext;
+    }
+
+    @Override
+    public List<Trajectory> next() {
+      // Note: no check that hasNext is false and don't bother with NoSuchElementException
+      hasNext = false;
+      return traces;
+    }
+  }
+
+  /**
+   * Iterator over a list grouped by ascending end time order.
+   */
+  private static class EarliestIterator implements Iterator<List<Trajectory>> {
+    private final List<Trajectory> traces;
+    private int index;
+
+    /**
+     * Create an instance.
+     *
+     * @param traces the traces (assumed to not be empty)
+     */
+    EarliestIterator(List<Trajectory> traces) {
+      this.traces = traces;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return index < traces.size();
+    }
+
+    @Override
+    public List<Trajectory> next() {
+      // Note: no check that hasNext is false and don't bother with NoSuchElementException
+      final int from = index;
+      final int end = traces.size();
+      final int t = traces.get(from).endTime();
+      int i = from + 1;
+      while (i < end && t == traces.get(i).endTime()) {
+        i++;
+      }
+      index = i;
+      return traces.subList(from, i);
+    }
+  }
+
+  /**
+   * Iterator over a list grouped by descending end time order.
+   */
+  private static class LatestIterator implements Iterator<List<Trajectory>> {
+    private final List<Trajectory> traces;
+    private int index;
+
+    /**
+     * Create an instance.
+     *
+     * @param traces the traces (assumed to not be empty)
+     */
+    LatestIterator(List<Trajectory> traces) {
+      this.traces = traces;
+      index = traces.size() - 1;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return index >= 0;
+    }
+
+    @Override
+    public List<Trajectory> next() {
+      // Note: no check that hasNext is false and don't bother with NoSuchElementException
+      final int to = index;
+      final int t = traces.get(to).endTime();
+      int i = to - 1;
+      while (i >= 0 && t == traces.get(i).endTime()) {
+        i--;
+      }
+      index = i;
+      return traces.subList(i + 1, to + 1);
+    }
+  }
+
+  /**
    * Contains trace assignment data.
    */
   private static class Assignment {
@@ -185,36 +325,46 @@ public class TraceManager {
       throw new IllegalArgumentException("Lowest start time is negative");
     }
 
-    // Build a second localisations list sorted by end time
-    endLocalisations = Arrays.copyOf(localisations, totalTraces);
-    Arrays.sort(endLocalisations, (o1, o2) -> Integer.compare(o1.endTime, o2.endTime));
+    // TODO - Assign a more efficient localisation representation using a grid
+  }
 
-    // Create a look-up table of the starting index in each localisations array for each possible
-    // time point. This allows looping over all localisations for a given t using the index
-    // index[t] <= i < index[t+1]
+  /**
+   * Create a look-up table of the starting index in the localisations array for each possible time
+   * point. This allows looping over all localisations for a given t using the index index[t] <= i <
+   * index[t+1]
+   *
+   * @param localisations the localisations
+   * @param timeFunction the time function
+   * @return the int[]
+   */
+  private static int[] createTimeIndexes(Localisation[] localisations,
+      ToIntFunction<Localisation> timeFunction) {
+    final int maxT = timeFunction.applyAsInt(localisations[localisations.length - 1]);
 
-    int maxT = localisations[totalTraces - 1].time;
-
-    indexes = new int[maxT + 2];
+    final int[] indexes = new int[maxT + 2];
     int time = -1;
     for (int i = 0; i < localisations.length; i++) {
-      while (time < localisations[i].time) {
+      while (time < timeFunction.applyAsInt(localisations[i])) {
         indexes[++time] = i;
       }
     }
-    indexes[maxT + 1] = totalTraces;
+    indexes[maxT + 1] = localisations.length;
+    return indexes;
+  }
 
-    maxT = endLocalisations[totalTraces - 1].endTime;
-    endIndexes = new int[maxT + 2];
-    time = -1;
-    for (int i = 0; i < endLocalisations.length; i++) {
-      while (time < endLocalisations[i].endTime) {
-        endIndexes[++time] = i;
-      }
+  private void createTimeIndexes() {
+    if (endLocalisations == null) {
+      // Build a second localisations list sorted by end time
+      endLocalisations = localisations.clone();
+      Arrays.sort(endLocalisations, (o1, o2) -> Integer.compare(o1.endTime, o2.endTime));
+
+      // Create a look-up table of the starting index in each localisations array for each possible
+      // time point. This allows looping over all localisations for a given t using the index
+      // index[t] <= i < index[t+1]
+
+      indexes = createTimeIndexes(localisations, point -> point.time);
+      endIndexes = createTimeIndexes(endLocalisations, point -> point.endTime);
     }
-    endIndexes[maxT + 1] = totalTraces;
-
-    // TODO - Assign a more efficient localisation representation using a grid
   }
 
   /**
@@ -237,9 +387,323 @@ public class TraceManager {
    */
   public int traceMolecules(final double distanceThreshold, final int timeThreshold) {
     if (timeThreshold <= 0 || distanceThreshold < 0) {
+      totalFiltered = 0;
       totalTraces = localisations.length;
       return totalTraces;
     }
+
+    final TrackProgress tp = NullTrackProgress.createIfNull(this.tracker);
+    tp.progress(0);
+
+    final LocalList<Trajectory> traces = new LocalList<>(100);
+
+    final IntPredicate ignoreActivation = createIgnoreActivationFilter();
+    final IntConsumer updateTrajectories = createUpdateTrajectoriesFunction(traces, timeThreshold,
+        pulseInterval, localisations[0].time);
+    final BiPredicate<List<Trajectory>, Localisation> exclusionFilter =
+        createExclusionFilter(distanceThreshold, distanceExclusion, ignoreActivation);
+    final Function<List<Trajectory>, Iterator<List<Trajectory>>> toIterator =
+        createIteratorFunction(timeThreshold, traceMode);
+
+    int nextIndex = initialiseTrajectories(traces, ignoreActivation);
+
+    // Now process the remaining frames, comparing them to previous frames
+    LocalList<Localisation> candidates = new LocalList<>(100);
+    LocalList<Localisation> targetCandidates = new LocalList<>(100);
+    final double threshold = distanceThreshold * distanceThreshold;
+
+    while (nextIndex < localisations.length) {
+      tp.progress(nextIndex, localisations.length);
+
+      // Identify the next localisations
+      final int t = localisations[nextIndex].time;
+      nextIndex = extractCandidates(nextIndex, candidates);
+
+      updateTrajectories.accept(t);
+
+      // Respect the exclusion distance. This removes any candidates that could be
+      // matched a trace but have another trace within the exclusion distance.
+      if (exclusionFilter != null) {
+        candidates.removeIf(point -> exclusionFilter.test(traces, point));
+        if (candidates.isEmpty()) {
+          continue;
+        }
+      }
+
+      // Match candidates to existing traces.
+      // The active traces are iterated in batches based on the trace mode.
+      // Traces are maintained in ascending end time order. Ignore any with
+      // an end time effectively in the future.
+      final int index = traces.findLastIndex(trace -> trace.endTime() < t);
+      if (index >= 0) {
+        final List<Trajectory> targetTraces =
+            index + 1 == traces.size() ? traces : traces.subList(0, index + 1);
+        Iterator<List<Trajectory>> iter = toIterator.apply(targetTraces);
+        while (iter.hasNext()) {
+          // Rotate the candidate lists
+          final LocalList<Localisation> tmp = targetCandidates;
+          targetCandidates = candidates;
+          candidates = tmp;
+          candidates.clear();
+
+          Matchings.nearestNeighbour(iter.next(), targetCandidates, Trajectory::distance2,
+              threshold, (trace, point) -> {
+                trace.add(point);
+                // Ensure we maintain the time range for this trace
+                maxTime[point.trace] = point.time;
+              }, null, candidates::add);
+
+          if (candidates.isEmpty()) {
+            break;
+          }
+        }
+      }
+
+      // Create new traces from unmatched candidates
+      if (!candidates.isEmpty()) {
+        final boolean ignore = ignoreActivation.test(t);
+        candidates.forEach(point -> addTrace(ignore, point, traces));
+      }
+    }
+
+    tp.progress(1.0);
+
+    return getTotalTraces();
+  }
+
+  private void addSingleTrace(boolean ignore, Localisation point) {
+    totalTraces++;
+    maxTime[totalTraces] = point.endTime;
+    point.trace = totalTraces;
+    if (ignore) {
+      // Count the number of traces that will be filtered
+      // (i.e. the time is not within an activation window).
+      totalFiltered++;
+    }
+  }
+
+  private void addTrace(boolean ignore, Localisation point, List<Trajectory> traces) {
+    totalTraces++;
+    maxTime[totalTraces] = point.endTime;
+    if (ignore) {
+      // Count the number of traces that will be filtered
+      // (i.e. the time is not within an activation window).
+      totalFiltered++;
+      point.trace = totalTraces;
+    } else {
+      // Add to the active traces
+      traces.add(new Trajectory(totalTraces, point));
+    }
+  }
+
+  /**
+   * Initialise the first traces using the first frame.
+   *
+   * @param traces the traces
+   * @param ignoreActivation the ignore activation filter
+   * @return the index in the localisations for the next time frame
+   */
+  private int initialiseTrajectories(LocalList<Trajectory> traces, IntPredicate ignoreActivation) {
+    // Used to track the highest frame containing spots for a trace
+    totalTraces = totalFiltered = 0;
+    maxTime = new int[localisations.length + 1];
+
+    // Initialise the first traces using the first frame
+    final int t = localisations[0].time;
+    final boolean ignore = ignoreActivation.test(t);
+    addTrace(ignore, localisations[0], traces);
+    // Add all with the same time
+    for (int index = 1; index < localisations.length; index++) {
+      if (localisations[index].time != t) {
+        return index;
+      }
+      addTrace(ignore, localisations[index], traces);
+    }
+    return localisations.length;
+  }
+
+  /**
+   * Creates the filter to ignore beginning a trajectory if the time does not occur in the
+   * activation window. The predictate will return false if filtering is not enabled.
+   *
+   * @return the predicate
+   */
+  private IntPredicate createIgnoreActivationFilter() {
+    if (filterActivationFrames) {
+      final int interval = activationFrameInterval;
+      final int window = activationFrameWindow;
+      return time -> time % interval > window;
+    }
+    return point -> false;
+  }
+
+  /**
+   * Creates a function to update the list of current trajectories. The list of trajectories is
+   * modified in place based on the current time.
+   *
+   * @param traces the traces
+   * @param timeThreshold the time threshold
+   * @param pulseInterval the pulse interval
+   * @param time the time of the first localisation
+   * @return the function (for the current time)
+   */
+  private static IntConsumer createUpdateTrajectoriesFunction(LocalList<Trajectory> traces,
+      int timeThreshold, int pulseInterval, int time) {
+    // Support for splitting traces across pulse boundaries.
+    if (pulseInterval > 0) {
+      final IntUnaryOperator timeToPulse = t -> 1 + pulseInterval * ((t - 1) / pulseInterval);
+      return new IntConsumer() {
+        private int pulse = timeToPulse.applyAsInt(time);
+
+        @Override
+        public void accept(int t) {
+          if (pulse != timeToPulse.applyAsInt(t)) {
+            // Crossed a pulse boundary
+            pulse = timeToPulse.applyAsInt(t);
+            traces.clear();
+          } else {
+            updateTrajectories(timeThreshold, traces, t);
+          }
+        }
+      };
+    }
+    return t -> updateTrajectories(timeThreshold, traces, t);
+  }
+
+  /**
+   * Filter trajectories to remove those with an end time before the start of the time window.
+   *
+   * @param timeThreshold the time threshold
+   * @param traces the traces
+   * @param t the current time
+   */
+  private static void updateTrajectories(final int timeThreshold, LocalList<Trajectory> traces,
+      final int t) {
+    // Filter to those traces within the window
+    final int pastT = t - timeThreshold;
+    traces.removeIf(trace -> trace.endTime() < pastT);
+    traces.sort((a, b) -> Integer.compare(a.endTime(), b.endTime()));
+  }
+
+  /**
+   * Creates the exclusion filter. This will mark localisations to ignore if they match multiple
+   * trajectories within the exclusion distance and at least 1 trajectory within the trace distance.
+   *
+   * <p>Filtered localisations are used to create a trace of a single localisation.
+   *
+   * @param distance the trace distance
+   * @param upperDistance the exclusion distance
+   * @return the predicate (or null)
+   */
+  private BiPredicate<List<Trajectory>, Localisation> createExclusionFilter(double distance,
+      double upperDistance, IntPredicate ignoreActivation) {
+    if (upperDistance >= distance) {
+      final double lower = distance * distance;
+      final double upper = upperDistance * upperDistance;
+      return (traces, point) -> {
+        boolean match = false;
+        int exclusionCount = 0;
+        for (final Trajectory trace : traces) {
+          final double d = trace.distance2(point);
+          if (d <= upper) {
+            exclusionCount++;
+            if (d <= lower) {
+              match = true;
+            }
+            if (match && exclusionCount > 1) {
+              addSingleTrace(ignoreActivation.test(point.time), point);
+              return true;
+            }
+          }
+        }
+        return false;
+      };
+    }
+    return null;
+  }
+
+  /**
+   * Create a function to divide the active traces into subsets based on the trace mode. If the time
+   * threshold is 1 then the trace mode is ignored and the entire set of active traces is returned.
+   *
+   * @param traces the traces
+   * @return the iterator
+   */
+  private static Function<List<Trajectory>, Iterator<List<Trajectory>>>
+      createIteratorFunction(int timeThreshold, TraceMode traceMode) {
+    if (traceMode == TraceMode.SINGLE_LINKAGE || timeThreshold == 1) {
+      return SingletonIterator::new;
+    }
+    // Return in chunks using the end time
+    return traces -> iteratorByTime(traces, traceMode == TraceMode.LATEST_FORERUNNER);
+  }
+
+  /**
+   * Create an iterable over the active traces (assumed to be sorted by end time).
+   *
+   * @param traces the traces
+   * @param reversed true to return in reversed order
+   * @return the iterable
+   */
+  private static Iterator<List<Trajectory>> iteratorByTime(List<Trajectory> traces,
+      boolean reversed) {
+    // If all the same then use a single list
+    if (traces.isEmpty() || traces.get(0).endTime() == traces.get(traces.size() - 1).endTime()) {
+      return new SingletonIterator(traces);
+    }
+    return reversed ? new LatestIterator(traces) : new EarliestIterator(traces);
+  }
+
+  /**
+   * Extract the candidates into the provided list.
+   *
+   * @param currentIndex the current index
+   * @param candidates the candidates
+   * @return the index in the localisations for the next time frame
+   */
+  private int extractCandidates(int currentIndex, LocalList<Localisation> candidates) {
+    candidates.clear();
+    final int t = localisations[currentIndex].time;
+    candidates.add(localisations[currentIndex]);
+    for (int index = currentIndex + 1; index < localisations.length; index++) {
+      if (localisations[index].time != t) {
+        return index;
+      }
+      candidates.add(localisations[index]);
+    }
+    return localisations.length;
+  }
+
+  /**
+   * Trace localisations across frames that are the same molecule.
+   *
+   * <p>Any spot that occurred within time threshold and distance threshold of a previous spot is
+   * grouped into the same trace as that previous spot. The resulting trace is assigned a spatial
+   * position equal to the centroid position of all the spots included in the trace.
+   *
+   * <p>See Coltharp, et al. Accurate Construction of Photoactivated Localization Microscopy (PALM)
+   * Images for Quantitative Measurements (2012). PLoS One. 7(12): e51725. DOI:
+   * http://dx.doi.org/10.1371%2Fjournal.pone.0051725
+   *
+   * <p>Note: The actual traces representing molecules can be obtained by calling
+   * {@link #getTraces()}
+   *
+   * <p>This is the previous version of the tracing algorithm. It does not store all possible
+   * matches and has a routine to find alternatives if multiple spots match a previous trace. This
+   * may be faster if the data is sparse. However when the data is dense then repeated match
+   * computations degrade performance. Also note that this method
+   *
+   * @param distanceThreshold The distance threshold in the native units of the results
+   * @param timeThreshold The time threshold in frames
+   * @return The number of traces
+   */
+  int traceMoleculesLegacy(final double distanceThreshold, final int timeThreshold) {
+    if (timeThreshold <= 0 || distanceThreshold < 0) {
+      totalTraces = localisations.length;
+      return totalTraces;
+    }
+
+    createTimeIndexes();
 
     totalTraces = totalFiltered = 0;
     distanceThreshSquared = (float) (distanceThreshold * distanceThreshold);
@@ -396,7 +860,6 @@ public class TraceManager {
     }
 
     final int traceId = ++totalTraces;
-    //traceIdToLocalisationsIndexMap[traceId] = index;
     maxT[traceId] = localisations[index].endTime;
     return traceId;
   }
@@ -415,21 +878,17 @@ public class TraceManager {
 
     // No tracing yet performed or no thresholds
     if (totalTraces == localisations.length) {
+      Stream<PeakResult> stream = Arrays.stream(peakResults);
       if (filterActivationFrames) {
-        final ArrayList<Trace> traces = new ArrayList<>();
-        for (int i = 0; i < totalTraces; i++) {
-          final PeakResult peakResult = peakResults[localisations[i].id];
-          if (!outsideActivationWindow(peakResult.getFrame())) {
-            traces.add(new Trace(peakResult));
-          }
-        }
-        return traces.toArray(new Trace[0]);
+        final IntPredicate ignoreActivation = createIgnoreActivationFilter();
+        stream = stream.filter(peakResult -> !ignoreActivation.test(peakResult.getFrame()));
       }
-      final Trace[] traces = new Trace[localisations.length];
-      for (int i = 0; i < traces.length; i++) {
-        traces[i] = new Trace(peakResults[localisations[i].id]);
-      }
-      return traces;
+      final int[] id = {0};
+      return stream.map(r -> {
+        final Trace trace = new Trace(r);
+        trace.setId(++id[0]);
+        return trace;
+      }).toArray(Trace[]::new);
     }
 
     if (tracker != null) {
@@ -449,7 +908,13 @@ public class TraceManager {
     // e.g. [1,2,2,1,3] => [1,2,5,4,3] when spots in group 1 are reallocated before spots in group
     // 2.
 
-    final IntOpenHashSet processedTraces = new IntOpenHashSet(traces.length);
+    // TODO - Update localisation to support a single linked list of the trace using a nextIndex.
+    // Created the traces by following the list.
+    // This should also mark any traces that were filtered so we do not require the
+    // filtering to be done here.
+
+    final BitSet processedTraces = new BitSet(totalTraces + 1);
+    final IntPredicate ignoreActivation = createIgnoreActivationFilter();
     for (int i = 0; i < localisations.length; i++) {
       if (tracker != null && (i & 0xff) == 0) {
         tracker.progress(i, localisations.length);
@@ -457,10 +922,10 @@ public class TraceManager {
 
       final int traceId = localisations[i].trace;
 
-      if (!processedTraces.add(traceId)
-          || (filterActivationFrames && outsideActivationWindow(localisations[i].time))) {
+      if (processedTraces.get(traceId) || ignoreActivation.test(localisations[i].time)) {
         continue;
       }
+      processedTraces.set(traceId);
 
       final PeakResult peakResult = peakResults[localisations[i].id];
 
@@ -1412,25 +1877,6 @@ public class TraceManager {
   }
 
   /**
-   * Filter the traces that start during an activation frame.
-   *
-   * @param traces the traces
-   * @param activationFrameInterval the interval at which the activation laser is used
-   * @return the filtered traces
-   */
-  public Trace[] filterTraces(Trace[] traces, int activationFrameInterval) {
-    final Trace[] newTraces = new Trace[traces.length];
-    int count = 0;
-    for (final Trace trace : traces) {
-      final PeakResult r = trace.getHead();
-      if (r != null && (r.getFrame() % activationFrameInterval) == 1) {
-        newTraces[count++] = trace;
-      }
-    }
-    return Arrays.copyOf(newTraces, count);
-  }
-
-  /**
    * Gets the trace mode.
    *
    * @return the trace mode
@@ -1509,6 +1955,20 @@ public class TraceManager {
   }
 
   /**
+   * Filter the traces that start during an activation frame.
+   *
+   * @param traces the traces
+   * @param activationFrameInterval the interval at which the activation laser is used
+   * @return the filtered traces
+   */
+  public Trace[] filterTraces(Trace[] traces, int activationFrameInterval) {
+    return Arrays.stream(traces).filter(trace -> {
+      final PeakResult r = trace.getHead();
+      return r != null && r.getFrame() % activationFrameInterval == 1;
+    }).toArray(Trace[]::new);
+  }
+
+  /**
    * Find the neighbour for each result within the given time and distance thresholds. The neighbour
    * with the strongest signal is selected.
    *
@@ -1519,26 +1979,30 @@ public class TraceManager {
    */
   public Trace[] findNeighbours(final double distanceThreshold, final int timeThreshold) {
     if (distanceThreshold <= 0 || timeThreshold <= 0) {
-      throw new IllegalArgumentException("Distancet and time thresholds must be positive");
+      throw new IllegalArgumentException("Distance and time thresholds must be positive");
     }
+
+    createTimeIndexes();
+
+    final Localisation[] localisations = this.localisations;
+    final Localisation[] endLocalisations = this.endLocalisations;
+    final int[] indexes = this.indexes;
+    final int[] endIndexes = this.endIndexes;
 
     final Trace[] neighbours = new Trace[results.size()];
     final PeakResult[] peakResults = results.toArray();
 
     final float dThresh2 = (float) (distanceThreshold * distanceThreshold);
 
-    if (tracker != null) {
-      tracker.progress(0);
-    }
+    final TrackProgress tp = NullTrackProgress.createIfNull(this.tracker);
+    tp.progress(0);
 
     // Initialise
     int nextIndex = 0;
 
     // Now process all the frames, comparing them to previous and future frames
     while (nextIndex < localisations.length) {
-      if (tracker != null) {
-        tracker.progress(nextIndex, localisations.length);
-      }
+      tp.progress(nextIndex, localisations.length);
 
       final int currentIndex = nextIndex;
       final int t = localisations[currentIndex].time;
@@ -1592,9 +2056,7 @@ public class TraceManager {
       }
     }
 
-    if (tracker != null) {
-      tracker.progress(1.0);
-    }
+    tp.progress(1.0);
 
     return neighbours;
   }
