@@ -315,13 +315,13 @@ The fluorophores used in single molecule imaging can exist is several states. Wh
 
 To prevent over-counting of molecules due to blinking it is possible to trace the localisations through time. Any localisation that occurs very close to another localisation from a different frame may be the same molecule. The distance between localisations can be spatial or temporal. Using two parameters it is possible to trace localisations using the following algorithm:
 
-Any spot that occurred within time threshold and distance threshold of a previous spot is grouped into the same trace as that previous spot. In the event of multiple candidate connections the algorithm assigns the closest distance connection first. The previous time frames can be searched either in earliest or latest order until a match, or all time frames. This is a greedy nearest neighbour algorithm and may not achieve the maximum cardinality matching for the specified distance threshold.
+Any spot that occurred within time threshold and distance threshold of a previous spot is grouped into the same trace as that previous spot. Note that existing traces are identified only by their last known position, not all previous positions. In the event of multiple candidate connections the algorithm assigns the closest distance connection first. The previous time frames can be searched using all time frames together, or iteratively using each time frame within the time threshold either in earliest or latest order. Matching uses a greedy nearest neighbour algorithm and may not achieve the maximum cardinality matching for the specified distance threshold.
 
-To remove the possibility for overlapping tracks the plugin allows the track to be excluded if a second localisation occurs within an exclusion threshold of the current track position. This ensures that the localisation assigned to the track is the only candidate within the exclusion distance and effectively removes traces of particles that could overlap with another moving particle. Setting the exclusion distance to less than the distance threshold disables this feature.
+To remove the possibility for overlapping tracks the plugin allows the track to be excluded if a second localisation occurs within an exclusion threshold of the current track position. This ensures that the localisation assigned to the track is the only candidate within the exclusion distance and effectively removes jumps of particles that could overlap with another moving particle. Note however that the effect is to terminate the track and start a new one. This will result it over counting of molelcules and shortening of track lengths. Setting the exclusion distance to less than the distance threshold disables this feature.
 
 When all frames are processed the resulting traces are assigned a spatial position equal to the centroid position of all the spots included in the trace.
 
-The molecule tracing algorithm is based on the work of Coltharp, *et al* (2012).
+An optimisation method for selecting the time and distance thresholds is provided based on the work of Coltharp, *et al* (2012).
 
 
 .. index:: Trace Molecules Plugin

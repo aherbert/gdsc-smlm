@@ -13,6 +13,19 @@ Minor release of GDSC SMLM.
 * Update to GDSC Core 2.2
 * Update the :numref:`{name} <analysis_plugins:Residence Time Analysis>` plugin to allow
   filtering of the counts histogram to remove long residence times.
+* Update the tracing algorithm used by the :numref:`{name} <analysis_plugins:Trace Molecules>`
+  plugin. This now performs tracing of localisations to existing tracks using the end time of the
+  track only (i.e. its last known position).
+
+  This corrects a bug in tracing using time thresholds above 1 where jump distances between
+  adjacent localisations could be above the distance threshold if a localisation was matched to
+  a prior position of the track. E.g. Given a track with localisations A and B, a new
+  localisation C will only be compared to position B; the previous algorithm allowed comparison
+  to A and B.
+
+  The use of the exclusion distance has been updated to apply a stricter exclusion using all
+  possible matches across the entire time distance. Previously this was applied using alternative
+  matches in the same frame only.
 
 
 Version 1.1
