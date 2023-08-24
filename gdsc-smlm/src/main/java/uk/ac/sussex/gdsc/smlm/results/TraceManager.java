@@ -103,8 +103,6 @@ public class TraceManager {
   private int[] maxTime;
   private int totalTraces;
   private int totalFiltered;
-  private float distanceThreshSquared;
-  private float distanceExclusionSquared;
   private TrackProgress tracker;
   private int activationFrameInterval;
   private int activationFrameWindow;
@@ -112,14 +110,6 @@ public class TraceManager {
   private boolean filterActivationFrames;
   private TraceMode traceMode = TraceMode.LATEST_FORERUNNER;
   private int pulseInterval;
-
-  /**
-   * The distance between the localisation and its assigned forerunner.
-   *
-   * <p>Set in {@link #findForerunner(int, int, int)} and
-   * {@link #findAlternativeForerunner(int, int, int, int, int[])}.
-   */
-  private float minD;
 
   /**
    * Contains trace localisation data.
@@ -280,21 +270,6 @@ public class TraceManager {
   }
 
   /**
-   * Contains trace assignment data.
-   */
-  private static class Assignment {
-    int index;
-    float distance;
-    int traceId;
-
-    Assignment(int index, float distance, int traceId) {
-      this.index = index;
-      this.distance = distance;
-      this.traceId = traceId;
-    }
-  }
-
-  /**
    * Instantiates a new trace manager.
    *
    * @param results the results
@@ -440,13 +415,15 @@ public class TraceManager {
             index + 1 == traces.size() ? traces : traces.subList(0, index + 1);
         Iterator<List<Trajectory>> iter = toIterator.apply(targetTraces);
         while (iter.hasNext()) {
+          List<Trajectory> activeTraces = iter.next();
+
           // Rotate the candidate lists
           final LocalList<Localisation> tmp = targetCandidates;
           targetCandidates = candidates;
           candidates = tmp;
           candidates.clear();
 
-          Matchings.nearestNeighbour(iter.next(), targetCandidates, Trajectory::distance2,
+          Matchings.nearestNeighbour(activeTraces, targetCandidates, Trajectory::distance2,
               threshold, (trace, point) -> {
                 trace.add(point);
                 // Ensure we maintain the time range for this trace
@@ -994,24 +971,6 @@ public class TraceManager {
     results.setName(source.getSource() + " Traced");
     // TODO - Add the tracing settings
     return results;
-  }
-
-  /**
-   * Check if the localisation at the specified index has a trace ID that matches any in the ignore
-   * array.
-   *
-   * @param index the index
-   * @param ignoreCount the ignore count
-   * @param ignore the ignore
-   * @return true, if successful
-   */
-  private boolean ignore(int index, int ignoreCount, int[] ignore) {
-    for (int j = 0; j < ignoreCount; j++) {
-      if (localisations[index].trace == ignore[j]) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
