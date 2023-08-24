@@ -230,6 +230,51 @@ class TraceManagerTest {
   }
 
   @SeededTest
+  void canTraceUsingTraceMode2(RandomSeed seed) {
+    final UniformRandomProvider rand = RngFactory.create(seed.get());
+    final float intensity = 100;
+    final float distance = 0.5f;
+
+    // p1 and p2 cannot be linked
+    // p3 can link to either, but p1 is closer
+    final PeakResult p1 = new PeakResult(1, distance * 0.5f, 0, intensity);
+    final PeakResult p2 = new PeakResult(2, -distance, 0, intensity);
+    final PeakResult p3 = new PeakResult(3, 0, 0, intensity);
+
+    final int time = 2;
+    runTracing(rand, distance, time, tm -> tm.setTraceMode(TraceMode.LATEST_FORERUNNER),
+        createTrace(p1), createTrace(p2, p3));
+    runTracing(rand, distance, time, tm -> tm.setTraceMode(TraceMode.EARLIEST_FORERUNNER),
+        createTrace(p1, p3), createTrace(p2));
+    runTracing(rand, distance, time - 1, tm -> tm.setTraceMode(TraceMode.EARLIEST_FORERUNNER),
+        createTrace(p1), createTrace(p2, p3));
+    runTracing(rand, distance, time, tm -> tm.setTraceMode(TraceMode.SINGLE_LINKAGE),
+        createTrace(p1, p3), createTrace(p2));
+  }
+
+  @SeededTest
+  void canTraceUsingTraceMode3(RandomSeed seed) {
+    final UniformRandomProvider rand = RngFactory.create(seed.get());
+    final float intensity = 100;
+    final float distance = 0.5f;
+
+    // Edge case where no points can be linked.
+    // This tests the iteration over the existing tracks can terminate without error.
+    final PeakResult p1a = new PeakResult(1, 0, 0, intensity);
+    final PeakResult p1b = new PeakResult(1, 0, 0, intensity);
+    final PeakResult p2a = new PeakResult(2, 2 * distance, 0, intensity);
+    final PeakResult p2b = new PeakResult(2, 0, 2 * distance, intensity);
+    final PeakResult p3a = new PeakResult(3, 4 * distance, 0, intensity);
+    final PeakResult p3b = new PeakResult(3, 0, 4 * distance, intensity);
+
+    final int time = 2;
+    final Trace[] traces = new Trace[] {createTrace(p1a), createTrace(p1b), createTrace(p2a),
+        createTrace(p2b), createTrace(p3a), createTrace(p3b)};
+    runTracing(rand, distance, time, tm -> tm.setTraceMode(TraceMode.LATEST_FORERUNNER), traces);
+    runTracing(rand, distance, time, tm -> tm.setTraceMode(TraceMode.EARLIEST_FORERUNNER), traces);
+  }
+
+  @SeededTest
   void canTraceUsingExclusionDistance(RandomSeed seed) {
     final UniformRandomProvider rand = RngFactory.create(seed.get());
     final float intensity = 100;
