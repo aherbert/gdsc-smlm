@@ -1975,8 +1975,8 @@ public class TraceMolecules implements PlugIn {
             v.stream().map(Pair::getRight).flatMap(Arrays::stream).toArray(Trace[]::new);
         final MemoryPeakResults r = TraceManager.toPeakResults(all, k.toCalibration(), true);
         r.setName(combinedName);
-        r.setBounds(results.stream().map(MemoryPeakResults::getBounds).reduce(new Rectangle(),
-            Rectangle::union));
+        r.setBounds(
+            results.stream().map(x -> x.getBounds(true)).reduce(new Rectangle(), Rectangle::union));
         r.setCalibration(createCombinedCalibration(r, results));
         r.setPsf(results.stream().map(MemoryPeakResults::getPsf)
             .reduce((a, b) -> Objects.equals(a, b) ? a : null).orElse(null));
