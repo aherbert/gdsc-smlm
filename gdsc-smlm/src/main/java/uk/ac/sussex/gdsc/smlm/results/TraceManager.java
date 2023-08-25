@@ -120,8 +120,8 @@ public class TraceManager {
     final int time;
     final int endTime;
     final int id;
-    final float x;
-    final float y;
+    final double x;
+    final double y;
     /** The next localisation in a trace. */
     Localisation next;
 
@@ -137,8 +137,8 @@ public class TraceManager {
     }
 
     double distance2(Localisation other) {
-      final double dx = (double) x - other.x;
-      final double dy = (double) y - other.y;
+      final double dx = x - other.x;
+      final double dy = y - other.y;
       return dx * dx + dy * dy;
     }
 
