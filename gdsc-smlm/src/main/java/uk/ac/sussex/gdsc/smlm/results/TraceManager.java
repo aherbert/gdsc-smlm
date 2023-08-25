@@ -100,7 +100,6 @@ public class TraceManager {
   private Localisation[] endLocalisations;
   private int[] indexes;
   private int[] endIndexes;
-  private int[] maxTime;
   private int totalTraces;
   private int totalFiltered;
   private TrackProgress tracker;
@@ -115,12 +114,16 @@ public class TraceManager {
    * Contains trace localisation data.
    */
   private static class Localisation {
-    int time;
-    int endTime;
-    int id;
-    int trace;
-    float x;
-    float y;
+    /** Marker to use for any localisation that is not part of a trace. */
+    private static final Localisation UNTRACED = new Localisation(0, 0, 0, 0, 0);
+
+    final int time;
+    final int endTime;
+    final int id;
+    final float x;
+    final float y;
+    /** The next localisation in a trace. */
+    Localisation next;
 
     Localisation(int id, int time, int endTime, float x, float y) {
       ValidationUtils.checkArgument(endTime >= time, "End time (%d) is before the start time (%d)",
@@ -133,10 +136,43 @@ public class TraceManager {
       this.y = y;
     }
 
-    float distance2(Localisation other) {
-      final float dx = x - other.x;
-      final float dy = y - other.y;
+    double distance2(Localisation other) {
+      final double dx = (double) x - other.x;
+      final double dy = (double) y - other.y;
       return dx * dx + dy * dy;
+    }
+
+    /**
+     * Mark the localisation as the start of a trace.
+     */
+    void setTraced() {
+      next = null;
+    }
+
+    /**
+     * Mark the localisation as not part of any trace.
+     */
+    void setUntraced() {
+      next = UNTRACED;
+    }
+
+    /**
+     * Extend the trace using the given point. The point is marked as the end of the trace.
+     *
+     * @param point the point
+     */
+    void connect(Localisation point) {
+      next = point;
+      point.next = null;
+    }
+
+    /**
+     * Checks if the localisation is not part of a trace.
+     *
+     * @return true if untraced
+     */
+    boolean isUntraced() {
+      return next == UNTRACED;
     }
   }
 
@@ -144,23 +180,20 @@ public class TraceManager {
    * Contains a trajectory.
    */
   private static class Trajectory {
-    int id;
-    Localisation tail;
+    private Localisation tail;
 
-    Trajectory(int id, Localisation point) {
-      this.id = id;
-      add(point);
+    Trajectory(Localisation point) {
+      point.setTraced();
+      tail = point;
     }
 
     void add(Localisation point) {
+      tail.connect(point);
       tail = point;
-      point.trace = id;
     }
 
     double distance2(Localisation other) {
-      final double dx = (double) tail.x - other.x;
-      final double dy = (double) tail.y - other.y;
-      return dx * dx + dy * dy;
+      return tail.distance2(other);
     }
 
     int endTime() {
@@ -424,11 +457,7 @@ public class TraceManager {
           candidates.clear();
 
           Matchings.nearestNeighbour(activeTraces, targetCandidates, Trajectory::distance2,
-              threshold, (trace, point) -> {
-                trace.add(point);
-                // Ensure we maintain the time range for this trace
-                maxTime[point.trace] = point.time;
-              }, null, candidates::add);
+              threshold, Trajectory::add, null, candidates::add);
 
           if (candidates.isEmpty()) {
             break;
@@ -450,26 +479,26 @@ public class TraceManager {
 
   private void addSingleTrace(boolean ignore, Localisation point) {
     totalTraces++;
-    maxTime[totalTraces] = point.endTime;
-    point.trace = totalTraces;
     if (ignore) {
       // Count the number of traces that will be filtered
       // (i.e. the time is not within an activation window).
       totalFiltered++;
+      point.setUntraced();
+    } else {
+      point.setTraced();
     }
   }
 
   private void addTrace(boolean ignore, Localisation point, List<Trajectory> traces) {
     totalTraces++;
-    maxTime[totalTraces] = point.endTime;
     if (ignore) {
       // Count the number of traces that will be filtered
       // (i.e. the time is not within an activation window).
       totalFiltered++;
-      point.trace = totalTraces;
+      point.setUntraced();
     } else {
       // Add to the active traces
-      traces.add(new Trajectory(totalTraces, point));
+      traces.add(new Trajectory(point));
     }
   }
 
@@ -483,7 +512,6 @@ public class TraceManager {
   private int initialiseTrajectories(LocalList<Trajectory> traces, IntPredicate ignoreActivation) {
     // Used to track the highest frame containing spots for a trace
     totalTraces = totalFiltered = 0;
-    maxTime = new int[localisations.length + 1];
 
     // Initialise the first traces using the first frame
     final int t = localisations[0].time;
@@ -682,53 +710,31 @@ public class TraceManager {
     final Trace[] traces = new Trace[getTotalTraces()];
     int count = 0;
 
-    // for (int index = 0; index < localisations.length; index++)
-    // if (localisations[index].trace == 0)
-    // System.out.printf("error @ %d\n", index);
-
-    // Since the trace numbers are allocated by processing the spots in frames, each frame can have
-    // trace number out-of-order. This occurs if re-allocation has been performed,
-    // e.g. [1,2,2,1,3] => [1,2,5,4,3] when spots in group 1 are reallocated before spots in group
-    // 2.
-
-    // TODO - Update localisation to support a single linked list of the trace using a nextIndex.
-    // Created the traces by following the list.
-    // This should also mark any traces that were filtered so we do not require the
-    // filtering to be done here.
-
-    final BitSet processedTraces = new BitSet(totalTraces + 1);
-    final IntPredicate ignoreActivation = createIgnoreActivationFilter();
+    // Created the traces by following the linked lists.
+    final BitSet processed = new BitSet(localisations.length);
+    int traceId = 0;
     for (int i = 0; i < localisations.length; i++) {
       if (tracker != null && (i & 0xff) == 0) {
         tracker.progress(i, localisations.length);
       }
 
-      final int traceId = localisations[i].trace;
+      Localisation point = localisations[i];
 
-      if (processedTraces.get(traceId) || ignoreActivation.test(localisations[i].time)) {
+      if (processed.get(point.id) || point.isUntraced()) {
         continue;
       }
-      processedTraces.set(traceId);
+      processed.set(point.id);
 
-      final PeakResult peakResult = peakResults[localisations[i].id];
-
-      final Trace nextTrace = new Trace(peakResult);
-      nextTrace.setId(traceId);
-      final int tLimit = maxTime[traceId];
-
-      // Check if the trace has later frames
-      if (tLimit > localisations[i].time) {
-        for (int j = i + 1; j < localisations.length; j++) {
-          if (localisations[j].time > tLimit) {
-            break;
-          }
-          if (localisations[j].trace == traceId) {
-            nextTrace.add(peakResults[localisations[j].id]);
-          }
-        }
+      final Trace trace = new Trace(peakResults[point.id]);
+      trace.setId(++traceId);
+      // Follow the linked list for the trace
+      while (point.next != null) {
+        point = point.next;
+        processed.set(point.id);
+        trace.add(peakResults[point.id]);
       }
 
-      traces[count++] = nextTrace;
+      traces[count++] = trace;
     }
 
     if (tracker != null) {
