@@ -323,7 +323,7 @@ public class SummariseResults implements PlugIn {
         return;
       }
 
-      // Do this is a thread so the click-event does not block
+      // Do this in a thread so the click-event does not block
       new Thread(() -> showStatistics(result)).start();
     }
 
