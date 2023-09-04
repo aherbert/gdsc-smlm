@@ -650,6 +650,7 @@ message SummariseResultsSettings {
   bool plot_precision = 8;
   int32 histgram_bins = 9;
   int32 remove_outliers = 10;
+  repeated bool plot_psf = 11;
 }
 
 // Contains settings for the ImageJ 3D Results Viewer plugin

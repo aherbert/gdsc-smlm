@@ -48,6 +48,9 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SummariseResultsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -340,6 +343,17 @@ public class SummariseResults implements PlugIn {
       gd.addCheckbox("Plot_noise", settings.getPlotNoise());
       gd.addCheckbox("Plot_SNR", settings.getPlotSnr());
       gd.addCheckbox("Plot_precision", settings.getPlotPrecision());
+
+      // Custom PSF fields
+      PSF psf = result.getPsf();
+      if (psf != null) {
+        for (int i = 0; i < psf.getParametersCount(); i++) {
+          final PSFParameter p = psf.getParameters(i);
+          gd.addCheckbox(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
+              i < settings.getPlotPsfCount() && settings.getPlotPsf(i));
+        }
+      }
+
       gd.addNumericField("Histgram_bins", settings.getHistgramBins(), 0);
       gd.addChoice("Remove_outliers", REMOVE_OUTLIERS, settings.getRemoveOutliers());
       gd.showDialog();
@@ -354,6 +368,18 @@ public class SummariseResults implements PlugIn {
       settings.setPlotNoise(gd.getNextBoolean());
       settings.setPlotSnr(gd.getNextBoolean());
       settings.setPlotPrecision(gd.getNextBoolean());
+
+      if (psf != null) {
+        for (int i = 0; i < psf.getParametersCount(); i++) {
+          boolean value = gd.getNextBoolean();
+          if (i < settings.getPlotPsfCount()) {
+            settings.setPlotPsf(i, value);
+          } else {
+            settings.addPlotPsf(value);
+          }
+        }
+      }
+
       settings.setHistgramBins(Math.max(0, (int) gd.getNextNumber()));
       settings.setRemoveOutliers(gd.getNextChoiceIndex());
       SettingsManager.writeSettings(settings);
@@ -411,6 +437,14 @@ public class SummariseResults implements PlugIn {
           plot(plotBuilder, wo, "Precision: " + name, StoredDataStatistics.create(p.precisions));
         } catch (final DataException ignored) {
           // Ignore
+        }
+      }
+      if (psf != null) {
+        for (int i = 0; i < psf.getParametersCount(); i++) {
+          if (settings.getPlotPsf(i)) {
+            final PSFParameter p = psf.getParameters(i);
+            plot(plotBuilder, wo, "PSF " + p.getName(), result, PeakResult.STANDARD_PARAMETERS + i);
+          }
         }
       }
 
