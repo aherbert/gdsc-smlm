@@ -185,12 +185,14 @@ public class Cluster {
     if (results.size() <= 1) {
       return 0;
     }
-    getCentroid();
+    final float[] c = getCentroid();
+    final double cx = c[0];
+    final double cy = c[1];
     double ssx = 0;
     for (int i = 0; i < results.size(); i++) {
       final PeakResult result = results.get(i);
-      final double dx = result.getXPosition() - centroid[0];
-      final double dy = result.getYPosition() - centroid[1];
+      final double dx = result.getXPosition() - cx;
+      final double dy = result.getYPosition() - cy;
       final double d2 = dx * dx + dy * dy;
       ssx += d2;
     }
