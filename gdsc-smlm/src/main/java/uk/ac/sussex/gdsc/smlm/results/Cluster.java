@@ -263,10 +263,9 @@ public class Cluster {
       sumS2 += MathUtils.pow2(checkPrecision(result.getPrecision())) * ni;
     }
 
-    final double sumNin = sumNi * n;
-    final double sumS2_sumNin = sumS2 / sumNin;
-    final double sxm = Math.sqrt((sumXi2Ni / sumNin + sumS2_sumNin) / 2);
-    final double sym = Math.sqrt((sumYi2Ni / sumNin + sumS2_sumNin) / 2);
+    final double sumS2_sumNi = sumS2 / sumNi;
+    final double sxm = Math.sqrt((sumXi2Ni / sumNi + sumS2_sumNi) / 2);
+    final double sym = Math.sqrt((sumYi2Ni / sumNi + sumS2_sumNi) / 2);
 
     return Math.max(sxm, sym);
   }
