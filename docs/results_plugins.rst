@@ -995,6 +995,14 @@ The following options are available:
      - Set to **true** to create a new dataset with the label ``(categorised)`` appended to the name; the original dataset will be unchanged. The default is to update the dataset in place.
 
 
+.. index:: ! Trace Viewer
+
+Trace Viewer
+------------
+
+The ``Trace Viewer`` plugin allows display of the traces in a results dataset.
+
+
 .. index:: ! Filter Results
 
 Filter Results
