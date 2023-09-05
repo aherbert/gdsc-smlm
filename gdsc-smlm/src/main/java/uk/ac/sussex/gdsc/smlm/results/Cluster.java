@@ -136,17 +136,17 @@ public class Cluster {
   }
 
   private float[] getCentroid(PeakResultStoreList results, float[] weights) {
-    centroid = new float[2];
+    double cx = 0;
+    double cy = 0;
     double sum = 0;
     for (int i = 0; i < results.size(); i++) {
       final PeakResult result = results.get(i);
-      final float w = weights[i++];
+      final double w = weights[i];
+      cx += result.getXPosition() * w;
+      cy += result.getYPosition() * w;
       sum += w;
-      centroid[0] += result.getXPosition() * w;
-      centroid[1] += result.getYPosition() * w;
     }
-    centroid[0] /= sum;
-    centroid[1] /= sum;
+    centroid = new float[] {(float) (cx / sum), (float) (cy / sum)};
     return centroid;
   }
 
@@ -157,14 +157,14 @@ public class Cluster {
    */
   public float[] getCentroid() {
     if (centroid == null && results.size() != 0) {
-      centroid = new float[2];
+      double cx = 0;
+      double cy = 0;
       for (int i = 0; i < results.size(); i++) {
         final PeakResult result = results.get(i);
-        centroid[0] += result.getXPosition();
-        centroid[1] += result.getYPosition();
+        cx += result.getXPosition();
+        cy += result.getYPosition();
       }
-      centroid[0] /= results.size();
-      centroid[1] /= results.size();
+      centroid = new float[] {(float) (cx / results.size()), (float) (cy / results.size())};
     }
     return centroid;
   }
@@ -229,18 +229,12 @@ public class Cluster {
       return checkPrecision(result.getPrecision());
     }
 
-    final float[] photons = new float[results.size()];
-    for (int i = 0; i < results.size(); i++) {
-      final PeakResult result = results.get(i);
-      photons[i++] = Math.abs(result.getIntensity());
-    }
-
     double sumNi = 0;
     double xm = 0;
     double ym = 0;
-    for (int i = 0; i < results.size(); i++) {
+    for (int i = 0; i < n; i++) {
       final PeakResult result = results.get(i);
-      final float ni = photons[i++];
+      final double ni = Math.abs(result.getIntensity());
       sumNi += ni;
       xm += result.getXPosition() * ni;
       ym += result.getYPosition() * ni;
@@ -255,9 +249,9 @@ public class Cluster {
     double sumXi2Ni = 0;
     double sumYi2Ni = 0;
     double sumS2 = 0;
-    for (int i = 0; i < results.size(); i++) {
+    for (int i = 0; i < n; i++) {
       final PeakResult result = results.get(i);
-      final float ni = photons[i++];
+      final double ni = Math.abs(result.getIntensity());
 
       final double dx = converter.convert(result.getXPosition() - xm);
       final double dy = converter.convert(result.getYPosition() - ym);
@@ -269,15 +263,14 @@ public class Cluster {
 
     final double sumNin = sumNi * n;
     final double sumS2_sumNin = sumS2 / sumNin;
-    final double sxm = Math.sqrt(sumXi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
-    final double sym = Math.sqrt(sumYi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
+    final double sxm = Math.sqrt((sumXi2Ni / sumNin + sumS2_sumNin) / 2);
+    final double sym = Math.sqrt((sumYi2Ni / sumNin + sumS2_sumNin) / 2);
 
     return Math.max(sxm, sym);
   }
 
   private static double checkPrecision(double precision) {
     return (precision > 0 && precision < Double.MAX_VALUE) ? precision : 1;
-
   }
 
   /**
