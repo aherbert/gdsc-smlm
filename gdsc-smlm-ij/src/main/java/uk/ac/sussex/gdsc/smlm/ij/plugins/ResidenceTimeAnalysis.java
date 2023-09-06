@@ -994,7 +994,13 @@ public class ResidenceTimeAnalysis implements PlugIn {
         hi = x.getDouble(index);
       }
       final double q = 1 - p;
-      points.add(solver.findRoot(xx -> m.sf(xx) - q, lo, hi));
+      final DoubleUnaryOperator func = xx -> m.sf(xx) - q;
+      // Ensure the bracket is wide enough
+      while (Double.compare(func.applyAsDouble(lo) * func.applyAsDouble(hi), 0.0) >= 0) {
+        lo *= 0.9375;
+        hi *= 1.25;
+      }
+      points.add(solver.findRoot(func, lo, hi));
     }
     final float[] qp = SimpleArrayUtils.toFloat(points.toDoubleArray());
     plot.setColor(COLORS[2]);
