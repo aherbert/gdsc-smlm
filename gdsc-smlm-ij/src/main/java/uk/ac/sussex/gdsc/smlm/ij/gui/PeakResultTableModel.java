@@ -903,7 +903,13 @@ public class PeakResultTableModel extends AbstractTableModel {
     });
   }
 
-  private static TableCellRenderer createTableCellRenderer(DefaultTableCellRenderer renderer) {
+  /**
+   * Creates the table cell renderer.
+   *
+   * @param renderer the renderer
+   * @return the table cell renderer
+   */
+  static TableCellRenderer createTableCellRenderer(DefaultTableCellRenderer renderer) {
     renderer.setHorizontalAlignment(SwingConstants.TRAILING);
     return renderer;
   }
