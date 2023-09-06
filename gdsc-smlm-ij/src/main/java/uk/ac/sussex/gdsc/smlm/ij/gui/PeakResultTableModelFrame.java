@@ -86,6 +86,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   private JMenuItem editSelectNone;
   private JMenuItem editUnsort;
   private JMenuItem editTableSettings;
+  private JMenuItem sourceAttachImage;
   private JMenuItem sourceShowInfo;
   private JMenuItem sourceShowImage;
   private JMenuItem sourceOverlay;
@@ -217,6 +218,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   private JMenu createSourceMenu() {
     final JMenu menu = new JMenu("Source");
     menu.setMnemonic(KeyEvent.VK_S);
+    menu.add(sourceAttachImage = add("Attach Image ...", KeyEvent.VK_A, null));
     menu.add(sourceShowInfo = add("Show Info", KeyEvent.VK_I, "ctrl pressed I"));
     menu.add(sourceShowImage = add("Show Image", KeyEvent.VK_S, "ctrl shift pressed I"));
     menu.add(sourceOverlay = add("Overlay", KeyEvent.VK_O, "ctrl pressed Y"));
@@ -262,6 +264,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       doEditUnsort();
     } else if (src == editTableSettings) {
       doEditTableSettings();
+    } else if (src == sourceAttachImage) {
+      doSourceAttachImage();
     } else if (src == sourceShowInfo) {
       doSourceShowInfo();
     } else if (src == sourceShowImage) {
@@ -386,6 +390,30 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     tableSettings.setRoundingPrecision((int) egd.getNextNumber());
     tableSettings.setShowRowCounter(egd.getNextBoolean());
     model.setTableSettings(tableSettings.build());
+  }
+
+  private void doSourceAttachImage() {
+    final PeakResultTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    // Assumes 3D stack (no channel/time)
+    String[] list = ImageJUtils.getImageList(imp -> imp.getNDimensions() <= 3);
+    if (list.length == 0) {
+      IJ.log("No suitable source images (require a 3D stack)");
+      return;
+    }
+    ExtendedGenericDialog gd = new ExtendedGenericDialog("Attach source image");
+    gd.addChoice("Image", list, 0);
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return;
+    }
+    ImagePlus imp = WindowManager.getImage(gd.getNextChoice());
+    if (imp == null) {
+      return;
+    }
+    model.setSource(new IJImageSource(imp));
   }
 
   private void doSourceShowInfo() {
