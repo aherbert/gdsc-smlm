@@ -1000,7 +1000,20 @@ The following options are available:
 Trace Viewer
 ------------
 
-The ``Trace Viewer`` plugin allows display of the traces in a results dataset.
+The ``Trace Viewer`` plugin allows display of the traces in a results dataset. The plugin allows
+selection of any result set that has a non-zero ID assigned to any localisations. The localisations
+with the same ID are grouped into traces and summary data is displayed in a table. The summary
+for each trace shows the centroid, number of localisations and start and end frame. Optionally
+the following can be displayed: the localisation precision (standard deviation from the centroid);
+the diffusion coefficient computed from the mean-square jump distance (MSD). The display is changed
+using ``Edit > Table Settings ...``.
+
+The table provides interactive functionality:
+
+ * Selected results can be displayed on a source image
+ * Data can be sorted by columns
+ * Data can be edited to remove traces
+ * Data can be saved to a new results set in memory
 
 
 .. index:: ! Filter Results

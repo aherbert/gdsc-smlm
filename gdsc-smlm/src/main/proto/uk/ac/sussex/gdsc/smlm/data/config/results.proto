@@ -154,6 +154,10 @@ message ResultsTableSettings {
   ResultsTableFormat results_table_format = 10;
   // Set to true to show a row counter in the table
   bool show_row_counter = 11;
+  // Set to true to show precision in the trace results table
+  bool show_trace_precision = 12;
+  // Set to true to show diffusion coefficient in the trace results table
+  bool show_trace_diffusion_coefficient = 13;
 }
 
 // Define the in-memory results settings

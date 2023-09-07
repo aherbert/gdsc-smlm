@@ -26,6 +26,10 @@ Minor release of GDSC SMLM.
   The use of the exclusion distance has been updated to apply a stricter exclusion using all
   possible matches across the entire time distance. Previously this was applied using alternative
   matches in the same frame only.
+* Update the interactive results table to allow a source image to be attached to the results.
+  The results can be added to the source image as an overlay.
+* Added the :numref:`{name} <results_plugins:Trace Viewer>` plugin to display a table of traced
+  results.
 
 
 Version 1.1

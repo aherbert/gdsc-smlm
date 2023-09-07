@@ -51,8 +51,11 @@ public final class ResultsProtosHelper {
         .setImageSize(2048)
         .setPixelSize(10)
         .setLutName("Fire");
+      builder.getResultsTableSettingsBuilder()
+        .setRoundingPrecision(4)
+        .setShowTracePrecision(true)
+        .setShowTraceDiffusionCoefficient(true);
       // @formatter:on
-      builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
       builder.getResultsInMemorySettingsBuilder().setInMemory(true);
       INSTANCE = builder.build();
     }

@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import ij.WindowManager;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Arrays;
 import java.util.Collections;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -47,16 +47,17 @@ import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SummariseResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * A frame that shows a PeakResultsTableModel.
+ * A frame that shows a TraceDatasTableModel.
  */
-public class PeakResultTableModelFrame extends JFrame implements ActionListener {
-  private static final long serialVersionUID = -3671174621388288975L;
+public class TraceDataTableModelFrame extends JFrame {
+  private static final long serialVersionUID = 20230906L;
 
-  private final PeakResultTableModelJTable table;
+  private final TraceDataTableModelJTable table;
   private JMenuItem resultsSave;
   private JMenuItem resultsShowInfo;
   private JCheckBoxMenuItem editReadOnly;
@@ -73,32 +74,22 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   private String saveName;
 
   /**
-   * Instantiates a new peak result table model frame.
+   * Create an instance.
    *
    * @param model the model
    */
-  public PeakResultTableModelFrame(PeakResultTableModel model) {
+  public TraceDataTableModelFrame(TraceDataTableModel model) {
     this(model, null, null);
   }
 
   /**
-   * Instantiates a new peak result table model frame.
-   *
-   * @param model the model
-   * @param selectionModel the selection model
-   */
-  public PeakResultTableModelFrame(PeakResultTableModel model, ListSelectionModel selectionModel) {
-    this(model, null, selectionModel);
-  }
-
-  /**
-   * Instantiates a new peak result table model frame.
+   * Create an instance.
    *
    * @param model the model
    * @param columnModel the column model
    * @param selectionModel the selection model
    */
-  public PeakResultTableModelFrame(final PeakResultTableModel model, TableColumnModel columnModel,
+  private TraceDataTableModelFrame(final TraceDataTableModel model, TableColumnModel columnModel,
       ListSelectionModel selectionModel) {
     setJMenuBar(createMenuBar());
 
@@ -108,7 +99,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     final int[] indices =
         selectionModel == null ? null : ListSelectionModelHelper.getSelectedIndices(selectionModel);
 
-    table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
+    table = new TraceDataTableModelJTable(model, columnModel, selectionModel);
 
     if (indices != null) {
       ListSelectionModelHelper.setSelectedIndices(selectionModel, indices);
@@ -131,26 +122,15 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       @Override
       public void windowOpened(WindowEvent event) {
         model.setLive(true);
-        WindowManager.addWindow(PeakResultTableModelFrame.this);
+        WindowManager.addWindow(TraceDataTableModelFrame.this);
       }
 
       @Override
       public void windowClosing(WindowEvent event) {
         model.setLive(false);
-        WindowManager.removeWindow(PeakResultTableModelFrame.this);
+        WindowManager.removeWindow(TraceDataTableModelFrame.this);
       }
     });
-  }
-
-  /**
-   * Clean up this table. This should only be called when the table is no longer required as it
-   * removes the JTable from the model listeners.
-   */
-  public void cleanUp() {
-    // Since the models may be shared
-    table.getModel().removeTableModelListener(table);
-    table.getColumnModel().removeColumnModelListener(table);
-    table.getSelectionModel().removeListSelectionListener(table);
   }
 
   private JMenuBar createMenuBar() {
@@ -210,7 +190,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     if (keyStroke != null) {
       item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
     }
-    item.addActionListener(this);
+    item.addActionListener(this::actionPerformed);
     return item;
   }
 
@@ -221,12 +201,11 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     if (keyStroke != null) {
       item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
     }
-    item.addActionListener(this);
+    item.addActionListener(this::actionPerformed);
     return item;
   }
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
+  private void actionPerformed(ActionEvent event) {
     final Object src = event.getSource();
     if (src == resultsSave) {
       doResultsSave();
@@ -256,7 +235,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   private void doResultsSave() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null || model.getRowCount() == 0) {
       return;
     }
@@ -265,7 +244,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
   private void doResultsShowInfo() {
     // Delegate to Summarise Results
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
@@ -275,25 +254,16 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Sets the read only.
-   *
-   * @param readOnly the new read only
-   */
-  public void setReadOnly(boolean readOnly) {
-    editReadOnly.setSelected(readOnly);
-  }
-
-  /**
    * Checks if is read only.
    *
    * @return true, if is read only
    */
-  public boolean isReadOnly() {
+  private boolean isReadOnly() {
     return editReadOnly.isSelected();
   }
 
   private void doEditDelete() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
@@ -303,7 +273,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   private void doEditDeleteAll() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
@@ -326,7 +296,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   private void doEditTableSettings() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
@@ -335,13 +305,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     final ExtendedGenericDialog egd = new ExtendedGenericDialog("Table Settings", this);
     egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
         tableSettings.getDistanceUnitValue());
-    egd.addChoice("Table_intensity_unit", SettingsManager.getIntensityUnitNames(),
-        tableSettings.getIntensityUnitValue());
-    egd.addChoice("Table_angle_unit", SettingsManager.getAngleUnitNames(),
-        tableSettings.getAngleUnitValue());
-    egd.addCheckbox("Table_show_fitting_data", tableSettings.getShowFittingData());
-    egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
-    egd.addCheckbox("Table_show_precision", tableSettings.getShowPrecision());
+    egd.addCheckbox("Table_show_precision", tableSettings.getShowTracePrecision());
+    egd.addCheckbox("Table_show_D", tableSettings.getShowTraceDiffusionCoefficient());
     egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
     egd.addCheckbox("Table_show_counter", tableSettings.getShowRowCounter());
     egd.showDialog();
@@ -349,18 +314,15 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       return;
     }
     tableSettings.setDistanceUnitValue(egd.getNextChoiceIndex());
-    tableSettings.setIntensityUnitValue(egd.getNextChoiceIndex());
-    tableSettings.setAngleUnitValue(egd.getNextChoiceIndex());
-    tableSettings.setShowFittingData(egd.getNextBoolean());
-    tableSettings.setShowNoiseData(egd.getNextBoolean());
-    tableSettings.setShowPrecision(egd.getNextBoolean());
+    tableSettings.setShowTracePrecision(egd.getNextBoolean());
+    tableSettings.setShowTraceDiffusionCoefficient(egd.getNextBoolean());
     tableSettings.setRoundingPrecision((int) egd.getNextNumber());
     tableSettings.setShowRowCounter(egd.getNextBoolean());
     model.setTableSettings(tableSettings.build());
   }
 
   private void doSourceAttachImage() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
@@ -368,7 +330,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   private void doSourceShowInfo() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
@@ -376,7 +338,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   private void doSourceShowImage() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
@@ -384,71 +346,25 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   private void doSourceOverlay() {
-    final PeakResultTableModel model = getModel();
+    final TraceDataTableModel model = getModel();
     if (model == null) {
       return;
     }
-    final PeakResult[] list = table.getSelectedData();
+    final TraceData[] list = table.getSelectedData();
     if (list.length == 0) {
       return;
     }
-    TableHelper.showOverlay(model.getSource(), model.getCalibration(), list);
+    final ImageSource source = model.getSource();
+    if (source == null) {
+      return;
+    }
+    final ArrayPeakResultStore store = new ArrayPeakResultStore(100);
+    Arrays.stream(list).map(t -> t.getTrace().getPoints()).forEach(store::addStore);
+    TableHelper.showOverlay(model.getSource(), model.getCalibration(), store.toArray());
   }
 
-  private PeakResultTableModel getModel() {
+  private TraceDataTableModel getModel() {
     final TableModel model = table.getModel();
-    return (model instanceof PeakResultTableModel) ? (PeakResultTableModel) model : null;
-  }
-
-  /**
-   * Maps the index of the row in terms of the view to the underlying {@code TableModel}. If the
-   * contents of the model are not sorted the model and view indices are the same.
-   *
-   * @param viewRowIndex the index of the row in the view
-   * @return the index of the corresponding row in the model
-   * @throws IndexOutOfBoundsException if sorting is enabled and passed an index outside the range
-   *         of the {@code JTable} as determined by the method {@code getRowCount}
-   * @see javax.swing.table.TableRowSorter
-   * @see javax.swing.JTable#getRowCount()
-   */
-  public int convertRowIndexToModel(int viewRowIndex) {
-    return table.convertRowIndexToModel(viewRowIndex);
-  }
-
-  /**
-   * Returns the location of {@code index} in terms of the underlying model. That is, for the row
-   * {@code index} in the coordinates of the view this returns the row index in terms of the
-   * underlying model.
-   *
-   * @param indices the indices (updated in-place)
-   * @throws IndexOutOfBoundsException if {@code index} is outside the range of the view
-   */
-  public void convertRowIndexToModel(int[] indices) {
-    table.convertRowIndexToModel(indices);
-  }
-
-  /**
-   * Maps the index of the row in terms of the {@code TableModel} to the view. If the contents of
-   * the model are not sorted the model and view indices are the same.
-   *
-   * @param modelRowIndex the index of the row in terms of the model
-   * @return the index of the corresponding row in the view, or -1 if the row isn't visible
-   * @throws IndexOutOfBoundsException if sorting is enabled and passed an index outside the number
-   *         of rows of the {@code TableModel}
-   * @see javax.swing.table.TableRowSorter
-   */
-  public int convertRowIndexToView(int modelRowIndex) {
-    return table.convertRowIndexToView(modelRowIndex);
-  }
-
-  /**
-   * Returns the location of {@code index} in terms of the view. That is, for the row {@code index}
-   * in the coordinates of the underlying model this returns the row index in terms of the view.
-   *
-   * @param indices the indices (updated in-place)
-   * @throws IndexOutOfBoundsException if {@code index} is outside the range of the model
-   */
-  public void convertRowIndexToView(int[] indices) {
-    table.convertRowIndexToView(indices);
+    return (model instanceof TraceDataTableModel) ? (TraceDataTableModel) model : null;
   }
 }
