@@ -47,7 +47,8 @@ public class PeakResultDataParameterDeviationConverter extends PeakResultDataFlo
 
   @Override
   public Float getValue(PeakResult result) {
-    return converter.convert(result.getParameterDeviation(index));
+    return result.hasParameterDeviations() ? converter.convert(result.getParameterDeviation(index))
+        : 0;
   }
 
   @Override
