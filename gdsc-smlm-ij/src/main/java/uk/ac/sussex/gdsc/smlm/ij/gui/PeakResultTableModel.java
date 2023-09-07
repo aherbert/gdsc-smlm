@@ -504,8 +504,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   /**
    * Replace the results.
    *
-   * <p>Warning: This does not check for duplicates as it is a total refresh of the data.
-   * Duplicates should be filtered by the caller.
+   * <p>Warning: This does not check for duplicates as it is a total refresh of the data. Duplicates
+   * should be filtered by the caller.
    *
    * @param source the source
    * @param peakResults the peak results

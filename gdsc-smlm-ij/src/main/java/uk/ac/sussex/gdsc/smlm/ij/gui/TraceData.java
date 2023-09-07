@@ -218,12 +218,12 @@ class TraceData {
    */
   String getCategoryString() {
     final int n = trace.size();
-    int cat1 = trace.getHead().getCategory();
+    final int cat1 = trace.getHead().getCategory();
     for (int i = 1; i < n; i++) {
       final PeakResult result = trace.get(i);
       if (result.getCategory() != cat1) {
         // Multiple categories
-        IntOpenHashSet set = new IntOpenHashSet(Math.max(16, n / 2));
+        final IntOpenHashSet set = new IntOpenHashSet(Math.max(16, n / 2));
         set.add(cat1);
         set.add(result.getCategory());
         for (int j = i + 1; j < n; j++) {

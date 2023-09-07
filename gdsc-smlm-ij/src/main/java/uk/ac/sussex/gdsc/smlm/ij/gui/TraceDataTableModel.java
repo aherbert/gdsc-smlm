@@ -74,8 +74,8 @@ public class TraceDataTableModel extends AbstractTableModel {
   // These depend on the source results
   private ImageSource source;
   private String configuration = "";
-  private boolean showCategory;
-  private boolean showZ;
+  private final boolean showCategory;
+  private final boolean showZ;
 
   // Used for the columns
   /** The rounder for the numeric cell entries. */

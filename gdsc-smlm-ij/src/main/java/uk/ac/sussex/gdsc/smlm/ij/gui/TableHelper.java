@@ -69,7 +69,8 @@ final class TableHelper {
    * @param resultsSupplier the results supplier
    * @return the result name if saved, else the original name argument
    */
-  static String saveResults(String title, String name, Supplier<MemoryPeakResults> resultsSupplier) {
+  static String saveResults(String title, String name,
+      Supplier<MemoryPeakResults> resultsSupplier) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog("Save Results");
     String saveName = TextUtils.isNullOrEmpty(name) ? title : name;
     gd.addStringField("Results_set_name", saveName, 30);
@@ -95,18 +96,18 @@ final class TableHelper {
    */
   static void updateSource(Consumer<ImageSource> action) {
     // Assumes 3D stack (no channel/time)
-    String[] list = ImageJUtils.getImageList(imp -> imp.getNDimensions() <= 3);
+    final String[] list = ImageJUtils.getImageList(imp -> imp.getNDimensions() <= 3);
     if (list.length == 0) {
       IJ.log("No suitable source images (require a 3D stack)");
       return;
     }
-    ExtendedGenericDialog gd = new ExtendedGenericDialog("Update source image");
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog("Update source image");
     gd.addChoice("Image", list, 0);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
-    ImagePlus imp = WindowManager.getImage(gd.getNextChoice());
+    final ImagePlus imp = WindowManager.getImage(gd.getNextChoice());
     if (imp == null) {
       return;
     }
@@ -183,17 +184,14 @@ final class TableHelper {
    * @param calibration the calibration
    * @param results the results
    */
-  static void showOverlay(ImageSource source, Calibration calibration , PeakResult[] results) {
+  static void showOverlay(ImageSource source, Calibration calibration, PeakResult[] results) {
     if (source == null || results.length == 0) {
       return;
     }
     final String title = source.getOriginal().getName();
     final ImagePlus imp = WindowManager.getImage(title);
-    if (imp == null) {
-      return;
-    }
     // Assumes 3D stack (no channel/time)
-    if (imp.getNDimensions() > 3) {
+    if ((imp == null) || (imp.getNDimensions() > 3)) {
       return;
     }
     try {

@@ -268,8 +268,8 @@ public class TraceDataTableModelFrame extends JFrame {
     if (model == null) {
       return;
     }
-    PeakResultTableModel m = getResultModel(model);
-    PeakResultTableModelFrame f = getResultFrame(m);
+    final PeakResultTableModel m = getResultModel(model);
+    final PeakResultTableModelFrame f = getResultFrame(m);
     // Update the displayed results
     m.replace(this, getSelectedResults().toArray());
     // Set visible (relevant if the previous table was hidden or the table is new)
