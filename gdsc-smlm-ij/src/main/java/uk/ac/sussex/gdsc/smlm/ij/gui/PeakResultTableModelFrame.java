@@ -342,6 +342,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     egd.addCheckbox("Table_show_fitting_data", tableSettings.getShowFittingData());
     egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
     egd.addCheckbox("Table_show_precision", tableSettings.getShowPrecision());
+    egd.addCheckbox("Table_show_deviations", model.isShowDeviations());
+    egd.addCheckbox("Table_show_end_frame", model.isShowEndFrame());
     egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
     egd.addCheckbox("Table_show_counter", tableSettings.getShowRowCounter());
     egd.showDialog();
@@ -354,6 +356,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     tableSettings.setShowFittingData(egd.getNextBoolean());
     tableSettings.setShowNoiseData(egd.getNextBoolean());
     tableSettings.setShowPrecision(egd.getNextBoolean());
+    model.setShowDeviations(egd.getNextBoolean());
+    model.setShowEndFrame(egd.getNextBoolean());
     tableSettings.setRoundingPrecision((int) egd.getNextNumber());
     tableSettings.setShowRowCounter(egd.getNextBoolean());
     model.setTableSettings(tableSettings.build());
