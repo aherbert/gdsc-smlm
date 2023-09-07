@@ -210,20 +210,20 @@ public class ResidenceTimeAnalysis implements PlugIn {
    * Custom statistics class to collect mean, standard deviation and max.
    */
   private static class MyStatistics {
-    private final Statistics s = new Statistics();
+    private final Statistics stats = new Statistics();
     private double max;
 
     void add(double value) {
-      s.add(value);
+      stats.add(value);
       max = max > value ? max : value;
     }
 
     double mean() {
-      return s.getMean();
+      return stats.getMean();
     }
 
     double sd() {
-      return s.getStandardDeviation();
+      return stats.getStandardDeviation();
     }
 
     double max() {
