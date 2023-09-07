@@ -502,6 +502,28 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
+   * Replace the results.
+   *
+   * <p>Warning: This does not check for duplicates as it is a total refresh of the data.
+   * Duplicates should be filtered by the caller.
+   *
+   * @param source the source
+   * @param peakResults the peak results
+   * @see #clear(Object)
+   * @see #add(Object, PeakResult...)
+   * @see #isCheckDuplicates()
+   */
+  void replace(Object source, PeakResult... peakResults) {
+    final int size = data.size();
+    data.clear();
+    data.addArray(peakResults);
+    if (size != 0 || data.size() != 0) {
+      // Either the data was cleared, or new data was added
+      fireTableDataChanged();
+    }
+  }
+
+  /**
    * Removes the result.
    *
    * @param source the source

@@ -47,8 +47,8 @@ import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SummariseResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * A frame that shows a PeakResultsTableModel.
@@ -388,11 +388,11 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     if (model == null) {
       return;
     }
-    final PeakResult[] list = table.getSelectedData();
-    if (list.length == 0) {
+    final ImageSource source = model.getSource();
+    if (source == null) {
       return;
     }
-    TableHelper.showOverlay(model.getSource(), model.getCalibration(), list);
+    TableHelper.showOverlay(source, model.getCalibration(), table.getSelectedData());
   }
 
   private PeakResultTableModel getModel() {

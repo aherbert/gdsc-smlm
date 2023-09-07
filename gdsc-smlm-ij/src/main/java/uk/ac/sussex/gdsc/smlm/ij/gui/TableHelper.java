@@ -184,7 +184,7 @@ final class TableHelper {
    * @param results the results
    */
   static void showOverlay(ImageSource source, Calibration calibration , PeakResult[] results) {
-    if (source == null) {
+    if (source == null || results.length == 0) {
       return;
     }
     final String title = source.getOriginal().getName();

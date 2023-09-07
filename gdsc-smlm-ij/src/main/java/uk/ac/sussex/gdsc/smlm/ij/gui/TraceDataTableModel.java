@@ -473,6 +473,24 @@ public class TraceDataTableModel extends AbstractTableModel {
   }
 
   /**
+   * Checks if showing the results category in the table.
+   *
+   * @return If true show the results category in the table.
+   */
+  boolean isShowCategory() {
+    return showCategory;
+  }
+
+  /**
+   * Checks if showing the Z column.
+   *
+   * @return true, if is show Z
+   */
+  boolean isShowZ() {
+    return showZ;
+  }
+
+  /**
    * Sets the source.
    *
    * @param source the new source
@@ -498,6 +516,15 @@ public class TraceDataTableModel extends AbstractTableModel {
    */
   Calibration getCalibration() {
     return calibration;
+  }
+
+  /**
+   * Gets the psf.
+   *
+   * @return the psf
+   */
+  PSF getPsf() {
+    return psf;
   }
 
   // *************************************************************************/

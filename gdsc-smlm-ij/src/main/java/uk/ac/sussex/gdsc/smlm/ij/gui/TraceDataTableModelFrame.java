@@ -60,6 +60,7 @@ public class TraceDataTableModelFrame extends JFrame {
   private final TraceDataTableModelJTable table;
   private JMenuItem resultsSave;
   private JMenuItem resultsShowInfo;
+  private JMenuItem resultsShowTable;
   private JCheckBoxMenuItem editReadOnly;
   private JMenuItem editDelete;
   private JMenuItem editDeleteAll;
@@ -72,6 +73,11 @@ public class TraceDataTableModelFrame extends JFrame {
   private JMenuItem sourceShowImage;
   private JMenuItem sourceOverlay;
   private String saveName;
+
+  /** The result model used to display selected trace results. */
+  private PeakResultTableModel resultModel;
+  /** The result frame used to display selected trace results. */
+  private PeakResultTableModelFrame resultFrame;
 
   /**
    * Create an instance.
@@ -146,6 +152,8 @@ public class TraceDataTableModelFrame extends JFrame {
     menu.setMnemonic(KeyEvent.VK_R);
     menu.add(resultsSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
     menu.add(resultsShowInfo = add("Show Info", KeyEvent.VK_I, null));
+    menu.addSeparator();
+    menu.add(resultsShowTable = add("Show Table", KeyEvent.VK_T, "T"));
     return menu;
   }
 
@@ -211,6 +219,8 @@ public class TraceDataTableModelFrame extends JFrame {
       doResultsSave();
     } else if (src == resultsShowInfo) {
       doResultsShowInfo();
+    } else if (src == resultsShowTable) {
+      doResultsShowTable();
     } else if (src == editDelete) {
       doEditDelete();
     } else if (src == editDeleteAll) {
@@ -251,6 +261,44 @@ public class TraceDataTableModelFrame extends JFrame {
     final MemoryPeakResults results = model.toMemoryPeakResults();
     results.setName("Table data: " + getTitle());
     SummariseResults.showSummary(Collections.singletonList(results));
+  }
+
+  private void doResultsShowTable() {
+    final TraceDataTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    PeakResultTableModel m = getResultModel(model);
+    PeakResultTableModelFrame f = getResultFrame(m);
+    // Update the displayed results
+    m.replace(this, getSelectedResults().toArray());
+    // Set visible (relevant if the previous table was hidden or the table is new)
+    f.setVisible(true);
+  }
+
+  private PeakResultTableModel getResultModel(TraceDataTableModel model) {
+    PeakResultTableModel m = resultModel;
+    if (m == null) {
+      m = new PeakResultTableModel(null, model.getCalibration(), model.getPsf(),
+          model.getTableSettings());
+      m.setShowId(true);
+      m.setShowZ(model.isShowZ());
+      m.setShowCategory(model.isShowCategory());
+      m.setSource(model.getSource());
+      m.addSettingsUpdatedAction(model::setTableSettings);
+      resultModel = m;
+    }
+    return m;
+  }
+
+  private PeakResultTableModelFrame getResultFrame(PeakResultTableModel model) {
+    PeakResultTableModelFrame f = resultFrame;
+    if (f == null || !f.isDisplayable()) {
+      f = new PeakResultTableModelFrame(model);
+      f.setTitle(getTitle() + ": Results");
+      resultFrame = f;
+    }
+    return f;
   }
 
   /**
@@ -326,7 +374,14 @@ public class TraceDataTableModelFrame extends JFrame {
     if (model == null) {
       return;
     }
-    TableHelper.updateSource(model::setSource);
+    TableHelper.updateSource(s -> {
+      model.setSource(s);
+      // Pass through changes to the result model.
+      // This allows both tables to overlay on the same source image.
+      if (resultModel != null) {
+        resultModel.setSource(s);
+      }
+    });
   }
 
   private void doSourceShowInfo() {
@@ -350,21 +405,22 @@ public class TraceDataTableModelFrame extends JFrame {
     if (model == null) {
       return;
     }
-    final TraceData[] list = table.getSelectedData();
-    if (list.length == 0) {
-      return;
-    }
     final ImageSource source = model.getSource();
     if (source == null) {
       return;
     }
-    final ArrayPeakResultStore store = new ArrayPeakResultStore(100);
-    Arrays.stream(list).map(t -> t.getTrace().getPoints()).forEach(store::addStore);
-    TableHelper.showOverlay(model.getSource(), model.getCalibration(), store.toArray());
+    TableHelper.showOverlay(source, model.getCalibration(), getSelectedResults().toArray());
   }
 
   private TraceDataTableModel getModel() {
     final TableModel model = table.getModel();
     return (model instanceof TraceDataTableModel) ? (TraceDataTableModel) model : null;
+  }
+
+  private ArrayPeakResultStore getSelectedResults() {
+    final ArrayPeakResultStore store = new ArrayPeakResultStore(100);
+    final TraceData[] list = table.getSelectedData();
+    Arrays.stream(list).map(t -> t.getTrace().getPoints()).forEach(store::addStore);
+    return store;
   }
 }
