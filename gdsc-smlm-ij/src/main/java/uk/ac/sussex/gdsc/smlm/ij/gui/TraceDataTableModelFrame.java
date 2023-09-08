@@ -24,12 +24,18 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
+import ij.IJ;
 import ij.WindowManager;
+import ij.gui.Plot;
+import ij.process.LUT;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -42,14 +48,22 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SummariseResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.Trace;
 
 /**
  * A frame that shows a TraceDatasTableModel.
@@ -61,6 +75,8 @@ public class TraceDataTableModelFrame extends JFrame {
   private JMenuItem resultsSave;
   private JMenuItem resultsShowInfo;
   private JMenuItem resultsShowTable;
+  private JMenuItem analysisSelectPlots;
+  private JMenuItem analysisPlot;
   private JCheckBoxMenuItem editReadOnly;
   private JMenuItem editDelete;
   private JMenuItem editDeleteAll;
@@ -78,6 +94,10 @@ public class TraceDataTableModelFrame extends JFrame {
   private PeakResultTableModel resultModel;
   /** The result frame used to display selected trace results. */
   private PeakResultTableModelFrame resultFrame;
+  /** The localisation parameter plots to display. */
+  private BitSet analysisPlots;
+  /** The plot LUT. */
+  private LutColour lutColour = LutColour.RED_BLUE;
 
   /**
    * Create an instance.
@@ -144,6 +164,7 @@ public class TraceDataTableModelFrame extends JFrame {
     menubar.add(createResultsMenu());
     menubar.add(createEditMenu());
     menubar.add(createSourceMenu());
+    menubar.add(createAnalysisMenu());
     return menubar;
   }
 
@@ -190,6 +211,14 @@ public class TraceDataTableModelFrame extends JFrame {
     menu.add(sourceShowInfo = add("Show Info", KeyEvent.VK_I, "ctrl pressed I"));
     menu.add(sourceShowImage = add("Show Image", KeyEvent.VK_S, "ctrl shift pressed I"));
     menu.add(sourceOverlay = add("Overlay", KeyEvent.VK_O, "ctrl pressed Y"));
+    return menu;
+  }
+
+  private JMenu createAnalysisMenu() {
+    final JMenu menu = new JMenu("Analysis");
+    menu.setMnemonic(KeyEvent.VK_A);
+    menu.add(analysisSelectPlots = add("Select Plots ...", KeyEvent.VK_S, null));
+    menu.add(analysisPlot = add("Plot", KeyEvent.VK_P, "P"));
     return menu;
   }
 
@@ -241,6 +270,10 @@ public class TraceDataTableModelFrame extends JFrame {
       doSourceShowImage();
     } else if (src == sourceOverlay) {
       doSourceOverlay();
+    } else if (src == analysisSelectPlots) {
+      doAnalysisSelectPlots();
+    } else if (src == analysisPlot) {
+      doAnalysisPlot();
     }
   }
 
@@ -412,6 +445,94 @@ public class TraceDataTableModelFrame extends JFrame {
     TableHelper.showOverlay(source, model.getCalibration(), getSelectedResults().toArray());
   }
 
+  private void doAnalysisSelectPlots() {
+    final TraceDataTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    final BitSet plots = getAnalysisPlots(model);
+
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog("Select Plots ...");
+    gd.addMessage("Select the localisation result parameters to plot");
+    for (int i = 0; i < PeakResult.STANDARD_PARAMETERS; i++) {
+      gd.addCheckbox(PeakResult.getParameterName(i), plots.get(i));
+    }
+    // Custom PSF fields
+    final PSF psf = model.getPsf();
+    if (psf != null) {
+      for (int i = 0; i < psf.getParametersCount(); i++) {
+        final PSFParameter p = psf.getParameters(i);
+        gd.addCheckbox(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
+            plots.get(i + PeakResult.STANDARD_PARAMETERS));
+      }
+    }
+    gd.addChoice("lut", LutHelper.getLutNames(), lutColour.ordinal());
+
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return;
+    }
+
+    for (int i = 0; i < PeakResult.STANDARD_PARAMETERS; i++) {
+      plots.set(i, gd.getNextBoolean());
+    }
+    if (psf != null) {
+      for (int i = 0; i < psf.getParametersCount(); i++) {
+        plots.set(i + PeakResult.STANDARD_PARAMETERS, gd.getNextBoolean());
+      }
+    }
+    lutColour = LutColour.forNumber(gd.getNextChoiceIndex());
+  }
+
+  private void doAnalysisPlot() {
+    final TraceDataTableModel model = getModel();
+    if (model == null || model.getRowCount() == 0) {
+      return;
+    }
+    final BitSet plots = getAnalysisPlots(model);
+    if (plots.isEmpty()) {
+      IJ.log("No analysis plots selected");
+      return;
+    }
+    final TraceData[] data = table.getSelectedData();
+    final PSF psf = model.getPsf();
+    final WindowOrganiser wo = new WindowOrganiser();
+    final LUT lut = LutHelper.createLut(lutColour);
+    plots.stream().forEach(i -> plot(psf, data, wo, lut, i));
+    wo.tile();
+  }
+
+  private static void plot(PSF psf, TraceData[] data, WindowOrganiser wo, LUT lut, int index) {
+    final String name = index < PeakResult.STANDARD_PARAMETERS ? PeakResult.getParameterName(index)
+        : psf.getParameters(index - PeakResult.STANDARD_PARAMETERS).getName();
+    final Plot plot = new Plot("Trace: " + name, "Frame", name);
+    final DoubleArrayList x = new DoubleArrayList();
+    final DoubleArrayList y = new DoubleArrayList();
+    final int limit = data.length - 1;
+    for (int j = 0; j < data.length; j++) {
+      final Trace trace = data[j].getTrace();
+      x.clear();
+      y.clear();
+      for (int i = 0; i < trace.size(); i++) {
+        final PeakResult peak = trace.get(i);
+        x.add(peak.getFrame());
+        y.add(peak.getParameter(index));
+        if (peak.hasEndFrame()) {
+          x.add(peak.getEndFrame());
+          y.add(peak.getParameter(index));
+        }
+      }
+      final double[] xp = x.toDoubleArray();
+      final double[] yp = y.toDoubleArray();
+      final Color c = LutHelper.getColour(lut, j, 0, limit);
+      plot.setColor(c);
+      plot.addPoints(xp, yp, x.size() == 1 ? Plot.CIRCLE : Plot.LINE);
+    }
+    plot.draw();
+    plot.setLimitsToFit(true);  // Seems to only work after drawing
+    ImageJUtils.display(plot.getTitle(), plot, wo);
+  }
+
   private TraceDataTableModel getModel() {
     final TableModel model = table.getModel();
     return (model instanceof TraceDataTableModel) ? (TraceDataTableModel) model : null;
@@ -422,5 +543,15 @@ public class TraceDataTableModelFrame extends JFrame {
     final TraceData[] list = table.getSelectedData();
     Arrays.stream(list).map(t -> t.getTrace().getPoints()).forEach(store::addStore);
     return store;
+  }
+
+  private BitSet getAnalysisPlots(TraceDataTableModel model) {
+    BitSet plots = analysisPlots;
+    if (plots == null) {
+      final PSF psf = model.getPsf();
+      plots = new BitSet(5 + (psf != null ? psf.getParametersCount() : 0));
+      analysisPlots = plots;
+    }
+    return plots;
   }
 }

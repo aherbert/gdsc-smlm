@@ -1011,6 +1011,7 @@ using ``Edit > Table Settings ...``.
 The table provides interactive functionality:
 
  * Selected results can be displayed on a source image
+ * Selected results can show plots of the localisation data against time
  * Data can be sorted by columns
  * Data can be edited to remove traces
  * Data can be saved to a new results set in memory
