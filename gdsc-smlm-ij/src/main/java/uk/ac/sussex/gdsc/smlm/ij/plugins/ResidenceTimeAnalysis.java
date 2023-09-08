@@ -123,6 +123,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     double f0;
     double exposureTime;
     Seed seed;
+    int firstFrame;
+    int lastFrame;
     int minSize;
     double meanDistance;
     double maxDistance;
@@ -142,6 +144,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
       f0 = 0.15;
       exposureTime = 50;
       seed = Seed.from("1c0f4f6003fc7f01");
+      firstFrame = 1;
+      lastFrame = -1;
       minSize = 2;
       meanDistance = 100;
       maxDistance = 400;
@@ -157,6 +161,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
       f0 = source.f0;
       exposureTime = source.exposureTime;
       seed = source.seed;
+      firstFrame = source.firstFrame;
+      lastFrame = source.lastFrame;
       minSize = source.minSize;
       meanDistance = source.meanDistance;
       maxDistance = source.maxDistance;
@@ -361,6 +367,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addHelp(HelpUrls.getUrl(HELP_KEY));
 
     gd.addMessage("Filter traces to stationary molecules");
+    gd.addNumericField("First_frame", settings.firstFrame, 0);
+    gd.addNumericField("Last_frame", settings.lastFrame, 0);
     gd.addSlider("Min_size", 2, 20, settings.minSize);
     gd.addNumericField("Mean_distance", settings.meanDistance, 2, 6, "nm");
     gd.addNumericField("Max_distance", settings.maxDistance, 2, 6, "nm");
@@ -377,6 +385,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     if (gd.wasCanceled() || gd.invalidNumber()) {
       return false;
     }
+    settings.firstFrame = (int) gd.getNextNumber();
+    settings.lastFrame = (int) gd.getNextNumber();
     settings.minSize = (int) gd.getNextNumber();
     settings.meanDistance = gd.getNextNumber();
     settings.maxDistance = gd.getNextNumber();
@@ -449,8 +459,10 @@ public class ResidenceTimeAnalysis implements PlugIn {
   }
 
   /**
-   * Creates the trace function to extract the molecule traces. Note that the traces may be empty or
-   * length 1.
+   * Creates the trace function to extract the molecule traces. Note that the traces may be length 1
+   * but should not be empty.
+   *
+   * <p>Any traces that start or end outside the allowed limits are discarded.
    *
    * @return the function
    */
@@ -470,13 +482,17 @@ public class ResidenceTimeAnalysis implements PlugIn {
       checkCalibration = r -> {
         /* do nothing */ };
     }
+    final int firstFrame = settings.firstFrame;
+    final int lastFrame = settings.lastFrame;
     return r -> {
       checkCalibration.accept(r);
       // Only use the results with a trace Id
       final LocalList<PeakResult> results = new LocalList<>(r.size());
+      final int[] max = {Integer.MIN_VALUE};
       r.forEach((PeakResult p) -> {
         if (p.getId() > 0) {
           results.add(p);
+          max[0] = Math.max(p.getEndFrame(), max[0]);
         }
       });
       final LocalList<Trace> traces = new LocalList<>();
@@ -494,9 +510,46 @@ public class ResidenceTimeAnalysis implements PlugIn {
           }
           t[0].add(p);
         });
+        Predicate<Trace> filter = createFrameFilter(firstFrame, lastFrame, max[0]);
+        if (filter != null) {
+          // Debug
+          final int[] count = {0};
+          final Logger logger = ImageJPluginLoggerHelper.getLogger(ResidenceTimeAnalysis.class);
+          filter = filter.and(tr -> {
+            count[0]++;
+            logger.fine(() -> String.format("Dataset %s : Filter trace %d [%d-%d]", r.getName(),
+                tr.getId(), tr.getHead().getFrame(), tr.getTail().getEndFrame()));
+            return true;
+          });
+          traces.removeIf(filter);
+          logger.info(() -> String.format("Dataset %s : Filtered %s using first/last frame",
+              r.getName(), TextUtils.pleural(count[0], "trace")));
+        }
       }
       return traces;
     };
+  }
+
+  /**
+   * Creates the frame filter.
+   *
+   * @param firstFrame the first frame
+   * @param lastFrame the last frame
+   * @param max the maximum frame in the data
+   * @return the predicate
+   */
+  private static Predicate<Trace> createFrameFilter(int firstFrame, int lastFrame, int max) {
+    Predicate<Trace> filter = null;
+    // Note: It makes no sense to have a first frame below 1 so this disables the filter
+    if (firstFrame > 0) {
+      filter = t -> t.getHead().getFrame() <= firstFrame;
+    }
+    if (lastFrame != 0) {
+      final int end = lastFrame < 0 ? lastFrame + 1 + max : lastFrame;
+      final Predicate<Trace> filter2 = t -> t.getTail().getEndFrame() >= end;
+      filter = filter == null ? filter2 : filter.or(filter2);
+    }
+    return filter;
   }
 
   /**
