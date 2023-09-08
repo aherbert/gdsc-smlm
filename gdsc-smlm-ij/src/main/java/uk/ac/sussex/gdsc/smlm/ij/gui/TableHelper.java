@@ -96,9 +96,11 @@ final class TableHelper {
    */
   static void updateSource(Consumer<ImageSource> action) {
     // Assumes 3D stack (no channel/time)
-    final String[] list = ImageJUtils.getImageList(imp -> imp.getNDimensions() <= 3);
+    // Assume 8/16-bit grey scale
+    final String[] list = ImageJUtils.getImageList(
+        imp -> imp.getNDimensions() <= 3 && (imp.getBitDepth() == 8 || imp.getBitDepth() == 16));
     if (list.length == 0) {
-      IJ.log("No suitable source images (require a 3D stack)");
+      IJ.log("No suitable source images (require a grey scale 3D stack)");
       return;
     }
     final ExtendedGenericDialog gd = new ExtendedGenericDialog("Update source image");
