@@ -82,6 +82,7 @@ public class TraceDataTableModelFrame extends JFrame {
   private JMenuItem editDeleteAll;
   private JMenuItem editSelectAll;
   private JMenuItem editSelectNone;
+  private JMenuItem editSelectInverse;
   private JMenuItem editUnsort;
   private JMenuItem editTableSettings;
   private JMenuItem sourceAttachImage;
@@ -187,6 +188,7 @@ public class TraceDataTableModelFrame extends JFrame {
     menu.addSeparator();
     menu.add(editSelectNone = add("Select None", KeyEvent.VK_N, "ctrl shift pressed A"));
     menu.add(editSelectAll = add("Select All", KeyEvent.VK_S, null));
+    menu.add(editSelectInverse = add("Select Inverse", KeyEvent.VK_I, null));
     menu.add(editUnsort = add("Unsort", KeyEvent.VK_U, null));
     menu.addSeparator();
     menu.add(editTableSettings = add("Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
@@ -258,6 +260,8 @@ public class TraceDataTableModelFrame extends JFrame {
       doEditSelectNone();
     } else if (src == editSelectAll) {
       doEditSelectAll();
+    } else if (src == editSelectInverse) {
+      doEditSelectInverse();
     } else if (src == editUnsort) {
       doEditUnsort();
     } else if (src == editTableSettings) {
@@ -367,6 +371,14 @@ public class TraceDataTableModelFrame extends JFrame {
 
   private void doEditSelectAll() {
     table.selectAll();
+  }
+
+  private void doEditSelectInverse() {
+    final TraceDataTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    ListSelectionModelHelper.invertSelection(model.getRowCount(), table.getSelectionModel());
   }
 
   private void doEditUnsort() {

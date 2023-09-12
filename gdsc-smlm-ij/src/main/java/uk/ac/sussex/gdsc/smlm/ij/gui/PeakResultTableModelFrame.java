@@ -64,6 +64,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   private JMenuItem editDeleteAll;
   private JMenuItem editSelectAll;
   private JMenuItem editSelectNone;
+  private JMenuItem editSelectInverse;
   private JMenuItem editUnsort;
   private JMenuItem editTableSettings;
   private JMenuItem sourceAttachImage;
@@ -178,6 +179,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     menu.addSeparator();
     menu.add(editSelectNone = add("Select None", KeyEvent.VK_N, "ctrl shift pressed A"));
     menu.add(editSelectAll = add("Select All", KeyEvent.VK_S, null));
+    menu.add(editSelectInverse = add("Select Inverse", KeyEvent.VK_I, null));
     menu.add(editUnsort = add("Unsort", KeyEvent.VK_U, null));
     menu.addSeparator();
     menu.add(editTableSettings = add("Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
@@ -240,6 +242,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       doEditSelectNone();
     } else if (src == editSelectAll) {
       doEditSelectAll();
+    } else if (src == editSelectInverse) {
+      doEditSelectInverse();
     } else if (src == editUnsort) {
       doEditUnsort();
     } else if (src == editTableSettings) {
@@ -316,6 +320,14 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
   private void doEditSelectAll() {
     table.selectAll();
+  }
+
+  private void doEditSelectInverse() {
+    final PeakResultTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    ListSelectionModelHelper.invertSelection(model.getRowCount(), table.getSelectionModel());
   }
 
   private void doEditUnsort() {

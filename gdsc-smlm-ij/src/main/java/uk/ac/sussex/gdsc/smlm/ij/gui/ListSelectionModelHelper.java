@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import javax.swing.ListSelectionModel;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -81,5 +82,44 @@ public final class ListSelectionModelHelper {
       sm.addSelectionInterval(indices[i], indices[i]);
     }
     sm.setValueIsAdjusting(false);
+  }
+
+  /**
+   * Invert the selection.
+   *
+   * @param size the size of the model data
+   * @param sm the selection model
+   */
+  static void invertSelection(int size, ListSelectionModel sm) {
+    if (sm == null) {
+      return;
+    }
+    final int iMin = sm.getMinSelectionIndex();
+    final int iMax = sm.getMaxSelectionIndex();
+    // Any negative
+    if ((iMin | iMax) < 0) {
+      sm.setSelectionInterval(0, size - 1);
+    } else {
+      final BitSet selected = new BitSet(size);
+      for (int i = iMin; i <= iMax; i++) {
+        if (sm.isSelectedIndex(i)) {
+          selected.set(i, true);
+        }
+      }
+      // Select the inverted range
+      sm.setValueIsAdjusting(true);
+      sm.clearSelection();
+      int i = selected.nextClearBit(0);
+      while (i < size) {
+        final int j = selected.nextSetBit(i);
+        if (j < 0) {
+          sm.addSelectionInterval(i, size - 1);
+          break;
+        }
+        sm.addSelectionInterval(i, j - 1);
+        i = selected.nextClearBit(j);
+      }
+      sm.setValueIsAdjusting(false);
+    }
   }
 }
