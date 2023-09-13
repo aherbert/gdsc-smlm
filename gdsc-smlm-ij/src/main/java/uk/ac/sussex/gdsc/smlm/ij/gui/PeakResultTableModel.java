@@ -430,6 +430,24 @@ public class PeakResultTableModel extends AbstractTableModel {
   public MemoryPeakResults toMemoryPeakResults() {
     final ArrayPeakResultStore store = new ArrayPeakResultStore(data.size());
     store.addArray(data.toArray());
+    return toMemoryPeakResults(store);
+  }
+
+  /**
+   * To memory peak results.
+   *
+   * @param indices the indices
+   * @return the memory peak results
+   */
+  MemoryPeakResults toMemoryPeakResults(int[] indices) {
+    final ArrayPeakResultStore store = new ArrayPeakResultStore(100);
+    for (final int i : indices) {
+      store.add(data.get(i));
+    }
+    return toMemoryPeakResults(store);
+  }
+
+  private MemoryPeakResults toMemoryPeakResults(final ArrayPeakResultStore store) {
     final MemoryPeakResults results = new MemoryPeakResults(store);
     results.setPsf(psf);
     results.setCalibration(calibration);

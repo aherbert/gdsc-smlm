@@ -338,6 +338,24 @@ public class TraceDataTableModel extends AbstractTableModel {
   MemoryPeakResults toMemoryPeakResults() {
     final ArrayPeakResultStore store = new ArrayPeakResultStore(100);
     data.stream().map(t -> t.getTrace().getPoints()).forEach(store::addStore);
+    return toMemoryPeakResults(store);
+  }
+
+  /**
+   * To memory peak results.
+   *
+   * @param indices the indices
+   * @return the memory peak results
+   */
+  MemoryPeakResults toMemoryPeakResults(int[] indices) {
+    final ArrayPeakResultStore store = new ArrayPeakResultStore(100);
+    for (final int i : indices) {
+      store.addStore(data.get(i).getTrace().getPoints());
+    }
+    return toMemoryPeakResults(store);
+  }
+
+  private MemoryPeakResults toMemoryPeakResults(final ArrayPeakResultStore store) {
     final MemoryPeakResults results = new MemoryPeakResults(store);
     results.setPsf(psf);
     results.setCalibration(calibration);
@@ -442,6 +460,15 @@ public class TraceDataTableModel extends AbstractTableModel {
   void removeRange(Object source, int fromIndex, int toIndex) {
     data.subList(fromIndex, toIndex + 1).clear();
     fireTableRowsDeleted(fromIndex, toIndex);
+  }
+
+  /**
+   * Performs the given action for each element of the data.
+   *
+   * @param action the action
+   */
+  void forEach(Consumer<? super TraceData> action) {
+    data.forEach(action);
   }
 
   // *************************************************************************/

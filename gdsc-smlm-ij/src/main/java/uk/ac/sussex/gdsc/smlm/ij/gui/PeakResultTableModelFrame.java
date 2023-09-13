@@ -58,6 +58,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
   private final PeakResultTableModelJTable table;
   private JMenuItem resultsSave;
+  private JMenuItem resultsSaveSelection;
   private JMenuItem resultsShowInfo;
   private JCheckBoxMenuItem editReadOnly;
   private JMenuItem editDelete;
@@ -166,6 +167,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     final JMenu menu = new JMenu("Results");
     menu.setMnemonic(KeyEvent.VK_R);
     menu.add(resultsSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+    menu.add(resultsSaveSelection = add("Save Selection ...", KeyEvent.VK_E, "ctrl shift pressed S"));
     menu.add(resultsShowInfo = add("Show Info", KeyEvent.VK_I, null));
     return menu;
   }
@@ -232,6 +234,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     final Object src = event.getSource();
     if (src == resultsSave) {
       doResultsSave();
+    } else if (src == resultsSaveSelection) {
+      doResultsSaveSelection();
     } else if (src == resultsShowInfo) {
       doResultsShowInfo();
     } else if (src == editDelete) {
@@ -265,6 +269,20 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       return;
     }
     saveName = TableHelper.saveResults(getTitle(), saveName, model::toMemoryPeakResults);
+  }
+
+  private void doResultsSaveSelection() {
+    final PeakResultTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    final int[] selected = table.getSelectedRows();
+    if (selected.length == 0) {
+      return;
+    }
+    table.convertRowIndexToModel(selected);
+    saveName =
+        TableHelper.saveResults(getTitle(), saveName, () -> model.toMemoryPeakResults(selected));
   }
 
   private void doResultsShowInfo() {

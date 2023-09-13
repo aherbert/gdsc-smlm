@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
-import ij.IJ;
 import ij.WindowManager;
 import ij.gui.Plot;
 import ij.process.LUT;
@@ -48,6 +47,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
@@ -73,6 +73,7 @@ public class TraceDataTableModelFrame extends JFrame {
 
   private final TraceDataTableModelJTable table;
   private JMenuItem resultsSave;
+  private JMenuItem resultsSaveSelection;
   private JMenuItem resultsShowInfo;
   private JMenuItem resultsShowTable;
   private JMenuItem analysisSelectPlots;
@@ -173,6 +174,8 @@ public class TraceDataTableModelFrame extends JFrame {
     final JMenu menu = new JMenu("Results");
     menu.setMnemonic(KeyEvent.VK_R);
     menu.add(resultsSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+    menu.add(
+        resultsSaveSelection = add("Save Selection ...", KeyEvent.VK_E, "ctrl shift pressed S"));
     menu.add(resultsShowInfo = add("Show Info", KeyEvent.VK_I, null));
     menu.addSeparator();
     menu.add(resultsShowTable = add("Show Table", KeyEvent.VK_T, "T"));
@@ -248,6 +251,8 @@ public class TraceDataTableModelFrame extends JFrame {
     final Object src = event.getSource();
     if (src == resultsSave) {
       doResultsSave();
+    } else if (src == resultsSaveSelection) {
+      doResultsSaveSelection();
     } else if (src == resultsShowInfo) {
       doResultsShowInfo();
     } else if (src == resultsShowTable) {
@@ -287,6 +292,20 @@ public class TraceDataTableModelFrame extends JFrame {
       return;
     }
     saveName = TableHelper.saveResults(getTitle(), saveName, model::toMemoryPeakResults);
+  }
+
+  private void doResultsSaveSelection() {
+    final TraceDataTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    final int[] selected = table.getSelectedRows();
+    if (selected.length == 0) {
+      return;
+    }
+    table.convertRowIndexToModel(selected);
+    saveName =
+        TableHelper.saveResults(getTitle(), saveName, () -> model.toMemoryPeakResults(selected));
   }
 
   private void doResultsShowInfo() {
@@ -503,7 +522,7 @@ public class TraceDataTableModelFrame extends JFrame {
     }
     final BitSet plots = getAnalysisPlots(model);
     if (plots.isEmpty()) {
-      IJ.log("No analysis plots selected");
+      ImageJPluginLoggerHelper.getLogger(this.getClass()).warning("No analysis plots selected");
       return;
     }
     final TraceData[] data = table.getSelectedData();
@@ -541,7 +560,7 @@ public class TraceDataTableModelFrame extends JFrame {
       plot.addPoints(xp, yp, x.size() == 1 ? Plot.CIRCLE : Plot.LINE);
     }
     plot.draw();
-    plot.setLimitsToFit(true);  // Seems to only work after drawing
+    plot.setLimitsToFit(true); // Seems to only work after drawing
     ImageJUtils.display(plot.getTitle(), plot, wo);
   }
 
