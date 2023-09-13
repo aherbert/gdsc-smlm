@@ -50,7 +50,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
-import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SummariseResultsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -465,7 +464,11 @@ public class SummariseResults implements PlugIn {
 
     private static void plot(HistogramPlotBuilder plotBuilder, WindowOrganiser wo, String title,
         StoredDataStatistics data) {
-      plotBuilder.setName(title).setData(data).show(wo);
+      plotBuilder.setName(title).setData(data)
+          .setPlotLabel(String.format("%s +/- %s (%d)",
+              MathUtils.rounded(data.getMean()), MathUtils.rounded(data.getStandardDeviation()),
+              data.getN()))
+          .show(wo);
     }
   }
 }
