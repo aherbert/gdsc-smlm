@@ -347,7 +347,7 @@ public class FilterResults implements PlugIn {
         continue;
       }
 
-      if (pp != null && pp.precisions[i] > maxPrecision) {
+      if (pp != null && pp.precisions[i] > filterSettings.getMaxPrecision()) {
         continue;
       }
 
