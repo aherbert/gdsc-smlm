@@ -167,7 +167,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     final JMenu menu = new JMenu("Results");
     menu.setMnemonic(KeyEvent.VK_R);
     menu.add(resultsSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
-    menu.add(resultsSaveSelection = add("Save Selection ...", KeyEvent.VK_E, "ctrl shift pressed S"));
+    menu.add(
+        resultsSaveSelection = add("Save Selection ...", KeyEvent.VK_E, "ctrl shift pressed S"));
     menu.add(resultsShowInfo = add("Show Info", KeyEvent.VK_I, null));
     return menu;
   }
