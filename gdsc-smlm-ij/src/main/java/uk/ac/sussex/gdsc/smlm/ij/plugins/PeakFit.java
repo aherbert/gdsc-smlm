@@ -1288,10 +1288,10 @@ public class PeakFit implements PlugInFilter {
       public Pair<WorkSettings, WorkResults> doWork(Pair<WorkSettings, WorkResults> work) {
         reset = false;
         final PeakFitPreviewSettings settings = work.getLeft().settings;
-        final MemoryPeakResults results = work.getRight().results;
-        if (results == null || !settings.getOverlay()) {
+        if (work.getRight() == null || !settings.getOverlay()) {
           reset();
         } else {
+          final MemoryPeakResults results = work.getRight().results;
           // Track changes this workers makes to the overlay
           final Object o = addedOverlay;
           final Overlay before = imp.getOverlay();
@@ -1351,10 +1351,10 @@ public class PeakFit implements PlugInFilter {
       public Pair<WorkSettings, WorkResults> doWork(Pair<WorkSettings, WorkResults> work) {
         reset = false;
         final PeakFitPreviewSettings settings = work.getLeft().settings;
-        final MemoryPeakResults results = work.getRight().results;
-        if (results == null || !settings.getTable()) {
+        if (work.getRight() == null || !settings.getTable()) {
           reset();
         } else {
+          final MemoryPeakResults results = work.getRight().results;
           // No requirement for a dynamic table as the blocking dialog prevents GUI interaction
           final ImageJTablePeakResults peakResults = new ImageJTablePeakResults(false);
           final ResultsTableSettings resultsSettings = settings.getResultsTableSettings();
