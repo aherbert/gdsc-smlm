@@ -769,7 +769,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         if (i < top) {
           x[0] = spots[i].x + bounds.x + 0.5f;
           y[0] = spots[i].y + bounds.y + 0.5f;
-          final Color c = LutHelper.getColour(lut, sizem1 - i, size);
+          // Constant mapping
+          //final Color c = LutHelper.getColour(lut, sizem1 - i, size);
+          // Mapping to full LUT
+          final Color c = LutHelper.getColour(lut, top - i, 0, top - 1);
           addRoi(0, o, x, y, 1, c, 2, 1);
         }
       }
