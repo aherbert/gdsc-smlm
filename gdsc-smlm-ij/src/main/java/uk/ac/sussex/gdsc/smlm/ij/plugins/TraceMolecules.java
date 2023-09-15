@@ -194,6 +194,10 @@ public class TraceMolecules implements PlugIn {
     private static final String KEY_DISPLAY_HISTOGRAMS =
         "gdsc.smlm.tracemolecules.displayHistograms";
     private static final String KEY_FILENAME = "gdsc.smlm.tracemolecules.filename";
+    private static final String KEY_DISABLE_COMBINED_DATASET =
+        "gdsc.smlm.tracemolecules.disableCombinedDataset";
+    private static final String KEY_SAVE_DERIVED_DATASETS =
+        "gdsc.smlm.tracemolecules.saveDerivedDatasets";
     private static final char ON = '1';
     private static final char OFF = '0';
 
@@ -203,6 +207,7 @@ public class TraceMolecules implements PlugIn {
     boolean[] displayHistograms;
     String filename;
     boolean disableCombinedDataset;
+    boolean saveDerivedDatasets;
 
     Settings() {
       inputOption = Prefs.get(KEY_INPUT_OPTION, "");
@@ -215,6 +220,8 @@ public class TraceMolecules implements PlugIn {
         displayHistograms[i] = display.charAt(i) == ON;
       }
       filename = Prefs.get(KEY_FILENAME, "");
+      disableCombinedDataset = Prefs.getBoolean(KEY_DISABLE_COMBINED_DATASET, false);
+      saveDerivedDatasets = Prefs.getBoolean(KEY_SAVE_DERIVED_DATASETS, false);
     }
 
     Settings(Settings source) {
@@ -224,6 +231,7 @@ public class TraceMolecules implements PlugIn {
       displayHistograms = source.displayHistograms.clone();
       filename = source.filename;
       disableCombinedDataset = source.disableCombinedDataset;
+      saveDerivedDatasets = source.saveDerivedDatasets;
     }
 
     Settings copy() {
@@ -253,6 +261,8 @@ public class TraceMolecules implements PlugIn {
       }
       Prefs.set(KEY_DISPLAY_HISTOGRAMS, sb.toString());
       Prefs.set(KEY_FILENAME, filename);
+      Prefs.set(KEY_DISABLE_COMBINED_DATASET, disableCombinedDataset);
+      Prefs.set(KEY_SAVE_DERIVED_DATASETS, saveDerivedDatasets);
     }
   }
 
@@ -488,17 +498,20 @@ public class TraceMolecules implements PlugIn {
       outputName += (outputName.endsWith("e") ? "" : "e") + "d";
       saveResults(results, traces, outputName);
 
-      // Save singles + single localisations in a trace
-      saveCentroidResults(results, getSingles(traces), outputName + " Singles");
-      final Trace[] multiTraces = getTraces(traces);
-      saveResults(results, multiTraces, outputName + " Multi");
+      // Optional save of other datasets
+      if (pluginSettings.saveDerivedDatasets) {
+        // Save singles + single localisations in a trace
+        saveCentroidResults(results, getSingles(traces), outputName + " Singles");
+        final Trace[] multiTraces = getTraces(traces);
+        saveResults(results, multiTraces, outputName + " Multi");
 
-      // Save centroids
-      outputName += " Centroids";
-      final MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
+        // Save centroids
+        outputName += " Centroids";
+        saveCentroidResults(results, traces, outputName);
 
-      // Save traces separately
-      saveCentroidResults(results, multiTraces, outputName + " Multi");
+        // Save traces separately
+        saveCentroidResults(results, multiTraces, outputName + " Multi");
+      }
 
       // Sort traces by time to assist the results source in extracting frames sequentially.
       // Do this before saving to assist in debugging using the saved traces file.
@@ -512,7 +525,7 @@ public class TraceMolecules implements PlugIn {
           settings.getDistanceThreshold(), timeThresholdInSeconds());
 
       IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(),
-          tracedResults.size(), totalFiltered));
+          traces.length, totalFiltered));
     }
     if (allResults.size() > 1) {
       IJ.showProgress(-1);
@@ -959,6 +972,7 @@ public class TraceMolecules implements PlugIn {
     gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
     gd.addNumericField("Pulse_window", settings.getPulseWindow(), 0, 6, "Frames");
     gd.addCheckbox("Split_pulses", settings.getSplitPulses());
+    gd.addCheckbox("Save_derived_datasets", pluginSettings.saveDerivedDatasets);
     if (!multiMode) {
       gd.addCheckbox("Optimise", settings.getOptimise());
       gd.addCheckbox("Save_traces", settings.getSaveTraces());
@@ -1025,6 +1039,7 @@ public class TraceMolecules implements PlugIn {
     settings.setPulseInterval((int) gd.getNextNumber());
     settings.setPulseWindow((int) gd.getNextNumber());
     settings.setSplitPulses(gd.getNextBoolean());
+    pluginSettings.saveDerivedDatasets = gd.getNextBoolean();
     if (!multiMode) {
       settings.setOptimise(gd.getNextBoolean());
       settings.setSaveTraces(gd.getNextBoolean());
@@ -1098,6 +1113,7 @@ public class TraceMolecules implements PlugIn {
         getClusteringAlgorithm(settings.getClusteringAlgorithm()).ordinal());
     gd.addNumericField("Pulse_interval", settings.getPulseInterval(), 0, 6, "Frames");
     gd.addCheckbox("Split_pulses", settings.getSplitPulses());
+    gd.addCheckbox("Save_derived_datasets", pluginSettings.saveDerivedDatasets);
     if (!multiMode) {
       gd.addCheckbox("Save_clusters", settings.getSaveTraces());
       gd.addCheckbox("Show_histograms", settings.getShowHistograms());
@@ -1131,6 +1147,7 @@ public class TraceMolecules implements PlugIn {
     settings.setClusteringAlgorithm(gd.getNextChoiceIndex());
     settings.setPulseInterval((int) gd.getNextNumber());
     settings.setSplitPulses(gd.getNextBoolean());
+    pluginSettings.saveDerivedDatasets = gd.getNextBoolean();
     if (!multiMode) {
       settings.setSaveTraces(gd.getNextBoolean());
       settings.setShowHistograms(gd.getNextBoolean());
@@ -1205,6 +1222,7 @@ public class TraceMolecules implements PlugIn {
       cbDld.setState(config.isDisableLocalDiffusionModel());
       cbDim.setState(config.isDisableIntensityModel());
     });
+    gd.addCheckbox("Save_derived_datasets", pluginSettings.saveDerivedDatasets);
     if (!multiMode) {
       gd.addCheckbox("Save_traces", settings.getSaveTraces());
       gd.addCheckbox("Show_histograms", settings.getShowHistograms());
@@ -1225,6 +1243,7 @@ public class TraceMolecules implements PlugIn {
     settings.setDisappearanceThreshold((int) gd.getNextNumber());
     settings.setDisableLocalDiffusionModel(gd.getNextBoolean());
     settings.setDisableIntensityModel(gd.getNextBoolean());
+    pluginSettings.saveDerivedDatasets = gd.getNextBoolean();
     if (!multiMode) {
       settings.setSaveTraces(gd.getNextBoolean());
       settings.setShowHistograms(gd.getNextBoolean());

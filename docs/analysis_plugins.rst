@@ -382,6 +382,9 @@ The following parameters can be configured:
    * - Split pulses
      - Enable this to split traces that span the a pulse boundary into separate traces. Use this setting if your imaging conditions use pulsed activation and you have imaged for long enough between pulses to be sure that all fluorophores have photo-bleached.
 
+   * - Save derived datasets
+     - Enable this to save derived datasets to memory such as the singles, multi, and centroids.
+
    * - Optimise
      - If selected the plugin will provide a second dialog that allows a range of distance and time thresholds to be enumerated (see section :numref:`{number}: {name} <analysis_plugins:Optimisation>`).
 
@@ -395,11 +398,9 @@ The following parameters can be configured:
      - Save all the histogram data to a results directory to allow further analysis. A folder selection dialog will be presented after the tracing has finished.
 
 
-The plugin will trace the localisations and store the results in memory with a suffix ``Traced``. Two additional datasets are created: all single localisations which could not be joined are given a suffix ``Trace Singles``; all traces are given a suffix ``Traces``. The ``Trace Singles`` plus ``Traces`` datasets equals the ``Traced`` dataset.
+The plugin will trace the localisations and store the results in memory with a suffix ``Traced``. Additional derived datasets are optionally created: all single localisations which could not be joined are given a suffix ``Trace Singles``; all traces are given a suffix ``Traced Multi``; the centroids of all traces are given the suffix ``Traced Centroids``; and the centroids of the traces-only are given the suffix ``Traced Centroids Multi``. Note: The ``Traced Singles`` plus ``Traced Multi`` datasets equals the ``Traced`` dataset.
 
-A summary of the number of traces is shown on the ``ImageJ`` status bar. The results are accessible using the
-``Results Manager``
-plugin.
+A summary of the number of traces is shown on the ``ImageJ`` status bar. The results are accessible using the ``Results Manager`` plugin.
 
 
 .. index:: Pulse Analysis
@@ -613,6 +614,9 @@ The following options are available:
 
        Use this setting if your imaging conditions use pulsed activation and you have imaged for long enough between pulses to be sure that all fluorophores have photo-bleached.
 
+   * - Save derived datasets
+     - Enable this to save derived datasets to memory such as the singles, multi, and centroids.
+
    * - Save clusters
      - When the clustering is complete, show a file selection dialog to allow the clusters to be saved.
 
@@ -623,7 +627,9 @@ The following options are available:
      - Save all the histogram data to a results directory to allow further analysis. A folder selection dialog will be presented after the clustering has finished.
 
 
-The plugin will cluster the localisations and store the results in memory with a suffix ``Clustered``. Two additional datasets are created: all single localisations which could not be joined are given a suffix ``Cluster Singles``; all clusters are given a suffix ``Clusters``. The ``Cluster Singles`` plus ``Clusters`` datasets equal the ``Clustered`` dataset.
+The plugin will cluster the localisations and store the results in memory with a suffix ``Clustered``. Additional derived datasets are optionally created: all single localisations which could not be joined are given a suffix ``Clustered Singles``; all clusters are given a suffix ``Clustered Multi``; the centroids of all clusters are given the suffix ``Clustered Centroids``; and the centroids of the clusters-only are given the suffix ``Clustered Centroids Multi``. Note: The ``Clustered Singles`` plus ``Clustered Multi`` datasets equals the ``Clustered`` dataset.
+
+A summary of the number of clusters is shown on the ``ImageJ`` status bar. The results are accessible using the ``Results Manager`` plugin.
 
 
 .. index:: Clustering Algorithms
@@ -743,6 +749,9 @@ This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`
    * - Defaults
      - Use this button to reset the values to the defaults as used in the original source paper (Sergé *et al*, 2008).
 
+   * - Save derived datasets
+     - Enable this to save derived datasets to memory such as the singles, multi, and centroids.
+
    * - Save traces
      - When the tracing is complete, show a file selection dialog to allow the traces to be saved.
 
@@ -752,7 +761,9 @@ This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`
    * - Save trace data
      - Save all the histogram data to a results directory to allow further analysis. A folder selection dialog will be presented after the tracing has finished.
 
-The plugin will trace the localisations and store the results in memory with a suffix ``Dynamic Traced``. Two additional datasets are created: all single localisations which could not be joined are given a suffix ``Cluster Singles``; all clusters are given a suffix ``Clusters``. The ``Cluster Singles`` plus ``Clusters`` datasets equal the ``Clustered`` dataset.
+The plugin will trace the localisations and store the results in memory with a suffix ``Dynamic Traced``. Additional derived datasets are optionally created: all single localisations which could not be joined are given a suffix ``Dynamic Traced Singles``; all traces are given a suffix ``Dynamic Traced Multi``; the centroids of all traces are given the suffix ``Dynamic Traced Centroids``; and the centroids of the traces-only are given the suffix ``Dynamic Traced Centroids Multi``. Note: The ``Dynamic Traced Singles`` plus ``Dynamic Traced Multi`` datasets equals the ``Dynamic Traced`` dataset.
+
+A summary of the number of traces is shown on the ``ImageJ`` status bar. The results are accessible using the ``Results Manager`` plugin.
 
 
 .. index:: ! Trace Molecules (Multi)
