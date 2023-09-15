@@ -28,6 +28,7 @@ import ij.WindowManager;
 import ij.gui.Plot;
 import ij.process.LUT;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -47,6 +48,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import org.apache.commons.statistics.distribution.PoissonDistribution;
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -54,9 +57,12 @@ import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SummariseResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
@@ -78,6 +84,7 @@ public class TraceDataTableModelFrame extends JFrame {
   private JMenuItem resultsShowTable;
   private JMenuItem analysisSelectPlots;
   private JMenuItem analysisPlot;
+  private JMenuItem analysisSlidingWindow;
   private JCheckBoxMenuItem editReadOnly;
   private JMenuItem editDelete;
   private JMenuItem editDeleteAll;
@@ -91,6 +98,8 @@ public class TraceDataTableModelFrame extends JFrame {
   private JMenuItem sourceShowImage;
   private JMenuItem sourceOverlay;
   private String saveName;
+  private int windowSize = 7;
+  private double pvalueThreshold = 1e-5;
 
   /** The result model used to display selected trace results. */
   private PeakResultTableModel resultModel;
@@ -224,6 +233,8 @@ public class TraceDataTableModelFrame extends JFrame {
     menu.setMnemonic(KeyEvent.VK_A);
     menu.add(analysisSelectPlots = add("Select Plots ...", KeyEvent.VK_S, null));
     menu.add(analysisPlot = add("Plot", KeyEvent.VK_P, "P"));
+    menu.addSeparator();
+    menu.add(analysisSlidingWindow = add("Sliding Window", KeyEvent.VK_W, null));
     return menu;
   }
 
@@ -283,6 +294,8 @@ public class TraceDataTableModelFrame extends JFrame {
       doAnalysisSelectPlots();
     } else if (src == analysisPlot) {
       doAnalysisPlot();
+    } else if (src == analysisSlidingWindow) {
+      doAnalysisSlidingWindow();
     }
   }
 
@@ -562,6 +575,73 @@ public class TraceDataTableModelFrame extends JFrame {
     plot.draw();
     plot.setLimitsToFit(true); // Seems to only work after drawing
     ImageJUtils.display(plot.getTitle(), plot, wo);
+  }
+
+  private void doAnalysisSlidingWindow() {
+    final TraceDataTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog("Window Analysis", this);
+    gd.addMessage("Compare intensity of localisations using two non-overlapping"
+        + "\nsliding windows. Large jumps are used to select possible localisation"
+        + "\noverlap (assuming overlaps are on for longer than the window length).");
+    gd.addSlider("Window_size", 2, 10, windowSize);
+    gd.addNumericField("Probability_threshold", pvalueThreshold, -2);
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return;
+    }
+    final int w = windowSize = Math.max(2, (int) gd.getNextNumber());
+    final double threshold = pvalueThreshold = MathUtils.clip(1e-10, 0.25, gd.getNextNumber());
+
+    final TypeConverter<IntensityUnit> toPhotons =
+        CalibrationHelper.getIntensityConverter(model.getCalibration(), IntensityUnit.PHOTON);
+
+    final IntArrayList select = new IntArrayList();
+    NEXT_TRACE: for (int i = 0; i < model.getRowCount(); i++) {
+      final Trace trace = model.get(i).getTrace();
+      if (trace.size() < 2 * w) {
+        continue;
+      }
+      // Extract intensity
+      final double[] intensity = new double[trace.size()];
+      for (int j = 0; j < intensity.length; j++) {
+        final PeakResult peak = trace.get(j);
+        if (peak.hasEndFrame()) {
+          // Invalidates analysis
+          continue NEXT_TRACE;
+        }
+        intensity[j] = toPhotons.convert(peak.getIntensity());
+      }
+      // Compare non-overlapping sliding windows
+      double m1 = mean(intensity, 0, w);
+      for (int to = 2 * w; to < intensity.length; to += w) {
+        final double m2 = mean(intensity, to - w, to);
+        // Create p-value using the smallest mean compared to the largest
+        final double min = Math.min(m1, m2);
+        final double max = Math.max(m1, m2);
+        final int x = (int) Math.round(max);
+        final PoissonDistribution pd = PoissonDistribution.of(min);
+        final double p = pd.survivalProbability(x);
+        if (p <= threshold) {
+          select.add(i);
+          break;
+        }
+        m1 = m2;
+      }
+    }
+    final int[] indices = select.toIntArray();
+    table.convertRowIndexToView(indices);
+    ListSelectionModelHelper.setSelectedIndices(table.getSelectionModel(), indices);
+  }
+
+  private static double mean(double[] array, int from, int to) {
+    double s = 0;
+    for (int i = from; i < to; i++) {
+      s += array[i];
+    }
+    return s / (to - from);
   }
 
   private TraceDataTableModel getModel() {
