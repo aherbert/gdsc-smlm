@@ -448,7 +448,7 @@ public class TraceManager {
             index + 1 == traces.size() ? traces : traces.subList(0, index + 1);
         Iterator<List<Trajectory>> iter = toIterator.apply(targetTraces);
         while (iter.hasNext()) {
-          List<Trajectory> activeTraces = iter.next();
+          final List<Trajectory> activeTraces = iter.next();
 
           // Rotate the candidate lists
           final LocalList<Localisation> tmp = targetCandidates;
