@@ -505,7 +505,7 @@ public class TraceMolecules implements PlugIn {
       sortByTime(traces);
 
       if (!multiMode && settings.getSaveTraces()) {
-        saveTraces(results, traces);
+        saveTracesToFile(results, traces);
       }
 
       summarise(results.getName(), mode, createSummaryTable(), traces, totalFiltered,
@@ -658,7 +658,7 @@ public class TraceMolecules implements PlugIn {
     return result.toArray(new Trace[0]);
   }
 
-  private void saveTraces(MemoryPeakResults results, Trace[] traces) {
+  private void saveTracesToFile(MemoryPeakResults results, Trace[] traces) {
     pluginSettings.filename =
         saveTraces(results, traces, createSettingsComment(), pluginSettings.filename, 0);
   }
