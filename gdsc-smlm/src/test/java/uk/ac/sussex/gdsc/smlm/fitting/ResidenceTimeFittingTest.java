@@ -259,7 +259,7 @@ class ResidenceTimeFittingTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"0.1, 3, 0.5, Infinity", "2, 4, 0.25, 7", "2, 4, 0.25, 5",})
+  @CsvSource({"0.1, 3, 0.5, Infinity", "2, 4, 0.25, 7", "2, 4, 0.25, 5"})
   void testModel2DefaultT(double k0, double k1, double f0, double upper) {
     final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
     final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
@@ -351,7 +351,7 @@ class ResidenceTimeFittingTest {
 
   @ParameterizedTest
   @CsvSource({"0.1, 3, 5, 0.5, 0.25, Infinity", "2, 4, 10, 0.25, 0.125, 7",
-      "2, 4, 10, 0.25, 0.125, 5",})
+      "2, 4, 10, 0.25, 0.125, 5"})
   void testModel3DefaultT(double k0, double k1, double k2, double f0, double f1, double upper) {
     final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
     final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
@@ -411,7 +411,7 @@ class ResidenceTimeFittingTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"0.1, Infinity", "0.3, Infinity", "0.1, 7", "0.1, 4",})
+  @CsvSource({"0.1, Infinity", "0.3, Infinity", "0.1, 7", "0.1, 4"})
   void testModel1(double k0, double upper) {
     final ExponentialDistribution d = ExponentialDistribution.of(1 / k0);
     final Model m = ResidenceTimeFitting.createModel(k0, upper);
@@ -439,7 +439,7 @@ class ResidenceTimeFittingTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"0.1, 3, 0.5, Infinity", "2, 4, 0.25, 0.35", "2, 4, 0.25, 0.5",})
+  @CsvSource({"0.1, 3, 0.5, Infinity", "2, 4, 0.25, 0.35", "2, 4, 0.25, 0.5"})
   void testModel2(double k0, double k1, double f0, double upper) {
     final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
     final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
@@ -475,7 +475,7 @@ class ResidenceTimeFittingTest {
 
   @ParameterizedTest
   @CsvSource({"0.1, 3, 5, 0.5, 0.25, Infinity", "2, 4, 10, 0.25, 0.125, 0.5",
-      "2, 4, 10, 0.25, 0.125, 0.375",})
+      "2, 4, 10, 0.25, 0.125, 0.375"})
   void testModel3(double k0, double k1, double k2, double f0, double f1, double upper) {
     final ExponentialDistribution d0 = ExponentialDistribution.of(1 / k0);
     final ExponentialDistribution d1 = ExponentialDistribution.of(1 / k1);
@@ -615,7 +615,7 @@ class ResidenceTimeFittingTest {
 
   @ParameterizedTest
   @CsvSource({"0.1, 3, 0.5, 200, 0.125, 7", "2, 4, 0.25, 200, 0.0625, 0.75",
-      "2, 4, 0.25, 200, 0.0625, 0.5",})
+      "2, 4, 0.25, 200, 0.0625, 0.5"})
   void testFunction2T(double k0, double k1, double f0, int size, double resolution, double upper) {
     // Create data
     final double f1 = 1 - f0;
@@ -697,7 +697,7 @@ class ResidenceTimeFittingTest {
 
   @ParameterizedTest
   @CsvSource({"0.1, 3, 5, 0.5, 0.25, 200, 0.125, 4", "2, 4, 10, 0.25, 0.5, 200, 0.0625, 0.5625",
-      "2, 4, 10, 0.25, 0.5, 200, 0.0625, 0.5",})
+      "2, 4, 10, 0.25, 0.5, 200, 0.0625, 0.5"})
   void testFunction3T(double k0, double k1, double k2, double f0, double f1, int size,
       double resolution, double upper) {
     // Create data

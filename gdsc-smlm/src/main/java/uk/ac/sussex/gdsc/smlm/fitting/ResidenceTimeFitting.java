@@ -456,7 +456,7 @@ public final class ResidenceTimeFitting {
   /**
    * Base function for fitting.
    */
-  private static abstract class BaseFunction {
+  private abstract static class BaseFunction {
     /** Count at each time point. */
     protected final int[] count;
     /** Time resolution. */
@@ -1162,8 +1162,8 @@ public final class ResidenceTimeFitting {
     SortUtils.sortData(f, k, true, false);
 
     final int eval = evaluations;
-    logger.info(() -> String.format("Fit (N=2) : %s (%s), MLE = %s (%d evaluations)",
-        formatK(k), format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
+    logger.info(() -> String.format("Fit (N=2) : %s (%s), MLE = %s (%d evaluations)", formatK(k),
+        format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
 
     return Pair.of(fr, createModel(k[0], k[1], f[0], upper));
   }
