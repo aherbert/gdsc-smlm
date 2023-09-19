@@ -1054,8 +1054,8 @@ public final class ResidenceTimeFitting {
 
     // Bound on rate set using the range of the residence times
     // Limit fraction to the the (0, 1) interval.
-    final double hi = 1 / (1e-3 * resolution);
-    final double lo = 1 / (1e3 * (resolution * count.length));
+    final double hi = 1 / (1e-1 * resolution);
+    final double lo = 1 / (1e1 * (resolution * count.length));
     final double[] lB = {lo, lo, 1e-9};
     final double[] uB = {hi, hi, 1 - 1e-9};
     final SimpleBounds bounds = new SimpleBounds(lB, uB);
@@ -1162,8 +1162,8 @@ public final class ResidenceTimeFitting {
     SortUtils.sortData(f, k, true, false);
 
     final int eval = evaluations;
-    logger.info(() -> String.format("Fit (N=2) : %s (%s), MLE = %s (%d evaluations)", formatK(k),
-        format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
+    logger.info(() -> String.format("Fit (N=2) : %s (%s), MLE = %s (%d evaluations)",
+        formatK(k), format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
 
     return Pair.of(fr, createModel(k[0], k[1], f[0], upper));
   }
@@ -1210,8 +1210,8 @@ public final class ResidenceTimeFitting {
 
     // Bound on rate set using the range of the residence times
     // Limit fraction to the the (0, 1) interval.
-    final double hi = 1 / (1e-3 * resolution);
-    final double lo = 1 / (1e3 * (resolution * count.length));
+    final double hi = 1 / (1e-1 * resolution);
+    final double lo = 1 / (1e1 * (resolution * count.length));
     final double[] lB = {lo, lo, lo, 1e-9, 1e-9, 1e-9};
     final double[] uB = {hi, hi, hi, 1 - 1e-9, 1 - 1e-9, 1 - 1e-9};
     final SimpleBounds bounds = new SimpleBounds(lB, uB);
