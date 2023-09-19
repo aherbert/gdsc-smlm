@@ -43,7 +43,8 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
  * <p>The class is based on the
  * org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer but updated to support:
  * (a) convergence on the position; (b) convergence when using the original basis vectors; (c)
- * support bounds checking on the current point within the optimisation space.
+ * support bounds checking on the current point within the optimisation space; (d) correct support
+ * for the goal type by always performing minimum fitting and then inverting the result if required.
  */
 public class CustomPowellOptimizer extends MultivariateOptimizer {
   /**
@@ -187,7 +188,6 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
 
   @Override
   protected PointValuePair doOptimize() {
-    final GoalType goal = getGoalType();
     final double[] guess = getStartPoint();
     final int n = guess.length;
 
@@ -197,10 +197,17 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
 
     final ConvergenceChecker<PointValuePair> checker = getConvergenceChecker();
 
+    // Note:
+    // This method originates in Commons Math with support for a goal type.
+    // However the comparisons of the objective function appear to require minimisation.
+    // Use a multiplier to switch sign on the objective function value.
+    final double multiplier =
+        CustomPowellOptimizer.this.getGoalType() == GoalType.MAXIMIZE ? -1 : 1;
+
     double[] x = guess;
     // Ensure the point is within bounds
     applyBounds(x);
-    double functionValue = computeObjectiveValue(x);
+    double functionValue = computeObjectiveValue(x) * multiplier;
     double[] x1 = x.clone();
     for (;;) {
       incrementIterationCount();
@@ -254,13 +261,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
           // Reset to the basis vectors and continue
           reset = true;
         } else {
-          final PointValuePair answer;
-          if (goal == GoalType.MINIMIZE) {
-            answer = (functionValue < fX) ? current : previous;
-          } else {
-            answer = (functionValue > fX) ? current : previous;
-          }
-          return answer;
+          final PointValuePair answer = functionValue < fX ? current : previous;
+          // Apply the multiplier to correct the sign of the result
+          return new PointValuePair(answer.getPointRef(), answer.getValue() * multiplier, false);
         }
       }
 
@@ -278,7 +281,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
       applyBounds(x2);
 
       x1 = x.clone();
-      fX2 = computeObjectiveValue(x2);
+      fX2 = computeObjectiveValue(x2) * multiplier;
 
       // See if we can continue along the overall search direction to find a better value
       if (fX > fX2) {
@@ -420,6 +423,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
      */
     public UnivariatePointValuePair search(final double[] p, final double[] d) {
       final int n = p.length;
+      // Switch sign for maximize goal type so we always use a minimize search
+      final double multiplier =
+          CustomPowellOptimizer.this.getGoalType() == GoalType.MAXIMIZE ? -1 : 1;
       final UnivariateFunction f = new UnivariateFunction() {
         final double[] x = new double[n];
 
@@ -430,16 +436,16 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
           }
           // Ensure the point is within bounds
           applyBounds(x);
-          return CustomPowellOptimizer.this.computeObjectiveValue(x);
+          return CustomPowellOptimizer.this.computeObjectiveValue(x) * multiplier;
         }
       };
 
-      final GoalType goal = CustomPowellOptimizer.this.getGoalType();
-      bracket.search(f, goal, 0, 1);
+      bracket.search(f, GoalType.MINIMIZE, 0, 1);
       // Passing "MAX_VALUE" as a dummy value because it is the enclosing
       // class that counts the number of evaluations (and will eventually
       // generate the exception).
-      return optimize(new MaxEval(Integer.MAX_VALUE), new UnivariateObjectiveFunction(f), goal,
+      return optimize(new MaxEval(Integer.MAX_VALUE), new UnivariateObjectiveFunction(f),
+          GoalType.MINIMIZE,
           new SearchInterval(bracket.getLo(), bracket.getHi(), bracket.getMid()));
     }
   }
