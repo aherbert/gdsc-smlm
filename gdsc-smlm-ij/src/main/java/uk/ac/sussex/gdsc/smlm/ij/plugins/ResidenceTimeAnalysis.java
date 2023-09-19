@@ -766,6 +766,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
     final DoubleUnaryOperator residenceTime = createResidenceTimeFunction();
 
     final int max = MathUtils.clip(1, 3, settings.maxPopulations);
+    Model best = null;
+    double bestAic = Double.POSITIVE_INFINITY;
     for (int n = 1; n <= max; n++) {
       final Pair<FitResult, Model> f = rt.fit(n, logger);
       if (f == null) {
@@ -808,6 +810,12 @@ public class ResidenceTimeAnalysis implements PlugIn {
               TextUtils.nanosToString(System.nanoTime() - start)));
       IJ.showStatus("");
 
+      final double aic = MathUtils.getAkaikeInformationCriterion(r.getLogLikelihood(), r.getP());
+      if (aic < bestAic) {
+        bestAic = aic;
+        best = m;
+      }
+
       // Report results
       final StringBuilder sb = new StringBuilder(256);
       sb.append(title).append('\t').append(samples).append('\t').append(exposureTime).append('\t')
@@ -819,15 +827,29 @@ public class ResidenceTimeAnalysis implements PlugIn {
       sb.append('\t').append(MathUtils.rounded(Math.max(settings.apparentDissociationRate, 0)));
       append(sb, n, i -> residenceTime.applyAsDouble(m.getRate(i)));
       appendCI(sb, n, models, (mm, i) -> residenceTime.applyAsDouble(mm.getRate(i)));
-      sb.append('\t').append(r.getLogLikelihood()).append('\t')
-          .append(MathUtils.getAkaikeInformationCriterion(r.getLogLikelihood(), r.getP()))
-          .append('\t').append(
-              MathUtils.getBayesianInformationCriterion(r.getLogLikelihood(), r.getN(), r.getP()));
+      sb.append('\t').append(r.getLogLikelihood()).append('\t').append(aic).append('\t').append(
+          MathUtils.getBayesianInformationCriterion(r.getLogLikelihood(), r.getN(), r.getP()));
       summary.accept(sb.toString());
 
       if (settings.showQQplot) {
         showQqPlot(exposureTime, counts, m, wo);
       }
+    }
+    // Warn about poor fitting on truncated data
+    if (best != null) {
+      final int n = best.getSize();
+      final double[] times = new double[n];
+      for (int i = 0; i < n; i++) {
+        // Time in seconds
+        times[i] = residenceTime.applyAsDouble(best.getRate(i));
+      }
+      if (times[0] * 4e3 > t[t.length - 1]) {
+        logger.warning(() -> "Best fit has a mean residence time above 1/4 of the input data range;"
+            + " truncated distribution fitting may not be accurate.");
+      }
+      plot.setColor(COLORS[n - 1]);
+      plot.addLabel(0, 0, Arrays.stream(times).mapToObj(MathUtils::rounded)
+          .collect(Collectors.joining(", ", "Residence time: ", "")));
     }
     plot.setColor(Color.black);
     plot.addLegend(legend.toString(), "top-right");
