@@ -34,7 +34,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
@@ -764,17 +763,18 @@ public class ResidenceTimeAnalysis implements PlugIn {
         SimpleArrayUtils.newArray((counts.length - 1) * steps, 0, (float) (exposureTime / steps));
 
     final DoubleUnaryOperator residenceTime = createResidenceTimeFunction();
+    final Predicate<Pair<FitResult, Model>> fitAccept =
+        createFitAcceptPredicate(exposureTime, counts);
 
     final int max = MathUtils.clip(1, 3, settings.maxPopulations);
     Model best = null;
     double bestAic = Double.POSITIVE_INFINITY;
     for (int n = 1; n <= max; n++) {
       final Pair<FitResult, Model> f = rt.fit(n, logger);
-      if (f == null) {
+      if (!fitAccept.test(f)) {
         continue;
       }
       final FitResult r = f.getLeft();
-      // Note: Use of the model requires knowing if the p-value must be scaled due to truncation
       final Model m = f.getRight();
 
       // Add to fitted SF curve to plot:
@@ -803,7 +803,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
             ResidenceTimeFitting.of(exposureTime / 1000, h, clipped).fit(m.getSize());
         ticker.tick();
         return fit;
-      }).filter(Objects::nonNull).map(Pair::getRight).collect(Collectors.toList());
+      }).filter(fitAccept).map(Pair::getRight).collect(Collectors.toList());
       logger.log(getTimingLogLevel(),
           () -> String.format("Fitted %d/%d Bootstrap samples (n=%d) in %s", models.size(),
               bootstrapSamples.length, m.getSize(),
@@ -909,6 +909,31 @@ public class ResidenceTimeAnalysis implements PlugIn {
   private DoubleUnaryOperator createResidenceTimeFunction() {
     final double kb = settings.apparentDissociationRate;
     return kb > 0 ? k -> 1 / Math.max(0, k - kb) : k -> 1 / k;
+  }
+
+  /**
+   * Create a predicate to test whether to accept a fit.
+   *
+   * @param exposureTime the exposure time (in milliseconds)
+   * @param counts the counts
+   * @return the predicate
+   */
+  private static Predicate<Pair<FitResult, Model>> createFitAcceptPredicate(double exposureTime,
+      int[] counts) {
+    final double max = counts.length * exposureTime / 1000;
+    // If the entire distribution is within a single bin of the histogram then the fit
+    // is invalid. Set a threshold based on 95% of the CDF of an exponential in the exposure
+    // time. exponential(mean=1) inverse cdf(0.95) = 2.9957
+    final double min = exposureTime / 1000 / 3;
+    return fit -> {
+      if (fit == null) {
+        return false;
+      }
+      final Model m = fit.getRight();
+      final int n = m.getSize();
+      // Assume the model returns the residence times in descending order
+      return m.getResidenceTime(0) < max && m.getResidenceTime(n - 1) > min;
+    };
   }
 
   /**
