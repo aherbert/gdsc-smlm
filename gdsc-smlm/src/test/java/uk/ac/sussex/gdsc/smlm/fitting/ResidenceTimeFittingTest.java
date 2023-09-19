@@ -527,29 +527,20 @@ class ResidenceTimeFittingTest {
 
     final Function1 f = new Function1(n, resolution);
 
-    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(0.05);
-    final DoubleDoubleBiPredicate testExp2 = Predicates.doublesAreRelativelyClose(1e-6);
+    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-10);
     final DoubleDoubleBiPredicate testGeo = Predicates.doublesAreRelativelyClose(1e-10);
     for (double s = 1.0 / 4; s <= 4; s *= 2) {
       final double k = k0 * s;
       final double ll = f.ll(k);
       final ExponentialDistribution de = ExponentialDistribution.of(1 / k);
+      final GeometricDistribution dg = GeometricDistribution.of(-Math.expm1(-k * resolution));
       double e = 0;
-      for (int i = 0; i < x.length; i++) {
-        e += de.logDensity(x[i]);
+      double e2 = 0;
+      for (int i = 0; i < n.length; i++) {
+        e += n[i] * Math.log(de.probability(i * resolution, (i + 1) * resolution));
+        e2 += n[i] * dg.logProbability(i);
       }
       TestAssertions.assertTest(e, ll, testExp, () -> "rate = " + k);
-      final GeometricDistribution dg = GeometricDistribution.of(-Math.expm1(-k * resolution));
-      e = 0;
-      double e2 = 0;
-      final double logr = Math.log(resolution);
-      for (int i = 0; i < n.length; i++) {
-        // Scaled probability maps each continuous interval to a discrete PMF value: p / resolution
-        // log(p) - log(resolution)
-        e += n[i] * Math.log(de.probability(i * resolution, (i + 1) * resolution) / resolution);
-        e2 += n[i] * (dg.logProbability(i) - logr);
-      }
-      TestAssertions.assertTest(e, ll, testExp2, () -> "rate = " + k);
       TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + k);
     }
   }
@@ -565,7 +556,7 @@ class ResidenceTimeFittingTest {
 
     final Function1T f = new Function1T(n, resolution, upper);
 
-    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-6);
+    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-10);
     final DoubleDoubleBiPredicate testGeo = Predicates.doublesAreRelativelyClose(1e-10);
     for (double s = 1.0 / 4; s <= 4; s *= 2) {
       final double k = k0 * s;
@@ -576,13 +567,11 @@ class ResidenceTimeFittingTest {
       final double normg = Math.log(dg.cumulativeProbability((int) (upper / resolution) - 1));
       double e = 0;
       double e2 = 0;
-      final double logr = Math.log(resolution);
       for (int i = 0; i < n.length; i++) {
         // Scaled probability maps each continuous interval to a discrete PMF value: p / resolution
         // log(p) - log(resolution)
-        e += n[i]
-            * (Math.log(de.probability(i * resolution, (i + 1) * resolution) / resolution) - norme);
-        e2 += n[i] * (dg.logProbability(i) - logr - normg);
+        e += n[i] * (Math.log(de.probability(i * resolution, (i + 1) * resolution)) - norme);
+        e2 += n[i] * (dg.logProbability(i) - normg);
       }
       TestAssertions.assertTest(e, ll, testExp, () -> "rate = " + k);
       TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + k);
@@ -601,12 +590,7 @@ class ResidenceTimeFittingTest {
 
     final Function2 f = new Function2(n, resolution);
 
-    // The LL values are not close when the expected approaches close to zero
-    // so we lower the tolerance. At the optimum and far from the optimum the LL
-    // is far from zero and here the values are close.
-    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(0.05);
-    final DoubleDoubleBiPredicate testExp1 = Predicates.doublesAreRelativelyClose(0.3);
-    final DoubleDoubleBiPredicate testExp2 = Predicates.doublesAreRelativelyClose(1e-6);
+    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-10);
     final DoubleDoubleBiPredicate testGeo = Predicates.doublesAreRelativelyClose(1e-10);
     for (double s = 1.0 / 4; s <= 4; s *= 2) {
       final double ka = k0 * s;
@@ -614,22 +598,17 @@ class ResidenceTimeFittingTest {
       final double ll = f.ll(ka, kb, f0);
       final ExponentialDistribution de0 = ExponentialDistribution.of(1 / ka);
       final ExponentialDistribution de1 = ExponentialDistribution.of(1 / kb);
-      double e = 0;
-      for (int i = 0; i < x.length; i++) {
-        e += Math.log(f0 * de0.density(x[i]) + f1 * de1.density(x[i]));
-      }
-      TestAssertions.assertTest(e, ll, Math.abs(e) < 5 ? testExp1 : testExp);
       final GeometricDistribution dg0 = GeometricDistribution.of(-Math.expm1(-ka * resolution));
       final GeometricDistribution dg1 = GeometricDistribution.of(-Math.expm1(-kb * resolution));
-      e = 0;
+      double e = 0;
       double e2 = 0;
       for (int i = 0; i < n.length; i++) {
         // Scaled probability maps each continuous interval to a discrete PMF value: p / resolution
-        e += n[i] * Math.log(f0 * de0.probability(i * resolution, (i + 1) * resolution) / resolution
-            + f1 * de1.probability(i * resolution, (i + 1) * resolution) / resolution);
-        e2 += n[i] * Math.log((f0 * dg0.probability(i) + f1 * dg1.probability(i)) / resolution);
+        e += n[i] * Math.log(f0 * de0.probability(i * resolution, (i + 1) * resolution)
+            + f1 * de1.probability(i * resolution, (i + 1) * resolution));
+        e2 += n[i] * Math.log((f0 * dg0.probability(i) + f1 * dg1.probability(i)));
       }
-      TestAssertions.assertTest(e, ll, testExp2, () -> "rate = " + ka + " " + kb);
+      TestAssertions.assertTest(e, ll, testExp, () -> "rate = " + ka + " " + kb);
       TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + ka + " " + kb);
     }
   }
@@ -647,10 +626,7 @@ class ResidenceTimeFittingTest {
 
     final Function2T f = new Function2T(n, resolution, upper);
 
-    // The LL values are not close when the expected approaches close to zero
-    // so we lower the tolerance. At the optimum and far from the optimum the LL
-    // is far from zero and here the values are close.
-    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-6);
+    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-10);
     final DoubleDoubleBiPredicate testGeo = Predicates.doublesAreRelativelyClose(1e-10);
     for (double s = 1.0 / 4; s <= 4; s *= 2) {
       final double ka = k0 * s;
@@ -668,11 +644,10 @@ class ResidenceTimeFittingTest {
       double e2 = 0;
       for (int i = 0; i < n.length; i++) {
         // Scaled probability maps each continuous interval to a discrete PMF value: p / resolution
-        e += n[i] * Math
-            .log(f0 * de0.probability(i * resolution, (i + 1) * resolution) / resolution / norme0
-                + f1 * de1.probability(i * resolution, (i + 1) * resolution) / resolution / norme1);
-        e2 += n[i] * Math.log(
-            (f0 * dg0.probability(i) / normg0 + f1 * dg1.probability(i) / normg1) / resolution);
+        e += n[i] * Math.log(f0 * de0.probability(i * resolution, (i + 1) * resolution) / norme0
+            + f1 * de1.probability(i * resolution, (i + 1) * resolution) / norme1);
+        e2 +=
+            n[i] * Math.log((f0 * dg0.probability(i) / normg0 + f1 * dg1.probability(i) / normg1));
       }
       TestAssertions.assertTest(e, ll, testExp, () -> "rate = " + ka + " " + kb);
       TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + ka + " " + kb);
@@ -693,9 +668,7 @@ class ResidenceTimeFittingTest {
 
     final Function3 f = new Function3(n, resolution);
 
-    // The LL values are not a close match for direct computation using the log density.
-    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(0.3);
-    final DoubleDoubleBiPredicate testExp2 = Predicates.doublesAreRelativelyClose(1e-6);
+    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-10);
     final DoubleDoubleBiPredicate testGeo = Predicates.doublesAreRelativelyClose(1e-10);
     for (double s = 1.0 / 4; s <= 4; s *= 2) {
       final double ka = k0 * s;
@@ -705,26 +678,19 @@ class ResidenceTimeFittingTest {
       final ExponentialDistribution de0 = ExponentialDistribution.of(1 / ka);
       final ExponentialDistribution de1 = ExponentialDistribution.of(1 / kb);
       final ExponentialDistribution de2 = ExponentialDistribution.of(1 / kc);
-      double e = 0;
-      for (int i = 0; i < x.length; i++) {
-        e += Math.log(f0 * de0.density(x[i]) + f1 * de1.density(x[i]) + f2 * de2.density(x[i]));
-      }
-      TestAssertions.assertTest(e, ll, testExp);
       final GeometricDistribution dg0 = GeometricDistribution.of(-Math.expm1(-ka * resolution));
       final GeometricDistribution dg1 = GeometricDistribution.of(-Math.expm1(-kb * resolution));
       final GeometricDistribution dg2 = GeometricDistribution.of(-Math.expm1(-kc * resolution));
-      e = 0;
+      double e = 0;
       double e2 = 0;
       for (int i = 0; i < n.length; i++) {
-        // Scaled probability maps each continuous interval to a discrete PMF value: p / resolution
-        e += n[i] * Math.log(f0 * de0.probability(i * resolution, (i + 1) * resolution) / resolution
-            + f1 * de1.probability(i * resolution, (i + 1) * resolution) / resolution
-            + f2 * de2.probability(i * resolution, (i + 1) * resolution) / resolution);
-        e2 += n[i]
-            * Math.log((f0 * dg0.probability(i) + f1 * dg1.probability(i) + f2 * dg2.probability(i))
-                / resolution);
+        e += n[i] * Math.log(f0 * de0.probability(i * resolution, (i + 1) * resolution)
+            + f1 * de1.probability(i * resolution, (i + 1) * resolution)
+            + f2 * de2.probability(i * resolution, (i + 1) * resolution));
+        e2 += n[i] * Math
+            .log((f0 * dg0.probability(i) + f1 * dg1.probability(i) + f2 * dg2.probability(i)));
       }
-      TestAssertions.assertTest(e, ll, testExp2, () -> "rate = " + ka + " " + kb + " " + kc);
+      TestAssertions.assertTest(e, ll, testExp, () -> "rate = " + ka + " " + kb + " " + kc);
       TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + ka + " " + kb + " " + kc);
     }
   }
@@ -744,8 +710,7 @@ class ResidenceTimeFittingTest {
 
     final Function3T f = new Function3T(n, resolution, upper);
 
-    // The LL values are not a close match for direct computation using the log density.
-    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-6);
+    final DoubleDoubleBiPredicate testExp = Predicates.doublesAreRelativelyClose(1e-10);
     final DoubleDoubleBiPredicate testGeo = Predicates.doublesAreRelativelyClose(1e-10);
     for (double s = 1.0 / 4; s <= 4; s *= 2) {
       final double ka = k0 * s;
@@ -768,12 +733,11 @@ class ResidenceTimeFittingTest {
       double e2 = 0;
       for (int i = 0; i < n.length; i++) {
         // Scaled probability maps each continuous interval to a discrete PMF value: p / resolution
-        e += n[i] * Math
-            .log(f0 * de0.probability(i * resolution, (i + 1) * resolution) / resolution / norme0
-                + f1 * de1.probability(i * resolution, (i + 1) * resolution) / resolution / norme1
-                + f2 * de2.probability(i * resolution, (i + 1) * resolution) / resolution / norme2);
+        e += n[i] * Math.log(f0 * de0.probability(i * resolution, (i + 1) * resolution) / norme0
+            + f1 * de1.probability(i * resolution, (i + 1) * resolution) / norme1
+            + f2 * de2.probability(i * resolution, (i + 1) * resolution) / norme2);
         e2 += n[i] * Math.log((f0 * dg0.probability(i) / normg0 + f1 * dg1.probability(i) / normg1
-            + f2 * dg2.probability(i) / normg2) / resolution);
+            + f2 * dg2.probability(i) / normg2));
       }
       TestAssertions.assertTest(e, ll, testExp, () -> "rate = " + ka + " " + kb + " " + kc);
       TestAssertions.assertTest(e2, ll, testGeo, () -> "rate = " + ka + " " + kb + " " + kc);
@@ -802,6 +766,9 @@ class ResidenceTimeFittingTest {
 
   final DoubleDoubleBiPredicate deltaR = Predicates.doublesAreClose(0.1, 0);
   final DoubleDoubleBiPredicate deltaF = Predicates.doublesAreClose(0.2, 0);
+
+  final DoubleDoubleBiPredicate deltaRT = Predicates.doublesAreClose(0.25, 0);
+  final DoubleDoubleBiPredicate deltaFT = Predicates.doublesAreClose(0.25, 0);
 
   // Used for testing dual populations:
   // 10-fold, 50-fold, 500-fold difference between residence times
@@ -949,7 +916,7 @@ class ResidenceTimeFittingTest {
   @Test
   void canFitTriple0_2PopulationFixedSeed() {
     // Ensure the triple-population fit is performed at least once
-    fitTriplePopulation(null, 0.25, 0.2, 0.3, 1236478126821268L);
+    fitTriplePopulation(null, 0.125, 0.2, 0.2, 1236478126821268L);
   }
 
   // @SeededTest
@@ -1005,8 +972,8 @@ class ResidenceTimeFittingTest {
     final UniformRandomProvider rng = RngFactory.create(1236478126821268L);
     final double r = RHO[0];
     final double resolution = r * 0.125;
-    fit(rng, "Single ", 5000, 1, new double[] {r}, new double[] {1}, resolution, r);
     fit(rng, "Single ", 5000, 1, new double[] {r}, new double[] {1}, resolution, r * 2);
+    fit(rng, "Single ", 5000, 1, new double[] {r}, new double[] {1}, resolution, r * 1.5);
   }
 
   @Test
@@ -1016,12 +983,13 @@ class ResidenceTimeFittingTest {
     final double r1 = RHO[1];
     // Set resolution using the smallest residence time
     final double resolution = Math.min(r0, r1) * 0.125;
+    final double f0 = 0.75;
     // Truncate using the largest residence time.
     // This cannot remove too much of the the largest distribution.
     final double upper = Math.max(r0, r1);
-    fit(rng, "Dual ", 5000, 2, new double[] {r0, r1}, new double[] {0.75, 0.25}, resolution,
+    fit(rng, "Dual ", 5000, 2, new double[] {r0, r1}, new double[] {f0, 1 - f0}, resolution,
         upper * 2);
-    fit(rng, "Dual ", 10000, 2, new double[] {r0, r1}, new double[] {0.75, 0.25}, resolution,
+    fit(rng, "Dual ", 10000, 2, new double[] {r0, r1}, new double[] {f0, 1 - f0}, resolution,
         upper * 1.5);
   }
 
@@ -1033,12 +1001,14 @@ class ResidenceTimeFittingTest {
     final double r2 = RHO[2];
     // Set resolution using the smallest residence time
     final double resolution = MathUtils.min(r0, r1, r2) * 0.125;
+    final double f0 = 0.5;
+    final double f1 = 0.25;
     // Truncate using the largest residence time
     // This cannot remove too much of the the largest distribution.
     final double upper = MathUtils.max(r0, r1, r2);
-    fit(rng, "Triple ", 5000, 3, new double[] {r0, r1, r2}, new double[] {0.5, 0.25, 0.25},
+    fit(rng, "Triple ", 5000, 3, new double[] {r0, r1, r2}, new double[] {f0, f1, 1 - f0 - f1},
         resolution, upper * 2);
-    fit(rng, "Triple ", 10000, 3, new double[] {r0, r1, r2}, new double[] {0.5, 0.25, 0.25},
+    fit(rng, "Triple ", 10000, 3, new double[] {r0, r1, r2}, new double[] {f0, f1, 1 - f0 - f1},
         resolution, upper * 1.5);
   }
 
@@ -1127,11 +1097,16 @@ class ResidenceTimeFittingTest {
     //if (f.length == 2 && Math.min(f[0],f[1])/(f[0]+f[1]) <= 0.2) return;
     // @formatter:on
 
+    final boolean truncated = upper < Double.POSITIVE_INFINITY;
+    if (truncated) {
+      Assertions.assertEquals(Math.round(upper / resolution), upper / resolution, 1e-3,
+          () -> "Invalid upper bound, set at interval: " + upper / resolution);
+    }
+
     JumpDistanceAnalysis.sort(r, fraction);
     final double[] data = createData(rng, samples, r, fraction);
     final int[] h = DataSample.toBins(data, resolution, upper);
 
-    final boolean truncated = upper < Double.POSITIVE_INFINITY;
     Assumptions.assumeTrue(h.length > 1,
         () -> String.format("Simulation did not generate enough timepoints: %d, %s, %s, %s, %s",
             samples, Arrays.toString(r), Arrays.toString(fraction), resolution, upper));
@@ -1154,8 +1129,8 @@ class ResidenceTimeFittingTest {
       Assertions.assertEquals(Arrays.stream(h).sum(), fr.getN(), "n");
       Assertions.assertEquals(2 * n - 1, fr.getP(), "parameters");
       final double ll = IntStream.range(0, h.length)
-          .mapToDouble(i -> h[i]
-              * Math.log((model.sf(i * resolution) - model.sf((i + 1) * resolution)) / resolution))
+          .mapToDouble(
+              i -> h[i] * Math.log((model.sf(i * resolution) - model.sf((i + 1) * resolution))))
           .sum();
       Assertions.assertEquals(ll, fr.getLogLikelihood(), Math.abs(ll) * 0.05, "log-likelihood");
     }
@@ -1167,8 +1142,14 @@ class ResidenceTimeFittingTest {
 
     AssertionError error = null;
     try {
-      TestAssertions.assertArrayTest(r, fitR, deltaR, "Failed to fit residence time (r)");
-      TestAssertions.assertArrayTest(fraction, fitF, deltaF, "Failed to fit f");
+      double[] fitRR = fitR;
+      double[] fitFF = fitF;
+      Supplier<String> msg = () -> Arrays.toString(fitRR) + ":" + Arrays.toString(fitFF);
+      DoubleDoubleBiPredicate testR = truncated ? deltaRT : deltaR;
+      DoubleDoubleBiPredicate testF = truncated ? deltaFT : deltaF;
+      TestAssertions.assertArrayTest(r, fitR, testR,
+          "Failed to fit residence time (r): " + msg.get());
+      TestAssertions.assertArrayTest(fraction, fitF, testF, "Failed to fit f: " + msg.get());
     } catch (final AssertionError ex) {
       error = ex;
     } finally {

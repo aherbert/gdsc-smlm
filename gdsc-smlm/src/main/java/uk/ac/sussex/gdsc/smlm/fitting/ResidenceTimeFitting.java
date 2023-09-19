@@ -518,15 +518,12 @@ public final class ResidenceTimeFitting {
       for (int x = 1; x < count.length; x++) {
         sum += count[x] * (log1mp * x);
       }
-      // Since the exponential has been scaled by 'resolution' to map to the geometric,
-      // all p-values are too small for the equivalent exponential.
-      // Scale the p-values back: p / resolution => c * -log(resolution)
 
       // If the histogram was truncated the geometric distribution must be adjusted to sum
       // to 1 between 0 and the upper bound (u). This can be done by dividing all probabilities
       // by CDF(u), or subtracting log(CDF(u)).
 
-      sum += total * (logp - Math.log(resolution) - getLogCdfUpper(k));
+      sum += total * (logp - getLogCdfUpper(k));
       return sum;
     }
 
@@ -615,10 +612,6 @@ public final class ResidenceTimeFitting {
         sum +=
             count[x] * Math.log(f0p0 * StdMath.exp(log1mp0 * x) + f1p1 * StdMath.exp(log1mp1 * x));
       }
-      // Since the exponential has been scaled by 'resolution' to map to the geometric,
-      // all p-values are too small for the equivalent exponential.
-      // Scale the p-values back: p / resolution => c * -log(resolution)
-      sum -= total * Math.log(resolution);
       return sum;
     }
 
@@ -715,10 +708,6 @@ public final class ResidenceTimeFitting {
         sum += count[x] * Math.log(f0p0 * StdMath.exp(log1mp0 * x) + f1p1 * StdMath.exp(log1mp1 * x)
             + f2p2 * StdMath.exp(log1mp2 * x));
       }
-      // Since the exponential has been scaled by 'resolution' to map to the geometric,
-      // all p-values are too small for the equivalent exponential.
-      // Scale the p-values back: p / resolution => c * -log(resolution)
-      sum -= total * Math.log(resolution);
       return sum;
     }
 
