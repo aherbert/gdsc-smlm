@@ -77,6 +77,8 @@ public final class ResidenceTimeFitting {
   private final int[] count;
   /** Time resolution (smallest difference between adjacent time points. */
   private final double resolution;
+  /** Set to true to use truncated exponential distributions. */
+  private final boolean truncated;
 
   /**
    * Contains the residence time model for a mixture of populations.
@@ -124,16 +126,48 @@ public final class ResidenceTimeFitting {
     }
 
     /**
+     * Gets the upper bound for the residence time. This will be in the range [0, infinity].
+     *
+     * <p>Note: If the upper bound is finite then the model represents a truncated distribution.
+     *
+     * @return the upper bound
+     */
+    default double getUpperBound() {
+      return Double.POSITIVE_INFINITY;
+    }
+
+    /**
      * Return the survival function for the specified time point. This is the complementary
-     * cumulative distribution function: {@code P(X > t)}.
+     * cumulative distribution function: {@code P(X > t)}
+     *
+     * <p>Note: If the upper bound is finite then the model represents a truncated distribution. The
+     * probability is adjusted so the valid domain is [0, upper] and the survival function above the
+     * upper bound is 0.
      *
      * @param t the time
      * @return sf(t)
      */
     default double sf(double t) {
       double p = 0;
-      for (int i = 0; i < getSize(); i++) {
-        p += getFraction(i) * StdMath.exp(-getRate(i) * t);
+      final double u = getUpperBound();
+      if (u < Double.POSITIVE_INFINITY) {
+        if (t >= u) {
+          return 0;
+        }
+        for (int i = 0; i < getSize(); i++) {
+          final double k = getRate(i);
+          // Scale the p-value using the truncation
+          // CDF = 1 - exp(-kx)
+          // SF(t; 0<t<u) = 1 - CDF(t) / CDF(u)
+          // = (CDF(u) - CDF(t)) / CDF(u)
+          final double cdfU = -Math.expm1(-k * u);
+          final double cdfT = -Math.expm1(-k * t);
+          p += getFraction(i) * (cdfU - cdfT) / cdfU;
+        }
+      } else {
+        for (int i = 0; i < getSize(); i++) {
+          p += getFraction(i) * StdMath.exp(-getRate(i) * t);
+        }
       }
       return p;
     }
@@ -144,14 +178,14 @@ public final class ResidenceTimeFitting {
    */
   static class Model1 implements Model {
     /** The rate constant. */
-    private final double rate;
+    protected final double rate;
 
     /**
      * Create an instance.
      *
      * @param rate the rate constant
      */
-    Model1(double rate) {
+    private Model1(double rate) {
       this.rate = rate;
     }
 
@@ -179,15 +213,49 @@ public final class ResidenceTimeFitting {
   }
 
   /**
+   * Single population model for a truncated distribution.
+   */
+  private static class Model1T extends Model1 {
+    private final double cdfU;
+    private final double upper;
+
+    /**
+     * Create an instance.
+     *
+     * @param rate the rate constant
+     * @param upper the upper limit of the domain
+     */
+    Model1T(double rate, double upper) {
+      super(rate);
+      this.upper = upper;
+      cdfU = -Math.expm1(-rate * upper);
+    }
+
+    @Override
+    public double getUpperBound() {
+      return upper;
+    }
+
+    @Override
+    public double sf(double t) {
+      if (t >= upper) {
+        return 0;
+      }
+      final double cdfT = -Math.expm1(-rate * t);
+      return (cdfU - cdfT) / cdfU;
+    }
+  }
+
+  /**
    * Dual population model.
    */
   static class Model2 implements Model {
     /** The rate constant for population 0. */
-    private final double k0;
+    protected final double k0;
     /** The rate constant for population 1. */
-    private final double k1;
+    protected final double k1;
     /** Fraction of population 0. */
-    private final double f0;
+    protected final double f0;
 
     /**
      * Create an instance.
@@ -232,21 +300,60 @@ public final class ResidenceTimeFitting {
   }
 
   /**
+   * Dual population model for a truncated distribution.
+   */
+  private static class Model2T extends Model2 {
+    private final double cdfU0;
+    private final double cdfU1;
+    private final double upper;
+
+    /**
+     * Create an instance.
+     *
+     * @param k0 the rate constant for 0
+     * @param k1 the rate constant for 1
+     * @param f0 the fraction of population 0
+     * @param upper the upper limit of the domain
+     */
+    Model2T(double k0, double k1, double f0, double upper) {
+      super(k0, k1, f0);
+      this.upper = upper;
+      cdfU0 = -Math.expm1(-k0 * upper);
+      cdfU1 = -Math.expm1(-k1 * upper);
+    }
+
+    @Override
+    public double getUpperBound() {
+      return upper;
+    }
+
+    @Override
+    public double sf(double t) {
+      if (t >= upper) {
+        return 0;
+      }
+      final double cdfT0 = -Math.expm1(-k0 * t);
+      final double cdfT1 = -Math.expm1(-k1 * t);
+      return f0 * (cdfU0 - cdfT0) / cdfU0 + (1 - f0) * (cdfU1 - cdfT1) / cdfU1;
+    }
+  }
+
+  /**
    * Triple population model.
    */
   static class Model3 implements Model {
     /** The rate constant for population 0. */
-    private final double k0;
+    protected final double k0;
     /** The rate constant for population 1. */
-    private final double k1;
+    protected final double k1;
     /** The rate constant for population 2. */
-    private final double k2;
+    protected final double k2;
     /** Fraction of population 0. */
-    private final double f0;
+    protected final double f0;
     /** Fraction of population 1. */
-    private final double f1;
+    protected final double f1;
     /** Fraction of population 3. */
-    private final double f2;
+    protected final double f2;
 
     /**
      * Create an instance.
@@ -302,15 +409,60 @@ public final class ResidenceTimeFitting {
   }
 
   /**
-   * Single population fitting model.
+   * Triple population model for a truncated distribution.
    */
-  static class Function1 {
+  private static class Model3T extends Model3 {
+    private final double cdfU0;
+    private final double cdfU1;
+    private final double cdfU2;
+    private final double upper;
+
+    /**
+     * Create an instance.
+     *
+     * @param k0 the rate constant for 0
+     * @param k1 the rate constant for 1
+     * @param k2 the rate constant for 2
+     * @param f0 the fraction of population 0
+     * @param f1 the fraction of population 1
+     * @param upper the upper limit of the domain
+     */
+    Model3T(double k0, double k1, double k2, double f0, double f1, double upper) {
+      super(k0, k1, k2, f0, f1);
+      this.upper = upper;
+      cdfU0 = -Math.expm1(-k0 * upper);
+      cdfU1 = -Math.expm1(-k1 * upper);
+      cdfU2 = -Math.expm1(-k2 * upper);
+    }
+
+    @Override
+    public double getUpperBound() {
+      return upper;
+    }
+
+    @Override
+    public double sf(double t) {
+      if (t >= upper) {
+        return 0;
+      }
+      final double cdfT0 = -Math.expm1(-k0 * t);
+      final double cdfT1 = -Math.expm1(-k1 * t);
+      final double cdfT2 = -Math.expm1(-k2 * t);
+      return f0 * (cdfU0 - cdfT0) / cdfU0 + f1 * (cdfU1 - cdfT1) / cdfU1
+          + f2 * (cdfU2 - cdfT2) / cdfU2;
+    }
+  }
+
+  /**
+   * Base function for fitting.
+   */
+  private static abstract class BaseFunction {
     /** Count at each time point. */
-    private final int[] count;
+    protected final int[] count;
     /** Time resolution. */
-    private final double resolution;
+    protected final double resolution;
     /** Total count. */
-    private final int total;
+    protected final int total;
 
     /**
      * Create an instance.
@@ -318,10 +470,25 @@ public final class ResidenceTimeFitting {
      * @param n the count at each time point
      * @param resolution the time resolution
      */
-    Function1(int[] n, double resolution) {
+    BaseFunction(int[] n, double resolution) {
       this.count = n;
       this.resolution = resolution;
       total = Arrays.stream(n).sum();
+    }
+  }
+
+  /**
+   * Single population fitting model.
+   */
+  static class Function1 extends BaseFunction {
+    /**
+     * Create an instance.
+     *
+     * @param n the count at each time point
+     * @param resolution the time resolution
+     */
+    Function1(int[] n, double resolution) {
+      super(n, resolution);
     }
 
     /**
@@ -354,23 +521,61 @@ public final class ResidenceTimeFitting {
       // Since the exponential has been scaled by 'resolution' to map to the geometric,
       // all p-values are too small for the equivalent exponential.
       // Scale the p-values back: p / resolution => c * -log(resolution)
-      sum += total * (logp - Math.log(resolution));
+
+      // If the histogram was truncated the geometric distribution must be adjusted to sum
+      // to 1 between 0 and the upper bound (u). This can be done by dividing all probabilities
+      // by CDF(u), or subtracting log(CDF(u)).
+
+      sum += total * (logp - Math.log(resolution) - getLogCdfUpper(k));
       return sum;
+    }
+
+    /**
+     * Gets the log of the cumulative probability function at the upper bound. This is used to
+     * normalise probability values for a distribution that has been truncated. If the upper bound
+     * is infinite this returns 0.
+     *
+     * @param k the rate constant
+     * @return the log cdf upper
+     */
+    protected double getLogCdfUpper(double k) {
+      return 0;
+    }
+  }
+
+  /**
+   * Single population fitting model for a truncated distribution.
+   */
+  static class Function1T extends Function1 {
+    private final double upper;
+
+    /**
+     * Create an instance.
+     *
+     * @param n the count at each time point
+     * @param resolution the time resolution
+     * @param upper the upper limit of the domain
+     */
+    Function1T(int[] n, double resolution, double upper) {
+      super(n, resolution);
+      this.upper = upper;
+    }
+
+    @Override
+    protected double getLogCdfUpper(double k) {
+      // This uses the CDF of an exponential function. The value is suitable for scaling
+      // p-values from the modelled distribution for data effectively truncated to the upper bound.
+      // CDF = 1 - exp(-kx)
+      return Math.log1p(-Math.exp(-k * upper));
     }
   }
 
   /**
    * Dual population fitting model.
    */
-  static class Function2 {
-    /** Count at each time point. */
-    private final int[] count;
+  static class Function2 extends BaseFunction {
     /** Points above zero where the count is non-zero. */
-    private final int[] xx;
-    /** Time resolution. */
-    private final double resolution;
-    /** Total count. */
-    private final int total;
+    protected final int[] xx;
 
     /**
      * Create an instance.
@@ -379,9 +584,7 @@ public final class ResidenceTimeFitting {
      * @param resolution the time resolution
      */
     Function2(int[] n, double resolution) {
-      this.count = n;
-      this.resolution = resolution;
-      total = Arrays.stream(n).sum();
+      super(n, resolution);
       xx = IntStream.range(1, n.length).filter(i -> n[i] != 0).toArray();
     }
 
@@ -402,8 +605,10 @@ public final class ResidenceTimeFitting {
       final double log1mp0 = -k0 * resolution;
       final double p1 = -Math.expm1(-k1 * resolution);
       final double log1mp1 = -k1 * resolution;
-      final double f0p0 = f0 * p0;
-      final double f1p1 = (1 - f0) * p1;
+      // Note: If the distribution has been truncated the p-values are scaled using
+      // the cumulative probability at the upper bound.
+      final double f0p0 = f0 * p0 / getCdfUpper(k0);
+      final double f1p1 = (1 - f0) * p1 / getCdfUpper(k1);
       // Special case for x=0. Assumes count[0] > 0
       double sum = count[0] * Math.log(f0p0 + f1p1);
       for (final int x : xx) {
@@ -416,20 +621,53 @@ public final class ResidenceTimeFitting {
       sum -= total * Math.log(resolution);
       return sum;
     }
+
+    /**
+     * Gets the cumulative probability function at the upper bound. This is used to normalise
+     * probability values for a distribution that has been truncated. If the upper bound is infinite
+     * this returns 1.
+     *
+     * @param k the rate constant
+     * @return the cdf upper
+     */
+    protected double getCdfUpper(double k) {
+      return 1;
+    }
+  }
+
+  /**
+   * Dual population fitting model for a truncated distribution.
+   */
+  static class Function2T extends Function2 {
+    private final double upper;
+
+    /**
+     * Create an instance.
+     *
+     * @param n the count at each time point
+     * @param resolution the time resolution
+     * @param upper the upper limit of the domain
+     */
+    Function2T(int[] n, double resolution, double upper) {
+      super(n, resolution);
+      this.upper = upper;
+    }
+
+    @Override
+    protected double getCdfUpper(double k) {
+      // This uses the CDF of an exponential function. The value is suitable for scaling
+      // p-values from the modelled distribution for data effectively truncated to the upper bound.
+      // CDF = 1 - exp(-kx)
+      return -Math.expm1(-k * upper);
+    }
   }
 
   /**
    * Triple population fitting model.
    */
-  static class Function3 {
-    /** Count at each time point. */
-    private final int[] count;
+  static class Function3 extends BaseFunction {
     /** Points above zero where the count is non-zero. */
-    private final int[] xx;
-    /** Time resolution. */
-    private final double resolution;
-    /** Total count. */
-    private final int total;
+    protected final int[] xx;
 
     /**
      * Create an instance.
@@ -438,9 +676,7 @@ public final class ResidenceTimeFitting {
      * @param resolution the time resolution
      */
     Function3(int[] n, double resolution) {
-      this.count = n;
-      this.resolution = resolution;
-      total = Arrays.stream(n).sum();
+      super(n, resolution);
       xx = IntStream.range(1, n.length).filter(i -> n[i] != 0).toArray();
     }
 
@@ -468,9 +704,11 @@ public final class ResidenceTimeFitting {
       final double log1mp2 = -k2 * resolution;
       // Normalise the fractions
       final double f = f0 + f1 + f2;
-      final double f0p0 = f0 * p0 / f;
-      final double f1p1 = f1 * p1 / f;
-      final double f2p2 = f2 * p2 / f;
+      // Note: If the distribution has been truncated the p-values are scaled using
+      // the cumulative probability at the upper bound.
+      final double f0p0 = f0 * p0 / getCdfUpper(k0) / f;
+      final double f1p1 = f1 * p1 / getCdfUpper(k1) / f;
+      final double f2p2 = f2 * p2 / getCdfUpper(k2) / f;
       // Special case for x=0. Assumes count[0] > 0
       double sum = count[0] * Math.log(f0p0 + f1p1 + f2p2);
       for (final int x : xx) {
@@ -482,6 +720,45 @@ public final class ResidenceTimeFitting {
       // Scale the p-values back: p / resolution => c * -log(resolution)
       sum -= total * Math.log(resolution);
       return sum;
+    }
+
+    /**
+     * Gets the cumulative probability function at the upper bound. This is used to normalise
+     * probability values for a distribution that has been truncated. If the upper bound is infinite
+     * this returns 1.
+     *
+     * @param k the rate constant
+     * @return the cdf upper
+     */
+    protected double getCdfUpper(double k) {
+      return 1;
+    }
+  }
+
+  /**
+   * Dual population fitting model for a truncated distribution.
+   */
+  static class Function3T extends Function3 {
+    private final double upper;
+
+    /**
+     * Create an instance.
+     *
+     * @param n the count at each time point
+     * @param resolution the time resolution
+     * @param upper the upper limit of the domain
+     */
+    Function3T(int[] n, double resolution, double upper) {
+      super(n, resolution);
+      this.upper = upper;
+    }
+
+    @Override
+    protected double getCdfUpper(double k) {
+      // This uses the CDF of an exponential function. The value is suitable for scaling
+      // p-values from the modelled distribution for data effectively truncated to the upper bound.
+      // CDF = 1 - exp(-kx)
+      return -Math.expm1(-k * upper);
     }
   }
 
@@ -539,10 +816,28 @@ public final class ResidenceTimeFitting {
    *
    * @param n the count at each time point
    * @param resolution the time resolution
+   * @param truncated set to true if the input histogram was truncated
    */
-  private ResidenceTimeFitting(int[] n, double resolution) {
+  private ResidenceTimeFitting(int[] n, double resolution, boolean truncated) {
     this.count = n;
     this.resolution = resolution;
+    this.truncated = truncated;
+  }
+
+
+  /**
+   * Create an instance.
+   *
+   * @param resolution the time resolution (in seconds)
+   * @param n the count at each time point
+   * @return an instance
+   * @throws IllegalArgumentException if the time resolution is not strictly positive; if there are
+   *         less than two time points; if any count is negative; if the sum of counts is zero or
+   *         {@code >= 2^31}; or if there are less than two non-zero counts.
+   * @see #of(double, int[], boolean)
+   */
+  public static ResidenceTimeFitting of(double resolution, int[] n) {
+    return of(resolution, n, false);
   }
 
   /**
@@ -555,14 +850,19 @@ public final class ResidenceTimeFitting {
    * non-zero values, otherwise an exception is raised. Support is provided for a total observed
    * count less than a 32-bit signed integer.
    *
+   * <p>If the count histogram has been truncated then the fit uses an upper truncated exponential
+   * distribution such that the cumulative probability of the distribution from 0 to the limit of
+   * the histogram is 1.
+   *
    * @param resolution the time resolution (in seconds)
    * @param n the count at each time point
+   * @param truncated set to true if the input histogram was truncated
    * @return an instance
    * @throws IllegalArgumentException if the time resolution is not strictly positive; if there are
    *         less than two time points; if any count is negative; if the sum of counts is zero or
    *         {@code >= 2^31}; or if there are less than two non-zero counts.
    */
-  public static ResidenceTimeFitting of(double resolution, int[] n) {
+  public static ResidenceTimeFitting of(double resolution, int[] n, boolean truncated) {
     ValidationUtils.checkStrictlyPositive(resolution, "time resolution");
     ValidationUtils.checkArgument(n.length > 1, "not enough time points: %d", n.length);
     int nonZero = 0;
@@ -577,13 +877,56 @@ public final class ResidenceTimeFitting {
     }
     ValidationUtils.checkArgument(nonZero > 1, "too few non-zero counts: %d", nonZero);
     ValidationUtils.checkArgument(sum <= Integer.MAX_VALUE, "sum of counts is too large: %d", sum);
-    return new ResidenceTimeFitting(n, resolution);
+    return new ResidenceTimeFitting(n, resolution, truncated);
+  }
+
+  /**
+   * Create an single population model.
+   *
+   * @param rate the rate constant
+   * @param upper the upper limit of the domain
+   * @return the model
+   */
+  static Model createModel(double rate, double upper) {
+    return upper < Double.POSITIVE_INFINITY ? new Model1T(rate, upper) : new Model1(rate);
+  }
+
+  /**
+   * Create a dual population model.
+   *
+   * @param k0 the rate constant for 0
+   * @param k1 the rate constant for 1
+   * @param f0 the fraction of population 0
+   * @param upper the upper limit of the domain
+   * @return the model
+   */
+  static Model createModel(double k0, double k1, double f0, double upper) {
+    return upper < Double.POSITIVE_INFINITY ? new Model2T(k0, k1, f0, upper)
+        : new Model2(k0, k1, f0);
+  }
+
+  /**
+   * Create a triple population model.
+   *
+   * @param k0 the rate constant for 0
+   * @param k1 the rate constant for 1
+   * @param k2 the rate constant for 2
+   * @param f0 the fraction of population 0
+   * @param f1 the fraction of population 1
+   * @param upper the upper limit of the domain
+   * @return the model
+   */
+  static Model createModel(double k0, double k1, double k2, double f0, double f1, double upper) {
+    return upper < Double.POSITIVE_INFINITY ? new Model3T(k0, k1, k2, f0, f1, upper)
+        : new Model3(k0, k1, k2, f0, f1);
   }
 
   /**
    * Gets the observed dissociation rate.
    *
    * <p>This is computed assuming the histogram of residence times follows a geometric distribution.
+   *
+   * <p>Note: This method does not account for truncation of the residence time histogram.
    *
    * @return the mean
    */
@@ -605,6 +948,16 @@ public final class ResidenceTimeFitting {
 
     // Note: Scale the rate by the resolution
     return -Math.log1p(-p) / resolution;
+  }
+
+  /**
+   * Gets the upper limit of the histogram of residence times. If the histogram is not truncated
+   * this will return positive infinity.
+   *
+   * @return the upper limit
+   */
+  private double getUpperLimit() {
+    return truncated ? count.length * resolution : Double.POSITIVE_INFINITY;
   }
 
   /**
@@ -649,9 +1002,13 @@ public final class ResidenceTimeFitting {
     final Logger logger = orElse(Logger.class, LoggerUtils.createIfNull(null), options);
     final MaxEval maxEval = orElse(new MaxEval(1000), options);
 
+    final double upper = getUpperLimit();
+
     // Estimate rate constant from the mean for single exponential.
     final double k = getRate();
-    final UnivariateFunction f1 = new Function1(count, resolution)::ll;
+    final UnivariateFunction f1 =
+        upper < Double.POSITIVE_INFINITY ? new Function1T(count, resolution, upper)::ll
+            : new Function1(count, resolution)::ll;
 
     try {
       final BracketFinder bf = new BracketFinder();
@@ -663,7 +1020,7 @@ public final class ResidenceTimeFitting {
       logger.info(() -> String.format("Fit (N=1) : %s, MLE = %f (%d evaluations)",
           formatK(new double[] {k}), result.getValue(), optimizer.getEvaluations()));
       return Pair.of(new FitResult(Arrays.stream(count).sum(), 1, result.getValue()),
-          new Model1(result.getPoint()));
+          createModel(result.getPoint(), upper));
     } catch (final TooManyEvaluationsException ex) {
       LoggerUtils.log(logger, Level.INFO, "Failed to fit (N=1) : %s", ex.getMessage());
     }
@@ -679,6 +1036,8 @@ public final class ResidenceTimeFitting {
   private Pair<FitResult, Model> fit2(Object[] options) {
     final Logger logger = orElse(Logger.class, LoggerUtils.createIfNull(null), options);
     final MaxEval maxEval = orElse(new MaxEval(20000), options);
+
+    final double upper = getUpperLimit();
 
     // Create estimates
     final double m = 1 / getRate();
@@ -699,7 +1058,8 @@ public final class ResidenceTimeFitting {
     final CustomPowellOptimizer.BasisStep step =
         new CustomPowellOptimizer.BasisStep(new double[] {0.1 / m1, 0.1 / m2, 0.05});
 
-    final Function2 f2 = new Function2(count, resolution);
+    final Function2 f2 = upper < Double.POSITIVE_INFINITY ? new Function2T(count, resolution, upper)
+        : new Function2(count, resolution);
     final ObjectiveFunction fun =
         new ObjectiveFunction(point -> f2.ll(point[0], point[1], point[2]));
 
@@ -816,7 +1176,7 @@ public final class ResidenceTimeFitting {
     logger.info(() -> String.format("Fit (N=2) : %s (%s), MLE = %s (%d evaluations)", formatK(k),
         format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
 
-    return Pair.of(fr, new Model2(k[0], k[1], f[0]));
+    return Pair.of(fr, createModel(k[0], k[1], f[0], upper));
   }
 
 
@@ -829,6 +1189,8 @@ public final class ResidenceTimeFitting {
   private Pair<FitResult, Model> fit3(Object[] options) {
     final Logger logger = orElse(Logger.class, LoggerUtils.createIfNull(null), options);
     final MaxEval maxEval = orElse(new MaxEval(20000), options);
+
+    final double upper = getUpperLimit();
 
     // Create estimates
     final double m = 1 / getRate();
@@ -852,7 +1214,8 @@ public final class ResidenceTimeFitting {
     final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
         new double[] {0.1 / m1, 0.1 / m2, 0.1 / m3, 0.02, 0.02, 0.02});
 
-    final Function3 f3 = new Function3(count, resolution);
+    final Function3 f3 = upper < Double.POSITIVE_INFINITY ? new Function3T(count, resolution, upper)
+        : new Function3(count, resolution);
     final ObjectiveFunction fun = new ObjectiveFunction(
         point -> f3.ll(point[0], point[1], point[2], point[3], point[4], point[5]));
 
@@ -974,7 +1337,7 @@ public final class ResidenceTimeFitting {
     logger.info(() -> String.format("Fit (N=3) : %s (%s), MLE = %s (%d evaluations)", formatK(k),
         format(f), MathUtils.rounded(fr.getLogLikelihood(), 4), eval));
 
-    return Pair.of(fr, new Model3(k[0], k[1], k[2], f[0], f[1]));
+    return Pair.of(fr, createModel(k[0], k[1], k[2], f[0], f[1], upper));
   }
 
   private static CustomPowellOptimizer createCustomPowellOptimizer() {

@@ -265,6 +265,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     // Convert results to residence times with options to exclude non-stationary objects.
     int[] counts = extractResidenceTimes(allResults);
     final double exposureTime = allResults.get(0).getCalibrationReader().getExposureTime();
+    final int originalLength = counts.length;
     counts = filterCounts(counts, exposureTime);
 
     String title = allResults.get(0).getName();
@@ -272,7 +273,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
       title += " + " + TextUtils.pleural(allResults.size() - 1, "other");
     }
 
-    runAnalysis(title, exposureTime, counts);
+    runAnalysis(title, exposureTime, counts, counts.length < originalLength);
   }
 
   private static boolean showMultiDialog(List<MemoryPeakResults> allResults) {
@@ -631,8 +632,9 @@ public class ResidenceTimeAnalysis implements PlugIn {
     }
     final StringBuilder sb = new StringBuilder(256);
     int[] counts = createSimulatation(sb);
+    final int originalLength = counts.length;
     counts = filterCounts(counts, settings.exposureTime);
-    runAnalysis(sb.toString(), settings.exposureTime, counts);
+    runAnalysis(sb.toString(), settings.exposureTime, counts, counts.length < originalLength);
   }
 
   private boolean showSimulationDialog() {
@@ -732,16 +734,20 @@ public class ResidenceTimeAnalysis implements PlugIn {
   /**
    * Run analysis on the data.
    *
+   * <p>If the histogram has been clipped, the fitting uses truncated exponential distributions.
+   *
+   * @param title the title
    * @param exposureTime the exposure time (in milliseconds)
    * @param counts the counts
+   * @param clipped true if the counts were clipped at the upper bound
    */
-  private void runAnalysis(String title, double exposureTime, int[] counts) {
+  private void runAnalysis(String title, double exposureTime, int[] counts, boolean clipped) {
     final Plot plot = new Plot("Residence Time", "Time (ms)", "Frequency");
     final float[] x = SimpleArrayUtils.newArray(counts.length, 0f, (float) exposureTime);
     plot.addPoints(x, SimpleArrayUtils.toFloat(counts), Plot.BAR);
     final WindowOrganiser wo = new WindowOrganiser();
 
-    final ResidenceTimeFitting rt = ResidenceTimeFitting.of(exposureTime / 1000, counts);
+    final ResidenceTimeFitting rt = ResidenceTimeFitting.of(exposureTime / 1000, counts, clipped);
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
     final Consumer<String> summary = createSummaryTable();
     final int samples = Arrays.stream(counts).sum();
@@ -755,7 +761,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     final int steps = 32;
     final int mask = steps - 1;
     final float[] t =
-        SimpleArrayUtils.newArray(counts.length * steps, 0, (float) (exposureTime / steps));
+        SimpleArrayUtils.newArray((counts.length - 1) * steps, 0, (float) (exposureTime / steps));
 
     final DoubleUnaryOperator residenceTime = createResidenceTimeFunction();
 
@@ -766,6 +772,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
         continue;
       }
       final FitResult r = f.getLeft();
+      // Note: Use of the model requires knowing if the p-value must be scaled due to truncation
       final Model m = f.getRight();
 
       // Add to fitted SF curve to plot:
@@ -791,7 +798,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
           Runtime.getRuntime().availableProcessors(), "Fitting Bootstrap samples");
       final List<Model> models = Arrays.stream(bootstrapSamples).parallel().map(h -> {
         final Pair<FitResult, Model> fit =
-            ResidenceTimeFitting.of(exposureTime / 1000, h).fit(m.getSize());
+            ResidenceTimeFitting.of(exposureTime / 1000, h, clipped).fit(m.getSize());
         ticker.tick();
         return fit;
       }).filter(Objects::nonNull).map(Pair::getRight).collect(Collectors.toList());
