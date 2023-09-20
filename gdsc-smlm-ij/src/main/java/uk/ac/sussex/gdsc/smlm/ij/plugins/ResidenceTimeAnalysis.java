@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.numbers.rootfinder.BrentSolver;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AliasMethodDiscreteSampler;
@@ -134,6 +135,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     Seed bootstrapSeed;
     int maxPopulations;
     boolean showQQplot;
+    boolean debug;
 
     Settings() {
       // Set defaults
@@ -172,6 +174,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
       bootstrapSeed = source.bootstrapSeed;
       showQQplot = source.showQQplot;
       maxPopulations = source.maxPopulations;
+      debug = source.debug;
     }
 
     Settings copy() {
@@ -380,6 +383,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
     gd.addHexField("Bootstrap_seed", settings.bootstrapSeed.toBytes());
     gd.addCheckbox("Show_QQ_plot", settings.showQQplot);
+    gd.addCheckbox("Debug", settings.debug);
 
     gd.showDialog();
     if (gd.wasCanceled() || gd.invalidNumber()) {
@@ -397,6 +401,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.bootstrapRepeats = (int) gd.getNextNumber();
     settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
     settings.showQQplot = gd.getNextBoolean();
+    settings.debug = gd.getNextBoolean();
 
     return !gd.invalidNumber();
   }
@@ -656,6 +661,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     gd.addNumericField("Boostrap_repeats", settings.bootstrapRepeats, 0);
     gd.addHexField("Bootstrap_seed", settings.bootstrapSeed.toBytes());
     gd.addCheckbox("Show_QQ_plot", settings.showQQplot);
+    gd.addCheckbox("Debug", settings.debug);
 
     gd.showDialog();
 
@@ -675,6 +681,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
     settings.bootstrapRepeats = (int) gd.getNextNumber();
     settings.bootstrapSeed = Seed.from(gd.getNextHexBytes());
     settings.showQQplot = gd.getNextBoolean();
+    settings.debug = gd.getNextBoolean();
 
     return !gd.invalidNumber();
   }
@@ -796,11 +803,12 @@ public class ResidenceTimeAnalysis implements PlugIn {
       // Bootstrap the data to create confidence intervals for model parameters.
       // Do this in parallel. This could be made an option.
       final long start = System.nanoTime();
+      final InitialGuess guess = createGuess(m);
       final Ticker ticker = ImageJUtils.createTicker(bootstrapSamples.length,
           Runtime.getRuntime().availableProcessors(), "Fitting Bootstrap samples");
       final List<Model> models = Arrays.stream(bootstrapSamples).parallel().map(h -> {
         final Pair<FitResult, Model> fit =
-            ResidenceTimeFitting.of(exposureTime / 1000, h, clipped).fit(m.getSize());
+            ResidenceTimeFitting.of(exposureTime / 1000, h, clipped).fit(m.getSize(), guess);
         ticker.tick();
         return fit;
       }).filter(fitAccept).map(Pair::getRight).collect(Collectors.toList());
@@ -937,6 +945,24 @@ public class ResidenceTimeAnalysis implements PlugIn {
   }
 
   /**
+   * Creates the guess from the fitted model.
+   *
+   * @param m the model
+   * @return the initial guess
+   */
+  private static InitialGuess createGuess(Model m) {
+    int size = m.getSize();
+    if (size == 1) {
+      return new InitialGuess(new double[] {m.getRate(0)});
+    } else if (size == 2) {
+      return new InitialGuess(new double[] {m.getRate(0), m.getRate(1), m.getFraction(0)});
+    }
+    // Assume size is 3
+    return new InitialGuess(new double[] {m.getRate(0), m.getRate(1), m.getRate(2),
+        m.getFraction(0), m.getFraction(1), m.getFraction(2)});
+  }
+
+  /**
    * Appends the value to the StringBuilder. The text is prefixed with a tab character and values
    * are delimited by commas.
    *
@@ -987,8 +1013,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
    *
    * @return the timing log level
    */
-  private static Level getTimingLogLevel() {
-    return IJ.debugMode ? Level.INFO : Level.FINE;
+  private Level getTimingLogLevel() {
+    return settings.debug ? Level.INFO : Level.FINE;
   }
 
   /**

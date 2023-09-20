@@ -1734,6 +1734,9 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
    * - Show QQ plot
      - Display a quantile-quantile plot of the model against the data distribution. The quantile for the model is taken using the cumulative probability of the data as (k - 1/3) / (n + 1/3).
 
+   * - Debug
+     - If enabled extra information is logged to the ``ImageJ`` log window.
+
 The analysis extracts the tracks and filters them to stationary molecules. A histogram of residence times is created and fit using the exponential model (see :numref:`Figure %s <fig_residence_time_analysis_histogram>`). Fit progress is recorded in the ``ImageJ`` log window. Bootstrapping is optionally used on the data to produce a 95% confidence interval for the fit parameters. 
 
 .. _fig_residence_time_analysis_histogram:
@@ -1845,6 +1848,9 @@ The following parameters can be set:
 
    * - Show QQ plot
      - Display a quantile-quantile plot of the model against the data distribution. The quantile for the model is taken using the cumulative probability of the data as (k - 1/3) / (n + 1/3).
+
+   * - Debug
+     - If enabled extra information is logged to the ``ImageJ`` log window.
 
 The simulation allows experimenting with the exposure time and number of samples required to obtain satisfactory results for the populations of bound molecules.
 
