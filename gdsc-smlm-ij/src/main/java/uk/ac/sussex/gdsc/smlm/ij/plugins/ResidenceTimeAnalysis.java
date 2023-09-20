@@ -755,6 +755,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
 
     final ResidenceTimeFitting rt = ResidenceTimeFitting.of(exposureTime / 1000, counts, clipped);
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
+    final Logger debugLogger = settings.debug ? logger : null;
     final Consumer<String> summary = createSummaryTable();
     final int samples = Arrays.stream(counts).sum();
     final StringBuilder legend = new StringBuilder("Data");
@@ -807,8 +808,8 @@ public class ResidenceTimeAnalysis implements PlugIn {
       final Ticker ticker = ImageJUtils.createTicker(bootstrapSamples.length,
           Runtime.getRuntime().availableProcessors(), "Fitting Bootstrap samples");
       final List<Model> models = Arrays.stream(bootstrapSamples).parallel().map(h -> {
-        final Pair<FitResult, Model> fit =
-            ResidenceTimeFitting.of(exposureTime / 1000, h, clipped).fit(m.getSize(), guess);
+        final Pair<FitResult, Model> fit = ResidenceTimeFitting.of(exposureTime / 1000, h, clipped)
+            .fit(m.getSize(), guess, debugLogger);
         ticker.tick();
         return fit;
       }).filter(fitAccept).map(Pair::getRight).collect(Collectors.toList());
