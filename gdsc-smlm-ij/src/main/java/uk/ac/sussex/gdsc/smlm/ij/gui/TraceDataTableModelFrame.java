@@ -100,6 +100,7 @@ public class TraceDataTableModelFrame extends JFrame {
   private String saveName;
   private int windowSize = 7;
   private double pvalueThreshold = 1e-5;
+  private boolean invertSelection;
 
   /** The result model used to display selected trace results. */
   private PeakResultTableModel resultModel;
@@ -585,15 +586,18 @@ public class TraceDataTableModelFrame extends JFrame {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog("Window Analysis", this);
     gd.addMessage("Compare intensity of localisations using two non-overlapping"
         + "\nsliding windows. Large jumps are used to select possible localisation"
-        + "\noverlap (assuming overlaps are on for longer than the window length).");
+        + "\noverlap (assuming overlaps are on for longer than the window length)."
+        + "\nAny overlaps are selected in the table data.");
     gd.addSlider("Window_size", 2, 10, windowSize);
     gd.addNumericField("Probability_threshold", pvalueThreshold, -2);
+    gd.addCheckbox("Invert_selection", invertSelection);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
     final int w = windowSize = Math.max(2, (int) gd.getNextNumber());
     final double threshold = pvalueThreshold = MathUtils.clip(1e-10, 0.25, gd.getNextNumber());
+    final boolean invert = invertSelection = gd.getNextBoolean();
 
     final TypeConverter<IntensityUnit> toPhotons =
         CalibrationHelper.getIntensityConverter(model.getCalibration(), IntensityUnit.PHOTON);
@@ -633,7 +637,11 @@ public class TraceDataTableModelFrame extends JFrame {
     }
     final int[] indices = select.toIntArray();
     table.convertRowIndexToView(indices);
-    ListSelectionModelHelper.setSelectedIndices(table.getSelectionModel(), indices);
+    final ListSelectionModel sm = table.getSelectionModel();
+    ListSelectionModelHelper.setSelectedIndices(table.getSelectionModel(), indices, invert);
+    if (invert) {
+      ListSelectionModelHelper.invertSelection(table.getRowCount(), sm);
+    }
   }
 
   private static double mean(double[] array, int from, int to) {

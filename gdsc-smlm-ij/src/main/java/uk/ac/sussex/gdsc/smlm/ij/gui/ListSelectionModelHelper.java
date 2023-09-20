@@ -72,6 +72,21 @@ public final class ListSelectionModelHelper {
    * @param indices the indices
    */
   public static void setSelectedIndices(ListSelectionModel sm, int[] indices) {
+    setSelectedIndices(sm, indices, false);
+  }
+
+  /**
+   * Sets the selected indices.
+   *
+   * <p>To continue with further adjustments set the {@code adjusting} flag to true. To propagate
+   * the selection change event the value must be set to false using
+   * {@link ListSelectionModel#setValueIsAdjusting(boolean)}.
+   *
+   * @param sm the selection model
+   * @param indices the indices
+   * @param adjusting the value for {@link ListSelectionModel#setValueIsAdjusting(boolean)}
+   */
+  static void setSelectedIndices(ListSelectionModel sm, int[] indices, boolean adjusting) {
     if (ArrayUtils.getLength(indices) == 0) {
       return;
     }
@@ -81,7 +96,7 @@ public final class ListSelectionModelHelper {
     for (int i = 1; i < indices.length; i++) {
       sm.addSelectionInterval(indices[i], indices[i]);
     }
-    sm.setValueIsAdjusting(false);
+    sm.setValueIsAdjusting(adjusting);
   }
 
   /**
