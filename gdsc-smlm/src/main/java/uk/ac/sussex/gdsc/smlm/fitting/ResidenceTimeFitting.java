@@ -962,6 +962,11 @@ public final class ResidenceTimeFitting {
    *
    * <li>{@link org.apache.commons.math3.optim.MaxEval}: maximum evaluations.
    *
+   * <li>{@link org.apache.commons.math3.optim.InitialGuess}: initial guess for the fit. The
+   * parameters are packed into an array as the {@code size} rate constants; then the {@code size}
+   * fractions for each population. The fractions are ignored for {@code size = 1}; only the first
+   * fraction is used for {@code size = 2}.
+   *
    * </ul>
    *
    * @param size the size
@@ -990,11 +995,13 @@ public final class ResidenceTimeFitting {
   private Pair<FitResult, Model> fit1(Object[] options) {
     final Logger logger = orElse(Logger.class, LoggerUtils.createIfNull(null), options);
     final MaxEval maxEval = orElse(new MaxEval(1000), options);
+    final InitialGuess guess = orElse(InitialGuess.class, null, options);
 
     final double upper = getUpperLimit();
 
-    // Estimate rate constant from the mean for single exponential.
-    final double k = getRate();
+    // Use the provided initial guess if provided, or
+    // estimate rate constant from the mean for single exponential.
+    final double k = guess != null ? guess.getInitialGuess()[0] : getRate();
     final UnivariateFunction f1 =
         upper < Double.POSITIVE_INFINITY ? new Function1T(count, resolution, upper)::ll
             : new Function1(count, resolution)::ll;
@@ -1025,14 +1032,17 @@ public final class ResidenceTimeFitting {
   private Pair<FitResult, Model> fit2(Object[] options) {
     final Logger logger = orElse(Logger.class, LoggerUtils.createIfNull(null), options);
     final MaxEval maxEval = orElse(new MaxEval(20000), options);
+    InitialGuess guess = orElse(InitialGuess.class, null, options);
 
     final double upper = getUpperLimit();
 
     // Create estimates
-    final double m = 1 / getRate();
-    final double m1 = m * 1.75;
-    final double m2 = m * 0.25;
-    final InitialGuess guess = new InitialGuess(new double[] {1 / m1, 1 / m2, 0.5});
+    if (guess == null) {
+      final double m = 1 / getRate();
+      final double m1 = m * 1.75;
+      final double m2 = m * 0.25;
+      guess = new InitialGuess(new double[] {1 / m1, 1 / m2, 0.5});
+    }
 
     // Note:
     // Choice of fitting optimiser has been adapted from the JumpDistanceAnalysis plugin.
@@ -1044,8 +1054,11 @@ public final class ResidenceTimeFitting {
     final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
     // Initial step size used to bracket the minimum in the line search
     // Use a smaller step size for the fraction component
-    final CustomPowellOptimizer.BasisStep step =
-        new CustomPowellOptimizer.BasisStep(new double[] {0.1 / m1, 0.1 / m2, 0.05});
+    final double[] g = guess.getInitialGuess();
+    g[0] *= 0.1;
+    g[1] *= 0.1;
+    g[2] = 0.05;
+    final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(g);
 
     final Function2 f2 = upper < Double.POSITIVE_INFINITY ? new Function2T(count, resolution, upper)
         : new Function2(count, resolution);
@@ -1178,17 +1191,19 @@ public final class ResidenceTimeFitting {
   private Pair<FitResult, Model> fit3(Object[] options) {
     final Logger logger = orElse(Logger.class, LoggerUtils.createIfNull(null), options);
     final MaxEval maxEval = orElse(new MaxEval(20000), options);
+    InitialGuess guess = orElse(InitialGuess.class, null, options);
 
     final double upper = getUpperLimit();
 
     // Create estimates
-    final double m = 1 / getRate();
-    final double m1 = m * 2;
-    final double m2 = m * 0.5;
-    final double m3 = m * 0.125;
-    // Must use a fraction for each population
-    final InitialGuess guess =
-        new InitialGuess(new double[] {1 / m1, 1 / m2, 1 / m3, 1.0 / 3, 1.0 / 3, 1.0 / 3});
+    if (guess == null) {
+      final double m = 1 / getRate();
+      final double m1 = m * 2;
+      final double m2 = m * 0.5;
+      final double m3 = m * 0.125;
+      // Must use a fraction for each population
+      guess = new InitialGuess(new double[] {1 / m1, 1 / m2, 1 / m3, 1.0 / 3, 1.0 / 3, 1.0 / 3});
+    }
 
     // Note:
     // Choice of fitting optimiser has been adapted from the JumpDistanceAnalysis plugin.
@@ -1200,8 +1215,14 @@ public final class ResidenceTimeFitting {
     final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
     // Initial step size used to bracket the minimum in the line search
     // Use a smaller step size for the fraction component
-    final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
-        new double[] {0.1 / m1, 0.1 / m2, 0.1 / m3, 0.02, 0.02, 0.02});
+    final double[] g = guess.getInitialGuess();
+    g[0] *= 0.1;
+    g[1] *= 0.1;
+    g[2] *= 0.1;
+    g[3] = 0.02;
+    g[4] = 0.02;
+    g[5] = 0.02;
+    final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(g);
 
     final Function3 f3 = upper < Double.POSITIVE_INFINITY ? new Function3T(count, resolution, upper)
         : new Function3(count, resolution);
