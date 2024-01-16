@@ -3,7 +3,7 @@
 
 sphinx==3.4.3
 sphinx_rtd_theme==0.5.1
-readthedocs-sphinx-search==0.1.0
+readthedocs-sphinx-search==0.3.2
 
 # Workaround docutils 0.18 bug
 # https://github.com/readthedocs/readthedocs.org/issues/8616
