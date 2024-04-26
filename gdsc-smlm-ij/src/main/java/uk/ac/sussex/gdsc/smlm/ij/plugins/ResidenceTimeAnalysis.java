@@ -1118,7 +1118,7 @@ public class ResidenceTimeAnalysis implements PlugIn {
         lo = 0;
         hi = x.getDouble(index);
       } else if (index == x.size()) {
-        lo = x.getDouble(index);
+        lo = x.getDouble(index - 1);
         // The last point should correspond to ~99% of the distribution. For an exponential
         // if we double the value it should bracket the quantile.
         hi = lo * 2;
