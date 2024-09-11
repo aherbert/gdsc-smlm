@@ -80,7 +80,9 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
         MultivariateGaussianMixtureExpectationMaximization.covariance(means, data);
     final double[][] exp = new Covariance(data).getCovarianceMatrix().getData();
 
-    Assertions.assertArrayEquals(exp, obs);
+    // Can be different if the means are different. Commons Math uses a double pass
+    // mean computation but this code uses a simple sum then divide.
+    TestAssertions.assertArrayTest(exp, obs, Predicates.doublesAreUlpClose(10));
   }
 
   @Test
