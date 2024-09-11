@@ -31,16 +31,18 @@ import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.math3.stat.inference.TestUtils;
+import org.apache.commons.statistics.descriptive.DoubleStatistics;
+import org.apache.commons.statistics.descriptive.Median;
+import org.apache.commons.statistics.descriptive.Statistic;
+import org.apache.commons.statistics.inference.TTest;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -109,12 +111,50 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private static final int Y = 2;
   private static final int XY = 3;
   private static final String[] NAMES = {"Angle", "X SD", "Y SD"};
-  private final DescriptiveStatistics[] sampleNew = new DescriptiveStatistics[3];
-  private final DescriptiveStatistics[] sampleOld = new DescriptiveStatistics[3];
+  private final SampleData[] sampleNew = new SampleData[3];
+  private final SampleData[] sampleOld = new SampleData[3];
   private final boolean[] ignore = new boolean[3];
 
   /** The plugin settings. */
   private Settings pluginSettings;
+
+  /**
+   * Simple wrapper to store values and compute their statistics.
+   */
+  private static class SampleData implements DoubleConsumer {
+    private final DoubleStatistics stats = DoubleStatistics.of(Statistic.VARIANCE);
+    private final DoubleArrayList values = new DoubleArrayList();
+
+    int getN() {
+      return values.size();
+    }
+
+    double getMean() {
+      return stats.getAsDouble(Statistic.MEAN);
+    }
+
+    double getVariance() {
+      return stats.getAsDouble(Statistic.VARIANCE);
+    }
+
+    double getStandardDeviation() {
+      return stats.getAsDouble(Statistic.STANDARD_DEVIATION);
+    }
+
+    double[] getValues() {
+      return values.toDoubleArray();
+    }
+
+    DoubleStatistics getStatistics() {
+      return stats;
+    }
+
+    @Override
+    public void accept(double value) {
+      stats.accept(value);
+      values.add(value);
+    }
+  }
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -533,9 +573,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     for (final double testAngle : new double[] {90, 0, 180}) {
       // The angle will be in the 0-180 domain.
       // We need to compute the Statistical summary around the testAngle.
-      StatisticalSummary sampleStats;
-      if (testAngle == 0 || testAngle == 180) {
-        final SummaryStatistics stats = new SummaryStatistics();
+      DoubleStatistics sampleStats;
+      if (testAngle != 90) {
+        final DoubleStatistics stats = DoubleStatistics.of(Statistic.VARIANCE);
         final boolean zeroAngle = (testAngle == 0);
         for (double a : angles) {
           if (zeroAngle) {
@@ -547,18 +587,20 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
           } else if (a < 90) {
             a += 180;
           }
-          stats.addValue(a);
+          stats.accept(a);
         }
         sampleStats = stats;
       } else {
         // Already in the 0-180 domain around the angle 90
-        sampleStats = sampleNew[ANGLE];
+        sampleStats = sampleNew[ANGLE].getStatistics();
       }
 
-      final double p = TestUtils.tTest(testAngle, sampleStats);
+      final double p =
+          TTest.withDefaults().withMu(testAngle).test(sampleStats.getAsDouble(Statistic.MEAN),
+              sampleStats.getAsDouble(Statistic.VARIANCE), angles.length).getPValue();
       if (p > settings.getPValue()) {
         log("NOTE: Angle is not significant: %g ~ %g (p=%g) => Re-run with fixed zero angle",
-            sampleStats.getMean(), testAngle, p);
+            sampleStats.getAsDouble(Statistic.MEAN), testAngle, p);
         ignore[ANGLE] = true;
         config.getFitConfiguration().setPsfType(PSFType.TWO_AXIS_GAUSSIAN_2D);
         tryAgain = true;
@@ -586,12 +628,14 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private void getP(int index, double[] pvalue, boolean[] identical) {
-    getP(sampleNew[index], sampleOld[index], index, pvalue, identical);
+    getP(sampleNew[index].getMean(), sampleNew[index].getVariance(), sampleNew[index].getN(),
+        sampleOld[index].getMean(), sampleOld[index].getVariance(), sampleOld[index].getN(), index,
+        pvalue, identical);
   }
 
-  private void getP(StatisticalSummary sample1, StatisticalSummary sample2, int index,
+  private void getP(double m1, double v1, long n1, double m2, double v2, long n2, int index,
       double[] pvalue, boolean[] identical) {
-    if (sample1.getN() < 2) {
+    if (n1 < 2) {
       return;
     }
 
@@ -599,12 +643,12 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     // hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative
     // that the mean paired difference is not equal to 0. For a one-sided test, divide the returned
     // value by 2
-    pvalue[index] = TestUtils.tTest(sample1, sample2);
+    pvalue[index] = TTest.withDefaults().test(m1, v1, n1, m2, v2, n2).getPValue();
     identical[index] = (pvalue[index] > settings.getPValue());
   }
 
-  private void getPairedP(DescriptiveStatistics sample1, DescriptiveStatistics sample2, int index,
-      double[] pvalue, boolean[] identical) {
+  private void getPairedP(SampleData sample1, SampleData sample2, int index, double[] pvalue,
+      boolean[] identical) {
     if (sample1.getN() < 2) {
       return;
     }
@@ -613,7 +657,8 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     // hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative
     // that the mean paired difference is not equal to 0. For a one-sided test, divide the returned
     // value by 2
-    pvalue[index] = TestUtils.pairedTTest(sample1.getValues(), sample2.getValues());
+    pvalue[index] = TTest.withDefaults().test(sample1.getMean(), sample1.getVariance(),
+        sample1.getN(), sample2.getMean(), sample2.getVariance(), sample2.getN()).getPValue();
     identical[index] = (pvalue[index] > settings.getPValue());
   }
 
@@ -716,7 +761,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
         final StoredDataStatistics stats = StoredDataStatistics.create(sampleNew[ii].getValues());
         builder.setData(stats).setName(NAMES[ii])
             .setPlotLabel("Mean = " + MathUtils.rounded(stats.getMean()) + ". Median = "
-                + MathUtils.rounded(sampleNew[ii].getPercentile(50)))
+                + MathUtils.rounded(Median.withDefaults().evaluate(sampleNew[ii].getValues())))
             .show(wo);
       }
       wo.tile();
@@ -729,8 +774,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     return true;
   }
 
-  private static void setParams(int index, double[] params, double[] paramsDev,
-      DescriptiveStatistics sample) {
+  private static void setParams(int index, double[] params, double[] paramsDev, SampleData sample) {
     if (sample.getN() > 0) {
       params[index] = sample.getMean();
       paramsDev[index] = sample.getStandardDeviation();
@@ -812,9 +856,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
   @Override
   public void begin() {
-    sampleNew[ANGLE] = new DescriptiveStatistics();
-    sampleNew[X] = new DescriptiveStatistics();
-    sampleNew[Y] = new DescriptiveStatistics();
+    sampleNew[ANGLE] = new SampleData();
+    sampleNew[X] = new SampleData();
+    sampleNew[Y] = new SampleData();
   }
 
   @Override
@@ -830,11 +874,11 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     if (!sampleSizeReached()) {
       // Assume fitting a 2D Gaussian
       if (!ignore[ANGLE]) {
-        sampleNew[ANGLE].addValue(Math.toDegrees(params[Gaussian2DFunction.ANGLE]));
+        sampleNew[ANGLE].accept(Math.toDegrees(params[Gaussian2DFunction.ANGLE]));
       }
-      sampleNew[X].addValue(params[Gaussian2DFunction.X_SD]);
+      sampleNew[X].accept(params[Gaussian2DFunction.X_SD]);
       if (!ignore[Y]) {
-        sampleNew[Y].addValue(params[Gaussian2DFunction.Y_SD]);
+        sampleNew[Y].accept(params[Gaussian2DFunction.Y_SD]);
       }
     }
   }

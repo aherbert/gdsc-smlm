@@ -46,9 +46,9 @@ import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
+import org.apache.commons.statistics.descriptive.Mean;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -591,20 +591,19 @@ public class DensityImage implements PlugIn {
    * @param density the density
    * @param radiusInPixels the radius
    * @param filtered the filtered
-   * @return the summary statistics
    */
-  private SummaryStatistics logDensityResults(MemoryPeakResults results, int[] density,
-      double radiusInPixels, int filtered) {
+  private void logDensityResults(MemoryPeakResults results, int[] density, double radiusInPixels,
+      int filtered) {
     final double region =
         radiusInPixels * radiusInPixels * ((settings.useSquareApproximation) ? 4 : Math.PI);
 
     final Rectangle bounds = results.getBounds();
     final double area = (double) bounds.width * bounds.height;
     final double expected = results.size() * region / area;
-    final SummaryStatistics summary = new SummaryStatistics();
+    final Mean summary = Mean.create();
 
     for (int i = 0; i < results.size(); i++) {
-      summary.addValue(density[i]);
+      summary.accept(density[i]);
     }
 
     final DensityManager dm = createDensityManager(results);
@@ -613,19 +612,17 @@ public class DensityImage implements PlugIn {
     final double l = (settings.useSquareApproximation) ? dm.ripleysLFunction(radiusInPixels)
         : dm.ripleysLFunction(density, radiusInPixels);
 
+    final double m = summary.getAsDouble();
     String msg = String.format(
         "Density %s : N=%d, %.0fpx^2 : Radius=%spx (%s%s): L(r) - r = %s : E = %s, Obs = %s (%sx)",
-        results.getName(), summary.getN(), area, rounded(radiusInPixels), rounded(settings.radius),
+        results.getName(), results.size(), area, rounded(radiusInPixels), rounded(settings.radius),
         UnitHelper.getShortName(DistanceUnit.forNumber(settings.distanceUnit)),
-        rounded(l - radiusInPixels), rounded(expected), rounded(summary.getMean()),
-        rounded(summary.getMean() / expected));
+        rounded(l - radiusInPixels), rounded(expected), rounded(m), rounded(m / expected));
     if (settings.filterLocalisations) {
       msg += String.format(" : Filtered=%d (%s%%)", filtered,
           rounded(filtered * 100.0 / density.length));
     }
     IJ.log(msg);
-
-    return summary;
   }
 
   private static String rounded(double value) {

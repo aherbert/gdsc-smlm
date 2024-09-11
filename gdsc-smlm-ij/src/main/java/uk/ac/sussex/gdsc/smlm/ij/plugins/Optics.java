@@ -75,7 +75,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntFunction;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.statistics.descriptive.Quantile;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.clustering.optics.ClusteringResult;
 import uk.ac.sussex.gdsc.core.clustering.optics.DbscanResult;
@@ -1783,17 +1783,17 @@ public class Optics implements PlugIn {
 
         if (settings.getOpticsMode() == OpticsMode.FAST_OPTICS.ordinal()) {
           // The profile may be very high. Compute the outliers and remove.
-          final Percentile p = new Percentile();
-          p.setData(profile);
+          final Quantile p = Quantile.withDefaults();
           double max;
           final boolean useIqr = true;
           if (useIqr) {
-            final double lq = p.evaluate(25);
-            final double uq = p.evaluate(75);
+            final double[] q = p.evaluate(profile, 0.25, 0.75);
+            final double lq = q[0];
+            final double uq = q[1];
             max = (uq - lq) * 2 + uq;
           } else {
             // Remove top 2%
-            max = p.evaluate(98);
+            max = p.evaluate(profile, 0.98);
           }
           if (limits[1] > max) {
             limits[1] = max;

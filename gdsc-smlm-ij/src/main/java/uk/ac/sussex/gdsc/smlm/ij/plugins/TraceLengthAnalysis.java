@@ -32,7 +32,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.statistics.descriptive.Median;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
@@ -172,7 +172,7 @@ public class TraceLengthAnalysis implements PlugIn {
       p.getPrecision();
 
       // Precision in nm using the median
-      precision = new Percentile().evaluate(p.precisions, 50);
+      precision = Median.withDefaults().evaluate(p.precisions);
       // Convert from nm to um to raw units
       final double rawPrecision = distanceConverter.convertBack(precision / 1e3);
       // Get the localisation error (4s^2) in units^2

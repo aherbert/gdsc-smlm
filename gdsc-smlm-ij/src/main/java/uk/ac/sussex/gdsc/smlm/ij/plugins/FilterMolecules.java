@@ -38,8 +38,8 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.exception.MathIllegalArgumentException;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.statistics.descriptive.Median;
+import org.apache.commons.statistics.descriptive.NaNPolicy;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -230,12 +230,12 @@ public class FilterMolecules implements PlugIn {
         p.getPrecision();
 
         // Precision in nm using the median
-        precision = new Percentile().evaluate(p.precisions, 50);
+        precision = Median.withDefaults().with(NaNPolicy.ERROR).evaluate(p.precisions);
         // Convert from nm to um to raw units
         final double rawPrecision = distanceConverter.convertBack(precision / 1e3);
         // Get the localisation error (4s^2) in units^2
         error = 4 * rawPrecision * rawPrecision;
-      } catch (final MathIllegalArgumentException | DataException ex) {
+      } catch (final IllegalArgumentException | DataException ex) {
         ImageJUtils.log(TITLE + " - Unable to compute precision: " + ex.getMessage());
       }
 

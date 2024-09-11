@@ -59,7 +59,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.statistics.descriptive.Quantile;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -1759,7 +1759,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Add a mouse listener to the config file field
     if (ImageJUtils.isShowGenericDialog()) {
+      @SuppressWarnings("unchecked")
       final Vector<TextField> numerics = gd.getNumericFields();
+      @SuppressWarnings("unchecked")
       final Vector<Choice> choices = gd.getChoices();
 
       final Iterator<TextField> nu = numerics.iterator();
@@ -2279,14 +2281,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // nSingle, tpDoublet, fpDoublet, nDoublet * 2);
 
     // Summarise score for true results
-    final Percentile p = new Percentile(99);
     for (int c = 0; c < stats.length; c++) {
       final double[] values = stats[c].getValues();
-      // Sorting is need for the percentile and the cumulative histogram so do it once
+      // Sorting is need for the quantile and the cumulative histogram so do it once
       Arrays.sort(values);
       sb.append(MathUtils.rounded(stats[c].getMean())).append("+/-")
           .append(MathUtils.rounded(stats[c].getStandardDeviation())).append(" (")
-          .append(stats[c].getN()).append(") ").append(MathUtils.rounded(p.evaluate(values)))
+          .append(stats[c].getN()).append(") ").append(
+              MathUtils.rounded(Quantile.withDefaults().evaluate(values, 0.99)))
           .append('\t');
 
       if (settings.showHistograms && settings.displayHistograms[c + Settings.NAMES.length]) {
@@ -3119,8 +3121,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Add a mouse listener to the config file field
     if (ImageJUtils.isShowGenericDialog()) {
+      @SuppressWarnings("unchecked")
       final Vector<TextField> numerics = gd.getNumericFields();
+      @SuppressWarnings("unchecked")
       final Vector<Checkbox> checkboxes = gd.getCheckboxes();
+      @SuppressWarnings("unchecked")
       final Vector<Choice> choices = gd.getChoices();
       choices.get(1).addItemListener(this);
       checkboxes.get(0).addItemListener(this);

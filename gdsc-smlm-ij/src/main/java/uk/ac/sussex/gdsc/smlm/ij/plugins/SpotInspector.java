@@ -44,13 +44,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.statistics.descriptive.Quantile;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
@@ -311,24 +312,25 @@ public class SpotInspector implements PlugIn {
         yValues[spotNumber++] = recoverScore(rank.score);
       }
 
-      // Set the min and max y-values using 1.5 x IQR
-      final DescriptiveStatistics stats = new DescriptiveStatistics();
-      for (final float v : yValues) {
-        stats.addValue(v);
-      }
+      final float[] limits = MathUtils.limits(yValues);
+      final float min = limits[0];
+      final float max = limits[1];
       if (settings.removeOutliers) {
-        final double lower = stats.getPercentile(25);
-        final double upper = stats.getPercentile(75);
+        // Set the min and max y-values using 1.5 x IQR
+        final double[] q =
+            Quantile.withDefaults().evaluate(SimpleArrayUtils.toDouble(yValues), 0.25, 0.75);
+        final double lower = q[0];
+        final double upper = q[1];
         final double iqr = upper - lower;
 
-        yMin = Math.max(lower - iqr, stats.getMin());
-        yMax = Math.min(upper + iqr, stats.getMax());
+        yMin = Math.max(lower - iqr, min);
+        yMax = Math.min(upper + iqr, max);
 
-        IJ.log(String.format("Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(),
-            stats.getMax(), yMin, yMax));
+        IJ.log(
+            String.format("Data range: %f - %f. Plotting 1.5x IQR: %f - %f", min, max, yMin, yMax));
       } else {
-        yMin = stats.getMin();
-        yMax = stats.getMax();
+        yMin = min;
+        yMax = max;
 
         IJ.log(String.format("Data range: %f - %f", yMin, yMax));
       }

@@ -70,7 +70,6 @@ import java.util.logging.Level;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
 import org.apache.commons.rng.core.util.NumberFactory;
@@ -79,6 +78,9 @@ import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSamp
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
+import org.apache.commons.statistics.descriptive.DoubleStatistics;
+import org.apache.commons.statistics.descriptive.Median;
+import org.apache.commons.statistics.descriptive.Statistic;
 import org.apache.commons.statistics.distribution.ContinuousDistribution;
 import org.apache.commons.statistics.distribution.GammaDistribution;
 import org.apache.commons.statistics.distribution.UniformContinuousDistribution;
@@ -330,7 +332,7 @@ public class CreateData implements PlugIn {
   AtomicInteger photonsRemoved;
   private AtomicInteger removedT1;
   private AtomicInteger removedTn;
-  private SummaryStatistics photonStats;
+  private DoubleStatistics photonStats;
   private double hwhm;
   private PSF psf;
   private double areaInUm;
@@ -2394,7 +2396,7 @@ public class CreateData implements PlugIn {
     photonsRemoved = new AtomicInteger();
     removedT1 = new AtomicInteger();
     removedTn = new AtomicInteger();
-    photonStats = new SummaryStatistics();
+    photonStats = DoubleStatistics.of(Statistic.MEAN, Statistic.VARIANCE);
 
     // Add drawn spots to memory
     results = new MemoryPeakResults();
@@ -2500,10 +2502,10 @@ public class CreateData implements PlugIn {
       ImageJUtils.log("Removed %d localisations with valid neighbours @ SNR %.2f", removedTn.get(),
           settings.getMinSnrTN());
     }
-    if (photonStats.getN() > 0) {
+    if (photonStats.getCount() > 0) {
       ImageJUtils.log("Average photons rendered = %s +/- %s",
-          MathUtils.rounded(photonStats.getMean()),
-          MathUtils.rounded(photonStats.getStandardDeviation()));
+          MathUtils.rounded(photonStats.getAsDouble(Statistic.MEAN)),
+          MathUtils.rounded(photonStats.getAsDouble(Statistic.STANDARD_DEVIATION)));
     }
 
     // System.out.printf("rawPhotons = %f\n", rawPhotons.getMean());
@@ -2624,7 +2626,7 @@ public class CreateData implements PlugIn {
    */
   void addPhotons(double photons) {
     synchronized (photonStats) {
-      photonStats.addValue(photons);
+      photonStats.accept(photons);
     }
   }
 
@@ -3817,7 +3819,7 @@ public class CreateData implements PlugIn {
     final int nStats = (psfModelType == PSF_MODEL_IMAGE) ? stats.length - 1 : stats.length;
     for (int i = 0; i < nStats; i++) {
       final double centre = (ALWAYS_REMOVE_OUTLIERS[i])
-          ? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
+          ? Median.withDefaults().evaluate(((StoredDataStatistics) stats[i]).values())
           : stats[i].getMean();
       sb.append(MathUtils.rounded(centre, 4)).append('\t');
     }

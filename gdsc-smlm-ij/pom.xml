@@ -94,6 +94,14 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
       <artifactId>3D_Viewer</artifactId>
       <!-- For testing <version>4.0.3-SNAPSHOT</version> -->
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-statistics-descriptive</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-statistics-inference</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>uk.ac.sussex.gdsc</groupId>

@@ -29,12 +29,16 @@ import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import java.util.function.DoubleConsumer;
+import org.apache.commons.statistics.descriptive.DoubleStatistics;
+import org.apache.commons.statistics.descriptive.Median;
+import org.apache.commons.statistics.descriptive.Statistic;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -72,6 +76,37 @@ public class SummariseResults implements PlugIn {
 
   /** The reference to the summary table. */
   static final AtomicReference<TextWindow> SUMMARY_REF = new AtomicReference<>();
+
+  /**
+   * Simple wrapper to store values and compute their statistics.
+   */
+  private static class SampleData implements DoubleConsumer {
+    private final DoubleStatistics stats =
+        DoubleStatistics.of(Statistic.MEAN, Statistic.MIN, Statistic.MAX);
+    private final DoubleArrayList values = new DoubleArrayList();
+
+    double getMean() {
+      return stats.getAsDouble(Statistic.MEAN);
+    }
+
+    double getMin() {
+      return stats.getAsDouble(Statistic.MIN);
+    }
+
+    double getMax() {
+      return stats.getAsDouble(Statistic.MAX);
+    }
+
+    double getMedian() {
+      return Median.withDefaults().evaluate(values.toDoubleArray());
+    }
+
+    @Override
+    public void accept(double value) {
+      stats.accept(value);
+      values.add(value);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -159,9 +194,9 @@ public class SummariseResults implements PlugIn {
       int[] removeNullResults) {
     sb.setLength(0);
 
-    final DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
+    final SampleData[] stats = new SampleData[2];
     for (int i = 0; i < stats.length; i++) {
-      stats[i] = new DescriptiveStatistics();
+      stats[i] = new SampleData();
     }
 
     if (result.hasNullResults()) {
@@ -193,7 +228,7 @@ public class SummariseResults implements PlugIn {
         stored = result.hasPrecision();
         precisionMethod = p.getPrecision(stored);
         for (final double v : p.precisions) {
-          stats[0].addValue(v);
+          stats[0].accept(v);
         }
       } catch (final DataException ignored) {
         // Ignore
@@ -204,7 +239,7 @@ public class SummariseResults implements PlugIn {
         final SnrResultProcedure p = new SnrResultProcedure(result);
         p.getSnr();
         for (final double v : p.snr) {
-          stats[1].addValue(v);
+          stats[1].accept(v);
         }
       } catch (final DataException ignored) {
         // Ignore
@@ -274,12 +309,12 @@ public class SummariseResults implements PlugIn {
     if (stored) {
       sb.append(" (Stored)");
     }
-    for (final DescriptiveStatistics stat : stats) {
+    for (final SampleData stat : stats) {
       if (Double.isNaN(stat.getMean())) {
         sb.append("\t-\t-\t-\t-");
       } else {
         sb.append('\t').append(IJ.d2s(stat.getMean(), 3));
-        sb.append('\t').append(IJ.d2s(stat.getPercentile(50), 3));
+        sb.append('\t').append(IJ.d2s(stat.getMedian(), 3));
         sb.append('\t').append(IJ.d2s(stat.getMin(), 3));
         sb.append('\t').append(IJ.d2s(stat.getMax(), 3));
       }
@@ -465,9 +500,8 @@ public class SummariseResults implements PlugIn {
     private static void plot(HistogramPlotBuilder plotBuilder, WindowOrganiser wo, String title,
         StoredDataStatistics data) {
       plotBuilder.setName(title).setData(data)
-          .setPlotLabel(String.format("%s +/- %s (%d)",
-              MathUtils.rounded(data.getMean()), MathUtils.rounded(data.getStandardDeviation()),
-              data.getN()))
+          .setPlotLabel(String.format("%s +/- %s (%d)", MathUtils.rounded(data.getMean()),
+              MathUtils.rounded(data.getStandardDeviation()), data.getN()))
           .show(wo);
     }
   }

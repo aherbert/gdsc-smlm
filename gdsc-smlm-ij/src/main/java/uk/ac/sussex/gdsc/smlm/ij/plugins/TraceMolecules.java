@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.statistics.descriptive.Mean;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
@@ -1539,11 +1539,11 @@ public class TraceMolecules implements PlugIn {
   }
 
   private static double getBlinkingRate(Trace[] traces) {
-    final SummaryStatistics stats = new SummaryStatistics();
+    final Mean mean = Mean.create();
     for (final Trace trace : traces) {
-      stats.addValue(trace.getBlinks());
+      mean.accept(trace.getBlinks());
     }
-    return stats.getMean();
+    return mean.getAsDouble();
   }
 
   private static double[] getIntervals(double min, double max, int optimiserSteps) {

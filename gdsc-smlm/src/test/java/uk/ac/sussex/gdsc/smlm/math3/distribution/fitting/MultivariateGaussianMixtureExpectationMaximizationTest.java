@@ -33,11 +33,11 @@ import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.fitting.MultivariateNormalMixtureExpectationMaximization;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.stat.correlation.Covariance;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
+import org.apache.commons.statistics.descriptive.Mean;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -508,9 +508,8 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
    */
   private static double[] getColumnMeans(double[][] data) {
     final Array2DRowRealMatrix m = new Array2DRowRealMatrix(data);
-    final Mean mean = new Mean();
-    return IntStream.range(0, data[0].length).mapToDouble(i -> mean.evaluate(m.getColumn(i)))
-        .toArray();
+    return IntStream.range(0, data[0].length)
+        .mapToDouble(i -> Mean.of(m.getColumn(i)).getAsDouble()).toArray();
   }
 
   /**

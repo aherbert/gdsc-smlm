@@ -65,9 +65,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.OutOfRangeException;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.apache.commons.statistics.descriptive.Median;
+import org.apache.commons.statistics.descriptive.Quantile;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -2571,16 +2571,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
           final int i = SimpleArrayUtils.findLastIndex(metric, Double::isFinite);
           if (i != -1) {
             final double[] tmp = Arrays.copyOf(metric, i + 1);
-            final Percentile p = new Percentile();
-            final double l = p.evaluate(metric, 25);
-            final double u = p.evaluate(metric, 75);
+            final double[] q = Quantile.withDefaults().evaluate(tmp, 0.25, 0.75);
+            final double l = q[0];
+            final double u = q[1];
             final double iqr = 1.5 * (u - l);
             limitsx[1] = Math.min(tmp[i], u + iqr);
           }
         } else {
-          final Percentile p = new Percentile();
-          final double l = p.evaluate(metric, 25);
-          final double u = p.evaluate(metric, 75);
+          final double[] q = Quantile.withDefaults().evaluate(metric, 0.25, 0.75);
+          final double l = q[0];
+          final double u = q[1];
           final double iqr = 1.5 * (u - l);
           limitsx[1] = Math.min(limitsx[1], u + iqr);
         }
@@ -2601,8 +2601,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final StoredDataStatistics s2 = stats[1][index];
     final StoredDataStatistics s3 = stats[2][index];
 
-    // Statistics of finite values
-    DescriptiveStatistics d = null;
+    // finite values
+    double[] tmp = null;
 
     double median = 0;
     Plot plot = null;
@@ -2610,12 +2610,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     if (settings.showFilterScoreHistograms) {
       // Filter the value to finite values (for plotting)
-      final double[] tmp = Arrays.stream(s1.values()).filter(Double::isFinite).toArray();
-      d = new DescriptiveStatistics(tmp);
+      tmp = Arrays.stream(s1.values()).filter(Double::isFinite).toArray();
 
-      median = d.getPercentile(50);
+      median = Median.withDefaults().evaluate(tmp);
       final String label =
-          String.format("n = %d. Median = %s nm", d.getN(), MathUtils.rounded(median));
+          String.format("n = %d. Median = %s nm", tmp.length, MathUtils.rounded(median));
       final HistogramPlot histogramPlot =
           new HistogramPlotBuilder(TITLE, DoubleData.wrap(tmp), xLabel)
               .setMinBinWidth(filterCriteria[index].minBinWidth)
@@ -2674,9 +2673,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       final double[] xlimit = {h1[0][0], h1[0][i1]};
       // Restrict using the inter-quartile range
       if (filterCriteria[index].restrictRange) {
-        @SuppressWarnings("null")
-        final double q1 = d.getPercentile(25);
-        final double q2 = d.getPercentile(75);
+        final double[] q = Quantile.withDefaults().evaluate(tmp, 0.25, 0.75);
+        final double q1 = q[0];
+        final double q2 = q[1];
         final double iqr = (q2 - q1) * 2.5;
         xlimit[0] = MathUtils.max(xlimit[0], median - iqr);
         xlimit[1] = MathUtils.min(xlimit[1], median + iqr);

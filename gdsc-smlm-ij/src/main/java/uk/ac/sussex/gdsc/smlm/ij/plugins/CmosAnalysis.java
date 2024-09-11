@@ -74,13 +74,15 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.apache.commons.math3.stat.inference.TestUtils;
-import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
+import org.apache.commons.statistics.inference.KolmogorovSmirnovTest;
+import org.apache.commons.statistics.inference.SignificanceResult;
+import org.apache.commons.statistics.inference.TTest;
+import org.apache.commons.statistics.inference.WilcoxonSignedRankTest;
 import uk.ac.sussex.gdsc.core.data.IntegerType;
 import uk.ac.sussex.gdsc.core.data.SiPrefix;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
@@ -1213,25 +1215,24 @@ public class CmosAnalysis implements PlugIn {
         .setPlotLabel(result.toString()).show(wo);
 
     // Kolmogorov–Smirnov test that the distributions are the same
-    double pvalue = TestUtils.kolmogorovSmirnovTest(x, y);
-    result.append(" : Kolmogorov–Smirnov p=").append(MathUtils.rounded(pvalue)).append(' ')
-        .append(((pvalue < 0.001) ? REJECT : ACCEPT));
+    SignificanceResult r = KolmogorovSmirnovTest.withDefaults().test(x, y);
+    result.append(" : Kolmogorov–Smirnov p=").append(MathUtils.rounded(r.getPValue())).append(' ')
+        .append((r.reject(0.001) ? REJECT : ACCEPT));
 
     if (slice == 3) {
       // Paired T-Test compares two related samples to assess whether their
       // population means differ.
       // T-Test is valid when the difference between the means is normally
       // distributed, e.g. gain
-      pvalue = TestUtils.pairedTTest(x, y);
-      result.append(" : Paired T-Test p=").append(MathUtils.rounded(pvalue)).append(' ')
-          .append(((pvalue < 0.001) ? REJECT : ACCEPT));
+      r = TTest.withDefaults().test(x, y);
+      result.append(" : Paired T-Test p=").append(MathUtils.rounded(r.getPValue())).append(' ')
+          .append((r.reject(0.001) ? REJECT : ACCEPT));
     } else {
       // Wilcoxon Signed Rank test compares two related samples to assess whether their
       // population mean ranks differ
-      final WilcoxonSignedRankTest wsrTest = new WilcoxonSignedRankTest();
-      pvalue = wsrTest.wilcoxonSignedRankTest(x, y, false);
-      result.append(" : Wilcoxon Signed Rank p=").append(MathUtils.rounded(pvalue)).append(' ')
-          .append(((pvalue < 0.001) ? REJECT : ACCEPT));
+      r = WilcoxonSignedRankTest.withDefaults().test(x, y);
+      result.append(" : Wilcoxon Signed Rank p=").append(MathUtils.rounded(r.getPValue()))
+          .append(' ').append((r.reject(0.001) ? REJECT : ACCEPT));
     }
 
     ImageJUtils.log(result.toString());

@@ -64,10 +64,12 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.statistics.descriptive.DoubleStatistics;
+import org.apache.commons.statistics.descriptive.Quantile;
+import org.apache.commons.statistics.descriptive.Statistic;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
@@ -83,6 +85,7 @@ import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -796,18 +799,22 @@ public class PcPalmMolecules implements PlugIn {
       boolean logFitParameters, boolean removeOutliers) {
     // Plot histogram of the precision
     final float[] data = new float[molecules.size()];
-    final DescriptiveStatistics stats = new DescriptiveStatistics();
+    final DoubleStatistics stats =
+        DoubleStatistics.of(Statistic.MIN, Statistic.MAX, Statistic.STANDARD_DEVIATION);
     double yMin = Double.NEGATIVE_INFINITY;
     double yMax = 0;
     for (int i = 0; i < data.length; i++) {
-      data[i] = (float) molecules.get(i).precision;
-      stats.addValue(data[i]);
+      final double x = molecules.get(i).precision;
+      data[i] = (float) x;
+      stats.accept(x);
     }
 
     // Set the min and max y-values using 1.5 x IQR
     if (removeOutliers) {
-      final double lower = stats.getPercentile(25);
-      final double upper = stats.getPercentile(75);
+      final double[] q =
+          Quantile.withDefaults().evaluate(SimpleArrayUtils.toDouble(data), 0.25, 0.75);
+      final double lower = q[0];
+      final double upper = q[1];
       if (Double.isNaN(lower) || Double.isNaN(upper)) {
         if (logFitParameters) {
           ImageJUtils.log("Error computing IQR: %f - %f", lower, upper);
@@ -815,19 +822,19 @@ public class PcPalmMolecules implements PlugIn {
       } else {
         final double iqr = upper - lower;
 
-        yMin = Math.max(lower - iqr, stats.getMin());
-        yMax = Math.min(upper + iqr, stats.getMax());
+        yMin = Math.max(lower - iqr, stats.getAsDouble(Statistic.MIN));
+        yMax = Math.min(upper + iqr, stats.getAsDouble(Statistic.MAX));
 
         if (logFitParameters) {
-          ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(),
-              stats.getMax(), yMin, yMax);
+          ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f",
+              stats.getAsDouble(Statistic.MIN), stats.getAsDouble(Statistic.MAX), yMin, yMax);
         }
       }
     }
 
     if (yMin == Double.NEGATIVE_INFINITY) {
-      yMin = stats.getMin();
-      yMax = stats.getMax();
+      yMin = stats.getAsDouble(Statistic.MIN);
+      yMax = stats.getAsDouble(Statistic.MAX);
 
       if (logFitParameters) {
         ImageJUtils.log("  Data range: %f - %f", yMin, yMax);
@@ -836,8 +843,9 @@ public class PcPalmMolecules implements PlugIn {
 
     int bins;
     if (histogramBins <= 0) {
-      bins = (int) Math.ceil((stats.getMax() - stats.getMin())
-          / HistogramPlot.getBinWidthScottsRule(stats.getStandardDeviation(), (int) stats.getN()));
+      bins = (int) Math.ceil((stats.getAsDouble(Statistic.MAX) - stats.getAsDouble(Statistic.MIN))
+          / HistogramPlot.getBinWidthScottsRule(stats.getAsDouble(Statistic.STANDARD_DEVIATION),
+              (int) stats.getCount()));
     } else {
       bins = histogramBins;
     }

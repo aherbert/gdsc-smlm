@@ -30,6 +30,8 @@ Minor release of GDSC SMLM.
   The results can be added to the source image as an overlay.
 * Added the :numref:`{name} <results_plugins:Trace Viewer>` plugin to display a table of traced
   results.
+* Update from Commons Math to Commons Statistics for inference testing and univariate
+  descriptive statistics.
 
 
 Version 1.1

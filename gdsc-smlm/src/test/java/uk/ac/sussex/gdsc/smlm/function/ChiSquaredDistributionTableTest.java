@@ -24,9 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.statistics.distribution.ChiSquaredDistribution;
+import org.apache.commons.statistics.inference.ChiSquareTest;
+import org.apache.commons.statistics.inference.SignificanceResult;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Assertions;
@@ -118,15 +119,16 @@ class ChiSquaredDistributionTableTest {
   @SeededTest
   void canPerformChiSquaredTest(RandomSeed seed) {
     final UniformRandomProvider rng = RngFactory.create(seed.get());
-    final ChiSquareTest test = new ChiSquareTest();
+    final ChiSquareTest test = ChiSquareTest.withDefaults();
     for (final int n : new int[] {10, 50, 100}) {
       final double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
       final long[] l = new long[x.length];
       for (int i = 0; i < x.length; i++) {
         l[i] = GdscSmlmTestUtils.createPoissonSampler(rng, x[i]).sample();
       }
-      final double chi2 = test.chiSquare(x, l);
-      final double ep = test.chiSquareTest(x, l);
+      final SignificanceResult r = test.test(x, l);
+      final double chi2 = r.getStatistic();
+      final double ep = r.getPValue();
       final int df = x.length - 1;
       final double o = ChiSquaredDistributionTable.computeQValue(chi2, df);
       Assertions.assertEquals(ep, o, 1e-10);

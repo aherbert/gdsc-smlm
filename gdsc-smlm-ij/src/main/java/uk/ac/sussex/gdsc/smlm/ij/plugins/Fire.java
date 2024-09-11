@@ -49,6 +49,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -79,8 +80,10 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.MathArrays;
+import org.apache.commons.statistics.descriptive.DoubleStatistics;
+import org.apache.commons.statistics.descriptive.Quantile;
+import org.apache.commons.statistics.descriptive.Statistic;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
@@ -2515,10 +2518,15 @@ public class Fire implements PlugIn {
     double yMax = 0;
 
     // Set the min and max y-values using 1.5 x IQR
-    final DescriptiveStatistics stats = precision.getStatistics();
-    final double lower = stats.getPercentile(25);
-    final double upper = stats.getPercentile(75);
+    final double[] values = precision.values();
+    final double[] q = Quantile.withDefaults().evaluate(values, 0.25, 0.75);
+    final double lower = q[0];
+    final double upper = q[1];
     final boolean logFitParameters = IJ.debugMode;
+    final DoubleStatistics stats = DoubleStatistics
+        .of(EnumSet.of(Statistic.STANDARD_DEVIATION, Statistic.MIN, Statistic.MAX), values);
+    final double min = stats.getAsDouble(Statistic.MIN);
+    final double max = stats.getAsDouble(Statistic.MAX);
     if (Double.isNaN(lower) || Double.isNaN(upper)) {
       if (logFitParameters) {
         ImageJUtils.log("Error computing IQR: %f - %f", lower, upper);
@@ -2526,23 +2534,24 @@ public class Fire implements PlugIn {
     } else {
       final double iqr = upper - lower;
 
-      yMin = Math.max(lower - iqr, stats.getMin());
-      yMax = Math.min(upper + iqr, stats.getMax());
+      yMin = Math.max(lower - iqr, min);
+      yMax = Math.min(upper + iqr, max);
 
       if (logFitParameters) {
-        ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(),
-            stats.getMax(), yMin, yMax);
+        ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", min, max, yMin, yMax);
       }
     }
 
     if (yMin == Double.NEGATIVE_INFINITY) {
       final int n = 5;
-      yMin = Math.max(stats.getMin(), stats.getMean() - n * stats.getStandardDeviation());
-      yMax = Math.min(stats.getMax(), stats.getMean() + n * stats.getStandardDeviation());
+      final double mean = stats.getAsDouble(Statistic.MEAN);
+      final double sd = stats.getAsDouble(Statistic.STANDARD_DEVIATION);
+      yMin = Math.max(min, mean - n * sd);
+      yMax = Math.min(min, mean + n * sd);
 
       if (logFitParameters) {
-        ImageJUtils.log("  Data range: %f - %f. Plotting mean +/- %dxSD: %f - %f", stats.getMin(),
-            stats.getMax(), n, yMin, yMax);
+        ImageJUtils.log("  Data range: %f - %f. Plotting mean +/- %dxSD: %f - %f", min, max, n,
+            yMin, yMax);
       }
     }
 

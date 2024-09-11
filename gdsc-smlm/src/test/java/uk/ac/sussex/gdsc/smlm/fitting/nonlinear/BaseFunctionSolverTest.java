@@ -28,11 +28,11 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
+import org.apache.commons.statistics.inference.TTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -429,8 +429,8 @@ public abstract class BaseFunctionSolverTest {
           final double sd1 = stats[i].getStandardDeviation();
           final double sd2 = stats[i + 1].getStandardDeviation();
 
-          final TTest tt = new TTest();
-          final boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
+          final boolean diff = TTest.withDefaults()
+              .test(stats[i].getValues(), stats[i + 1].getValues()).reject(alpha);
 
           final int index = i / 2;
           final Object[] args = new Object[] {name2, name, s, noiseModel, statName[index], u2, sd2,

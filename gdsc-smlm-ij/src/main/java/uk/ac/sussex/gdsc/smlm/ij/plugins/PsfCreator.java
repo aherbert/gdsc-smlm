@@ -68,7 +68,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.statistics.descriptive.Quantile;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.FloatStackTrivalueProvider;
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
@@ -848,9 +848,9 @@ public class PsfCreator implements PlugInFilter {
    */
   private static double[] getLimits(double[] data) {
     final double[] limits = MathUtils.limits(data);
-    final DescriptiveStatistics stats = new DescriptiveStatistics(data);
-    final double lower = stats.getPercentile(25);
-    final double upper = stats.getPercentile(75);
+    final double[] q = Quantile.withDefaults().evaluate(data, 0.25, 0.75);
+    final double lower = q[0];
+    final double upper = q[1];
     final double iqr = (upper - lower) * 2;
     limits[0] = Math.max(lower - iqr, limits[0]);
     limits[1] = Math.min(upper + iqr, limits[1]);
