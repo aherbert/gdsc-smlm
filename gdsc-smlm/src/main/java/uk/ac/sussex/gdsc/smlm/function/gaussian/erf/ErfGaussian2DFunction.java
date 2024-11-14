@@ -102,7 +102,9 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
     /** Use a fast approximation for the Error function. */
     FAST,
 
-    /** Use the Apache commons math library Error function. */
+    /** Use the Apache Commons library Error function.
+     * <p>As of version 1.2 this uses the implementation in Commons Numbers
+     * (replacing the Commons Math implementation). */
     COMMONS_MATH;
   }
 
@@ -130,14 +132,14 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
   }
 
   /**
-   * Compute the error function using the Commons Math implementation.
+   * Compute the error function using the Commons Numbers implementation.
    */
-  private static class CommontsMathErrorFunction implements ErrorFunction {
-    static final CommontsMathErrorFunction INSTANCE = new CommontsMathErrorFunction();
+  private static class CommontsNumbersErrorFunction implements ErrorFunction {
+    static final CommontsNumbersErrorFunction INSTANCE = new CommontsNumbersErrorFunction();
 
     @Override
     public double erf(double x) {
-      return org.apache.commons.math3.special.Erf.erf(x);
+      return org.apache.commons.numbers.gamma.Erf.value(x);
     }
   }
 
@@ -265,7 +267,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
   public void setErfFunction(ErfFunction erfFunction) {
     switch (erfFunction) {
       case COMMONS_MATH:
-        errorFunction = CommontsMathErrorFunction.INSTANCE;
+        errorFunction = CommontsNumbersErrorFunction.INSTANCE;
         break;
       case FAST:
         errorFunction = FastErrorFunction.INSTANCE;

@@ -215,7 +215,7 @@ public final class PoissonGaussianConvolutionFunction
    * @return the cumulative density
    */
   double gaussianCdf(final double x) {
-    // return org.apache.commons.math3.special.Erf.erf(x / sqrt_var_by_2)
+    // return org.apache.commons.numbers.gamma.Erf.value(x / sqrt_var_by_2)
     // This may not be precise enough.
     // Absolute error is <3e-7. Not sure what relative error is.
     // The standard CDF is much slower.

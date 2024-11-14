@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.special.Erf;
+import org.apache.commons.numbers.gamma.Erf;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -289,11 +289,11 @@ public class GaussianPsfModel extends PsfModel {
     // Note: The 0.5 factors are moved to reduce computations
     for (int x = 0; x <= x0range; x++) {
       // erf0[x] = 0.5 * Erf.erf((x - x0) * denom0);
-      erf0[x] = Erf.erf((x - x0) * denom0);
+      erf0[x] = Erf.value((x - x0) * denom0);
     }
     for (int y = 0; y <= x1range; y++) {
       // erf1[y] = 0.5 * Erf.erf((y - x1) * denom1);
-      erf1[y] = Erf.erf((y - x1) * denom1);
+      erf1[y] = Erf.value((y - x1) * denom1);
     }
     sum *= 0.5; // Incorporate the 0.5 factor for Y into the sum
 

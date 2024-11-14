@@ -108,7 +108,7 @@ public final class Erf {
    * @return the error function erf(x)
    */
   public static double erf(double x) {
-    // return org.apache.commons.math3.special.Erf.erf(x);
+    // return org.apache.commons.numbers.gamma.Erf.value(x);
 
     final boolean negative = (x < 0);
     if (negative) {

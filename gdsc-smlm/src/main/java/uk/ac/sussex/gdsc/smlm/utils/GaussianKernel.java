@@ -413,10 +413,10 @@ public class GaussianKernel {
     final double sqrtTwoVar = Math.sqrt(sigma * sigma * 2);
 
     // Use erfc to reach into the long tail at sigma <= 38
-    double lower = org.apache.commons.math3.special.Erf.erfc(-0.5 / sqrtTwoVar);
+    double lower = org.apache.commons.numbers.gamma.Erfc.value(-0.5 / sqrtTwoVar);
     for (int i = 0; i < kradius; i++) {
       final double upper = lower;
-      lower = org.apache.commons.math3.special.Erf.erfc((i + 0.5) / sqrtTwoVar);
+      lower = org.apache.commons.numbers.gamma.Erfc.value((i + 0.5) / sqrtTwoVar);
       kernel[i] = (upper - lower) * 0.5;
       if (kernel[i] == 0) {
         break;
