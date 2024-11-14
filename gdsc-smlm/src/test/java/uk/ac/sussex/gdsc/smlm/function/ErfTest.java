@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.logging.Logger;
 import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.gamma.ErfDifference;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -43,8 +44,6 @@ import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
-
-// TODO: Update this using the new Erf implementation in Commons Numbers 1.1
 
 @SuppressWarnings({"javadoc"})
 class ErfTest {
@@ -70,9 +69,9 @@ class ErfTest {
   private static class ApacheErf extends BaseErf {
     ApacheErf() {  super("apache erf"); }
     @Override
-    double erf(double x) { return org.apache.commons.math3.special.Erf.erf(x); }
+    double erf(double x) { return org.apache.commons.numbers.gamma.Erf.value(x); }
     @Override
-    double erf(double x1, double x2) { return org.apache.commons.math3.special.Erf.erf(x1, x2); }
+    double erf(double x1, double x2) { return ErfDifference.value(x1, x2); }
   }
   private static class Erf extends BaseErf {
     Erf() {  super("erf"); }
@@ -121,7 +120,7 @@ class ErfTest {
       for (int i = 0; i < 5; i++) {
         final double x = xi + rg.nextDouble();
         final double o = erf.erf(x);
-        final double e = org.apache.commons.math3.special.Erf.erf(x);
+        final double e = org.apache.commons.numbers.gamma.Erf.value(x);
         final double error = Math.abs(o - e);
         if (max < error) {
           max = error;
@@ -204,7 +203,7 @@ class ErfTest {
             final double x2 = xi2 + rg.nextDouble();
 
             final double o = erf.erf(x, x2);
-            final double e = org.apache.commons.math3.special.Erf.erf(x, x2);
+            final double e = ErfDifference.value(x, x2);
             final double error = Math.abs(o - e);
             if (max < error) {
               max = error;
@@ -244,7 +243,7 @@ class ErfTest {
       final double x = xi;
       final double x2 = xi + 1;
       final double o = erf.erf(x, x2);
-      final double e = org.apache.commons.math3.special.Erf.erf(x, x2);
+      final double e = ErfDifference.value(x, x2);
       final double error = Math.abs(o - e);
       if (max < error) {
         max = error;
@@ -291,11 +290,11 @@ class ErfTest {
     for (int x = -range; x <= range; x++) {
       final double o1 = 0.5 * erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
       final double e1 =
-          0.5 * org.apache.commons.math3.special.Erf.erf((x - 0.5) * denom, (x + 0.5) * denom);
+          0.5 * ErfDifference.value((x - 0.5) * denom, (x + 0.5) * denom);
       for (int y = -range; y <= range; y++) {
         final double o2 = 0.5 * erf.erf((y - 0.5) * denom, (y + 0.5) * denom);
         final double e2 =
-            0.5 * org.apache.commons.math3.special.Erf.erf((y - 0.5) * denom, (y + 0.5) * denom);
+            0.5 * ErfDifference.value((y - 0.5) * denom, (y + 0.5) * denom);
 
         final double o = o1 * o2;
         final double e = e1 * e2;
@@ -355,8 +354,8 @@ class ErfTest {
     // final double denom = 1.0 / (2.0 * s * s); // As per Smith, etal (2010),
 
     final double denom = 1.0 / (Math.sqrt(2.0) * s);
-    final double e1 = 0.5 * org.apache.commons.math3.special.Erf.erf(minx * denom, maxx * denom);
-    final double e2 = 0.5 * org.apache.commons.math3.special.Erf.erf(miny * denom, maxy * denom);
+    final double e1 = 0.5 * ErfDifference.value(minx * denom, maxx * denom);
+    final double e2 = 0.5 * ErfDifference.value(miny * denom, maxy * denom);
     final double expected = e1 * e2;
 
     double observed = 0;
