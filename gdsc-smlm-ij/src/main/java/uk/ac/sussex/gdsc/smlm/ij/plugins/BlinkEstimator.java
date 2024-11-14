@@ -42,7 +42,6 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optim
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.DiagonalMatrix;
-import org.apache.commons.math3.util.Precision;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
@@ -74,7 +73,7 @@ public class BlinkEstimator implements PlugIn {
   private static final double COST_RELATIVE_TOLERANCE = 1e-6;
   private static final double PAR_RELATIVE_TOLERANCE = 1e-6;
   private static final double ORTHO_TOLERANCE = 1e-6;
-  private static final double THRESHOLD = Precision.SAFE_MIN;
+  private static final double THRESHOLD = Double.MIN_NORMAL;
 
   private BlinkingFunction blinkingModel;
   private double r2;

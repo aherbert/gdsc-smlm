@@ -59,7 +59,6 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optim
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.DiagonalMatrix;
-import org.apache.commons.math3.util.Precision;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
@@ -950,7 +949,7 @@ public class AstigmatismModelManager implements PlugIn {
     final double costRelativeTolerance = 1e-10;
     final double parRelativeTolerance = 1e-10;
     final double orthoTolerance = 1e-10;
-    final double threshold = Precision.SAFE_MIN;
+    final double threshold = Double.MIN_NORMAL;
 
     // We optimise against both sx and sy as a combined y-value.
     final double[] y = new double[fitZ.length * 2];

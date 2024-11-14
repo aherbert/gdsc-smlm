@@ -37,7 +37,6 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.Pair;
-import org.apache.commons.math3.util.Precision;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -76,7 +75,7 @@ public class ApacheLvmFitter extends LseBaseFunctionSolver {
       final double costRelativeTolerance = 1e-10;
       final double parRelativeTolerance = 1e-10;
       final double orthoTolerance = 1e-10;
-      final double threshold = Precision.SAFE_MIN;
+      final double threshold = Double.MIN_NORMAL;
 
       // Extract the parameters to be fitted
       final double[] initialSolution = getInitialSolution(a);
