@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.model;
 
 import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
