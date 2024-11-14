@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;

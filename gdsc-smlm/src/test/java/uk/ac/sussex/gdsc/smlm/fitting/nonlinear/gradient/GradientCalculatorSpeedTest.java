@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.statistics.distribution.PoissonDistribution;

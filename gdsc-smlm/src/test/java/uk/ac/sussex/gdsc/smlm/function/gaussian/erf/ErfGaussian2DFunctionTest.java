@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;

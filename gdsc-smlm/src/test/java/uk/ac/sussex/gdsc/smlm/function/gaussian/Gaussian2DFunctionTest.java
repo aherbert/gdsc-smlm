@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;

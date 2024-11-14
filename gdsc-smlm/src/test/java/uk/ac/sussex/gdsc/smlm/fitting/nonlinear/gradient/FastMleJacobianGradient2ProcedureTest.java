@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;

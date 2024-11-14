@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.apache.commons.numbers.gamma.ErfDifference;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;

@@ -29,7 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
-import org.apache.commons.math3.util.Precision;
+import org.apache.commons.numbers.core.Precision;
 import org.apache.commons.statistics.distribution.PoissonDistribution;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
