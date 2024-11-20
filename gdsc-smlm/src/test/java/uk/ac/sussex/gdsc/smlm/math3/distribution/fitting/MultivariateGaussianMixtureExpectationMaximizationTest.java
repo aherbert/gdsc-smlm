@@ -131,7 +131,8 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     final MultivariateNormalDistribution expDist =
         new MultivariateNormalDistribution(means, covariances);
     for (final double[] x : data) {
-      Assertions.assertEquals(expDist.density(x), dist.density(x));
+      final double e = expDist.density(x);
+      Assertions.assertEquals(e, dist.density(x), Math.ulp(e));
     }
   }
 
