@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.numbers.core.Precision;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -536,7 +536,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
                     @Override
                     public void executeExtended(double value, double[] dyDa, double[] d2yDaDb) {
                       index++;
-                      final DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams, d2yDaDb);
+                      final DMatrixRMaj m = DMatrixRMaj.wrap(nparams, nparams, d2yDaDb);
                       for (int j = 0; j < nparams; j++) {
                         // Evaluate the function +/- delta for parameter j
                         fHigh[j].eval(index, duDa);
@@ -757,8 +757,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
                                     double[] d2yDaDb) {
                                   index++;
                                   // if (i!=f2.size()/2) return;
-                                  final DenseMatrix64F m =
-                                      DenseMatrix64F.wrap(nparams, nparams, d2yDaDb);
+                                  final DMatrixRMaj m =
+                                      DMatrixRMaj.wrap(nparams, nparams, d2yDaDb);
                                   for (int j = 0; j < nparams; j++) {
                                     // Evaluate the function +/- delta for parameter j
                                     fHigh[j].eval(index, duDa);

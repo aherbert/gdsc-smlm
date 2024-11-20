@@ -24,9 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 public class Tensor3D {
   private final double[] com;
 
-  private final DenseMatrix64F tensor;
+  private final DMatrixRMaj tensor;
   private final double[] eigenValues;
   private final double[][] eigenVectors;
 
@@ -76,7 +76,7 @@ public class Tensor3D {
 
     // Compute tensor
     // https://en.wikipedia.org/wiki/Moment_of_inertia#Inertia_tensor
-    tensor = new DenseMatrix64F(3, 3);
+    tensor = new DMatrixRMaj(3, 3);
     for (int z = 0; z < data.length; z++) {
       final double dz = z - cz;
       final double dz2 = dz * dz;
@@ -127,7 +127,7 @@ public class Tensor3D {
     tensor.data[7] = tensor.data[5];
 
     // Eigen decompose
-    final EigenDecomposition<DenseMatrix64F> decomp = DecompositionFactory.eig(3, true, true);
+    final EigenDecomposition_F64<DMatrixRMaj> decomp = DecompositionFactory_DDRM.eig(3, true, true);
 
     if (!decomp.decompose(tensor)) {
       eigenValues = null;
@@ -186,8 +186,13 @@ public class Tensor3D {
    *
    * @return the tensor
    */
-  public DenseMatrix64F getTensor() {
-    return tensor;
+  public double[][] getTensor() {
+    final double[] m = tensor.data;
+    return new double[][] {
+      {m[0], m[1], m[2]},
+      {m[3], m[4], m[5]},
+      {m[6], m[7], m[8]},
+    };
   }
 
   /**

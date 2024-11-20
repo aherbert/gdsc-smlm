@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3f;
 
 /**
  * Interface for shape objects that represent a set of items.

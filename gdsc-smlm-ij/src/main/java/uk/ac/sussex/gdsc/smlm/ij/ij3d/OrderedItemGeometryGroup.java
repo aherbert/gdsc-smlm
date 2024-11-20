@@ -24,12 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import org.scijava.java3d.Appearance;
-import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.Group;
-import org.scijava.java3d.OrderedGroup;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
+import org.jogamp.java3d.Appearance;
+import org.jogamp.java3d.GeometryArray;
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.OrderedGroup;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3f;
 
 /**
  * This class represents a list as a number of repeated shapes in the universe. The shape is defined

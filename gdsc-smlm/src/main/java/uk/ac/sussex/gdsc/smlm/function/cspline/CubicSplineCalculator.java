@@ -24,9 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import uk.ac.sussex.gdsc.core.data.TrivalueProvider;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
@@ -38,10 +38,10 @@ public class CubicSplineCalculator {
   // Based on the code provided by Hazen Babcock for 3D spline fitting
   // https://github.com/ZhuangLab/storm-analysis/blob/master/storm_analysis/spliner/spline3D.py
 
-  private static final DenseMatrix64F A;
+  private static final DMatrixRMaj A;
 
   static {
-    A = new DenseMatrix64F(64, 64);
+    A = new DMatrixRMaj(64, 64);
     final CubicSplinePosition[] s = new CubicSplinePosition[4];
     for (int i = 0; i < 4; i++) {
       s[i] = new CubicSplinePosition((double) i / 3);
@@ -59,13 +59,13 @@ public class CubicSplineCalculator {
     }
   }
 
-  private final LinearSolver<DenseMatrix64F> solver;
+  private final LinearSolverDense<DMatrixRMaj> solver;
 
   /**
    * Instantiates a new cubic spline calculator.
    */
   public CubicSplineCalculator() {
-    solver = LinearSolverFactory.linear(64);
+    solver = LinearSolverFactory_DDRM.linear(64);
     // Note: Linear solver should not modify A or B for this to work!
     if (!solver.setA(A) || solver.modifiesA() || solver.modifiesB()) {
       throw new IllegalStateException("Unable to create linear solver");
@@ -80,7 +80,7 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(double[][][] value) {
-    final DenseMatrix64F matrix = new DenseMatrix64F(64, 1);
+    final DMatrixRMaj matrix = new DMatrixRMaj(64, 1);
     int count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
@@ -101,7 +101,7 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(TrivalueProvider value) {
-    final DenseMatrix64F matrix = new DenseMatrix64F(64, 1);
+    final DMatrixRMaj matrix = new DMatrixRMaj(64, 1);
     int count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
@@ -122,7 +122,7 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(double[] value) {
-    final DenseMatrix64F matrix = DenseMatrix64F.wrap(64, 1, value);
+    final DMatrixRMaj matrix = DMatrixRMaj.wrap(64, 1, value);
     solver.solve(matrix, matrix);
     return matrix.data;
   }
@@ -135,7 +135,7 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(float[] value) {
-    final DenseMatrix64F matrix = new DenseMatrix64F(64, 1);
+    final DMatrixRMaj matrix = new DMatrixRMaj(64, 1);
     for (int i = 0; i < 64; i++) {
       matrix.data[i] = value[i];
     }

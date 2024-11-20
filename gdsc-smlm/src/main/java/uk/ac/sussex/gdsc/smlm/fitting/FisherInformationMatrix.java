@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 
 import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import uk.ac.sussex.gdsc.core.annotation.NotNull;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
@@ -44,7 +44,7 @@ public class FisherInformationMatrix {
   private static final byte UNKNOWN = 0;
   private static final byte NO = -1;
 
-  private final DenseMatrix64F matrix;
+  private final DMatrixRMaj matrix;
   private double[] crlb;
   private byte inverted = UNKNOWN;
   private double inversionTolerance;
@@ -76,7 +76,7 @@ public class FisherInformationMatrix {
    * @param matrix the fisher information matrix
    * @param inversionTolerance the inversion tolerance
    */
-  public FisherInformationMatrix(DenseMatrix64F matrix, double inversionTolerance) {
+  public FisherInformationMatrix(DMatrixRMaj matrix, double inversionTolerance) {
     this.matrix = matrix;
     setInversionTolerance(inversionTolerance);
   }
@@ -105,7 +105,7 @@ public class FisherInformationMatrix {
    *
    * @param matrix the fisher information matrix
    */
-  public FisherInformationMatrix(DenseMatrix64F matrix) {
+  public FisherInformationMatrix(DMatrixRMaj matrix) {
     this(matrix, DEFAULT_INVERSION_TOLERANCE);
   }
 
@@ -408,7 +408,7 @@ public class FisherInformationMatrix {
    *
    * @return the matrix
    */
-  public DenseMatrix64F getMatrix() {
+  public DMatrixRMaj getMatrix() {
     return matrix;
   }
 

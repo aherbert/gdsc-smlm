@@ -30,7 +30,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import org.apache.commons.numbers.core.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -213,7 +213,7 @@ class LsqLvmGradientProcedureTest {
       Assertions.assertArrayEquals(p.beta, beta, msgOb.set(0, i));
 
       final double[] al = p.getAlphaLinear();
-      Assertions.assertArrayEquals(al, new DenseMatrix64F(alpha).data, msgOal.set(0, i));
+      Assertions.assertArrayEquals(al, new DMatrixRMaj(alpha).data, msgOal.set(0, i));
 
       final double[][] am = p.getAlphaMatrix();
       Assertions.assertArrayEquals(am, alpha, msgOam.set(0, i));

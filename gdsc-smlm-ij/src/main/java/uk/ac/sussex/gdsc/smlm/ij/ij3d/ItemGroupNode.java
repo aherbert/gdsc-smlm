@@ -25,10 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import ij3d.ContentNode;
-import org.scijava.java3d.View;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
-import org.scijava.vecmath.Tuple3d;
+import org.jogamp.java3d.View;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3f;
+import org.jogamp.vecmath.Tuple3d;
 
 /**
  * Node to allow display of ItemGroup content.

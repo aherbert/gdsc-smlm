@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -131,7 +131,7 @@ class PoissonGradientProcedureTest {
       final double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
       // Not exactly the same ...
       final double[] al = p.getLinear();
-      TestAssertions.assertArrayTest(al, new DenseMatrix64F(m).data, predicate, msgOal.set(1, i));
+      TestAssertions.assertArrayTest(al, new DMatrixRMaj(m).data, predicate, msgOal.set(1, i));
 
       final double[][] am = p.getMatrix();
       TestAssertions.assertArrayTest(am, m, predicate, msgOam.set(1, i));

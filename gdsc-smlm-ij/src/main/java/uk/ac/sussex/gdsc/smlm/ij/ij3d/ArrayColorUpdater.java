@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Color4f;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Color4f;
 
 /**
  * Class to create the colour array for a set of vertex coordinates with the same colour.

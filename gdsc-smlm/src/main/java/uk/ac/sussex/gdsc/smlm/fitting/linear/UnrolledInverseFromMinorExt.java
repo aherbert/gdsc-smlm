@@ -41,11 +41,14 @@ package uk.ac.sussex.gdsc.smlm.fitting.linear;
  * see <http://www.gnu.org/licenses/>.
  */
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 /**
- * Alex Herbert created this extension of {@link org.ejml.alg.dense.misc.UnrolledInverseFromMinor}
+ * Alex Herbert created this extension of {@code org.ejml.alg.dense.misc.UnrolledInverseFromMinor}
  * to compute only the diagonal of the inverse.
+ *
+ * <p>Adapted from EHML 0.24. The class has since been renamed but a variant of
+ * UnrolledInverseFromMinor can be found in later EJML versions.
  */
 public final class UnrolledInverseFromMinorExt {
   /** The maximum supported matrix size. */
@@ -60,7 +63,7 @@ public final class UnrolledInverseFromMinorExt {
    * @param mat the matrix
    * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
-  public static double[] inv(DenseMatrix64F mat) {
+  public static double[] inv(DMatrixRMaj mat) {
     double max = Math.abs(mat.data[0]);
     final int n = mat.getNumElements();
 
@@ -93,7 +96,7 @@ public final class UnrolledInverseFromMinorExt {
    * @param scale the scale (set to the maximum of the matrix data, or 1)
    * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
-  public static double[] inv2(DenseMatrix64F mat, double scale) {
+  public static double[] inv2(DMatrixRMaj mat, double scale) {
     final double[] data = mat.data;
 
     final double a11 = data[0] * scale;
@@ -121,7 +124,7 @@ public final class UnrolledInverseFromMinorExt {
    * @param scale the scale (set to the maximum of the matrix data, or 1)
    * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
-  public static double[] inv3(DenseMatrix64F mat, double scale) {
+  public static double[] inv3(DMatrixRMaj mat, double scale) {
     final double[] data = mat.data;
 
     final double a11 = data[0] * scale;
@@ -156,7 +159,7 @@ public final class UnrolledInverseFromMinorExt {
    * @param scale the scale (set to the maximum of the matrix data, or 1)
    * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
-  public static double[] inv4(DenseMatrix64F mat, double scale) {
+  public static double[] inv4(DMatrixRMaj mat, double scale) {
     final double[] data = mat.data;
 
     final double a11 = data[0] * scale;
@@ -207,7 +210,7 @@ public final class UnrolledInverseFromMinorExt {
    * @param scale the scale (set to the maximum of the matrix data, or 1)
    * @return the diagonal of the inverse (or null if there is no determinant reciprocal)
    */
-  public static double[] inv5(DenseMatrix64F mat, double scale) {
+  public static double[] inv5(DMatrixRMaj mat, double scale) {
     final double[] data = mat.data;
 
     final double a11 = data[0] * scale;

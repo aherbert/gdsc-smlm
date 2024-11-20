@@ -173,8 +173,8 @@ Software for single molecule localisation microscopy (SMLM)
       <artifactId>commons-statistics-distribution</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-      <artifactId>ejml</artifactId>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-all</artifactId>
     </dependency>
     <dependency>
       <groupId>it.unimi.dsi</groupId>
@@ -271,18 +271,6 @@ Software for single molecule localisation microscopy (SMLM)
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <executions>
           <execution>
@@ -339,6 +327,7 @@ Software for single molecule localisation microscopy (SMLM)
               <roots>
                 <!-- Path(s) to configuration in the JSON config file -->
                 <root>1.1</root>
+                <root>1.2</root>
               </roots>
             </configurationFile>
           </analysisConfigurationFiles>

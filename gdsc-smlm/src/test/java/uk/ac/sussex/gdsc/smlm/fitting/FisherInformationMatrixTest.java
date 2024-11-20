@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -204,7 +204,7 @@ class FisherInformationMatrixTest {
 
     final UniformRandomProvider UniformRandomProvider = RngFactory.create(seed.get());
     final FisherInformationMatrix m = createRandomMatrix(UniformRandomProvider, n);
-    final DenseMatrix64F e = m.getMatrix();
+    final DMatrixRMaj e = m.getMatrix();
     if (logger.isLoggable(level)) {
       logger.log(level, String.valueOf(e));
     }
@@ -212,7 +212,7 @@ class FisherInformationMatrixTest {
     for (int run = 1; run < 10; run++) {
       final int[] indices = RandomUtils.sample(k, n, UniformRandomProvider);
       Arrays.sort(indices);
-      final DenseMatrix64F o = m.subset(indices).getMatrix();
+      final DMatrixRMaj o = m.subset(indices).getMatrix();
       if (logger.isLoggable(level)) {
         logger.log(level, FormatSupplier.getSupplier(Arrays.toString(indices)));
         logger.log(level, String.valueOf(o));

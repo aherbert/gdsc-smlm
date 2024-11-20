@@ -26,12 +26,12 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import customnode.CustomIndexedTriangleMesh;
 import java.util.Objects;
-import org.scijava.java3d.Geometry;
-import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.IndexedTriangleArray;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
-import org.scijava.vecmath.Vector3f;
+import org.jogamp.java3d.Geometry;
+import org.jogamp.java3d.GeometryArray;
+import org.jogamp.java3d.IndexedTriangleArray;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3f;
+import org.jogamp.vecmath.Vector3f;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**

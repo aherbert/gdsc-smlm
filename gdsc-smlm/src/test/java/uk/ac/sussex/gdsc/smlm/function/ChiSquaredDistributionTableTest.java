@@ -28,8 +28,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.statistics.distribution.ChiSquaredDistribution;
 import org.apache.commons.statistics.inference.ChiSquareTest;
 import org.apache.commons.statistics.inference.SignificanceResult;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
@@ -85,8 +85,8 @@ class ChiSquaredDistributionTableTest {
   @SeededTest
   void canComputeChiSquared() {
     // We have to use the transpose of the table
-    final DenseMatrix64F m = new DenseMatrix64F(chi2);
-    CommonOps.transpose(m);
+    final DMatrixRMaj m = new DMatrixRMaj(chi2);
+    CommonOps_DDRM.transpose(m);
     final int max = m.numCols;
     final double[] et = m.data;
     for (int i = 0, j = 0; i < p.length; i++) {

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.ArrayList;
 import org.apache.commons.numbers.core.Precision;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
@@ -187,7 +187,7 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
       p.computeJacobian(a);
       final double[] d1 = p.d1.clone();
       final double[] d2 = p.d2.clone();
-      final DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.getJacobianLinear());
+      final DMatrixRMaj J = DMatrixRMaj.wrap(nparams, nparams, p.getJacobianLinear());
       for (int j = 0; j < nparams; j++) {
         final int j_ = j;
         msg1.set(1, j);

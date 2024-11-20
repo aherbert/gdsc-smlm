@@ -32,8 +32,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3f;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import vib.InterpolatedImage;
 

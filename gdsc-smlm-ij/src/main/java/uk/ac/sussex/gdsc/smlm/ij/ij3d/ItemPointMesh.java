@@ -27,14 +27,14 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 import customnode.CustomPointMesh;
 import java.util.Arrays;
 import java.util.List;
-import org.scijava.java3d.Appearance;
-import org.scijava.java3d.Geometry;
-import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.GeometryUpdater;
-import org.scijava.java3d.PointArray;
-import org.scijava.java3d.PointAttributes;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
+import org.jogamp.java3d.Appearance;
+import org.jogamp.java3d.Geometry;
+import org.jogamp.java3d.GeometryArray;
+import org.jogamp.java3d.GeometryUpdater;
+import org.jogamp.java3d.PointArray;
+import org.jogamp.java3d.PointAttributes;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3f;
 
 /**
  * Create an object to represent a set of points.

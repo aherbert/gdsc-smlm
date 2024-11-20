@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -366,10 +366,10 @@ class EjmlLinearSolverTest {
 
   private abstract class SolverExecutable implements Executable {
     String name;
-    DenseMatrix64F[] a;
-    DenseMatrix64F[] b;
+    DMatrixRMaj[] a;
+    DMatrixRMaj[] b;
 
-    SolverExecutable(String name, DenseMatrix64F[] a, DenseMatrix64F[] b) {
+    SolverExecutable(String name, DMatrixRMaj[] a, DMatrixRMaj[] b) {
       this.name = name + " " + a[0].numCols;
       this.a = a;
       this.b = b;
@@ -382,8 +382,8 @@ class EjmlLinearSolverTest {
       solver.setEqual(new DoubleEquality(5e-3, 1e-6));
       int fail = 0;
       for (int i = 0; i < a.length; i++) {
-        DenseMatrix64F aa = a[i].copy();
-        DenseMatrix64F bb = b[i].copy();
+        DMatrixRMaj aa = a[i].copy();
+        DMatrixRMaj bb = b[i].copy();
         if (!solve(solver, aa, bb)) {
           fail++;
         }
@@ -392,60 +392,60 @@ class EjmlLinearSolverTest {
           FormatSupplier.getSupplier("%s failed to invert %d/%d", name, fail, a.length));
     }
 
-    abstract boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b);
+    abstract boolean solve(EjmlLinearSolver solver, DMatrixRMaj a, DMatrixRMaj b);
   }
 
   private class LinearSolverExecutable extends SolverExecutable {
-    public LinearSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+    public LinearSolverExecutable(DMatrixRMaj[] a, DMatrixRMaj[] b) {
       super("Linear Solver", a, b);
     }
 
     @Override
-    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DMatrixRMaj a, DMatrixRMaj b) {
       return solver.solveLinear(a, b);
     }
   }
 
   private class CholeskySolverExecutable extends SolverExecutable {
-    public CholeskySolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+    public CholeskySolverExecutable(DMatrixRMaj[] a, DMatrixRMaj[] b) {
       super("Cholesky Solver", a, b);
     }
 
     @Override
-    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DMatrixRMaj a, DMatrixRMaj b) {
       return solver.solveCholesky(a, b);
     }
   }
 
   private class CholeskyLdltSolverExecutable extends SolverExecutable {
-    public CholeskyLdltSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+    public CholeskyLdltSolverExecutable(DMatrixRMaj[] a, DMatrixRMaj[] b) {
       super("CholeskyLDLT Solver", a, b);
     }
 
     @Override
-    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DMatrixRMaj a, DMatrixRMaj b) {
       return solver.solveCholeskyLdlT(a, b);
     }
   }
 
   private class PseudoInverseSolverExecutable extends SolverExecutable {
-    public PseudoInverseSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+    public PseudoInverseSolverExecutable(DMatrixRMaj[] a, DMatrixRMaj[] b) {
       super("PseudoInverse Solver", a, b);
     }
 
     @Override
-    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DMatrixRMaj a, DMatrixRMaj b) {
       return solver.solvePseudoInverse(a, b);
     }
   }
 
   private class DirectInversionSolverExecutable extends SolverExecutable {
-    public DirectInversionSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+    public DirectInversionSolverExecutable(DMatrixRMaj[] a, DMatrixRMaj[] b) {
       super("DirectInversion Solver", a, b);
     }
 
     @Override
-    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DMatrixRMaj a, DMatrixRMaj b) {
       return solver.solveDirectInversion(a, b);
     }
   }
@@ -484,8 +484,8 @@ class EjmlLinearSolverTest {
     final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
     final int n = f0.size();
     final double[] y = new double[n];
-    final LocalList<DenseMatrix64F> aList = new LocalList<>();
-    final LocalList<DenseMatrix64F> bList = new LocalList<>();
+    final LocalList<DMatrixRMaj> aList = new LocalList<>();
+    final LocalList<DMatrixRMaj> bList = new LocalList<>();
     final double[] testbackground = new double[] {0.2, 0.7};
     final double[] testsignal1 = new double[] {30, 100, 300};
     final double[] testcx1 = new double[] {4.9, 5.3};
@@ -528,8 +528,8 @@ class EjmlLinearSolverTest {
       }
     }
 
-    final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[0]);
-    final DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[0]);
+    final DMatrixRMaj[] a = aList.toArray(new DMatrixRMaj[0]);
+    final DMatrixRMaj[] b = bList.toArray(new DMatrixRMaj[0]);
     final List<Executable> list = new ArrayList<>(
         Arrays.asList(new PseudoInverseSolverExecutable(a, b), new LinearSolverExecutable(a, b),
             new CholeskySolverExecutable(a, b), new CholeskyLdltSolverExecutable(a, b)));
@@ -541,10 +541,10 @@ class EjmlLinearSolverTest {
 
   private abstract class InversionExecutable implements Executable {
     String name;
-    DenseMatrix64F[] a;
+    DMatrixRMaj[] a;
     double[][] answer;
 
-    public InversionExecutable(String name, DenseMatrix64F[] a, double[][] answer) {
+    public InversionExecutable(String name, DMatrixRMaj[] a, double[][] answer) {
       this.name = name + " " + a[0].numCols;
       this.a = a;
       this.answer = answer;
@@ -558,7 +558,7 @@ class EjmlLinearSolverTest {
       DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-3, 1e-4);
       int fail = 0;
       for (int i = 0; i < a.length; i++) {
-        DenseMatrix64F aa = a[i].copy();
+        DMatrixRMaj aa = a[i].copy();
         double[] b = invert(solver, aa);
 
         // Check against the answer
@@ -581,9 +581,9 @@ class EjmlLinearSolverTest {
           FormatSupplier.getSupplier("%s failed to invert %d/%d", name, fail, a.length));
     }
 
-    abstract double[] invert(EjmlLinearSolver solver, DenseMatrix64F a);
+    abstract double[] invert(EjmlLinearSolver solver, DMatrixRMaj a);
 
-    final double[] extract(DenseMatrix64F a) {
+    final double[] extract(DMatrixRMaj a) {
       final int n = a.numCols;
       final double[] b = new double[n];
       for (int i = 0, j = 0; i < n; i++, j += n + 1) {
@@ -594,12 +594,12 @@ class EjmlLinearSolverTest {
   }
 
   private class LinearInversionExecutable extends InversionExecutable {
-    public LinearInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+    public LinearInversionExecutable(DMatrixRMaj[] a, double[][] answer) {
       super("Linear Inversion", a, answer);
     }
 
     @Override
-    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DMatrixRMaj a) {
       if (solver.invertLinear(a)) {
         return extract(a);
       }
@@ -608,12 +608,12 @@ class EjmlLinearSolverTest {
   }
 
   private class CholeskyInversionExecutable extends InversionExecutable {
-    public CholeskyInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+    public CholeskyInversionExecutable(DMatrixRMaj[] a, double[][] answer) {
       super("Cholesky Inversion", a, answer);
     }
 
     @Override
-    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DMatrixRMaj a) {
       if (solver.invertCholesky(a)) {
         return extract(a);
       }
@@ -622,12 +622,12 @@ class EjmlLinearSolverTest {
   }
 
   private class CholeskyLdltInversionExecutable extends InversionExecutable {
-    public CholeskyLdltInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+    public CholeskyLdltInversionExecutable(DMatrixRMaj[] a, double[][] answer) {
       super("CholeskyLDLT Inversion", a, answer);
     }
 
     @Override
-    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DMatrixRMaj a) {
       if (solver.invertCholeskyLdlT(a)) {
         return extract(a);
       }
@@ -636,12 +636,12 @@ class EjmlLinearSolverTest {
   }
 
   private class PseudoInverseInversionExecutable extends InversionExecutable {
-    public PseudoInverseInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+    public PseudoInverseInversionExecutable(DMatrixRMaj[] a, double[][] answer) {
       super("PseudoInverse Inversion", a, answer);
     }
 
     @Override
-    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DMatrixRMaj a) {
       if (solver.invertPseudoInverse(a)) {
         return extract(a);
       }
@@ -650,12 +650,12 @@ class EjmlLinearSolverTest {
   }
 
   private class DirectInversionInversionExecutable extends InversionExecutable {
-    public DirectInversionInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+    public DirectInversionInversionExecutable(DMatrixRMaj[] a, double[][] answer) {
       super("DirectInversion Inversion", a, answer);
     }
 
     @Override
-    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DMatrixRMaj a) {
       if (solver.invertDirectInversion(a)) {
         return extract(a);
       }
@@ -664,12 +664,12 @@ class EjmlLinearSolverTest {
   }
 
   private class DiagonalDirectInversionInversionExecutable extends InversionExecutable {
-    public DiagonalDirectInversionInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+    public DiagonalDirectInversionInversionExecutable(DMatrixRMaj[] a, double[][] answer) {
       super("DiagonalDirectInversion Inversion", a, answer);
     }
 
     @Override
-    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DMatrixRMaj a) {
       return EjmlLinearSolver.invertDiagonalDirectInversion(a);
     }
 
@@ -710,7 +710,7 @@ class EjmlLinearSolverTest {
     final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
     final int n = f0.size();
     final double[] y = new double[n];
-    final LocalList<DenseMatrix64F> aList = new LocalList<>();
+    final LocalList<DMatrixRMaj> aList = new LocalList<>();
     final double[] testbackground = new double[] {0.2, 0.7};
     final double[] testsignal1 = new double[] {30, 100, 300};
     final double[] testcx1 = new double[] {4.9, 5.3};
@@ -752,7 +752,7 @@ class EjmlLinearSolverTest {
       }
     }
 
-    final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[0]);
+    final DMatrixRMaj[] a = aList.toArray(new DMatrixRMaj[0]);
     final double[][] answer = new double[a.length][];
 
     // Get the actual answer

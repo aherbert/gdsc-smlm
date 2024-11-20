@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 public class Tensor2D {
   private final double[] com;
 
-  private final DenseMatrix64F tensor;
+  private final DMatrixRMaj tensor;
   private final double[] eigenValues;
   private final double[][] eigenVectors;
 
@@ -67,7 +67,7 @@ public class Tensor2D {
 
     // Compute tensor
     // https://en.wikipedia.org/wiki/Moment_of_inertia#Inertia_tensor
-    tensor = new DenseMatrix64F(2, 2);
+    tensor = new DMatrixRMaj(2, 2);
     for (int y = 0, j = 0; y < height; y++) {
       final double dy = y - cy;
       final double dy2 = dy * dy;
@@ -169,8 +169,12 @@ public class Tensor2D {
    *
    * @return the tensor
    */
-  public DenseMatrix64F getTensor() {
-    return tensor;
+  public double[][] getTensor() {
+    final double[] m = tensor.data;
+    return new double[][] {
+      {m[0], m[1]},
+      {m[2], m[3]}
+    };
   }
 
   /**

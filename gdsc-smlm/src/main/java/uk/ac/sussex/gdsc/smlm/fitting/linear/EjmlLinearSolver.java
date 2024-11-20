@@ -25,12 +25,14 @@
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 import java.util.logging.Logger;
-import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
-import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.linsol.chol.LinearSolverCholLDL_DDRM;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
+import org.ejml.interfaces.decomposition.DecompositionInterface;
 import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 /**
@@ -53,28 +55,28 @@ public class EjmlLinearSolver {
   // CHECKSTYLE.OFF: ParameterName
 
   /** The linear solver. */
-  private LinearSolver<DenseMatrix64F> linearSolver;
+  private LinearSolverDense<DMatrixRMaj> linearSolver;
 
   /** The pseudo inverse solver. */
-  private LinearSolver<DenseMatrix64F> pseudoInverseSolver;
+  private LinearSolverDense<DMatrixRMaj> pseudoInverseSolver;
 
   /** The cholesky solver. */
-  private LinearSolver<DenseMatrix64F> choleskySolver;
+  private LinearSolverDense<DMatrixRMaj> choleskySolver;
 
   /** The cholesky LDLT solver. */
-  private LinearSolver<DenseMatrix64F> choleskyLdlTSolver;
+  private LinearSolverDense<DMatrixRMaj> choleskyLdlTSolver;
 
   /** The inversion solver. */
-  private LinearSolver<DenseMatrix64F> inversionSolver;
+  private LinearSolverDense<DMatrixRMaj> inversionSolver;
 
   /** The last successful solver. */
-  private LinearSolver<DenseMatrix64F> lastSuccessfulSolver;
+  private LinearSolverDense<DMatrixRMaj> lastSuccessfulSolver;
 
   /** The vector x. */
-  private DenseMatrix64F x;
+  private DMatrixRMaj x;
 
   /** The inverse of matrix A. */
-  private DenseMatrix64F invA;
+  private DMatrixRMaj invA;
 
   /** The solver size. */
   private int solverSize;
@@ -91,9 +93,9 @@ public class EjmlLinearSolver {
   /**
    * Solve the matrix using direct inversion.
    */
-  private static class InversionSolver implements LinearSolver<DenseMatrix64F> {
+  private static class InversionSolver implements LinearSolverDense<DMatrixRMaj> {
     /** The matrix A. */
-    private DenseMatrix64F a;
+    private DMatrixRMaj a;
 
     /**
      * Instantiates a new inversion solver.
@@ -103,11 +105,11 @@ public class EjmlLinearSolver {
     }
 
     @Override
-    public boolean setA(DenseMatrix64F a) {
-      if (a.numCols <= UnrolledInverseFromMinor.MAX) {
+    public boolean setA(DMatrixRMaj a) {
+      if (a.numCols <= UnrolledInverseFromMinor_DDRM.MAX) {
         // Direct inversion using the determinant
         if (a.numCols >= 2) {
-          UnrolledInverseFromMinor.inv(a, a);
+          UnrolledInverseFromMinor_DDRM.inv(a, a);
         } else {
           a.set(0, 1.0 / a.get(0));
         }
@@ -131,12 +133,12 @@ public class EjmlLinearSolver {
     }
 
     @Override
-    public void solve(DenseMatrix64F b, DenseMatrix64F x) {
-      CommonOps.mult(a, b, x);
+    public void solve(DMatrixRMaj b, DMatrixRMaj x) {
+      CommonOps_DDRM.mult(a, b, x);
     }
 
     @Override
-    public void invert(DenseMatrix64F aInv) {
+    public void invert(DMatrixRMaj aInv) {
       System.arraycopy(a.data, 0, aInv.data, 0, a.data.length);
     }
 
@@ -148,6 +150,11 @@ public class EjmlLinearSolver {
     @Override
     public boolean modifiesB() {
       return false;
+    }
+
+    @Override
+    public <Decomposition extends DecompositionInterface> Decomposition getDecomposition() {
+      return null;
     }
   }
 
@@ -253,7 +260,7 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveLinear(DenseMatrix64F a, DenseMatrix64F b) {
+  public boolean solveLinear(DMatrixRMaj a, DMatrixRMaj b) {
     createSolver(a.numCols);
     return solveEquation(getLinearSolver(), a, b);
   }
@@ -267,7 +274,7 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveCholesky(DenseMatrix64F a, DenseMatrix64F b) {
+  public boolean solveCholesky(DMatrixRMaj a, DMatrixRMaj b) {
     createSolver(a.numCols);
     return solveEquation(getCholeskySolver(), a, b);
   }
@@ -281,7 +288,7 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveCholeskyLdlT(DenseMatrix64F a, DenseMatrix64F b) {
+  public boolean solveCholeskyLdlT(DMatrixRMaj a, DMatrixRMaj b) {
     createSolver(a.numCols);
     return solveEquation(getCholeskyLdlTSolver(), a, b);
   }
@@ -295,7 +302,7 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solvePseudoInverse(DenseMatrix64F a, DenseMatrix64F b) {
+  public boolean solvePseudoInverse(DMatrixRMaj a, DMatrixRMaj b) {
     createSolver(a.numCols);
     return solveEquation(getPseudoInverseSolver(), a, b);
   }
@@ -310,7 +317,7 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveDirectInversion(DenseMatrix64F a, DenseMatrix64F b) {
+  public boolean solveDirectInversion(DMatrixRMaj a, DMatrixRMaj b) {
     createSolver(a.numCols);
     return solveEquation(getInversionSolver(), a, b);
   }
@@ -325,10 +332,10 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  private boolean solveEquation(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F a,
-      DenseMatrix64F b) {
+  private boolean solveEquation(LinearSolverDense<DMatrixRMaj> solver, DMatrixRMaj a,
+      DMatrixRMaj b) {
     final boolean copy = (errorChecking || solver.modifiesB());
-    final DenseMatrix64F x = (copy) ? getX() : b;
+    final DMatrixRMaj x = (copy) ? getX() : b;
 
     if (!solveEquation(solver, a, b, x)) {
       return false;
@@ -356,8 +363,8 @@ public class EjmlLinearSolver {
    * @param x the vector x
    * @return False if the equation is singular (no solution)
    */
-  private boolean solveEquation(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F a,
-      DenseMatrix64F b, DenseMatrix64F x) {
+  private boolean solveEquation(LinearSolverDense<DMatrixRMaj> solver, DMatrixRMaj a,
+      DMatrixRMaj b, DMatrixRMaj x) {
     if (errorChecking) {
       // We need A+b for error checking so solve without modification
       if (!solveEquationSafe(solver, a, b, x)) {
@@ -374,7 +381,7 @@ public class EjmlLinearSolver {
    * <p>Output is written to x.
    *
    * <p>A and/or b will not be modified. If you do not care then use
-   * {@link #solveEquationUnsafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
+   * {@link #solveEquationUnsafe(LinearSolver, DMatrixRMaj, DMatrixRMaj, DMatrixRMaj)}
    *
    * @param solver the solver
    * @param a the matrix A
@@ -382,8 +389,8 @@ public class EjmlLinearSolver {
    * @param x the vector x
    * @return False if the equation is singular (no solution)
    */
-  private boolean solveEquationSafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F a,
-      DenseMatrix64F b, DenseMatrix64F x) {
+  private boolean solveEquationSafe(LinearSolverDense<DMatrixRMaj> solver, DMatrixRMaj a,
+      DMatrixRMaj b, DMatrixRMaj x) {
     if (solver.modifiesA()) {
       a = a.copy();
     }
@@ -406,7 +413,7 @@ public class EjmlLinearSolver {
    * <p>Output is written to x.
    *
    * <p>A and/or b may be modified. Check the solver before calling or use
-   * {@link #solveEquationSafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
+   * {@link #solveEquationSafe(LinearSolver, DMatrixRMaj, DMatrixRMaj, DMatrixRMaj)}
    *
    * @param solver the solver
    * @param a the matrix A
@@ -414,8 +421,8 @@ public class EjmlLinearSolver {
    * @param x the vector x
    * @return False if the equation is singular (no solution)
    */
-  private boolean solveEquationUnsafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F a,
-      DenseMatrix64F b, DenseMatrix64F x) {
+  private boolean solveEquationUnsafe(LinearSolverDense<DMatrixRMaj> solver, DMatrixRMaj a,
+      DMatrixRMaj b, DMatrixRMaj x) {
     if (!initialiseSolver(solver, a)) {
       return false;
     }
@@ -433,7 +440,7 @@ public class EjmlLinearSolver {
    * @param b the b
    * @return true, if successful
    */
-  private boolean validate(DenseMatrix64F a, DenseMatrix64F x, DenseMatrix64F b) {
+  private boolean validate(DMatrixRMaj a, DMatrixRMaj x, DMatrixRMaj b) {
     // Compute A x = b
     for (int i = 0, index = 0; i < b.numRows; i++) {
       double bi = 0;
@@ -459,7 +466,7 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solve(DenseMatrix64F a, DenseMatrix64F b) {
+  public boolean solve(DMatrixRMaj a, DMatrixRMaj b) {
     createSolver(a.numCols);
 
     // Speed tests show the Cholesky solver marginally outperforms the
@@ -494,7 +501,7 @@ public class EjmlLinearSolver {
    * Checks if a solve may modify A.
    *
    * @return true, if a solve may modify A
-   * @see #solve(DenseMatrix64F, DenseMatrix64F)
+   * @see #solve(DMatrixRMaj, DMatrixRMaj)
    * @see #solve(double[], double[])
    */
   public boolean solveModifiesA() {
@@ -513,7 +520,7 @@ public class EjmlLinearSolver {
    *
    * @return False if the last solve attempt failed, or inversion produces non finite values
    */
-  public boolean invertLastA(DenseMatrix64F a) {
+  public boolean invertLastA(DMatrixRMaj a) {
     if (lastSuccessfulSolver == null) {
       return false;
     }
@@ -543,7 +550,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return true, if successful
    */
-  private boolean initialiseSolver(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F a) {
+  private boolean initialiseSolver(LinearSolverDense<DMatrixRMaj> solver, DMatrixRMaj a) {
     lastSuccessfulSolver = null;
     if (!solver.setA(a)) {
       return false;
@@ -574,9 +581,9 @@ public class EjmlLinearSolver {
    *
    * @return the x
    */
-  private DenseMatrix64F getX() {
+  private DMatrixRMaj getX() {
     if (x == null) {
-      x = new DenseMatrix64F(solverSize, 1);
+      x = new DMatrixRMaj(solverSize, 1);
     }
     return x;
   }
@@ -586,9 +593,9 @@ public class EjmlLinearSolver {
    *
    * @return the space for A^-1
    */
-  private DenseMatrix64F getAinv() {
+  private DMatrixRMaj getAinv() {
     if (invA == null) {
-      invA = new DenseMatrix64F(solverSize, solverSize);
+      invA = new DMatrixRMaj(solverSize, solverSize);
     }
     return invA;
   }
@@ -598,11 +605,11 @@ public class EjmlLinearSolver {
    *
    * @return the cholesky LDLT solver
    */
-  private LinearSolver<DenseMatrix64F> getCholeskyLdlTSolver() {
+  private LinearSolverDense<DMatrixRMaj> getCholeskyLdlTSolver() {
     // This is a Cholesky LDLT solver that should be faster than the Cholesky solver.
     // It only works on symmetric positive definite matrices.
     if (choleskyLdlTSolver == null) {
-      choleskyLdlTSolver = new LinearSolverCholLDL();
+      choleskyLdlTSolver = new LinearSolverCholLDL_DDRM();
     }
     return choleskyLdlTSolver;
   }
@@ -612,10 +619,10 @@ public class EjmlLinearSolver {
    *
    * @return the cholesky solver
    */
-  private LinearSolver<DenseMatrix64F> getCholeskySolver() {
+  private LinearSolverDense<DMatrixRMaj> getCholeskySolver() {
     if (choleskySolver == null) {
       // This is a Cholesky solver that only works on symmetric positive definite matrices
-      choleskySolver = LinearSolverFactory.symmPosDef(solverSize);
+      choleskySolver = LinearSolverFactory_DDRM.symmPosDef(solverSize);
     }
     return choleskySolver;
   }
@@ -625,10 +632,10 @@ public class EjmlLinearSolver {
    *
    * @return the linear solver
    */
-  private LinearSolver<DenseMatrix64F> getLinearSolver() {
+  private LinearSolverDense<DMatrixRMaj> getLinearSolver() {
     if (linearSolver == null) {
       // This should work on any matrix
-      linearSolver = LinearSolverFactory.linear(solverSize);
+      linearSolver = LinearSolverFactory_DDRM.linear(solverSize);
     }
     return linearSolver;
   }
@@ -638,11 +645,11 @@ public class EjmlLinearSolver {
    *
    * @return the pseudo inverse solver
    */
-  private LinearSolver<DenseMatrix64F> getPseudoInverseSolver() {
+  private LinearSolverDense<DMatrixRMaj> getPseudoInverseSolver() {
     // The pseudo inverse is constructed using the non-singular sub matrix of A
 
     if (pseudoInverseSolver == null) {
-      pseudoInverseSolver = LinearSolverFactory.pseudoInverse(false);
+      pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(false);
     }
     return pseudoInverseSolver;
   }
@@ -652,7 +659,7 @@ public class EjmlLinearSolver {
    *
    * @return the inversion solver
    */
-  private LinearSolver<DenseMatrix64F> getInversionSolver() {
+  private LinearSolverDense<DMatrixRMaj> getInversionSolver() {
     if (inversionSolver == null) {
       // Supports any matrix up to size 5
       inversionSolver = new InversionSolver();
@@ -685,7 +692,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return False if the matrix is singular (no solution)
    */
-  public boolean invertLinear(DenseMatrix64F a) {
+  public boolean invertLinear(DMatrixRMaj a) {
     createSolver(a.numCols);
     return invertUnsafe(getLinearSolver(), a, false);
   }
@@ -696,7 +703,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return False if the matrix is singular (no solution)
    */
-  public boolean invertCholesky(DenseMatrix64F a) {
+  public boolean invertCholesky(DMatrixRMaj a) {
     createSolver(a.numCols);
     return invertUnsafe(getCholeskySolver(), a, false);
   }
@@ -707,7 +714,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return False if the matrix is singular (no solution)
    */
-  public boolean invertCholeskyLdlT(DenseMatrix64F a) {
+  public boolean invertCholeskyLdlT(DMatrixRMaj a) {
     createSolver(a.numCols);
     return invertUnsafe(getCholeskyLdlTSolver(), a, false);
   }
@@ -718,7 +725,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return False if the matrix is singular (no solution)
    */
-  public boolean invertPseudoInverse(DenseMatrix64F a) {
+  public boolean invertPseudoInverse(DMatrixRMaj a) {
     createSolver(a.numCols);
     return invertUnsafe(getPseudoInverseSolver(), a, true);
   }
@@ -729,7 +736,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return False if the matrix is singular (no solution)
    */
-  public boolean invertDirectInversion(DenseMatrix64F a) {
+  public boolean invertDirectInversion(DMatrixRMaj a) {
     createSolver(a.numCols);
     return invertUnsafe(getInversionSolver(), a, false);
   }
@@ -742,7 +749,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return The diagonal of A^-1 (or null if the matrix is singular (no solution) or too large)
    */
-  public static double[] invertDiagonalDirectInversion(DenseMatrix64F a) {
+  public static double[] invertDiagonalDirectInversion(DMatrixRMaj a) {
     return (a.numCols <= UnrolledInverseFromMinorExt.MAX) ? UnrolledInverseFromMinorExt.inv(a)
         : null;
   }
@@ -756,7 +763,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return False if there is no solution
    */
-  public boolean invert(DenseMatrix64F a) {
+  public boolean invert(DMatrixRMaj a) {
     createSolver(a.numCols);
 
     // Speed tests show the Cholesky solver marginally outperforms the
@@ -765,7 +772,7 @@ public class EjmlLinearSolver {
     // Note: The EJML factory returns a Cholesky solver for symmetric
     // positive definite matrices so we use this in preference to a CholeskyLDLT.
 
-    final LinearSolver<DenseMatrix64F> primarySolver =
+    final LinearSolverDense<DMatrixRMaj> primarySolver =
         (a.numCols < 5) ? getInversionSolver() : getCholeskySolver();
     if (invertSafe(primarySolver, a, false)) {
       return true;
@@ -778,7 +785,7 @@ public class EjmlLinearSolver {
    * Checks if an inversion may modify A.
    *
    * @return true, if an inversion may modify A
-   * @see #invert(DenseMatrix64F)
+   * @see #invert(DMatrixRMaj)
    * @see #invert(double[], int)
    */
   public boolean invertModifiesA() {
@@ -796,9 +803,9 @@ public class EjmlLinearSolver {
    * @param pseudoInverse the pseudo inverse
    * @return true, if successful
    */
-  private boolean invertSafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F a,
+  private boolean invertSafe(LinearSolverDense<DMatrixRMaj> solver, DMatrixRMaj a,
       boolean pseudoInverse) {
-    final DenseMatrix64F aa = (solver.modifiesA() || isInversionTolerance()) ? a.copy() : a;
+    final DMatrixRMaj aa = (solver.modifiesA() || isInversionTolerance()) ? a.copy() : a;
     if (!initialiseSolver(solver, aa)) {
       return false;
     }
@@ -829,9 +836,9 @@ public class EjmlLinearSolver {
    * @param pseudoInverse the pseudo inverse
    * @return true, if successful
    */
-  private boolean invertUnsafe(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F a,
+  private boolean invertUnsafe(LinearSolverDense<DMatrixRMaj> solver, DMatrixRMaj a,
       boolean pseudoInverse) {
-    final DenseMatrix64F aa = (isInversionTolerance()) ? a.copy() : a;
+    final DMatrixRMaj aa = (isInversionTolerance()) ? a.copy() : a;
     if (!initialiseSolver(solver, aa)) {
       return false;
     }
@@ -862,12 +869,12 @@ public class EjmlLinearSolver {
    * @param pseudoInverse the pseudo inverse
    * @return true, if successful
    */
-  private boolean invalidInversion(DenseMatrix64F a, boolean pseudoInverse) {
+  private boolean invalidInversion(DMatrixRMaj a, boolean pseudoInverse) {
     // Check for the identity matrix:
     // Compute A Ainv = I
     final int n = a.numCols;
-    final DenseMatrix64F eye = new DenseMatrix64F(n, n);
-    CommonOps.mult(a, invA, eye);
+    final DMatrixRMaj eye = new DMatrixRMaj(n, n);
+    CommonOps_DDRM.mult(a, invA, eye);
 
     if (pseudoInverse) {
       for (int i = n, index = eye.data.length; i-- > 0;) {
@@ -915,7 +922,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return The diagonal of the inverted matrix (or null)
    */
-  public double[] invertDiagonal(DenseMatrix64F a) {
+  public double[] invertDiagonal(DMatrixRMaj a) {
     // Try a fast inversion of the diagonal
     if (a.numCols <= UnrolledInverseFromMinorExt.MAX) {
       final double[] d = UnrolledInverseFromMinorExt.inv(a);
@@ -951,7 +958,7 @@ public class EjmlLinearSolver {
    * @param a the matrix A
    * @return The diagonal of the inverted matrix (or null)
    */
-  private double[] invertDiagonalUnsafe(DenseMatrix64F a) {
+  private double[] invertDiagonalUnsafe(DMatrixRMaj a) {
     // Try a fast inversion of the diagonal
     if (a.numCols <= UnrolledInverseFromMinorExt.MAX) {
       final double[] d = UnrolledInverseFromMinorExt.inv(a);
@@ -984,7 +991,7 @@ public class EjmlLinearSolver {
    * @param a the matrix
    * @return the row/column format
    */
-  public static double[][] toSquareData(DenseMatrix64F a) {
+  public static double[][] toSquareData(DMatrixRMaj a) {
     final int numRows = a.numRows;
     final int numCols = a.numCols;
     final double[][] out = new double[numRows][];
@@ -1001,7 +1008,7 @@ public class EjmlLinearSolver {
    * @param a the matrix
    * @param out the row/column format
    */
-  public static void toSquareData(DenseMatrix64F a, double[][] out) {
+  public static void toSquareData(DMatrixRMaj a, double[][] out) {
     final int numRows = a.numRows;
     for (int i = 0, pos = 0; i < numRows; i++, pos += numRows) {
       System.arraycopy(a.data, pos, out[i], 0, numRows);
@@ -1011,7 +1018,7 @@ public class EjmlLinearSolver {
   /**
    * Create a new DenseMatrix from the input matrix a. Modifications to the matrix Are not passed
    * through to the input array! The matrix can be converted back using
-   * {@link #toSquareData(DenseMatrix64F, double[][])}.
+   * {@link #toSquareData(DMatrixRMaj, double[][])}.
    *
    * <p>This is provided as a bridge method between the functions that accept primitive arrays and
    * those that accept DenseMatrix.
@@ -1019,8 +1026,8 @@ public class EjmlLinearSolver {
    * @param a the matrix
    * @return the dense matrix
    */
-  public static DenseMatrix64F toA(double[][] a) {
-    return new DenseMatrix64F(a);
+  public static DMatrixRMaj toA(double[][] a) {
+    return new DMatrixRMaj(a);
   }
 
   /**
@@ -1034,8 +1041,8 @@ public class EjmlLinearSolver {
    * @param n the number of columns/rows
    * @return the dense matrix
    */
-  public static DenseMatrix64F toA(double[] a, int n) {
-    return DenseMatrix64F.wrap(n, n, a);
+  public static DMatrixRMaj toA(double[] a, int n) {
+    return DMatrixRMaj.wrap(n, n, a);
   }
 
   /**
@@ -1048,8 +1055,8 @@ public class EjmlLinearSolver {
    * @param b the array
    * @return the dense matrix
    */
-  public static DenseMatrix64F toB(double[] b) {
-    return DenseMatrix64F.wrap(b.length, 1, b);
+  public static DMatrixRMaj toB(double[] b) {
+    return DMatrixRMaj.wrap(b.length, 1, b);
   }
 
   // Methods for input of primitive arrays
@@ -1176,7 +1183,7 @@ public class EjmlLinearSolver {
    * @return False if the matrix is singular (no solution)
    */
   public boolean invertLinear(double[][] a) {
-    final DenseMatrix64F aa = toA(a);
+    final DMatrixRMaj aa = toA(a);
     if (!invertLinear(aa)) {
       return false;
     }
@@ -1191,7 +1198,7 @@ public class EjmlLinearSolver {
    * @return False if the matrix is singular (no solution)
    */
   public boolean invertCholesky(double[][] a) {
-    final DenseMatrix64F aa = toA(a);
+    final DMatrixRMaj aa = toA(a);
     if (!invertCholesky(aa)) {
       return false;
     }
@@ -1206,7 +1213,7 @@ public class EjmlLinearSolver {
    * @return False if the matrix is singular (no solution)
    */
   public boolean invertCholeskyLdlT(double[][] a) {
-    final DenseMatrix64F aa = toA(a);
+    final DMatrixRMaj aa = toA(a);
     if (!invertCholeskyLdlT(aa)) {
       return false;
     }
@@ -1221,7 +1228,7 @@ public class EjmlLinearSolver {
    * @return False if the matrix is singular (no solution)
    */
   public boolean invertPseudoInverse(double[][] a) {
-    final DenseMatrix64F aa = toA(a);
+    final DMatrixRMaj aa = toA(a);
     if (!invertPseudoInverse(aa)) {
       return false;
     }
@@ -1236,7 +1243,7 @@ public class EjmlLinearSolver {
    * @return False if the matrix is singular (no solution)
    */
   public boolean invertDirectInversion(double[][] a) {
-    final DenseMatrix64F aa = toA(a);
+    final DMatrixRMaj aa = toA(a);
     if (!invertDirectInversion(aa)) {
       return false;
     }
@@ -1269,7 +1276,7 @@ public class EjmlLinearSolver {
    * @return False if there is no solution
    */
   public boolean invert(double[][] a) {
-    final DenseMatrix64F aa = toA(a);
+    final DMatrixRMaj aa = toA(a);
     if (!invert(aa)) {
       return false;
     }
@@ -1287,7 +1294,7 @@ public class EjmlLinearSolver {
    */
   public double[] invertDiagonal(double[][] a) {
     // Use the unsafe method as the matrix has been converted so can be modified
-    return invertDiagonalUnsafe(new DenseMatrix64F(a));
+    return invertDiagonalUnsafe(new DMatrixRMaj(a));
   }
 
   /**

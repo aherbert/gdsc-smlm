@@ -44,21 +44,21 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.scijava.java3d.BranchGroup;
-import org.scijava.java3d.Group;
-import org.scijava.java3d.Node;
-import org.scijava.java3d.OrderedGroup;
-import org.scijava.java3d.Switch;
-import org.scijava.java3d.Transform3D;
-import org.scijava.java3d.TransformGroup;
-import org.scijava.java3d.View;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Matrix3f;
-import org.scijava.vecmath.Point3d;
-import org.scijava.vecmath.Vector3d;
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.Node;
+import org.jogamp.java3d.OrderedGroup;
+import org.jogamp.java3d.Switch;
+import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.View;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Matrix3f;
+import org.jogamp.vecmath.Point3d;
+import org.jogamp.vecmath.Vector3d;
 import orthoslice.MultiOrthoGroup;
 import orthoslice.OrthoGroup;
 import surfaceplot.SurfacePlotGroup;
@@ -192,8 +192,8 @@ public class CustomContentInstant extends ContentInstant {
   @Override
   public void display(final ContentNode node) {
     // Remove everything if possible
-    for (final Enumeration<Node> e = ordered.getAllChildren(); e.hasMoreElements();) {
-      final Switch s = (Switch) e.nextElement();
+    for (final Iterator<Node> e = ordered.getAllChildren(); e.hasNext();) {
+      final Switch s = (Switch) e.next();
       s.removeAllChildren();
     }
     // Remove custom switch objects

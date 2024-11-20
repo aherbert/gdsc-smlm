@@ -86,31 +86,31 @@ import javax.swing.event.ListSelectionListener;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.scijava.java3d.Appearance;
-import org.scijava.java3d.BranchGroup;
-import org.scijava.java3d.Canvas3D;
-import org.scijava.java3d.ColoringAttributes;
-import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.IndexedGeometryArray;
-import org.scijava.java3d.LineAttributes;
-import org.scijava.java3d.PickInfo;
-import org.scijava.java3d.PickInfo.IntersectionInfo;
-import org.scijava.java3d.PointAttributes;
-import org.scijava.java3d.PolygonAttributes;
-import org.scijava.java3d.SceneGraphPath;
-import org.scijava.java3d.Shape3D;
-import org.scijava.java3d.Transform3D;
-import org.scijava.java3d.TransformGroup;
-import org.scijava.java3d.TransparencyAttributes;
-import org.scijava.java3d.TriangleArray;
-import org.scijava.java3d.View;
-import org.scijava.java3d.utils.pickfast.PickCanvas;
-import org.scijava.vecmath.AxisAngle4d;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point2d;
-import org.scijava.vecmath.Point3d;
-import org.scijava.vecmath.Point3f;
-import org.scijava.vecmath.Vector3d;
+import org.jogamp.java3d.Appearance;
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Canvas3D;
+import org.jogamp.java3d.ColoringAttributes;
+import org.jogamp.java3d.GeometryArray;
+import org.jogamp.java3d.IndexedGeometryArray;
+import org.jogamp.java3d.LineAttributes;
+import org.jogamp.java3d.PickInfo;
+import org.jogamp.java3d.PickInfo.IntersectionInfo;
+import org.jogamp.java3d.PointAttributes;
+import org.jogamp.java3d.PolygonAttributes;
+import org.jogamp.java3d.SceneGraphPath;
+import org.jogamp.java3d.Shape3D;
+import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.TransparencyAttributes;
+import org.jogamp.java3d.TriangleArray;
+import org.jogamp.java3d.View;
+import org.jogamp.java3d.utils.pickfast.PickCanvas;
+import org.jogamp.vecmath.AxisAngle4d;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point2d;
+import org.jogamp.vecmath.Point3d;
+import org.jogamp.vecmath.Point3f;
+import org.jogamp.vecmath.Vector3d;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
@@ -251,7 +251,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (Modifier.isStatic(field.getModifiers()) && field.getType() == Color.class) {
         try {
           final Color c = (Color) field.get(null);
-          colours.put(field.getName().toLowerCase(Locale.US), new Color3f(c));
+          colours.put(field.getName().toLowerCase(Locale.US),
+              new Color3f(c.getRed()/255f, c.getGreen()/255f, c.getBlue()/155f));
         } catch (final IllegalArgumentException | IllegalAccessException ignored) {
           // Ignore
         }
@@ -2101,10 +2102,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
         if (split.length > 2) {
           try {
             // RGB
-            final int red = Integer.parseInt(split[0]);
-            final int green = Integer.parseInt(split[1]);
-            final int blue = Integer.parseInt(split[2]);
-            HIGHLIGHT_COLOR.set(new Color3f(new Color(red, green, blue)));
+            final float red = Integer.parseInt(split[0]) / 255f;
+            final float green = Integer.parseInt(split[1]) / 255f;
+            final float blue = Integer.parseInt(split[2]) / 255f;
+            HIGHLIGHT_COLOR.set(new Color3f(red, green, blue));
             return;
           } catch (final NumberFormatException ignored) {
             // Ignore
@@ -2139,15 +2140,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final float[] limits = MathUtils.limits(rank);
     final float range = limits[1] - limits[0];
     if (!(range > 0)) {
-      return new Color3f[] {new Color3f(new Color(lut.getRGB(255)))};
+      return new Color3f[] {createColor(lut.getRGB(255))};
     }
 
     // Create 256 Colors
     final float scale = 255f / range;
     final Color3f[] colors = new Color3f[256];
     for (int i = 0; i < 256; i++) {
-      final Color c = new Color(lut.getRGB(i));
-      colors[i] = new Color3f(c);
+      colors[i] = createColor(lut.getRGB(i));
     }
 
     final float minimum = limits[0];
@@ -2166,6 +2166,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     }
     return allColors;
+  }
+  
+  private static Color3f createColor(int rgb) {
+    Color c = new Color(rgb);
+    return new Color3f(c.getRed()/255f, c.getGreen()/255f, c.getBlue()/255f);
   }
 
   private static float[] createRankById(MemoryPeakResults results) {

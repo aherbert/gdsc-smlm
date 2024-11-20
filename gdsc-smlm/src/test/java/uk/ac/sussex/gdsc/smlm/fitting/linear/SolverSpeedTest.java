@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -569,7 +569,7 @@ class SolverSpeedTest {
     iter = Math.min(adata.size(), iter);
     final ArrayList<double[]> a2 = new ArrayList<>(iter);
     for (int i = 0; i < iter; i++) {
-      a2.add(new DenseMatrix64F(copydouble(adata.get(i))).data);
+      a2.add(new DMatrixRMaj(copydouble(adata.get(i))).data);
     }
     return a2;
   }

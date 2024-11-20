@@ -1499,7 +1499,7 @@ public final class SettingsManager {
         localPrinter = localPrinter.omittingInsignificantWhitespace();
       }
       if (BitFlagUtils.anySet(flags, FLAG_JSON_DEFAULT_VALUES)) {
-        localPrinter = localPrinter.includingDefaultValueFields();
+        localPrinter = localPrinter.alwaysPrintFieldsWithNoPresence();
       }
       localPrinter.appendTo(message, output);
       return true;
