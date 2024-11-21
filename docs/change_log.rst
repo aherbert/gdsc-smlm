@@ -32,6 +32,10 @@ Minor release of GDSC SMLM.
   results.
 * Update from Commons Math to Commons Statistics for inference testing and univariate
   descriptive statistics.
+* Change use of EJML API from 0.24 to 0.41 (change mandated by scijava-pom for ImageJ
+  compatibility). This is binary incompatible change to the public API.
+* Change use of java3d API from 4.x to 5.x (change mandated by scijava-pom for ImageJ
+  compatibility). This is binary incompatible change to the public API.
 
 
 Version 1.1
