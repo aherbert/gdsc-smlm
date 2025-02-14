@@ -36,6 +36,7 @@ Minor release of GDSC SMLM.
   compatibility). This is binary incompatible change to the public API.
 * Change use of java3d API from 4.x to 5.x (change mandated by scijava-pom for ImageJ
   compatibility). This is binary incompatible change to the public API.
+* Add ``Use stack`` option to :ref:`tools_plugins:Overlay Image`.
 
 
 Version 1.1

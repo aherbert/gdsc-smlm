@@ -406,7 +406,12 @@ The ``Overlay Image`` plugin must be run after selecting the image to overlay. T
    * - Replace overlay
      - Select this to replace the current overlay. Uncheck this to add to the current overlay (i.e. combine overlays).
 
+   * - Use stack
+     - Select this to use all frames of a stack. The CZT stack dimensions of the target image and the overlay image must match.
+
 Clear an overlay using the ``Image > Overlay > Remove Overlay`` command.
+
+Note: When using the `Use stack` option the overlay may not be displayed until the current frame of the stack is changed.
 
 
 .. index:: ! Image Kernel Filter

@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.Undo;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
@@ -33,13 +34,15 @@ import ij.gui.ImageRoi;
 import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.process.ImageProcessor;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * This plugin is extracted from ij.plugins.OverlayCommands to allow an image to be added with a
- * transparent background.
+ * transparent background. An option to overlay a stack has been added.
  */
 public class OverlayImage implements PlugIn {
   private static final String TITLE = "Overlay image";
@@ -54,6 +57,7 @@ public class OverlayImage implements PlugIn {
     int opacity;
     boolean transparent;
     boolean replace;
+    boolean stack;
     String title;
 
     Settings() {
@@ -61,6 +65,7 @@ public class OverlayImage implements PlugIn {
       opacity = 100;
       transparent = true;
       replace = true;
+      stack = true;
       title = "";
     }
 
@@ -68,6 +73,7 @@ public class OverlayImage implements PlugIn {
       opacity = source.opacity;
       transparent = source.transparent;
       replace = source.replace;
+      stack = source.stack;
       title = source.title;
     }
 
@@ -100,8 +106,8 @@ public class OverlayImage implements PlugIn {
   }
 
   /**
-   * Adapted from ij.plugins.OverlayCommands#addImage(boolean) with the additional option for
-   * setting the zero pixels to transparent.
+   * Adapted from ij.plugins.OverlayCommands#addImage(boolean) with: the additional option for
+   * setting the zero pixels to transparent; support for overlay of a stack.
    */
   void addImage() {
     final int[] wList = WindowManager.getIDList();
@@ -142,6 +148,7 @@ public class OverlayImage implements PlugIn {
     gd.addNumericField("Opacity (0-100%):", settings.opacity, 0);
     gd.addCheckbox("Transparent background", settings.transparent);
     gd.addCheckbox("Replace overlay", settings.replace);
+    gd.addCheckbox("Use stack", settings.stack);
 
     gd.addHelp(HelpUrls.getUrl("overlay-image"));
     gd.showDialog();
@@ -150,36 +157,70 @@ public class OverlayImage implements PlugIn {
     }
 
     settings.title = gd.getNextChoice();
-    x = (int) gd.getNextNumber();
-    y = (int) gd.getNextNumber();
+    int xx = (int) gd.getNextNumber();
+    int yy = (int) gd.getNextNumber();
     settings.opacity = (int) gd.getNextNumber();
     settings.transparent = gd.getNextBoolean();
     settings.replace = gd.getNextBoolean();
+    settings.stack = gd.getNextBoolean();
     settings.save();
 
-    final ImagePlus overlay = WindowManager.getImage(settings.title);
-    if (overlay.getID() == imp.getID()) {
+    final ImagePlus imp2 = WindowManager.getImage(settings.title);
+    if (imp2.getID() == imp.getID()) {
       IJ.error(TITLE, "Image to be added cannot be the same as\n\"" + imp.getTitle() + "\".");
       return;
     }
-    if (overlay.getWidth() > imp.getWidth() && overlay.getHeight() > imp.getHeight()) {
+    if (imp2.getWidth() > imp.getWidth() && imp2.getHeight() > imp.getHeight()) {
       IJ.error(TITLE, "Image to be added cannnot be larger than\n\"" + imp.getTitle() + "\".");
       return;
-    }
-
-    final ImageRoi roi2 = new ImageRoi(x, y, overlay.getProcessor());
-    roi2.setZeroTransparent(settings.transparent);
-    roi2.setName(overlay.getShortTitle());
-    if (settings.opacity != 100) {
-      roi2.setOpacity(settings.opacity / 100.0);
     }
 
     Overlay overlayList = imp.getOverlay();
     if (overlayList == null || settings.replace) {
       overlayList = new Overlay();
     }
-    overlayList.add(roi2);
+
+    final Function<ImageProcessor, ImageRoi> createRoi = ip -> {
+      final ImageRoi imageRoi = new ImageRoi(xx, yy, ip);
+      imageRoi.setZeroTransparent(settings.transparent);
+      imageRoi.setName(imp2.getShortTitle());
+      if (settings.opacity != 100) {
+        imageRoi.setOpacity(settings.opacity / 100.0);
+      }
+      return imageRoi;
+    };
+
+    // Support overlay of stacks
+    final int nc = imp2.getNChannels();
+    final int nz = imp2.getNSlices();
+    final int nt = imp2.getNFrames();
+    if (settings.stack && imp.getNChannels() == nc && imp.getNSlices() == nz
+        && imp.getNFrames() == nt) {
+      final ImageStack stack2 = imp2.getImageStack();
+      for (int c = 1; c <= nc; c++) {
+        for (int z = 1; z <= nz; z++) {
+          for (int t = 1; t <= nt; t++) {
+            // 1-based stack index
+            // See ImagePlus.getStackIndex(c, z, t);
+            final int i = (t - 1) * nc * nz + (z - 1) * nc + c;
+            final ImageRoi r = createRoi.apply(stack2.getProcessor(i));
+            // See Roi.setPosition(ImagePlus):
+            if (imp2.isHyperStack()) {
+              r.setPosition(c, z, t);
+            } else {
+              r.setPosition(i);
+            }
+            overlayList.add(r);
+          }
+        }
+      }
+    } else {
+      // Single frame
+      overlayList.add(createRoi.apply(imp2.getProcessor()));
+    }
+
     imp.setOverlay(overlayList);
     Undo.setup(Undo.OVERLAY_ADDITION, imp);
+    imp.updateAndDraw();
   }
 }
