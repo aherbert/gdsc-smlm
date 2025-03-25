@@ -2288,7 +2288,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       sb.append(MathUtils.rounded(stats[c].getMean())).append("+/-")
           .append(MathUtils.rounded(stats[c].getStandardDeviation())).append(" (")
           .append(stats[c].getN()).append(") ").append(
-              MathUtils.rounded(Quantile.withDefaults().evaluate(values, 0.99)))
+              MathUtils.rounded(Quantile.withDefaults().evaluate(values.length, i -> values[i], 0.99)))
           .append('\t');
 
       if (settings.showHistograms && settings.displayHistograms[c + Settings.NAMES.length]) {
