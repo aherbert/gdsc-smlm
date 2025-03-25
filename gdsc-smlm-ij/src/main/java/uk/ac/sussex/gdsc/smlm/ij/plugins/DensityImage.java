@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
-import org.apache.commons.statistics.descriptive.Mean;
+import org.apache.commons.statistics.descriptive.IntMean;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -600,7 +600,7 @@ public class DensityImage implements PlugIn {
     final Rectangle bounds = results.getBounds();
     final double area = (double) bounds.width * bounds.height;
     final double expected = results.size() * region / area;
-    final Mean summary = Mean.create();
+    final IntMean summary = IntMean.create();
 
     for (int i = 0; i < results.size(); i++) {
       summary.accept(density[i]);
