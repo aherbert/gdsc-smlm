@@ -5,7 +5,7 @@ GDSC Single Molecule Light Microscopy (SMLM) ImageJ Plugins
 [![Build Status](https://github.com/aherbert/gdsc-smlm/actions/workflows/build.yml/badge.svg)](https://github.com/aherbert/gdsc-smlm/actions/workflows/build.yml)
 [![Coverage Status](https://codecov.io/gh/aherbert/gdsc-smlm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/aherbert/gdsc-smlm)
 [![Documentation Status](https://readthedocs.org/projects/gdsc-smlm/badge/?version=latest)](https://gdsc-smlm.readthedocs.io/en/latest/?badge=latest)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/uk.ac.sussex.gdsc/gdsc-smlm/badge.svg)](https://maven-badges.herokuapp.com/maven-central/uk.ac.sussex.gdsc/gdsc-smlm/)
+[![Maven Central](https://img.shields.is/maven-central/v/uk.ac.sussex.gdsc/gdsc-smlm/)](https://img.shields.is/maven-central/v/uk.ac.sussex.gdsc/gdsc-smlm/)
 [![Javadocs](https://javadoc.io/badge2/uk.ac.sussex.gdsc/gdsc-smlm/javadoc.svg)](https://javadoc.io/doc/uk.ac.sussex.gdsc/gdsc-smlm)
 
 The GDSC Single Molecule Light Microscopy (SMLM) plugins provide various tools
