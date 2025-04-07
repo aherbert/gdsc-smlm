@@ -118,7 +118,7 @@ Software for single molecule localisation microscopy (SMLM)
 
     <!-- Dependency versions -->
     <gdsc.core.version>2.2-SNAPSHOT</gdsc.core.version>
-    <xstream.version>1.4.20</xstream.version>
+    <xstream.version>1.4.21</xstream.version>
     <JTransforms.version>3.1</JTransforms.version>
     <jsoup.version>1.16.1</jsoup.version>
     <mfl-core.version>0.5.15</mfl-core.version>
