@@ -28,6 +28,6 @@ jobs:
       # Note: revapi is skipped only in the modules containing the profile
       run: mvn -V -B --no-transfer-progress -P jacoco,revapi-skip checkstyle:check verify jacoco:report
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
         files: ./gdsc-smlm/target/site/jacoco/jacoco.xml,./gdsc-smlm-ij/target/site/jacoco/jacoco.xml
