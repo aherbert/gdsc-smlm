@@ -707,10 +707,10 @@ public class BlinkEstimator implements PlugIn {
       final double n = variables[0];
       final double nBlink = variables[1];
       final double tOff = variables[2];
-      final double[][] jacobian = new double[x.size()][variables.length];
+      final double[][] jacobian = new double[size()][variables.length];
 
       for (int i = 0; i < jacobian.length; ++i) {
-        final double td = this.x.getDouble(i);
+        final double td = getX(i);
 
         final double a = (1 - td) / tOff;
         final double b = StdMath.exp(a);
@@ -750,7 +750,7 @@ public class BlinkEstimator implements PlugIn {
       final double n = variables[0];
       final double nBlink = variables[1];
       final double tOff = variables[2];
-      final double[][] jacobian = new double[x.size()][variables.length];
+      final double[][] jacobian = new double[size()][variables.length];
 
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
@@ -759,7 +759,7 @@ public class BlinkEstimator implements PlugIn {
         d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
-        final double r = this.x.getDouble(i);
+        final double r = getX(i);
         final double value = evaluate(r, n, nBlink, tOff);
         for (int j = 0; j < variables.length; j++) {
           final double value2 = evaluate(r, n + d[0][j], nBlink + d[1][j], tOff + d[2][j]);
@@ -796,9 +796,9 @@ public class BlinkEstimator implements PlugIn {
     @Override
     public double[] value(double[] variables) {
       increment();
-      final double[] values = new double[x.size()];
+      final double[] values = new double[size()];
       for (int i = 0; i < values.length; i++) {
-        values[i] = evaluate(x.getDouble(i), variables[0], variables[1], variables[2]);
+        values[i] = evaluate(getX(i), variables[0], variables[1], variables[2]);
       }
       return values;
     }

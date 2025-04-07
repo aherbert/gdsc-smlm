@@ -31,11 +31,15 @@ import java.util.Arrays;
  * Base class providing support methods to allow univariate function optimisation.
  */
 public class OptimiserFunction {
-  // TODO - Make these private and optimise data access using DoubleArrayList.elements()
+  // TODO - Make these private
 
-  /** The x. */
+  /** The x.
+   * @deprecated use {@link #getX(int)} to access the data values. */
+  @Deprecated
   protected DoubleArrayList x;
-  /** The y. */
+  /** The y. 
+   * @deprecated use {@link #getY(int)} to access the data values. */
+  @Deprecated
   protected DoubleArrayList y;
 
   /**
@@ -81,12 +85,36 @@ public class OptimiserFunction {
   }
 
   /**
+   * Gets the x data at the specified index.
+   * <p>Warning: This performs no bounds checking and may return invalid values outside of {@code [0, size)}.
+   *
+   * @param i the index
+   * @return the x value
+   * @see #size()
+   */
+  public double getX(int i) {
+    return x.elements()[i];
+  }
+
+  /**
    * Gets the y data.
    *
    * @return the y
    */
   public double[] getY() {
     return y.toDoubleArray();
+  }
+
+  /**
+   * Gets the y data at the specified index.
+   * <p>Warning: This performs no bounds checking and may return invalid values outside of {@code [0, size)}.
+   *
+   * @param i the index
+   * @return the y value
+   * @see #size()
+   */
+  public double getY(int i) {
+    return y.elements()[i];
   }
 
   /**

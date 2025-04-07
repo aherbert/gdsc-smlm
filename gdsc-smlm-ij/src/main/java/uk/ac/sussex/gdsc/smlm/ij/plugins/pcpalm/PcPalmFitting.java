@@ -1491,11 +1491,11 @@ public class PcPalmFitting implements PlugIn {
       // Compute the gradients using calculus differentiation
       final double sigma = variables[0];
       final double density = variables[1];
-      final double[][] jacobian = new double[x.size()][2];
-      lastValue = new double[x.size()];
+      final double[][] jacobian = new double[size()][2];
+      lastValue = new double[size()];
 
       for (int i = 0; i < jacobian.length; ++i) {
-        final double r = this.x.getDouble(i);
+        final double r = this.getX(i);
 
         final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
         final double b = -r * r / (4 * sigma * sigma);
@@ -1525,8 +1525,8 @@ public class PcPalmFitting implements PlugIn {
       // Compute the gradients using numerical differentiation
       final double sigma = variables[0];
       final double density = variables[1];
-      final double[][] jacobian = new double[x.size()][2];
-      lastValue = new double[x.size()];
+      final double[][] jacobian = new double[size()][2];
+      lastValue = new double[size()];
 
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
@@ -1535,7 +1535,7 @@ public class PcPalmFitting implements PlugIn {
         d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
-        final double r = this.x.getDouble(i);
+        final double r = this.getX(i);
         final double value = lastValue[i] = evaluate(r, sigma, density);
         for (int j = 0; j < variables.length; j++) {
           final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j]);
@@ -1573,9 +1573,9 @@ public class PcPalmFitting implements PlugIn {
     @Override
     public double[] value(double[] variables) {
       increment();
-      final double[] values = new double[x.size()];
+      final double[] values = new double[size()];
       for (int i = 0; i < values.length; i++) {
-        values[i] = evaluate(x.getDouble(i), variables[0], variables[1]);
+        values[i] = evaluate(getX(i), variables[0], variables[1]);
       }
       return values;
     }
@@ -1626,11 +1626,11 @@ public class PcPalmFitting implements PlugIn {
       final double density = variables[1];
       final double range = variables[2];
       final double amplitude = variables[3];
-      final double[][] jacobian = new double[x.size()][variables.length];
-      lastValue = new double[x.size()];
+      final double[][] jacobian = new double[size()][variables.length];
+      lastValue = new double[size()];
 
       for (int i = 0; i < jacobian.length; ++i) {
-        final double r = this.x.getDouble(i);
+        final double r = this.getX(i);
 
         final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
         final double b = -r * r / (4 * sigma * sigma);
@@ -1675,8 +1675,8 @@ public class PcPalmFitting implements PlugIn {
       final double density = variables[1];
       final double range = variables[2];
       final double amplitude = variables[3];
-      final double[][] jacobian = new double[x.size()][variables.length];
-      lastValue = new double[x.size()];
+      final double[][] jacobian = new double[size()][variables.length];
+      lastValue = new double[size()];
 
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
@@ -1685,7 +1685,7 @@ public class PcPalmFitting implements PlugIn {
         d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
-        final double r = this.x.getDouble(i);
+        final double r = this.getX(i);
         final double value = lastValue[i] = evaluate(r, sigma, density, range, amplitude);
         for (int j = 0; j < variables.length; j++) {
           final double value2 =
@@ -1738,10 +1738,10 @@ public class PcPalmFitting implements PlugIn {
     @Override
     public double[] value(double[] variables) {
       increment();
-      final double[] values = new double[x.size()];
+      final double[] values = new double[size()];
       for (int i = 0; i < values.length; i++) {
         values[i] =
-            evaluate(x.getDouble(i), variables[0], variables[1], variables[2], variables[3]);
+            evaluate(getX(i), variables[0], variables[1], variables[2], variables[3]);
       }
       return values;
     }
@@ -1906,11 +1906,11 @@ public class PcPalmFitting implements PlugIn {
       final double range = variables[2];
       final double amplitude = variables[3];
       final double alpha = variables[4];
-      final double[][] jacobian = new double[x.size()][variables.length];
-      lastValue = new double[x.size()];
+      final double[][] jacobian = new double[size()][variables.length];
+      lastValue = new double[size()];
 
       for (int i = 0; i < jacobian.length; ++i) {
-        final double r = this.x.getDouble(i);
+        final double r = this.getX(i);
 
         final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
         final double b = -r * r / (4 * sigma * sigma);
@@ -1965,8 +1965,8 @@ public class PcPalmFitting implements PlugIn {
       final double range = variables[2];
       final double amplitude = variables[3];
       final double alpha = variables[4];
-      final double[][] jacobian = new double[x.size()][variables.length];
-      lastValue = new double[x.size()];
+      final double[][] jacobian = new double[size()][variables.length];
+      lastValue = new double[size()];
 
       final double delta = 0.001;
       final double[][] d = new double[variables.length][variables.length];
@@ -1975,7 +1975,7 @@ public class PcPalmFitting implements PlugIn {
         d[i][i] = delta * Math.abs(variables[i]);
       }
       for (int i = 0; i < jacobian.length; ++i) {
-        final double r = this.x.getDouble(i);
+        final double r = this.getX(i);
         final double value = lastValue[i] = evaluate(r, sigma, density, range, amplitude, alpha);
         for (int j = 0; j < variables.length; j++) {
           final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j],
@@ -2028,9 +2028,9 @@ public class PcPalmFitting implements PlugIn {
     @Override
     public double[] value(double[] variables) {
       increment();
-      final double[] values = new double[x.size()];
+      final double[] values = new double[size()];
       for (int i = 0; i < values.length; i++) {
-        values[i] = evaluate(x.getDouble(i), variables[0], variables[1], variables[2], variables[3],
+        values[i] = evaluate(getX(i), variables[0], variables[1], variables[2], variables[3],
             variables[4]);
       }
       return values;
