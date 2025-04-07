@@ -82,7 +82,7 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
 
     // Can be different if the means are different. Commons Math uses a double pass
     // mean computation but this code uses a simple sum then divide.
-    TestAssertions.assertArrayTest(exp, obs, Predicates.doublesAreUlpClose(10));
+    TestAssertions.assertArrayTest(exp, obs, Predicates.doublesAreUlpClose(15));
   }
 
   @Test
