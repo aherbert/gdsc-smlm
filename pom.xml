@@ -338,6 +338,9 @@ Software for single molecule localisation microscopy (SMLM)
                   <!-- Ignore changes to ImageJ methods.
                     The GDSC SMLM code aims to run within the latest ImageJ. -->
                   <item>method .* ij\..*</item>
+                  <!-- Ignore changes to FastUtil.
+                    The currently exposed classes in the public API will be removed in future. -->
+                  <item>class it\.unimi\.dsi\.fastutil\..*</item>
                   <!-- Ignore changes to generated code -->
                   <item>class .*Protos</item>
                   <item>class .*Protos\..*</item>
@@ -402,6 +405,9 @@ Software for single molecule localisation microscopy (SMLM)
                   <!-- Ignore changes to ImageJ methods.
                     The GDSC SMLM code aims to run within the latest ImageJ. -->
                   <item>method .* ij\..*</item>
+                  <!-- Ignore changes to FastUtil.
+                    The currently exposed classes in the public API will be removed in future. -->
+                  <item>class it\.unimi\.dsi\.fastutil\..*</item>
                   <!-- Ignore changes to generated code -->
                   <item>class .*Protos</item>
                   <item>class .*Protos\..*</item>
