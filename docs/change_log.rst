@@ -5,10 +5,10 @@ Change Log
    :local:
 
 
-Version 1.2
+Version 2.0
 -----------
 
-Minor release of GDSC SMLM.
+Major release of GDSC SMLM.
 
 * Update to GDSC Core 2.2
 * Update the :numref:`{name} <analysis_plugins:Residence Time Analysis>` plugin to allow
