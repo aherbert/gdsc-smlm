@@ -32,7 +32,7 @@ The code is hosted on GitHub_.
 Citation
 --------
 
-| **GDSC SMLM: Single-molecule localisation microscopy software for ImageJ** [version 1; peer review: 1 approved].
+| **GDSC SMLM: Single-molecule localisation microscopy software for ImageJ** [version 1; peer review: 3 approved].
 | Etheridge TJ, Carr AM and Herbert AD.
 | *Wellcome Open Res* 2022, **7:241**
 
