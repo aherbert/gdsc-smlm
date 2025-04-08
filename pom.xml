@@ -398,6 +398,7 @@ Software for single molecule localisation microscopy (SMLM)
               <roots>
                 <!-- Path(s) to configuration in the JSON config file -->
                 <root>1.1</root>
+                <root>1.2</root>
               </roots>
             </configurationFile>
           </analysisConfigurationFiles>
