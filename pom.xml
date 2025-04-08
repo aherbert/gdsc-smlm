@@ -127,6 +127,9 @@ Software for single molecule localisation microscopy (SMLM)
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
 
+    <!-- Downgrade spotbugs version for Java 8 compatibility -->
+    <spotbugs-maven-plugin.version>4.7.3.5</spotbugs-maven-plugin.version>
+
   </properties>
 
   <dependencies>
