@@ -55,44 +55,6 @@ class PoissonDistributionTest {
     }
   }
 
-  @SeededTest
-  void canComputeCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngFactory.create(seed.get());
-    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-15);
-
-    final PoissonDistribution fpd = new PoissonDistribution(1);
-    for (int i = 1; i <= 100; i++) {
-      final double mean = rng.nextDouble() * i;
-      final org.apache.commons.statistics.distribution.PoissonDistribution pd =
-          createReferencePoissonDistribution(mean);
-      fpd.setMean(mean);
-      final int lower = (int) Math.floor(Math.max(0, mean - 5 * Math.sqrt(mean)));
-      final int upper = (int) Math.ceil((mean + 5 * Math.sqrt(mean)));
-      for (int x = lower; x <= upper; x++) {
-        TestAssertions.assertTest(pd.cumulativeProbability(x), fpd.cumulativeProbability(x), tol);
-      }
-    }
-  }
-
-  @SeededTest
-  void canComputeInverseCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngFactory.create(seed.get());
-    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-15);
-
-    final PoissonDistribution fpd = new PoissonDistribution(1);
-    for (int i = 1; i <= 100; i++) {
-      final double mean = rng.nextDouble() * i;
-      final org.apache.commons.statistics.distribution.PoissonDistribution pd =
-          createReferencePoissonDistribution(mean);
-      fpd.setMean(mean);
-      for (int j = 0; j <= 10; j++) {
-        final double p = 0.1 * j;
-        TestAssertions.assertTest(pd.inverseCumulativeProbability(p),
-            fpd.inverseCumulativeProbability(p), tol);
-      }
-    }
-  }
-
   private static org.apache.commons.statistics.distribution.PoissonDistribution
       createReferencePoissonDistribution(final double mean) {
     return org.apache.commons.statistics.distribution.PoissonDistribution.of(mean);
@@ -125,26 +87,6 @@ class PoissonDistributionTest {
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(-1));
     Assertions.assertEquals(-mean, fpd.logProbability(0));
-  }
-
-  @Test
-  void testCumulativeProbabilityEdgeCases() {
-    final double mean = 1.23;
-    final PoissonDistribution fpd = new PoissonDistribution(mean);
-    Assertions.assertEquals(0, fpd.cumulativeProbability(-1));
-    Assertions.assertEquals(1.0, fpd.cumulativeProbability(Integer.MAX_VALUE));
-  }
-
-  @Test
-  void testInverseCumulativeProbabilityEdgeCases() {
-    final double mean = 1.23;
-    final PoissonDistribution fpd = new PoissonDistribution(mean);
-    Assertions.assertEquals(0, fpd.inverseCumulativeProbability(0));
-    Assertions.assertEquals(Integer.MAX_VALUE, fpd.inverseCumulativeProbability(1.0));
-    Assertions.assertThrows(IllegalArgumentException.class,
-        () -> fpd.inverseCumulativeProbability(-0.1));
-    Assertions.assertThrows(IllegalArgumentException.class,
-        () -> fpd.inverseCumulativeProbability(1.1));
   }
 
   @Test

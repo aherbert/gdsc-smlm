@@ -7812,7 +7812,7 @@ public class BenchmarkFilterAnalysis
     getBounds();
     duplicateDistance *= distanceScalingFactor;
     return CoordinateStoreFactory.create(bounds.x, bounds.y, bounds.width, bounds.height,
-        duplicateDistance);
+        duplicateDistance, -1);
   }
 
   /**

@@ -853,47 +853,6 @@ public abstract class ImageModel {
   }
 
   /**
-   * Gets the photon distribution used for the fluorophore.
-   *
-   * <p>The model no longer uses {@link org.apache.commons.math3.distribution.RealDistribution}.
-   * This method has been changed to always returns {@code null}. This return value was previously
-   * used to indicate no distribution.
-   *
-   * @return {@code null}
-   * @deprecated The underlying photon distribution is no longer available.
-   */
-  @Deprecated
-  public org.apache.commons.math3.distribution.RealDistribution getPhotonDistribution() {
-    return null;
-  }
-
-  /**
-   * Set the distribution used to generate the photon budget of a fluorophore.
-   *
-   * <p>Note: The model no longer uses
-   * {@link org.apache.commons.math3.distribution.RealDistribution}. The argument is wrapped to a
-   * {@link RealDistribution}.
-   *
-   * @param photonDistribution the photon distribution to set
-   * @deprecated Use {@link #setPhotonDistribution(RealDistribution)}
-   */
-  @Deprecated
-  public void setPhotonDistribution(
-      org.apache.commons.math3.distribution.RealDistribution photonDistribution) {
-    this.photonDistribution = new RealDistribution() {
-      @Override
-      public double getMean() {
-        return photonDistribution.getNumericalMean();
-      }
-
-      @Override
-      public double sample() {
-        return photonDistribution.sample();
-      }
-    };
-  }
-
-  /**
    * Set the distribution used to generate the photon budget of a fluorophore.
    *
    * @param photonDistribution the photon distribution to set

@@ -444,34 +444,6 @@ public class CustomContentInstant extends ContentInstant {
     points.save(out, false);
   }
 
-  /**
-   * Adds the point list point.
-   *
-   * @param point the point
-   * @deprecated To be removed
-   */
-  @Deprecated
-  @Override
-  public void addPointListPoint(final Point3d point) {
-    points.add(point.x, point.y, point.z);
-    if (plDialog != null) {
-      plDialog.update();
-    }
-  }
-
-  /**
-   * Sets the list point point.
-   *
-   * @param index the index
-   * @param point the point
-   * @deprecated To be removed
-   */
-  @Override
-  @Deprecated
-  public void setListPointPos(final int index, final Point3d point) {
-    points.placePoint(points.get(index), point.x, point.y, point.z);
-  }
-
   @Override
   public float getLandmarkPointSize() {
     return plShape.getRadius();
@@ -495,21 +467,6 @@ public class CustomContentInstant extends ContentInstant {
   @Override
   public PointList getPointList() {
     return points;
-  }
-
-  /**
-   * Delete point list point.
-   *
-   * @param index the index
-   * @deprecated To be removed
-   */
-  @Override
-  @Deprecated
-  public void deletePointListPoint(final int index) {
-    points.remove(index);
-    if (plDialog != null) {
-      plDialog.update();
-    }
   }
 
   /////////////////////////////////////////////////////////////

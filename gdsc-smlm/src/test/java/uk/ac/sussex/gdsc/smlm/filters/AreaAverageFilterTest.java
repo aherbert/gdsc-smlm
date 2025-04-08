@@ -29,7 +29,6 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
@@ -37,9 +36,8 @@ import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
-@SuppressWarnings({"deprecation", "javadoc"})
+@SuppressWarnings({"javadoc"})
 class AreaAverageFilterTest extends AbstractFilterTest {
-  private static final int ITER = 100;
   private static final int INTERNAL_ITER = 300;
 
   @SeededTest
@@ -119,168 +117,6 @@ class AreaAverageFilterTest extends AbstractFilterTest {
     }
     logger.log(TestLogging.getTimingRecord("float areaAverageInternal", slowTotal,
         "areaAverageUsingSumsInternal", fastTotal));
-  }
-
-  @SpeedTag
-  @SeededTest
-  void stripedBlockAverageIsFasterThanAreaAverage(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final AreaAverageFilter filter = new AreaAverageFilter();
-    final AverageFilter filter2 = new AverageFilter();
-
-    final ArrayList<float[]> dataSet = getSpeedData(seed, ITER);
-
-    final ArrayList<Long> fastTimes = new ArrayList<>();
-
-    // Initialise
-    for (final float boxSize : fBoxSizes) {
-      filter.areaAverageUsingAverages(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
-      filter2.stripedBlockAverage(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
-    }
-
-    for (final float boxSize : fBoxSizes) {
-      for (final int width : primes) {
-        for (final int height : primes) {
-          final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-          for (final float[] data : dataSet) {
-            dataSet2.add(data.clone());
-          }
-
-          final long start = System.nanoTime();
-          for (final float[] data : dataSet2) {
-            filter2.stripedBlockAverage(data, width, height, boxSize);
-          }
-          final long time = System.nanoTime() - start;
-          fastTimes.add(time);
-        }
-      }
-    }
-
-    long slowTotal = 0;
-    long fastTotal = 0;
-    int index = 0;
-    for (final float boxSize : fBoxSizes) {
-      long boxSlowTotal = 0;
-      long boxFastTotal = 0;
-      for (final int width : primes) {
-        for (final int height : primes) {
-          final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-          for (final float[] data : dataSet) {
-            dataSet2.add(data.clone());
-          }
-
-          final long start = System.nanoTime();
-          for (final float[] data : dataSet2) {
-            filter.areaAverageUsingAverages(data, width, height, boxSize);
-          }
-          final long time = System.nanoTime() - start;
-
-          final long fastTime = fastTimes.get(index++);
-          slowTotal += time;
-          fastTotal += fastTime;
-          boxSlowTotal += time;
-          boxFastTotal += fastTime;
-          if (debug) {
-            logger.log(TestLevel.TEST_DEBUG,
-                () -> String.format(
-                    "float areaAverageUsingAverages [%dx%d] @ %.1f : "
-                        + "%d => stripedBlockAverage %d = %.2fx",
-                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
-            // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
-            // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
-            // blockTime, time), blockTime < time);
-          }
-        }
-      }
-      // if (debug)
-      logger.log(TestLogging.getStageTimingRecord("float areaAverageUsingAverages " + boxSize,
-          boxSlowTotal, "stripedBlockAverage", boxFastTotal));
-    }
-    logger.log(TestLogging.getTimingRecord("float areaAverageUsingAverages", slowTotal,
-        "stripedBlockAverage", fastTotal));
-  }
-
-  @SpeedTag
-  @SeededTest
-  void stripedBlockAverageInternalIsFasterThanAreaAverageInternal(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final AreaAverageFilter filter = new AreaAverageFilter();
-    final AverageFilter filter2 = new AverageFilter();
-
-    final ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER);
-
-    final ArrayList<Long> fastTimes = new ArrayList<>();
-
-    // Initialise
-    for (final float boxSize : fBoxSizes) {
-      filter.areaAverageUsingAveragesInternal(dataSet.get(0).clone(), primes[0], primes[0],
-          boxSize);
-      filter2.stripedBlockAverageInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
-    }
-
-    for (final float boxSize : fBoxSizes) {
-      for (final int width : primes) {
-        for (final int height : primes) {
-          final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-          for (final float[] data : dataSet) {
-            dataSet2.add(data.clone());
-          }
-
-          final long start = System.nanoTime();
-          for (final float[] data : dataSet2) {
-            filter2.stripedBlockAverageInternal(data, width, height, boxSize);
-          }
-          final long time = System.nanoTime() - start;
-          fastTimes.add(time);
-        }
-      }
-    }
-
-    long slowTotal = 0;
-    long fastTotal = 0;
-    int index = 0;
-    for (final float boxSize : fBoxSizes) {
-      long boxSlowTotal = 0;
-      long boxFastTotal = 0;
-      for (final int width : primes) {
-        for (final int height : primes) {
-          final ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
-          for (final float[] data : dataSet) {
-            dataSet2.add(data.clone());
-          }
-
-          final long start = System.nanoTime();
-          for (final float[] data : dataSet2) {
-            filter.areaAverageUsingAveragesInternal(data, width, height, boxSize);
-          }
-          final long time = System.nanoTime() - start;
-
-          final long fastTime = fastTimes.get(index++);
-          slowTotal += time;
-          fastTotal += fastTime;
-          boxSlowTotal += time;
-          boxFastTotal += fastTime;
-          if (debug) {
-            logger.log(TestLevel.TEST_DEBUG,
-                () -> String.format(
-                    "float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : "
-                        + "%d => stripedBlockAverageInternal %d = %.2fx",
-                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
-            // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
-            // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
-            // blockTime, time), blockTime < time);
-          }
-        }
-      }
-      // if (debug)
-      logger.log(
-          TestLogging.getStageTimingRecord("float areaAverageUsingAveragesInternal " + boxSize,
-              boxSlowTotal, "stripedBlockAverageInternal", boxFastTotal));
-    }
-    logger.log(TestLogging.getTimingRecord("float areaAverageUsingAveragesInternal", slowTotal,
-        "stripedBlockAverageInternal", fastTotal));
   }
 
   @SeededTest

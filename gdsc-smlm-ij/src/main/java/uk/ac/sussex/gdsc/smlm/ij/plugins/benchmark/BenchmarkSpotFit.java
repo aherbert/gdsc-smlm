@@ -1910,8 +1910,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final MultiPathFilter mpf =
         new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
     mpf.fractionScoreSubset(multiResults, NullFailCounter.INSTANCE, this.results.size(),
-        assignments, scoreStore, CoordinateStoreFactory.create(0, 0, imp.getWidth(),
-            imp.getHeight(), config.convertUsingHwhMax(config.getDuplicateDistanceParameter())));
+        assignments, scoreStore,
+        CoordinateStoreFactory.create(0, 0, imp.getWidth(), imp.getHeight(),
+            config.convertUsingHwhMax(config.getDuplicateDistanceParameter()), -1));
 
     final double[][] matchScores = new double[set.size()][];
     int count = 0;

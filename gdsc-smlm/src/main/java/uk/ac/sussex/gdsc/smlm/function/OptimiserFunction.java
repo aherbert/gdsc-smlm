@@ -31,16 +31,11 @@ import java.util.Arrays;
  * Base class providing support methods to allow univariate function optimisation.
  */
 public class OptimiserFunction {
-  // TODO - Make these private
 
-  /** The x.
-   * @deprecated use {@link #getX(int)} to access the data values. */
-  @Deprecated
-  protected DoubleArrayList x;
-  /** The y.
-   * @deprecated use {@link #getY(int)} to access the data values. */
-  @Deprecated
-  protected DoubleArrayList y;
+  /** The x. */
+  private DoubleArrayList x;
+  /** The y. */
+  private DoubleArrayList y;
 
   /**
    * Create an instance.

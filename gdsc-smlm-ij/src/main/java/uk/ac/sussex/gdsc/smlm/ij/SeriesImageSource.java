@@ -1757,28 +1757,6 @@ public class SeriesImageSource extends ImageSource {
   }
 
   /**
-   * Gets the number of threads to use for opening images.
-   *
-   * @return The number of background threads to use for opening images
-   * @deprecated Currently only 1 thread is used for opening images
-   */
-  @Deprecated
-  public int getNumberOfThreads() {
-    return numberOfThreads;
-  }
-
-  /**
-   * Set the number of background threads to use for opening images.
-   *
-   * @param numberOfThreads The number of background threads to use for opening images
-   * @deprecated Currently only 1 thread is used for opening images
-   */
-  @Deprecated
-  public void setNumberOfThreads(int numberOfThreads) {
-    this.numberOfThreads = Math.max(1, numberOfThreads);
-  }
-
-  /**
    * Gets the buffer limit for reading TIFF images into memory.
    *
    * @return the buffer limit

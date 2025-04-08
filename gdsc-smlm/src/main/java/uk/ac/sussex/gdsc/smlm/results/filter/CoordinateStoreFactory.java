@@ -39,24 +39,6 @@ public final class CoordinateStoreFactory {
    * @param width the width
    * @param height the height
    * @param xyResolution the xy resolution (if negative then nothing is stored)
-   * @return the coordinate store
-   * @deprecated The z resolution should be specified using
-   *             {@link #create(int, int, int, int, double, double)}
-   */
-  @Deprecated
-  public static CoordinateStore create(int minx, int miny, int width, int height,
-      double xyResolution) {
-    return create(minx, miny, width, height, xyResolution, -1);
-  }
-
-  /**
-   * Creates the coordinate store.
-   *
-   * @param minx the min x coordinate value
-   * @param miny the min y coordinate value
-   * @param width the width
-   * @param height the height
-   * @param xyResolution the xy resolution (if negative then nothing is stored)
    * @param zResolution the z resolution (if negative then this is ignored and the store behaves as
    *        if processing 2D coordinates)
    * @return the coordinate store

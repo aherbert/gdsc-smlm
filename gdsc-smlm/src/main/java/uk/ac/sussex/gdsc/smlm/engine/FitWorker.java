@@ -485,7 +485,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
     // Used for duplicate checking
     coordinateStore = CoordinateStoreFactory.create(0, 0, 0, 0,
-        config.convertUsingHwhMax(config.getDuplicateDistanceParameter()));
+        config.convertUsingHwhMax(config.getDuplicateDistanceParameter()), -1);
     calculateNoise = fitConfig.getNoise() <= 0;
     if (!calculateNoise) {
       noise = (float) fitConfig.getNoise();
