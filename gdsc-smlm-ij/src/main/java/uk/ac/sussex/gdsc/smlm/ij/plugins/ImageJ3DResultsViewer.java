@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM) in ImageJ
  * %%
- * Copyright (C) 2011 - 2023 Alex Herbert
+ * Copyright (C) 2011 - 2025 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -2167,7 +2167,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
     return allColors;
   }
-  
+
   private static Color3f createColor(int rgb) {
     Color c = new Color(rgb);
     return new Color3f(c.getRed()/255f, c.getGreen()/255f, c.getBlue()/255f);

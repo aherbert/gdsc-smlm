@@ -1,5 +1,5 @@
 GDSC SMLM
-Copyright 2011-2023 Alex Herbert
+Copyright 2011-2025 Alex Herbert
 
 The uk.ac.sussex.gdsc.smlm.function.Bessel class contains derivative
 work originating from the "Boost C++ Libraries" <boost/math/special_functions>.

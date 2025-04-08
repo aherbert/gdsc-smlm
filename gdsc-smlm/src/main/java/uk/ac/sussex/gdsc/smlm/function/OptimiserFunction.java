@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
- * Copyright (C) 2011 - 2023 Alex Herbert
+ * Copyright (C) 2011 - 2025 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -37,7 +37,7 @@ public class OptimiserFunction {
    * @deprecated use {@link #getX(int)} to access the data values. */
   @Deprecated
   protected DoubleArrayList x;
-  /** The y. 
+  /** The y.
    * @deprecated use {@link #getY(int)} to access the data values. */
   @Deprecated
   protected DoubleArrayList y;

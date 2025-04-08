@@ -1,21 +1,21 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Package
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM) in ImageJ
  * %%
- * Copyright (C) 2011 - 2023 Alex Herbert
+ * Copyright (C) 2011 - 2025 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,10 +23,10 @@
  */
 // This is a test macro to run the PC-PALM simulation and then analyse and fit
 // the results.
-// It is used to test the estimation of the cluster parameters for different 
+// It is used to test the estimation of the cluster parameters for different
 // cluster simulations.
-// See Sengupta, et al (2013). Quantifying spatial resolution in 
-// point-localisation superresolution images using pair correlation analysis. 
+// See Sengupta, et al (2013). Quantifying spatial resolution in
+// point-localisation superresolution images using pair correlation analysis.
 // Nature Protocols 8, pp345-354.
 
 molecules = 3000;
@@ -60,13 +60,13 @@ datasets="";
 
 // Run once to clear memory
 run("PC-PALM Molecules", "run_mode=Simulation molecules=10 " +
-    " simulation_size=16 blinking_rate=1 average_precision=20" + 
+    " simulation_size=16 blinking_rate=1 average_precision=20" +
     " image_size=1024 roi_size=4 nm_per_pixel_limit=0 clear_results blinking_distribution=None");
 
 for (j=0; j<10; j++) {
 
 run("PC-PALM Molecules", "run_mode=Simulation molecules="+molecules+
-    " simulation_size=16 blinking_rate=" + blinking + " average_precision=" + precision + 
+    " simulation_size=16 blinking_rate=" + blinking + " average_precision=" + precision +
     " image_size=1024 roi_size=4 nm_per_pixel_limit=0 " + options +
     " cluster_number="+cluster_number+" cluster_variation="+cluster_variation+
     " cluster_radius="+cluster_radius);
@@ -82,7 +82,7 @@ for (y=0; y<h && i<samples; y+=size, i++) {
     selectWindow("Molecule Simulation Binary Image (low res)");
     makeRectangle(x, y, size, size);
     run("PC-PALM Analysis", "correlation_distance="+correlation_distance+
-        " blinking_rate=" + blinking + " nm_per_pixel=" + nm_per_pixel + 
+        " blinking_rate=" + blinking + " nm_per_pixel=" + nm_per_pixel +
         " show_error_bars apply_window correlation_interval="+ correlationInterval);
     datasets += "r_" + r + "=[" + 2*r + "*:] ";
     r++;
@@ -90,9 +90,9 @@ for (y=0; y<h && i<samples; y+=size, i++) {
 
 } // End j loop
 
-run("PC-PALM Fitting", "input=[Select PC-PALM Analysis results] " + datasets + 
-    " estimated_precision=" + precision + 
-    " blinking_rate=" + blinking + " show_error_bars fit_clustered_models" + 
+run("PC-PALM Fitting", "input=[Select PC-PALM Analysis results] " + datasets +
+    " estimated_precision=" + precision +
+    " blinking_rate=" + blinking + " show_error_bars fit_clustered_models" +
     " fit_above_estimated_precision=1 fitting_tolerance=50 gr_random_threshold=1.50" +
-    " save_correlation_curve output_correlation_file=[" + curve_file+"]"); 
+    " save_correlation_curve output_correlation_file=[" + curve_file+"]");
 
