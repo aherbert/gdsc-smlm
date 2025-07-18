@@ -47,14 +47,6 @@ Software for single molecule localisation microscopy (SMLM)
     <url>https://travis-ci.com/aherbert/gdsc-smlm</url>
   </ciManagement>
   <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
     <site>
       <id>${project.artifactId}-site</id>
       <url>file://${parent.dir}/mvn-repo</url>
@@ -68,8 +60,9 @@ Software for single molecule localisation microscopy (SMLM)
   </mailingLists>
   <repositories>
     <repository>
-      <id>snapshots-repo</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <name>Central Portal Snapshots</name>
+      <id>central-portal-snapshots</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
       <releases>
         <enabled>false</enabled>
       </releases>
