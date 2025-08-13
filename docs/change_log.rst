@@ -9,13 +9,19 @@ Version 2.1
 
 Minor release of GDSC SMLM.
 
+* Update to GDSC Core 2.3.
+* Update the tracing algorithm used by the :numref:`{name} <analysis_plugins:Trace Diffusion>`
+  plugin to allow weighted fitting where each trace contributes equally to the fit irrespective
+  of the trace length. This reduces bias introduced by long lasting immobile molecules (more jumps)
+  and short lasting fast diffusing molecules (fewer jumps).
+
 
 Version 2.0
 -----------
 
 Major release of GDSC SMLM.
 
-* Update to GDSC Core 2.2
+* Update to GDSC Core 2.2.
 * Update the :numref:`{name} <analysis_plugins:Residence Time Analysis>` plugin to allow
   filtering of the counts histogram to remove long residence times.
 * Update the tracing algorithm used by the :numref:`{name} <analysis_plugins:Trace Molecules>`
@@ -50,7 +56,7 @@ Version 1.1
 
 Minor release of GDSC SMLM.
 
-* Update to GDSC Core 2.1
+* Update to GDSC Core 2.1.
 * Fix the :numref:`{name} <analysis_plugins:Trace Diffusion>` plugin to use descending diffusion
   coefficients for multi-population models. This corrects selection of the model using the minimum
   relative difference between successive coefficients.
@@ -74,7 +80,7 @@ Version 1.0.2
 
 Patch release of GDSC SMLM.
 
-* Update to GDSC Core 2.0.2
+* Update to GDSC Core 2.0.2.
 
 
 Version 1.0.1

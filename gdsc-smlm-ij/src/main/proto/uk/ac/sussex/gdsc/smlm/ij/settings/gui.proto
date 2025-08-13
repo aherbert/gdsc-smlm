@@ -239,6 +239,7 @@ message ClusteringSettings {
   bool precision_correction = 30;
   bool msd_correction = 31;
   bool mle = 32;
+  bool weighted_fitting = 46;
   int32 fit_length = 33;
   int32 fit_restarts = 34;
   int32 jump_distance = 35;

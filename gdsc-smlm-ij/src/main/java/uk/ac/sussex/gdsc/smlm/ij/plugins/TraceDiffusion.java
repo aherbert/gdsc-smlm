@@ -28,6 +28,7 @@ import ij.IJ;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.TextField;
@@ -255,16 +256,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     final ArrayList<MemoryPeakResults> allResults = new ArrayList<>();
 
     // Option to pick multiple input datasets together using a list box.
-    if ("multi".equals(arg) && !showMultiDialog(allResults)) {
-      return;
-    }
+    
 
     // This shows the dialog for selecting trace options
-    if (!showTraceDialog(allResults)) {
-      return;
-    }
-
-    if (allResults.isEmpty()) {
+    if (("multi".equals(arg) && !showMultiDialog(allResults)) || !showTraceDialog(allResults) || allResults.isEmpty()) {
       return;
     }
 
@@ -339,6 +334,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
       // Store all the jump distances at the specified interval
       final StoredDataStatistics jumpDistances = new StoredDataStatistics();
+      // Store the number of jumps for each trace
+      final IntArrayList jumpCount = new IntArrayList();
       final int jumpDistanceInterval = clusteringSettings.getJumpDistance();
 
       // Compute squared distances
@@ -346,6 +343,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       final StoredDataStatistics msdPerMoleculeAdjacent = new StoredDataStatistics();
       for (final Trace trace : traces) {
         final PeakResultStoreList results = trace.getPoints();
+        final int initialJumpDistanceSize = jumpDistances.size();
         // Sum the MSD and the time
         final int traceLength =
             (clusteringSettings.getTruncate()) ? clusteringSettings.getMinimumTraceLength()
@@ -410,6 +408,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
             stats[t].add(sumDistance[t]);
           }
         }
+
+        // Count jumps from this trace
+        jumpCount.add(jumpDistances.size() - initialJumpDistanceSize);
 
         // Fix this for the precision and MSD adjustment.
         // It may be necessary to:
@@ -493,9 +494,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         saveStatistics(jumpDistances, "Jump Distance", "Distance (um^2)", false);
       }
 
-      // Calculate the cumulative jump-distance histogram
+      // Calculate the cumulative jump-distance histogram.
+      // Optionally use a weighted cumulative histogram.
+      final int[] counts = clusteringSettings.getWeightedFitting() ? jumpCount.toIntArray() : null;
       final double[][] jdHistogram =
-          JumpDistanceAnalysis.cumulativeHistogram(jumpDistances.getValues());
+          JumpDistanceAnalysis.cumulativeHistogram(jumpDistances.getValues(), counts);
 
       // Always show the jump distance histogram
       jdTitle = TITLE + " Jump Distance";
@@ -505,7 +508,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
       // Fit Jump Distance cumulative probability
       numberOfDataPoints = jumpDistances.getN();
-      jdParams = fitJumpDistance(jumpDistances, jdHistogram);
+      jdParams = fitJumpDistance(jumpDistances, counts, jdHistogram);
       JUMP_DISTANCE_PARAMETERS_REF.set(jdParams);
     }
 
@@ -876,8 +879,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         .append(clusteringSettings.getFitLength()).append('\t')
         .append(clusteringSettings.getMsdCorrection()).append('\t')
         .append(clusteringSettings.getPrecisionCorrection()).append('\t')
-        .append(clusteringSettings.getMle()).append('\t').append(traces.length).append('\t')
-        .append(MathUtils.rounded(precision, 4)).append('\t');
+        .append(clusteringSettings.getMle()).append('\t')
+        .append(clusteringSettings.getWeightedFitting()).append('\t').append(traces.length)
+        .append('\t').append(MathUtils.rounded(precision, 4)).append('\t');
     double diffCoeff = 0; // D
     double precision = 0;
     if (fitMsdResult != null) {
@@ -981,7 +985,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     final StringBuilder sb =
         new StringBuilder("Title\tDataset\tExposure time (ms)\tTrace settings\t"
             + "Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length"
-            + "\tMSD corr.\ts corr.\tMLE\tTraces\ts (nm)\tD (um^2/s)\tfit s (nm)"
+            + "\tMSD corr.\ts corr.\tMLE\tWeighted\tTraces\ts (nm)\tD (um^2/s)\tfit s (nm)"
             + "\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions\tFit Score");
     for (int i = 0; i < Settings.NAMES.length; i++) {
       sb.append('\t').append(Settings.NAMES[i]);
@@ -1294,6 +1298,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     gd.addCheckbox("MSD_correction", clusteringSettings.getMsdCorrection());
     gd.addCheckbox("Precision_correction", clusteringSettings.getPrecisionCorrection());
     gd.addCheckbox("Maximum_likelihood", clusteringSettings.getMle());
+    gd.addCheckbox("Weighted_fitting", clusteringSettings.getWeightedFitting());
     gd.addSlider("MLE_significance_level", 0, 0.5, settings.significanceLevel);
     gd.addSlider("Fit_restarts", 0, 10, clusteringSettings.getFitRestarts());
     gd.addSlider("Jump_distance", 1, 20, clusteringSettings.getJumpDistance());
@@ -1322,6 +1327,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     clusteringSettings.setMsdCorrection(gd.getNextBoolean());
     clusteringSettings.setPrecisionCorrection(gd.getNextBoolean());
     clusteringSettings.setMle(gd.getNextBoolean());
+    clusteringSettings.setWeightedFitting(gd.getNextBoolean());
     settings.significanceLevel = Math.abs(gd.getNextNumber());
     clusteringSettings.setFitRestarts((int) Math.abs(gd.getNextNumber()));
     clusteringSettings.setJumpDistance((int) Math.abs(gd.getNextNumber()));
@@ -1935,11 +1941,17 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    *
    * <p>Update the plot by adding the fit line(s).
    *
+   * <p>The counts are the number of consecutive jumps to group together with equal weights to
+   * perform weighted fitting.
+   *
    * @param jumpDistances (in um^2)
+   * @param counts the counts
    * @param jdHistogram the jump distance histogram
    * @return The fitted coefficients and fractions
    */
-  private double[][] fitJumpDistance(StoredDataStatistics jumpDistances, double[][] jdHistogram) {
+  private double[][] fitJumpDistance(StoredDataStatistics jumpDistances, int[] counts,
+      double[][] jdHistogram) {
+    // Parameter estimation does not account for weights using the counts
     final double msd = jumpDistances.getMean();
     final double meanDistance = Math.sqrt(msd) * 1e3;
     // TODO:
@@ -1986,10 +1998,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     jd.setMsdCorrection(clusteringSettings.getMsdCorrection());
 
     double[][] fit;
+    final int[] c = clusteringSettings.getWeightedFitting() ? counts : null;
     if (clusteringSettings.getMle()) {
-      fit = jd.fitJumpDistancesMle(jumpDistances.getValues(), jdHistogram);
+      fit = jd.fitJumpDistancesMle(jumpDistances.getValues(), c, jdHistogram);
     } else {
-      fit = jd.fitJumpDistanceHistogram(jumpDistances.getMean(), jdHistogram);
+      fit = jd.fitJumpDistanceHistogram(msd, jdHistogram);
     }
 
     // Get the raw fitted D and convert it to a calibrated D*
@@ -2183,12 +2196,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       }
     }
 
-    if (allResults.isEmpty()) {
-      return false;
-    }
-
     // Check calibration exists for the first set of results
-    if (!checkCalibration(allResults.get(0))) {
+    if (allResults.isEmpty() || !checkCalibration(allResults.get(0))) {
       return false;
     }
 

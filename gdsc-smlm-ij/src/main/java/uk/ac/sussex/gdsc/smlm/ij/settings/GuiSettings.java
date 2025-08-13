@@ -246,6 +246,7 @@ public final class GuiSettings {
       builder.setPrecisionCorrection(true);
       builder.setMsdCorrection(true);
       builder.setMle(true);
+      builder.setWeightedFitting(true);
       builder.setFitLength(6);
       builder.setFitRestarts(1);
       builder.setJumpDistance(1);

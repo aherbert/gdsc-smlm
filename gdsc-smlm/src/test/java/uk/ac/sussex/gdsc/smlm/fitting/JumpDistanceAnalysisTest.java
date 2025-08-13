@@ -40,11 +40,14 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
+import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.WeightedJumpDistanceFunction;
+import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.WeightedMixedJumpDistanceFunction;
 import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -100,6 +103,17 @@ class JumpDistanceAnalysisTest {
   // For proteins with mass 823 and 347 kDa the
   // difference using predicted diffusion coefficients is 3:1
   static final double[] D = new double[] {3, 1};
+
+  @Test
+  void testCumulativeHistogram() {
+    final double[] values = {1, 3, 2, 4};
+    Assertions.assertArrayEquals(new double[][] {{1, 2, 3, 4}, {0.25, 0.5, 0.75, 1}},
+        JumpDistanceAnalysis.cumulativeHistogram(values, null));
+    Assertions.assertArrayEquals(new double[][] {{1, 2, 3, 4}, {1.0 / 3, 0.5, 5.0 / 6, 1}},
+        JumpDistanceAnalysis.cumulativeHistogram(values, new int[] {1, 1, 2}));
+    Assertions.assertArrayEquals(new double[][] {{1, 2, 3, 4}, {1.0 / 3, 0.5, 2.0 / 3, 1}},
+        JumpDistanceAnalysis.cumulativeHistogram(values, new int[] {1, 2, 1}));
+  }
 
   @Disabled("Commented out as this test always passes")
   @Test
@@ -169,6 +183,46 @@ class JumpDistanceAnalysisTest {
               FormatSupplier.getSupplier("Failed to integrate: x=%g", x));
         }
       }
+    }
+  }
+
+  @SeededTest
+  void canWeightJumpDistanceFunction(RandomSeed seed) {
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
+    final double estimatedD = 1;
+    final double[] x = createData(rg, 1000, new double[] {estimatedD}, new double[] {1});
+    final int[] counts = SimpleArrayUtils.newIntArray(x.length, 1);
+    final JumpDistanceFunction f1 = new JumpDistanceFunction(x, estimatedD);
+    final WeightedJumpDistanceFunction f2 = new WeightedJumpDistanceFunction(x, counts, estimatedD);
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-14, 0);
+    for (final double d : new double[] {estimatedD / 2, estimatedD, estimatedD * 2}) {
+      final double e = f1.value(new double[] {d});
+      final double o = f2.value(new double[] {d});
+      TestAssertions.assertTest(e, o, test, () -> "D=" + d);
+    }
+  }
+
+  @SeededTest
+  void canWeightMixedJumpDistanceFunction(RandomSeed seed) {
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
+    final double[] estimatedD = {1, 0.5};
+    final double[] fraction = {0.7, 0.3};
+    final int n = estimatedD.length;
+    final double[] x = createData(rg, 1000, estimatedD, fraction);
+    final int[] counts = SimpleArrayUtils.newIntArray(x.length, 1);
+    final MixedJumpDistanceFunction f1 = new MixedJumpDistanceFunction(x, estimatedD[0], n);
+    final WeightedMixedJumpDistanceFunction f2 =
+        new WeightedMixedJumpDistanceFunction(x, counts, estimatedD[0], n);
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-15, 0);
+    for (final double scale : new double[] {0.5, 1, 2}) {
+      final double[] params = new double[estimatedD.length * 2];
+      for (int i = 0; i < n; i++) {
+        params[2 * i] = estimatedD[i] * scale;
+        params[2 * i + 1] = fraction[i];
+      }
+      final double e = f1.value(params);
+      final double o = f2.value(params);
+      TestAssertions.assertTest(e, o, test, () -> "params=" + Arrays.toString(params));
     }
   }
 
@@ -534,7 +588,7 @@ class JumpDistanceAnalysisTest {
     return String.format("%.3f", value);
   }
 
-  class DataSample {
+  static class DataSample {
     double[] dc;
     double[] fraction;
     double[] sigma;
@@ -602,8 +656,8 @@ class JumpDistanceAnalysisTest {
           for (int i = 0; i < data.length; i++) {
             sample[i] = pick(c, random.nextDouble());
           }
+          Arrays.sort(sample);
         }
-        Arrays.sort(sample);
 
         for (int i = 0; i < data.length; i++) {
           // Pick the population using the fraction
@@ -646,10 +700,7 @@ class JumpDistanceAnalysisTest {
         return false;
       }
       for (int i = dc.length; i-- > 0;) {
-        if (that.dc[i] != this.dc[i]) {
-          return false;
-        }
-        if (that.fraction[i] != this.fraction[i]) {
+        if ((that.dc[i] != this.dc[i]) || (that.fraction[i] != this.fraction[i])) {
           return false;
         }
       }

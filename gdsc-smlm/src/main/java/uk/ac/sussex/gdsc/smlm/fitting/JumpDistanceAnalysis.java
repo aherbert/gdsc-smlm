@@ -49,6 +49,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -166,7 +167,7 @@ public class JumpDistanceAnalysis {
     if (meanJumpDistance == 0) {
       return null;
     }
-    final double[][] jdHistogram = cumulativeHistogram(jumpDistances);
+    final double[][] jdHistogram = cumulativeHistogram(jumpDistances, null);
     return fitJumpDistanceHistogram(meanJumpDistance, jdHistogram);
   }
 
@@ -188,7 +189,7 @@ public class JumpDistanceAnalysis {
     if (meanJumpDistance == 0) {
       return null;
     }
-    final double[][] jdHistogram = cumulativeHistogram(jumpDistances);
+    final double[][] jdHistogram = cumulativeHistogram(jumpDistances, null);
     return fitJumpDistanceHistogram(meanJumpDistance, jdHistogram, numberOfSpecies);
   }
 
@@ -645,11 +646,42 @@ public class JumpDistanceAnalysis {
    *
    * @param jumpDistances The jump distances (in um^2)
    * @param jdHistogram The jump distance histogram for the given distances. If null will be
-   *        computed using {@link #cumulativeHistogram(double[])}. Only used if the CurveLogger is
-   *        not null.
+   *        computed using {@link #cumulativeHistogram(double[], int[])}. Only used if the
+   *        CurveLogger is not null.
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
   public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances, double[][] jdHistogram) {
+    return fitJumpDistancesMle(jumpDistances, null, jdHistogram);
+  }
+
+  /**
+   * Fit the jump distances using a maximum likelihood estimation.
+   *
+   * <p>The data is fit repeatedly using a mixed population model with increasing number of
+   * different molecules. Results are sorted by the diffusion coefficient ascending. This process is
+   * stopped when: the log-likelihood ratio does not improve; the fraction of one of the populations
+   * is below the min fraction; the difference between two consecutive diffusion coefficients is
+   * below the min difference; more than one population is below min D.
+   *
+   * <p>The number of populations must be obtained from the size of the D/fractions arrays.
+   *
+   * <p>The optional counts are the number of consecutive jumps to group together with equal weights
+   * to perform weighted estimation. The sum of the counts must equal the length of the values
+   * array. Each group of jumps has the likelihood computed for the group as the weighted sum of
+   * likelihoods of each jump. This reduces the number of observations to the number of groups.
+   *
+   * @param jumpDistances The jump distances (in um^2)
+   * @param counts the counts (can be null)
+   * @param jdHistogram The jump distance histogram for the given distances. If null will be
+   *        computed using {@link #cumulativeHistogram(double[], int[])}. Only used if the
+   *        CurveLogger is not null.
+   * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
+   * @throws IllegalArgumentException if any count is less than 1; or the total count does not equal
+   *         the values length
+   */
+  public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances, int[] counts,
+      double[][] jdHistogram) {
+    checkCounts(jumpDistances, counts);
     resetFitResult();
     if (jumpDistances == null || jumpDistances.length == 0) {
       return null;
@@ -665,7 +697,7 @@ public class JumpDistanceAnalysis {
 
     // Used for saving fitted the curve
     if (curveLogger != null && jdHistogram == null) {
-      jdHistogram = cumulativeHistogram(jumpDistances);
+      jdHistogram = cumulativeHistogram(jumpDistances, null);
     }
 
     // When performing MLE we can use the Log-Likelihood Ratio (LLR) to do a significance
@@ -679,7 +711,7 @@ public class JumpDistanceAnalysis {
     int best = -1;
 
     if (minN == 1) {
-      final double[][] fit = doFitJumpDistancesMle(jumpDistances, estimatedD, 1);
+      final double[][] fit = doFitJumpDistancesMle(jumpDistances, counts, estimatedD, 1);
       if (fit != null) {
         coefficients[0] = fit[0];
         fractions[0] = fit[1];
@@ -694,7 +726,7 @@ public class JumpDistanceAnalysis {
     // Vary n from 2 to N. Stop when the fit fails or the fit is worse.
     int bestMulti = -1;
     for (int n = Math.max(1, minN - 1); n < maxN; n++) {
-      final double[][] fit = doFitJumpDistancesMle(jumpDistances, estimatedD, n + 1);
+      final double[][] fit = doFitJumpDistancesMle(jumpDistances, counts, estimatedD, n + 1);
       if (fit == null) {
         break;
       }
@@ -774,13 +806,39 @@ public class JumpDistanceAnalysis {
    *
    * @param jumpDistances The jump distances (in um^2)
    * @param jdHistogram The jump distance histogram for the given distances. If null will be
-   *        computed using {@link #cumulativeHistogram(double[])}. Only used if the CurveLogger is
-   *        not null.
+   *        computed using {@link #cumulativeHistogram(double[], int[])}. Only used if the
+   *        CurveLogger is not null.
    * @param n The number of species in the mixed population
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
   public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances, double[][] jdHistogram,
       int n) {
+    return fitJumpDistancesMle(jumpDistances, null, jdHistogram, n);
+  }
+
+  /**
+   * Fit the jump distances using a maximum likelihood estimation with the given number of species.
+   *
+   * <p>Results are sorted by the diffusion coefficient ascending.
+   *
+   * <p>The optional counts are the number of consecutive jumps to group together with equal weights
+   * to perform weighted estimation. The sum of the counts must equal the length of the values
+   * array. Each group of jumps has the likelihood computed for the group as the weighted sum of
+   * likelihoods of each jump. This reduces the number of observations to the number of groups.
+   *
+   * @param jumpDistances The jump distances (in um^2)
+   * @param counts the counts (can be null)
+   * @param jdHistogram The jump distance histogram for the given distances. If null will be
+   *        computed using {@link #cumulativeHistogram(double[], int[])}. Only used if the
+   *        CurveLogger is not null.
+   * @param n The number of species in the mixed population
+   * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
+   * @throws IllegalArgumentException if any count is less than 1; or the total count does not equal
+   *         the values length
+   */
+  public @Nullable double[][] fitJumpDistancesMle(double[] jumpDistances, int[] counts,
+      double[][] jdHistogram, int n) {
+    checkCounts(jumpDistances, counts);
     resetFitResult();
     if (jumpDistances == null || jumpDistances.length == 0) {
       return null;
@@ -796,10 +854,10 @@ public class JumpDistanceAnalysis {
 
     // Used for saving fitted the curve
     if (curveLogger != null && jdHistogram == null) {
-      jdHistogram = cumulativeHistogram(jumpDistances);
+      jdHistogram = cumulativeHistogram(jumpDistances, null);
     }
 
-    final double[][] fit = doFitJumpDistancesMle(jumpDistances, estimatedD, n);
+    final double[][] fit = doFitJumpDistancesMle(jumpDistances, counts, estimatedD, n);
     if (fit != null) {
       saveFitCurve(fit, jdHistogram);
     }
@@ -812,24 +870,28 @@ public class JumpDistanceAnalysis {
    * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param jumpDistances The jump distances (in um^2)
+   * @param counts the counts (can be null)
    * @param estimatedD The estimated diffusion coefficient
    * @param n The number of species in the mixed population
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
-  private @Nullable double[][] doFitJumpDistancesMle(double[] jumpDistances, double estimatedD,
-      int n) {
+  private @Nullable double[][] doFitJumpDistancesMle(double[] jumpDistances, int[] counts,
+      double estimatedD, int n) {
     final MaxEval maxEval = new MaxEval(20000);
     final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
     calibrated = isCalibrated();
 
     if (n == 1) {
       try {
-        final JumpDistanceFunction function = new JumpDistanceFunction(jumpDistances, estimatedD);
+        final Function function =
+            counts != null ? new WeightedJumpDistanceFunction(jumpDistances, counts, estimatedD)
+                : new JumpDistanceFunction(jumpDistances, estimatedD);
         // The Powell algorithm can use more general bounds: 0 - Infinity
         final SimpleBounds bounds = new SimpleBounds(function.getLowerBounds(),
             function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
         final PointValuePair solution = powellOptimizer.optimize(maxEval,
-            new ObjectiveFunction(function), new InitialGuess(function.guess()), bounds,
+            new ObjectiveFunction((MultivariateFunction) function),
+            new InitialGuess(function.guess()), bounds,
             new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
 
         final double[] fitParams = solution.getPointRef();
@@ -860,8 +922,9 @@ public class JumpDistanceAnalysis {
       return null;
     }
 
-    final MixedJumpDistanceFunction function =
-        new MixedJumpDistanceFunction(jumpDistances, estimatedD, n);
+    final Function function =
+        counts != null ? new WeightedMixedJumpDistanceFunction(jumpDistances, counts, estimatedD, n)
+            : new MixedJumpDistanceFunction(jumpDistances, estimatedD, n);
 
     final double[] lB = function.getLowerBounds();
 
@@ -870,11 +933,12 @@ public class JumpDistanceAnalysis {
 
     try {
       // The Powell algorithm can use more general bounds: 0 - Infinity
-      constrainedSolution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function),
-          new InitialGuess(function.guess()),
-          new SimpleBounds(lB,
-              function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
-          new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
+      constrainedSolution =
+          powellOptimizer.optimize(maxEval, new ObjectiveFunction((MultivariateFunction) function),
+              new InitialGuess(function.guess()),
+              new SimpleBounds(lB,
+                  function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
+              new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
 
       evaluations = powellOptimizer.getEvaluations();
       LoggerUtils.log(logger, Level.FINE, "Powell optimiser fit (N=%d) : MLE = %f (%d evaluations)",
@@ -918,9 +982,10 @@ public class JumpDistanceAnalysis {
       for (int i = 0; i <= fitRestarts; i++) {
         // Try from the initial guess
         try {
-          final PointValuePair solution = cmaesOptimizer.optimize(
-              new InitialGuess(function.guess()), new ObjectiveFunction(function),
-              GoalType.MAXIMIZE, bounds, sigma, popSize, maxEval);
+          final PointValuePair solution =
+              cmaesOptimizer.optimize(new InitialGuess(function.guess()),
+                  new ObjectiveFunction((MultivariateFunction) function), GoalType.MAXIMIZE, bounds,
+                  sigma, popSize, maxEval);
           if (constrainedSolution == null || solution.getValue() > constrainedSolution.getValue()) {
             evaluations = cmaesOptimizer.getEvaluations();
             constrainedSolution = solution;
@@ -938,9 +1003,10 @@ public class JumpDistanceAnalysis {
 
         // Try from the current optimum
         try {
-          final PointValuePair solution = cmaesOptimizer.optimize(
-              new InitialGuess(constrainedSolution.getPointRef()), new ObjectiveFunction(function),
-              GoalType.MAXIMIZE, bounds, sigma, popSize, maxEval);
+          final PointValuePair solution =
+              cmaesOptimizer.optimize(new InitialGuess(constrainedSolution.getPointRef()),
+                  new ObjectiveFunction((MultivariateFunction) function), GoalType.MAXIMIZE, bounds,
+                  sigma, popSize, maxEval);
           if (solution.getValue() > constrainedSolution.getValue()) {
             evaluations = cmaesOptimizer.getEvaluations();
             constrainedSolution = solution;
@@ -957,7 +1023,8 @@ public class JumpDistanceAnalysis {
         try {
           // Re-optimise with Powell?
           final PointValuePair solution = powellOptimizer.optimize(maxEval,
-              new ObjectiveFunction(function), new InitialGuess(constrainedSolution.getPointRef()),
+              new ObjectiveFunction((MultivariateFunction) function),
+              new InitialGuess(constrainedSolution.getPointRef()),
               new SimpleBounds(lB,
                   function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
               new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
@@ -1319,30 +1386,31 @@ public class JumpDistanceAnalysis {
 
     @Override
     public double evaluate(double x, double[] params) {
-      // Compute the probability:
-      // p = 1/4D * exp(-x/4D)
-      // final double fourD = 4 * getD(params[0]);
-      final double fourD = 4 * params[0];
-      return StdMath.exp(-x / fourD) / fourD;
+      throw new NotImplementedException();
+      // // Compute the probability:
+      // // p = 1/4D * exp(-x/4D)
+      // // final double fourD = 4 * getD(params[0]);
+      // final double fourD = 4 * params[0];
+      // return StdMath.exp(-x / fourD) / fourD;
     }
 
-    /**
-     * Evaluate all.
-     *
-     * @param params the params
-     * @return the values
-     */
-    public double[] evaluateAll(double[] params) {
-      // Compute the probability:
-      // p = 1/4D * exp(-x/4D)
-      final double[] values = new double[x.length];
-      // final double oneDivFourD = 1 / (4 * getD(params[0]));
-      final double oneDivFourD = 1 / (4 * params[0]);
-      for (int i = 0; i < values.length; i++) {
-        values[i] = oneDivFourD * StdMath.exp(-x[i] * oneDivFourD);
-      }
-      return values;
-    }
+    // /**
+    // * Evaluate all.
+    // *
+    // * @param params the params
+    // * @return the values
+    // */
+    // public double[] evaluateAll(double[] params) {
+    // // Compute the probability:
+    // // p = 1/4D * exp(-x/4D)
+    // final double[] values = new double[x.length];
+    // // final double oneDivFourD = 1 / (4 * getD(params[0]));
+    // final double oneDivFourD = 1 / (4 * params[0]);
+    // for (int i = 0; i < values.length; i++) {
+    // values[i] = oneDivFourD * StdMath.exp(-x[i] * oneDivFourD);
+    // }
+    // return values;
+    // }
 
     @Override
     public double value(double[] variables) {
@@ -1402,6 +1470,56 @@ public class JumpDistanceAnalysis {
     //
     // return jacobian;
     // }
+  }
+
+  /**
+   * Compute the probability of mean-squared distance x given a diffusion coefficient.
+   *
+   * <p>Function used for maximum likelihood fitting.
+   */
+  // TODO: Test this is the same as the JumpDistanceFunction when all counts are 1
+  static class WeightedJumpDistanceFunction extends Function implements MultivariateFunction {
+    private final int[] counts;
+
+    /**
+     * Instantiates a new jump distance function.
+     *
+     * @param x the x
+     * @param counts the counts
+     * @param estimatedD the estimated D
+     */
+    public WeightedJumpDistanceFunction(double[] x, int[] counts, double estimatedD) {
+      super(x, null, estimatedD, 1);
+      this.counts = counts;
+    }
+
+    @Override
+    public double evaluate(double x, double[] params) {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public double value(double[] variables) {
+      // Compute the likelihood for each group of size n:
+      // p = 1/n * sum { 1/4D * exp(-x/4D) }
+
+      double ll = 0;
+      // final double oneDivFourD = 1 / (4 * getD(variables[0]));
+      final double oneDivFourD = 1 / (4 * variables[0]);
+      int to = 0;
+      for (final int n : counts) {
+        final int from = to;
+        to += n;
+        double p = 0;
+        for (int i = from; i < to; i++) {
+          p += StdMath.exp(-x[i] * oneDivFourD);
+        }
+        ll += Math.log(p * oneDivFourD / n);
+      }
+      // Debug the call from the optimiser
+      // System.out.printf("[1] : [%f] = %f\n", variables[0], ll);
+      return ll;
+    }
   }
 
   /**
@@ -1494,17 +1612,18 @@ public class JumpDistanceAnalysis {
 
     @Override
     double evaluate(double x, double[] params) {
-      // Compute the probability:
-      // p = sum [ Fj/4Dj * exp(-x/4Dj) ]
-      double sum = 0;
-      double total = 0;
-      for (int i = 0; i < numberOfFractions; i++) {
-        final double f = params[i * 2];
-        final double fourD = 4 * params[i * 2 + 1];
-        sum += (f / fourD) * StdMath.exp(-x / fourD);
-        total += f;
-      }
-      return MathUtils.div0(sum, total);
+      throw new NotImplementedException();
+      // // Compute the probability:
+      // // p = sum [ Fj/4Dj * exp(-x/4Dj) ]
+      // double sum = 0;
+      // double total = 0;
+      // for (int i = 0; i < numberOfFractions; i++) {
+      // final double f = params[i * 2];
+      // final double fourD = 4 * params[i * 2 + 1];
+      // sum += (f / fourD) * StdMath.exp(-x / fourD);
+      // total += f;
+      // }
+      // return MathUtils.div0(sum, total);
     }
 
     /**
@@ -1538,6 +1657,95 @@ public class JumpDistanceAnalysis {
           sum += fOver4D[j] * StdMath.exp(-x[i] / fourD[j]);
         }
         values[i] = sum;
+      }
+      return values;
+    }
+
+    @Override
+    public double value(double[] params) {
+      // Compute the log-likelihood
+      double ll = 0;
+      for (final double p : evaluateAll(params)) {
+        ll += Math.log(p);
+      }
+      // Debug the call from the optimiser
+      // final double[] f = new double[numberOfFractions];
+      // final double[] d = new double[numberOfFractions];
+      // for (int i = 0; i < numberOfFractions; i++) {
+      // f[i] = params[i * 2];
+      // d[i] = params[i * 2 + 1];
+      // }
+      // System.out.printf("%s : %s = %f\n", Arrays.toString(f), Arrays.toString(d), ll);
+      return ll;
+    }
+  }
+
+  /**
+   * Compute the probability of mean-squared distance x given a mixed population with set fractions
+   * and diffusion coefficients.
+   *
+   * <p>Function used for maximum likelihood fitting.
+   */
+  // TODO: Test this is the same as the MixedJumpDistanceFunction when all counts are 1
+  static class WeightedMixedJumpDistanceFunction extends Function implements MultivariateFunction {
+    private final int[] counts;
+
+    /**
+     * Instantiates a new mixed jump distance function.
+     *
+     * @param x the x
+     * @param counts the counts
+     * @param estimatedD the estimated D
+     * @param n the n
+     */
+    WeightedMixedJumpDistanceFunction(double[] x, int[] counts, double estimatedD, int n) {
+      super(x, null, estimatedD, n);
+      this.counts = counts;
+    }
+
+    @Override
+    double evaluate(double x, double[] params) {
+      throw new NotImplementedException();
+    }
+
+    /**
+     * Evaluate all.
+     *
+     * @param params the params
+     * @return the values
+     */
+    double[] evaluateAll(double[] params) {
+      // First sum the fractions
+      double total = 0;
+      final double[] fOver4D = new double[numberOfFractions];
+      for (int i = 0; i < numberOfFractions; i++) {
+        fOver4D[i] = params[i * 2];
+        total += fOver4D[i];
+      }
+
+      // Normalise the fractions to 1
+      final double[] fourD = new double[numberOfFractions];
+      for (int i = 0; i < numberOfFractions; i++) {
+        fourD[i] = 4 * params[i * 2 + 1];
+        fOver4D[i] = (fOver4D[i] / total) / fourD[i];
+      }
+
+      // Compute the probability for one jump:
+      // p = sum [ Fj/4Dj * exp(-x/4Dj) ]
+      // Compute the likelihood for the group as the sum of p divided by n
+      final double[] values = new double[counts.length];
+      int c = 0;
+      int to = 0;
+      for (final int n : counts) {
+        final int from = to;
+        to += n;
+        double p = 0;
+        for (int i = from; i < to; i++) {
+          for (int j = 0; j < numberOfFractions; j++) {
+            p += fOver4D[j] * StdMath.exp(-x[i] / fourD[j]);
+          }
+        }
+        values[c++] = p / n;
       }
       return values;
     }
@@ -1901,6 +2109,70 @@ public class JumpDistanceAnalysis {
   }
 
   /**
+   * Get the cumulative jump distance histogram given a set of jump distance values.
+   *
+   * <p>The optional counts are the number of consecutive jumps to group together with equal weights
+   * to create a weighted cumulative histogram. The sum of the counts must equal the length of the
+   * values array. For example with five distances the counts of {2, 3} would generate weights of
+   * {1/2, 1/2, 1/3, 1/3, 1/3}.
+   *
+   * <p>If the counts are {@code null} this returns the result of
+   * {@link #cumulativeHistogram(double[])}.
+   *
+   * @param values The jump distances
+   * @param counts the counts (can be null)
+   * @return The JD cumulative histogram as two arrays: { MSD, CumulativeProbability }
+   * @throws IllegalArgumentException if any count is less than 1; or the total count does not equal
+   *         the values length
+   */
+  public static double[][] cumulativeHistogram(double[] values, int[] counts) {
+    if (counts == null) {
+      return MathUtils.cumulativeHistogram(values, true);
+    }
+    checkCounts(values, counts);
+    final double[] weights = new double[values.length];
+    int to = 0;
+    for (final int c : counts) {
+      final int from = to;
+      to += c;
+      final double w = 1.0 / c;
+      for (int i = from; i < to; i++) {
+        weights[i] = w;
+      }
+    }
+    return MathUtils.cumulativeHistogram(values, weights, true);
+  }
+
+  /**
+   * Check the sum of the counts equals the number of values.
+   *
+   * @param values The jump distances
+   * @param counts the counts (can be null)
+   * @throws IllegalArgumentException if any count is less than 1; or the total count does not equal
+   *         the values length
+   */
+  private static void checkCounts(double[] values, int[] counts) {
+    if (counts == null) {
+      return;
+    }
+    int sum = 0;
+    for (final int c : counts) {
+      if (c < 1) {
+        throw new IllegalArgumentException("Invalid count: " + c);
+      }
+      sum += c;
+      // Overflow safe range check
+      if (sum - values.length > 0) {
+        throw new IllegalArgumentException("Total count exceeds values length " + values.length);
+      }
+    }
+    if (sum != values.length) {
+      throw new IllegalArgumentException(
+          String.format("Total count %d must match values length %d", sum, values.length));
+    }
+  }
+
+  /**
    * Gets the diffusion coefficient.
    *
    * @param dc the diffusion coefficient
@@ -2030,7 +2302,9 @@ public class JumpDistanceAnalysis {
    * be reduced by 1/3.
    *
    * <pre>
-   * {@code correctedFrames = n - 1/3}
+   * {@code
+   * correctedFrames = n - 1 / 3
+   * }
    * </pre>
    *
    * <p>Note this is only valid for {@code n>=1}.

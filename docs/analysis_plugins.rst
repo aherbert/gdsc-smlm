@@ -1157,6 +1157,9 @@ When all the datasets have been traced the plugin presents a second dialog to co
    * - Maximum likelihood
      - Perform jump distance fitting using maximum likelihood estimation (MLE). The default is sum-of-squared residuals (SS) fitting of the cumulative histogram of jump distances.
 
+   * - Weighted fitting
+     - Perform jump distance fitting using equal weights for each trace. This will use a weighted cumulative histogram, or compute maximum likelihood for each trace by summing weighted probabilities of each jump. This option will remove bias introduced by long traces by down weighting them; this is useful for non-moving long lived traces.
+
    * - MLE significance level
      - Sets the significance level. This is used when testing the log-likelihood ratio during maximum likelihood fitting that an increase in model parameters improves the model.
 
@@ -1324,6 +1327,9 @@ The plugin shows a summary table of the analysis results. This allows the plugin
 
    * - MLE
      - True if maximum likelihood fitting was used.
+
+   * - Weighted
+     - True if weighted fitting was used.
 
    * - Traces
      - The number of traces analysed.
