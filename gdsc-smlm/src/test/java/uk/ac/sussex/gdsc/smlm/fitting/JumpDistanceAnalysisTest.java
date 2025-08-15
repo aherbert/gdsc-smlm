@@ -187,13 +187,31 @@ class JumpDistanceAnalysisTest {
   }
 
   @SeededTest
-  void canWeightJumpDistanceFunction(RandomSeed seed) {
+  void canWeightJumpDistanceFunction1(RandomSeed seed) {
+    final int[] counts = SimpleArrayUtils.newIntArray(1000, 1);
+    assertWeightedJumpDistanceFunction(seed, counts);
+  }
+
+  @SeededTest
+  void canWeightJumpDistanceFunction2(RandomSeed seed) {
+    final int[] counts = SimpleArrayUtils.newIntArray(1000, 2);
+    assertWeightedJumpDistanceFunction(seed, counts);
+  }
+
+  @SeededTest
+  void canWeightJumpDistanceFunctionMixed(RandomSeed seed) {
+    final int[] counts = {1, 2, 3, 2, 1, 2, 2, 3, 2, 3, 4, 2, 6, 2, 1, 5};
+    assertWeightedJumpDistanceFunction(seed, counts);
+  }
+
+  private void assertWeightedJumpDistanceFunction(RandomSeed seed, int[] counts) {
     final UniformRandomProvider rg = RngFactory.create(seed.get());
     final double estimatedD = 1;
-    final double[] x = createData(rg, 1000, new double[] {estimatedD}, new double[] {1});
-    final int[] counts = SimpleArrayUtils.newIntArray(x.length, 1);
-    final JumpDistanceFunction f1 = new JumpDistanceFunction(x, estimatedD);
-    final WeightedJumpDistanceFunction f2 = new WeightedJumpDistanceFunction(x, counts, estimatedD);
+    final double[] x1 = createData(rg, counts.length, new double[] {estimatedD}, new double[] {1});
+    final double[] x2 = duplicateJumps(x1, counts);
+    final JumpDistanceFunction f1 = new JumpDistanceFunction(x1, estimatedD);
+    final WeightedJumpDistanceFunction f2 =
+        new WeightedJumpDistanceFunction(x2, counts, estimatedD);
     final DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-14, 0);
     for (final double d : new double[] {estimatedD / 2, estimatedD, estimatedD * 2}) {
       final double e = f1.value(new double[] {d});
@@ -203,16 +221,33 @@ class JumpDistanceAnalysisTest {
   }
 
   @SeededTest
-  void canWeightMixedJumpDistanceFunction(RandomSeed seed) {
+  void canWeightMixedJumpDistanceFunction1(RandomSeed seed) {
+    final int[] counts = SimpleArrayUtils.newIntArray(1000, 1);
+    assertWeightedMixedJumpDistanceFunction(seed, counts);
+  }
+
+  @SeededTest
+  void canWeightMixedJumpDistanceFunction2(RandomSeed seed) {
+    final int[] counts = SimpleArrayUtils.newIntArray(1000, 2);
+    assertWeightedMixedJumpDistanceFunction(seed, counts);
+  }
+
+  @SeededTest
+  void canWeightMixedJumpDistanceFunctionMixed(RandomSeed seed) {
+    final int[] counts = {1, 2, 3, 2, 1, 2, 2, 3, 2, 3, 4, 2, 6, 2, 1, 5};
+    assertWeightedMixedJumpDistanceFunction(seed, counts);
+  }
+
+  private void assertWeightedMixedJumpDistanceFunction(RandomSeed seed, int[] counts) {
     final UniformRandomProvider rg = RngFactory.create(seed.get());
     final double[] estimatedD = {1, 0.5};
     final double[] fraction = {0.7, 0.3};
     final int n = estimatedD.length;
-    final double[] x = createData(rg, 1000, estimatedD, fraction);
-    final int[] counts = SimpleArrayUtils.newIntArray(x.length, 1);
-    final MixedJumpDistanceFunction f1 = new MixedJumpDistanceFunction(x, estimatedD[0], n);
+    final double[] x1 = createData(rg, counts.length, estimatedD, fraction);
+    final double[] x2 = duplicateJumps(x1, counts);
+    final MixedJumpDistanceFunction f1 = new MixedJumpDistanceFunction(x1, estimatedD[0], n);
     final WeightedMixedJumpDistanceFunction f2 =
-        new WeightedMixedJumpDistanceFunction(x, counts, estimatedD[0], n);
+        new WeightedMixedJumpDistanceFunction(x2, counts, estimatedD[0], n);
     final DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-15, 0);
     for (final double scale : new double[] {0.5, 1, 2}) {
       final double[] params = new double[estimatedD.length * 2];
@@ -224,6 +259,20 @@ class JumpDistanceAnalysisTest {
       final double o = f2.value(params);
       TestAssertions.assertTest(e, o, test, () -> "params=" + Arrays.toString(params));
     }
+  }
+
+  private static double[] duplicateJumps(double[] x1, int[] counts) {
+    final int size = Arrays.stream(counts).sum();
+    final double[] x2 = new double[size];
+    int c = 0;
+    int j = 0;
+    for (final int n : counts) {
+      final double x = x1[j++];
+      for (int i = n; --i >= 0;) {
+        x2[c++] = x;
+      }
+    }
+    return x2;
   }
 
   // @formatter:off

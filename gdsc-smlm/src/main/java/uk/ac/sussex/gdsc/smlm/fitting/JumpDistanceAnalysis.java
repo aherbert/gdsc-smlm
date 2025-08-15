@@ -1477,7 +1477,6 @@ public class JumpDistanceAnalysis {
    *
    * <p>Function used for maximum likelihood fitting.
    */
-  // TODO: Test this is the same as the JumpDistanceFunction when all counts are 1
   static class WeightedJumpDistanceFunction extends Function implements MultivariateFunction {
     private final int[] counts;
 
@@ -1686,7 +1685,6 @@ public class JumpDistanceAnalysis {
    *
    * <p>Function used for maximum likelihood fitting.
    */
-  // TODO: Test this is the same as the MixedJumpDistanceFunction when all counts are 1
   static class WeightedMixedJumpDistanceFunction extends Function implements MultivariateFunction {
     private final int[] counts;
 
