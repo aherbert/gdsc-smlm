@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.Prefs;
-import ij.WindowManager;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import java.util.ArrayList;
