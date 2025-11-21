@@ -102,7 +102,6 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -233,7 +232,7 @@ public class BenchmarkFilterAnalysis
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static final AtomicReference<
-      Pair<Integer, CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]>>> COORDINATE_CACHE =
+      Pair<Integer, Int2ObjectOpenHashMap<UniqueIdPeakResult[]>>> COORDINATE_CACHE =
           new AtomicReference<>(Pair.of(-1, null));
 
   /** A reference to the last prepared fit results. */
@@ -245,7 +244,7 @@ public class BenchmarkFilterAnalysis
       new AtomicReference<>();
 
   /** The actual coordinates from the simulation. */
-  private CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]> actualCoordinates;
+  private Int2ObjectOpenHashMap<UniqueIdPeakResult[]> actualCoordinates;
 
   /** The prepared fit result data. */
   FitResultData fitResultData;
@@ -2638,7 +2637,7 @@ public class BenchmarkFilterAnalysis
   private MultiPathFitResults[] readResults() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean update = false;
-    Pair<Integer, CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]>> coords =
+    Pair<Integer, Int2ObjectOpenHashMap<UniqueIdPeakResult[]>> coords =
         COORDINATE_CACHE.get();
 
     if (coords.getKey() != simulationParameters.id) {
@@ -2857,10 +2856,10 @@ public class BenchmarkFilterAnalysis
     return localFitResultData.resultsList;
   }
 
-  private static CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]>
+  private static Int2ObjectOpenHashMap<UniqueIdPeakResult[]>
       getCoordinates(MemoryPeakResults results) {
-    final CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]> coords =
-        new CustomInt2ObjectOpenHashMap<>();
+    final Int2ObjectOpenHashMap<UniqueIdPeakResult[]> coords =
+        new Int2ObjectOpenHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
       // will be many calls to getEntry(). Instead sort the results and use

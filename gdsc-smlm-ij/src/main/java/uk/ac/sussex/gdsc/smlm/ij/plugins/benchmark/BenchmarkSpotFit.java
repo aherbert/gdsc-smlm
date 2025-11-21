@@ -87,7 +87,6 @@ import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -501,7 +500,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int id;
 
     /** The fit results. */
-    CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults;
+    Int2ObjectOpenHashMap<FilterCandidates> fitResults;
 
     /** The distance in pixels. */
     double distanceInPixels;
@@ -531,7 +530,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * @param fitResults the fit results
      */
     BenchmarkSpotFitResult(int simulationId,
-        CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults) {
+        Int2ObjectOpenHashMap<FilterCandidates> fitResults) {
       id = FIT_RESULT_ID.incrementAndGet();
       this.simulationId = simulationId;
       this.fitResults = fitResults;
@@ -1546,8 +1545,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       results.convertToPreferredUnits();
     }
 
-    final CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults =
-        new CustomInt2ObjectOpenHashMap<>();
+    final Int2ObjectOpenHashMap<FilterCandidates> fitResults =
+        new Int2ObjectOpenHashMap<>();
     for (final Worker w : workers) {
       fitResults.putAll(w.results);
     }
@@ -1642,7 +1641,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @param fitting the fitting
    * @return The filter candidate data
    */
-  private CandidateData subsetFilterResults(CustomInt2ObjectOpenHashMap<FilterResult> filterResults,
+  private CandidateData subsetFilterResults(Int2ObjectOpenHashMap<FilterResult> filterResults,
       int fitting) {
     // Convert fractions from percent
     final double f1 = Math.min(1, settings.fractionPositives / 100.0);
@@ -1798,7 +1797,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int[] multiDoubletStatus = new int[singleStatus.length];
 
     // Easier to materialise the values since we have a lot of non final variables to manipulate
-    final CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults = spotFitResults.fitResults;
+    final Int2ObjectOpenHashMap<FilterCandidates> fitResults = spotFitResults.fitResults;
     final int[] frames = new int[fitResults.size()];
     final FilterCandidates[] candidates = new FilterCandidates[fitResults.size()];
     final int[] counter = new int[1];

@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -36,7 +37,6 @@ import java.util.BitSet;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomLong2IntOpenHashMap;
 import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.IdCategoryPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -150,7 +150,7 @@ class TrackPopulationImporterTest {
   void assignCategoryWithMissingResultKeyThrows() {
     final PeakResult[] data = {create(1, 1), create(2, 1), create(2, 2), create(3, 2)};
     final Long2IntMap resultMap = TrackPopulationImporter.createResultMap(data);
-    final CustomLong2IntOpenHashMap categoryMap = new CustomLong2IntOpenHashMap(4);
+    final Long2IntOpenHashMap categoryMap = new Long2IntOpenHashMap(4);
     categoryMap.put(TrackPopulationImporter.getKey(3, 15), 42);
     Assertions.assertThrows(IllegalArgumentException.class,
         () -> TrackPopulationImporter.assignCategory(data, resultMap, categoryMap));
@@ -160,7 +160,7 @@ class TrackPopulationImporterTest {
   void assignCategoryCanMarkAssigned() {
     final PeakResult[] data = {create(1, 1), create(2, 1), create(2, 2), create(3, 2)};
     final Long2IntMap resultMap = TrackPopulationImporter.createResultMap(data);
-    final CustomLong2IntOpenHashMap categoryMap = new CustomLong2IntOpenHashMap(4);
+    final Long2IntOpenHashMap categoryMap = new Long2IntOpenHashMap(4);
     categoryMap.put(getKey(data[0]), 1);
     categoryMap.put(getKey(data[2]), 4);
     categoryMap.put(getKey(data[3]), 3);

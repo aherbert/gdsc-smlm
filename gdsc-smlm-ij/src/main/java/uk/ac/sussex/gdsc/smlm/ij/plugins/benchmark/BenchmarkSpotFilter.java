@@ -64,7 +64,6 @@ import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -341,7 +340,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     final int id;
 
     /** The filter results. */
-    CustomInt2ObjectOpenHashMap<FilterResult> filterResults;
+    Int2ObjectOpenHashMap<FilterResult> filterResults;
 
     /** The configuration for the spot filter. */
     FitEngineConfiguration config;
@@ -417,7 +416,7 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @param spotFilter the spot filter
      */
     BenchmarkSpotFilterResult(int simulationId,
-        CustomInt2ObjectOpenHashMap<FilterResult> filterResults, FitEngineConfiguration config,
+        Int2ObjectOpenHashMap<FilterResult> filterResults, FitEngineConfiguration config,
         MaximaSpotFilter spotFilter) {
       id = filterResultsId.getAndIncrement();
       this.simulationId = simulationId;
@@ -852,7 +851,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     final MaximaSpotFilter spotFilter;
     final float background;
     final Int2ObjectOpenHashMap<PsfSpot[]> coords;
-    final CustomInt2ObjectOpenHashMap<FilterResult> results;
+    final Int2ObjectOpenHashMap<FilterResult> results;
 
     float[] data;
     long time;
@@ -862,7 +861,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       this.jobs = jobs;
       this.stack = stack;
       this.spotFilter = (MaximaSpotFilter) spotFilter.copy();
-      this.results = new CustomInt2ObjectOpenHashMap<>();
+      this.results = new Int2ObjectOpenHashMap<>();
       this.background = background;
       this.coords = coords;
 
@@ -2005,7 +2004,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       IJ.showStatus("Collecting results ...");
     }
 
-    CustomInt2ObjectOpenHashMap<FilterResult> filterResults = null;
+    Int2ObjectOpenHashMap<FilterResult> filterResults = null;
     time = 0;
     for (final Worker w : workers) {
       time += w.time;
@@ -2113,7 +2112,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    *
    * @param filterResults the filter results
    */
-  private static void addSpotsToMemory(CustomInt2ObjectOpenHashMap<FilterResult> filterResults) {
+  private static void addSpotsToMemory(Int2ObjectOpenHashMap<FilterResult> filterResults) {
     final MemoryPeakResults results = new MemoryPeakResults();
     results.setName(TITLE + " TP " + TRUE_POSITIVES_RESULTS_SET_ID.getAndIncrement());
     filterResults.forEach((int peak, FilterResult filterResult) -> {
@@ -2177,7 +2176,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   }
 
   private BenchmarkSpotFilterResult summariseResults(
-      CustomInt2ObjectOpenHashMap<FilterResult> filterResults, FitEngineConfiguration config,
+      Int2ObjectOpenHashMap<FilterResult> filterResults, FitEngineConfiguration config,
       MaximaSpotFilter spotFilter, boolean batchSummary) {
     final BenchmarkSpotFilterResult filterResult =
         new BenchmarkSpotFilterResult(simulationParameters.id, filterResults, config, spotFilter);

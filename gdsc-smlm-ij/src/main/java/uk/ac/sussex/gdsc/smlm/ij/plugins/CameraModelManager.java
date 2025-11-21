@@ -39,6 +39,7 @@ import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextField;
@@ -66,7 +67,6 @@ import uk.ac.sussex.gdsc.core.utils.ExtendedStatistics;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2IntOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings;
@@ -819,7 +819,7 @@ public class CameraModelManager implements PlugIn {
   private static void saveOutliers(ImagePlus imp, double[] limits, Builder pluginSettings) {
     final ImageStack stack = imp.getImageStack();
     final int width = stack.getWidth();
-    final CustomInt2IntOpenHashMap map = new CustomInt2IntOpenHashMap();
+    final Int2IntOpenHashMap map = new Int2IntOpenHashMap();
     for (int slice = 1; slice <= 3; slice++) {
       final ImageProcessor ip = stack.getProcessor(slice);
       final int n = ip.getPixelCount();

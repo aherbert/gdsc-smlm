@@ -31,6 +31,7 @@ import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -59,9 +60,7 @@ import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2IntOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.function.IntIntConsumer;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
@@ -480,7 +479,7 @@ public class PcPalmClusters implements PlugIn {
 
       String line;
 
-      final CustomInt2IntOpenHashMap data = new CustomInt2IntOpenHashMap();
+      final Int2IntOpenHashMap data = new Int2IntOpenHashMap();
 
       // Read the header and store the calibration if present
       for (line = input.readLine(); line != null; line = input.readLine()) {
@@ -539,7 +538,7 @@ public class PcPalmClusters implements PlugIn {
       for (int n = 1; n <= maxN; n++) {
         hist[0][n] = n;
       }
-      data.forEach((IntIntConsumer) (k, v) -> hist[1][k] = Float.intBitsToFloat(v));
+      data.forEach((k, v) -> hist[1][k] = Float.intBitsToFloat(v));
 
       final HistogramData histogramData = new HistogramData(hist, frames, area, units);
       histogramData.filename = filename;

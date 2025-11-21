@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.rng.core.util.NumberFactory;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomLong2IntOpenHashMap;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
 import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
@@ -156,7 +155,7 @@ public class TrackPopulationImporter implements PlugIn {
       final Long2IntMap resultMap = createResultMap(data);
 
       // Read the mapping 'Frame:ID -> Category'
-      CustomLong2IntOpenHashMap categoryMap;
+      Long2IntOpenHashMap categoryMap;
       try (BufferedReader br = Files.newBufferedReader(Paths.get(settings.filename))) {
         categoryMap = createCategoryMap(br);
       }
@@ -245,8 +244,8 @@ public class TrackPopulationImporter implements PlugIn {
    * @throws IllegalArgumentException if the category map does not contain 3 integer fields per
    *         line; or the map contains duplicate keys
    */
-  static CustomLong2IntOpenHashMap createCategoryMap(BufferedReader reader) throws IOException {
-    final CustomLong2IntOpenHashMap map = new CustomLong2IntOpenHashMap(16);
+  static Long2IntOpenHashMap createCategoryMap(BufferedReader reader) throws IOException {
+    final Long2IntOpenHashMap map = new Long2IntOpenHashMap(16);
     map.defaultReturnValue(-1);
     for (String line = reader.readLine(); line != null; line = reader.readLine()) {
       final String[] fields = CSV.split(line);
@@ -281,7 +280,7 @@ public class TrackPopulationImporter implements PlugIn {
    * @throws IllegalArgumentException if the category map contains a key not in the results
    */
   static BitSet assignCategory(PeakResult[] data, Long2IntMap resultMap,
-      CustomLong2IntOpenHashMap categoryMap) {
+      Long2IntOpenHashMap categoryMap) {
     final BitSet assigned = new BitSet(data.length);
     categoryMap.forEach((long key, int category) -> {
       final int index = resultMap.get(key);

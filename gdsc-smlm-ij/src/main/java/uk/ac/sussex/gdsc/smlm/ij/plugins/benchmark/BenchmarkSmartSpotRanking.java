@@ -61,7 +61,6 @@ import uk.ac.sussex.gdsc.core.threshold.FloatHistogram;
 import uk.ac.sussex.gdsc.core.threshold.Histogram;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
@@ -797,8 +796,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     IJ.showStatus("Collecting results ...");
 
-    final CustomInt2ObjectOpenHashMap<RankResults> rankResults =
-        new CustomInt2ObjectOpenHashMap<>();
+    final Int2ObjectOpenHashMap<RankResults> rankResults =
+        new Int2ObjectOpenHashMap<>();
     for (final Worker w : workers) {
       rankResults.putAll(w.results);
     }
@@ -816,7 +815,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * @return The filter candidate data
    */
   private CandidateData
-      subsetFilterResults(CustomInt2ObjectOpenHashMap<FilterResult> filterResults) {
+      subsetFilterResults(Int2ObjectOpenHashMap<FilterResult> filterResults) {
     // Convert fractions from percent
     final double f1 = Math.min(1, settings.fractionPositives / 100.0);
     final double f2 = settings.fractionNegativesAfterAllPositives / 100.0;
@@ -941,7 +940,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private void summariseResults(CustomInt2ObjectOpenHashMap<RankResults> rankResults,
+  private void summariseResults(Int2ObjectOpenHashMap<RankResults> rankResults,
       CandidateData candidateData) {
     // Summarise the ranking results.
     final StringBuilder sb = new StringBuilder(filterResult.resultPrefix);
