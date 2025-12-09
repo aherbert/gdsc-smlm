@@ -40,6 +40,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntObjectBiConsumer;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Checkbox;
 import java.awt.Color;
@@ -109,7 +110,6 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.core.utils.function.IntObjConsumer;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -1838,7 +1838,7 @@ public class BenchmarkFilterAnalysis
   /**
    * Abstract class to allow the array storage to be reused.
    */
-  private abstract class CustomIntObjectProcedure implements IntObjConsumer<UniqueIdPeakResult[]> {
+  private abstract class CustomIntObjectProcedure implements IntObjectBiConsumer<UniqueIdPeakResult[]> {
     float[] x;
     float[] y;
     float[] x2;
