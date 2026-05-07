@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.statistics.descriptive.Quantile;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -340,12 +341,13 @@ class BlinkEstimatorTest {
     logger.info(
         FormatSupplier.getSupplier("N = %d (%d), N-blinks = %f, tOn = %f, tOff = %f, Fixed = %f",
             fluorophores.size(), localisations.size(), blinkingRate, ton, toff, fixedFraction));
+    final double[] values = statsSampledTOff.getValues();
+    final double[] upper = Quantile.withDefaults().evaluate(values, 0.95, 1.0);
     logger.info(FormatSupplier.getSupplier(
         "Actual N-blinks = %f (%f), tOn = %f (%f), tOff = %f (%f), 95%% = %f, max = %f",
         statsNBlinks.getMean(), statsSampledNBlinks.getMean(), statsTOn.getMean(),
         statsSampledTOn.getMean(), statsTOff.getMean(), statsSampledTOff.getMean(),
-        statsSampledTOff.getStatistics().getPercentile(95),
-        statsSampledTOff.getStatistics().getMax()));
+        upper[0], upper[1]));
     logger.info("-=-=--=-");
 
     final BlinkEstimator be = new BlinkEstimator();

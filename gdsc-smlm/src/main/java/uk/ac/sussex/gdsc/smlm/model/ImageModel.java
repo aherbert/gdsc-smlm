@@ -562,13 +562,12 @@ public abstract class ImageModel {
       }
 
       if (invert) {
-        final double min = correlatedOnTime.getStatistics().getMin();
-        final double range = correlatedOnTime.getStatistics().getMax() - min;
-        final StoredDataStatistics newCorrelatedOnTime = new StoredDataStatistics();
-        for (final double d : correlatedOnTime.getValues()) {
-          newCorrelatedOnTime.add(range - d + min);
+        final double[] values = correlatedOnTime.getValues();
+        final double max = MathUtils.max(values);
+        for (int i = 0; i < values.length; i++) {
+          values[i] = max - values[i];
         }
-        correlatedOnTime = newCorrelatedOnTime;
+        correlatedOnTime = StoredDataStatistics.create(values);
       }
 
       // Get the average on time from the correlated sample.
