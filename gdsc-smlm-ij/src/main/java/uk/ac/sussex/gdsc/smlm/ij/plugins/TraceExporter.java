@@ -45,6 +45,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
@@ -149,7 +150,7 @@ public class TraceExporter implements PlugIn {
    * The export format.
    */
   private enum ExportFormat implements NamedObject {
-    SPOT_ON("Spot-On"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS("NOBIAS"), NONE("None");
+    SPOT_ON("Spot-On"), SPOT_ON_PLUS("Spot-On Plus"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS("NOBIAS"), NONE("None");
 
     private final String name;
 
@@ -326,6 +327,8 @@ public class TraceExporter implements PlugIn {
       exportAnaDda(results);
     } else if (settings.format == ExportFormat.SPOT_ON.ordinal()) {
       exportSpotOn(results);
+    } else if (settings.format == ExportFormat.SPOT_ON_PLUS.ordinal()) {
+      exportSpotOnPlus(results);
     }
     ImageJUtils.log("Exported %s: %s in %s", results.getName(),
         TextUtils.pleural(results.size(), "localisation"), TextUtils.pleural(tracks, "track"));
@@ -476,6 +479,69 @@ public class TraceExporter implements PlugIn {
             out.write(Float.toString(x));
             out.write(",");
             out.write(Float.toString(y));
+            out.newLine();
+          }
+        } catch (final IOException ex) {
+          throw new UncheckedIOException(ex);
+        }
+      });
+    } catch (final IOException | RuntimeException ex) {
+      handleException(ex);
+    }
+  }
+
+  private void exportSpotOnPlus(MemoryPeakResults results) {
+    // As per Spot-On with extra columns
+
+    try (BufferedWriter out =
+        Files.newBufferedWriter(Paths.get(settings.directory, results.getName() + ".csv"))) {
+      out.write("frame,t,trajectory,x,y,r");
+      out.newLine();
+
+      final TypeConverter<TimeUnit> converter = UnitConverterUtils.createConverter(TimeUnit.FRAME,
+          TimeUnit.SECOND, results.getCalibrationReader().getExposureTime());
+
+      final int[] currentId = {-1};
+      final float[] origin = new float[2];
+      results.forEach(DistanceUnit.UM, (XyrResultProcedure) (x, y, result) -> {
+        try {
+          final int id = result.getId();
+          if (currentId[0] != id) {
+            currentId[0] = id;
+            origin[0] = x;
+            origin[1] = y;
+          }
+          if (result.hasEndFrame()) {
+            final String sId = Integer.toString(id);
+            final String sx = Float.toString(x);
+            final String sy = Float.toString(y);
+            final String sr = Float.toString(MathUtils.distance(x, y, origin[0], origin[1]));
+            for (int t = result.getFrame(); t <= result.getEndFrame(); t++) {
+              out.write(Integer.toString(t));
+              out.write(",");
+              out.write(Float.toString(converter.convert(t)));
+              out.write(",");
+              out.write(sId);
+              out.write(",");
+              out.write(sx);
+              out.write(",");
+              out.write(sy);
+              out.write(",");
+              out.write(sr);
+              out.newLine();
+            }
+          } else {
+            out.write(Integer.toString(result.getFrame()));
+            out.write(",");
+            out.write(Float.toString(converter.convert(result.getFrame())));
+            out.write(",");
+            out.write(Integer.toString(id));
+            out.write(",");
+            out.write(Float.toString(x));
+            out.write(",");
+            out.write(Float.toString(y));
+            out.write(",");
+            out.write(Float.toString(MathUtils.distance(x, y, origin[0], origin[1])));
             out.newLine();
           }
         } catch (final IOException ex) {

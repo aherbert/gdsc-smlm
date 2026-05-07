@@ -841,6 +841,36 @@ The `Spot-On CSV file format <https://spoton.berkeley.edu/SPTGUI/docs/latest#inp
    * - Y
      - The y position (in |micro|\ m).
 
+Spot-On Plus
+^^^^^^^^^^^^
+
+This matches the Spot-On format with additional columns:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Column
+     - Description
+
+   * - Frame
+     - Frame number.
+
+   * - T
+     - Time (in seconds).
+
+   * - Trajectory
+     - The trace Id.
+
+   * - X
+     - The x position (in |micro|\ m).
+
+   * - Y
+     - The y position (in |micro|\ m).
+
+   * - r
+     - The displacement distance from the trace origin (in |micro|\ m).
+
 anaDDA Localisations
 ^^^^^^^^^^^^^^^^^^^^
 
