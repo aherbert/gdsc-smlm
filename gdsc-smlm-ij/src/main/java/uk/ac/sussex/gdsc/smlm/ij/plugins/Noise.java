@@ -257,8 +257,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     IJ.showStatus("Estimating noise ...");
 
     final boolean twoMethods = method1 != method2;
-    final boolean preserveResiduals =
-        method1.name().contains("Residuals") && method2.name().contains("Residuals") && twoMethods;
 
     final int current = imp.getCurrentSlice();
     final int stackSize = imp.getStackSize();
@@ -287,7 +285,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
           buffer);
       cameraModel.removeBiasAndGain(bounds, buffer);
       final NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
-      ne.setPreserveResiduals(preserveResiduals);
       ne.setRange(settings.lowestPixelsRange);
       xValues[i] = slice;
       yValues1[i] = ne.getNoise(method1);
@@ -348,7 +345,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
         ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
     cameraModel.removeBiasAndGain(bounds, buffer);
     final NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
-    ne.setPreserveResiduals(true);
     for (final NoiseEstimator.Method m : NoiseEstimator.Method.values()) {
       result[index++] = ne.getNoise(m);
     }
