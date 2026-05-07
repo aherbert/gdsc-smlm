@@ -491,6 +491,8 @@ public class MeanVarianceTest implements PlugIn {
         stats = StoredDataStatistics.create(values);
       }
 
+      final double median = stats.getMedian();
+
       if (settings.showCharts) {
         // Plot the gain over time
         final String title = TITLE + " Gain vs Frame";
@@ -501,7 +503,7 @@ public class MeanVarianceTest implements PlugIn {
 
         // Show a histogram
         final String label = String.format("Mean = %s, Median = %s",
-            MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getMedian()));
+            MathUtils.rounded(stats.getMean()), MathUtils.rounded(median));
         final WindowOrganiser wo = new WindowOrganiser();
         final PlotWindow pw2 = new HistogramPlotBuilder(TITLE, stats, "Gain")
             .setRemoveOutliersOption(1).setPlotLabel(label).show(wo);
@@ -513,7 +515,7 @@ public class MeanVarianceTest implements PlugIn {
       }
 
       ImageJUtils.log("Single-image mode: %s camera", (emMode) ? "EM-CCD" : "Standard");
-      final double gain = stats.getMedian();
+      final double gain = median;
 
       if (emMode) {
         final double totalGain = gain;
