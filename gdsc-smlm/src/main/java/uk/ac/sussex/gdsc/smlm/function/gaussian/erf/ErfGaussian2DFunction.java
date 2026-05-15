@@ -102,9 +102,12 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
     /** Use a fast approximation for the Error function. */
     FAST,
 
-    /** Use the Apache Commons library Error function.
-     * <p>As of version 1.2 this uses the implementation in Commons Numbers
-     * (replacing the Commons Math implementation). */
+    /**
+     * Use the Apache Commons library Error function.
+     *
+     * <p>As of version 1.2 this uses the implementation in Commons Numbers (replacing the Commons
+     * Math implementation).
+     */
     COMMONS_MATH;
   }
 

@@ -81,7 +81,9 @@ public class OptimiserFunction {
 
   /**
    * Gets the x data at the specified index.
-   * <p>Warning: This performs no bounds checking and may return invalid values outside of {@code [0, size)}.
+   *
+   * <p>Warning: This performs no bounds checking and may return invalid values outside of
+   * {@code [0, size)}.
    *
    * @param i the index
    * @return the x value
@@ -102,7 +104,9 @@ public class OptimiserFunction {
 
   /**
    * Gets the y data at the specified index.
-   * <p>Warning: This performs no bounds checking and may return invalid values outside of {@code [0, size)}.
+   *
+   * <p>Warning: This performs no bounds checking and may return invalid values outside of
+   * {@code [0, size)}.
    *
    * @param i the index
    * @return the y value
