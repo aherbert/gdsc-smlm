@@ -36,6 +36,7 @@ class DiffusionAnalysisTest {
     // Data obtained from the python code:
     // https://gitlab.com/tjian-darzacq-lab/Spot-On-cli
     // fastspt.fastspt.C_AbsorBoundAUTO
+    "0.35171539143446967, 0.01, 0.75, 0.0001, 1.0",
     "0.4409547738693467, 0.01, 1.5, 1.0, 0.9711316588468534",
     "0.7424623115577889, 0.01, 1.5, 1.0, 0.042506726296412944",
     "-0.7047738693467337, 0.02, 1.5, 1.0, 0.1789001958617121",
@@ -67,6 +68,8 @@ class DiffusionAnalysisTest {
     // Cases requiring more than n=200 evaluations are not as accurate
     "0.01, 1.75, 0.025, 0.9796100101011112, 1e-5",
     "0.001, 1.75, 0.02, 0.994232839949668, 1e-3",
+    // "Fixed" molecules
+    "0.01, 0.75, 0.0001, 0.9969909888877455, 1e-5",
   })
   void testRemaining(double dt, double dz, double d, double p, double eps) {
     TestAssertions.assertTest(p, DiffusionAnalysis.remaining(dt, dz, d),
