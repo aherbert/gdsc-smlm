@@ -1144,7 +1144,7 @@ public class DiffusionRateTest implements PlugIn {
     // Convert to um^2/second
     ImageJUtils.log(
         "Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, "
-            + "MSD = %s um^2/s",
+            + "MSD 2D = %s um^2/s",
         MathUtils.rounded(settings.getDiffusionRate()), MathUtils.rounded(myPrecision), count,
         MathUtils.rounded(results.getCalibrationReader().getExposureTime() / 1000),
         MathUtils.rounded(msd / conversionFactor), MathUtils.rounded(
@@ -1232,8 +1232,8 @@ public class DiffusionRateTest implements PlugIn {
               sum += last.distance2(current);
               count++;
             } else {
-              // This can be varied but the effect on the output with only 1 loop
-              // is the same if enough samples are present
+              // Number of repeats can be varied but the effect on the output with only
+              // 1 repeat is the same if enough samples are present
               for (int ii = 1; ii-- > 0;) {
                 sum += last.distance2(current, p, gauss);
                 count++;
