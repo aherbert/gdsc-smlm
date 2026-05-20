@@ -831,7 +831,7 @@ public abstract class ImageModel {
    */
   public static double getRandomMoveDistance2D(double diffusionRateInPixelsPerStep) {
     // Convert diffusion co-efficient into the standard deviation for the random move
-    // For 3D diffusion: sigma^2 = 4D
+    // For 2D diffusion: sigma^2 = 4D
     // sigma = sqrt(4D)
     return Math.sqrt(4 * diffusionRateInPixelsPerStep);
   }
