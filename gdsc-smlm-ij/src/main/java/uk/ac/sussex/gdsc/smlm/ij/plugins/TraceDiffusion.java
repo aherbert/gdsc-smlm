@@ -256,7 +256,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     final ArrayList<MemoryPeakResults> allResults = new ArrayList<>();
 
     // Option to pick multiple input datasets together using a list box.
-    
 
     // This shows the dialog for selecting trace options
     if (("multi".equals(arg) && !showMultiDialog(allResults)) || !showTraceDialog(allResults) || allResults.isEmpty()) {
