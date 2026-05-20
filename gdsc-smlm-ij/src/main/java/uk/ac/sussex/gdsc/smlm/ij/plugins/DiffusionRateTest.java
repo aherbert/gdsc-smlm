@@ -386,7 +386,8 @@ public class DiffusionRateTest implements PlugIn {
             if (diffusionType == DiffusionType.GRID_WALK) {
               m.walk(diffusionSigma, random);
             } else if (diffusionType == DiffusionType.LINEAR_WALK) {
-              m.slide(diffusionSigma, axis, random);
+              // diffusionSigma is for 1D. scale for 3D using sqrt(3).
+              m.slide(diffusionSigma * 1.7320508075688772, axis, random);
             } else {
               m.move(diffusionSigma, random);
             }
@@ -422,8 +423,10 @@ public class DiffusionRateTest implements PlugIn {
         }
       } else if (diffusionType == DiffusionType.LINEAR_WALK) {
         final double[] axis = nextVector(gauss);
+        // diffusionSigma is for 1D. scale for 3D using sqrt(3).
+        final double s = diffusionSigma * 1.7320508075688772;
         for (int j = 0; j < totalSteps; j++) {
-          m.slide(diffusionSigma, axis, random);
+          m.slide(s, axis, random);
           double[] xyz = m.getCoordinates();
           points.add(new Point(id, xyz));
           if (addError) {
