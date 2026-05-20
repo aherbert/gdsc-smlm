@@ -1313,7 +1313,9 @@ public class DiffusionRateTest implements PlugIn {
       gauss[i] = SamplerUtils.createNormalizedGaussianSampler(UniformRandomProviders.create());
     }
 
-    final double scale = Math.sqrt(2 * pluginSettings.simpleD);
+    // diffusionSigma is for 1D. scale for 3D using sqrt(3).
+    final double scale = Math.sqrt(2 * pluginSettings.simpleD) *
+        (pluginSettings.linearDiffusion ? 1.7320508075688772 : 1);
     final Ticker ticker = ImageJUtils.createTicker(pluginSettings.simpleParticles, 1);
     for (int particle = 0; particle < pluginSettings.simpleParticles; particle++) {
       final double[] xyz = new double[3];
@@ -1363,7 +1365,7 @@ public class DiffusionRateTest implements PlugIn {
     gd.addNumericField("Steps", pluginSettings.simpleSteps, 0);
     gd.addNumericField("Particles", pluginSettings.simpleParticles, 0);
     gd.addCheckbox("Linear_diffusion", pluginSettings.linearDiffusion);
-    gd.addStringField("Directory", pluginSettings.simpleDir, 30);
+    gd.addDirectoryField("Directory", pluginSettings.simpleDir, 30);
 
     gd.addHelp(HelpUrls.getUrl("diffusion-rate-test"));
     gd.showDialog();
