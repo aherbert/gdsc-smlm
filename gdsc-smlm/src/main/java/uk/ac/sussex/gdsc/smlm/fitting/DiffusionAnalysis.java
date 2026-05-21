@@ -34,8 +34,8 @@ import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator
  * Perform diffusion analysis.
  *
  * <p>Contains methods that compute the probability that a diffusing molecule remains within the
- * depth-of-field after a given time. This is based on the Spot-On model described in the
- * methods section of the paper:
+ * depth-of-field after a given time. This is based on the Spot-On model described in the methods
+ * section of the paper:
  *
  * <p>Hansen, A.S., Woringer, M., Grimm, J.B., Lavis, L.D., Tjian, R., and Darzacq, X. (2018) Robust
  * model-based analysis of single-particle tracking experiments with Spot-On. eLife 7, e33125.
@@ -47,13 +47,17 @@ public class DiffusionAnalysis {
   /**
    * Compute the probability that a molecule remains within bounds {@code [-dz/2, dz/2]} when
    * diffusing with a coefficient {@code d} for time {@code dt}.
+   * 
+   * <p>Note: Parameters are not validated. It is assumed they are all strictly positive and finite.
+   * If {@code dt} or {@code d} are zero the probability is 1. If {@code dz} is zero the computation
+   * is invalid.
    *
-   * @param dt the time delay (must be strictly positive)
+   * @param dt the time delay
    * @param dz the depth of field
    * @param d the diffusion coefficient
    * @return the probability
    */
-  static double remaining(double dt, double dz, double d) {
+  public static double remaining(double dt, double dz, double d) {
     // The function is symmetric about z=0.
     // Integrate [0, z/2].
     // Each withinBound function is accurate to 1e-10 and the result is in [0, dz/2].
