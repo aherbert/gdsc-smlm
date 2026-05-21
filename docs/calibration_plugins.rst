@@ -1522,3 +1522,10 @@ The precision error has the effect of increasing the mean-squared displacement f
     Raw data D=1.0 um^2/s, Precision = 30.0 nm, N=22000, step=0.001 s, mean=0.007614 um^2, MSD = 7.614 um^2/s
 
 
+.. index:: ! Diffusion Depth of Field
+
+Diffusion Depth of Field
+------------------------
+
+The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF.
+

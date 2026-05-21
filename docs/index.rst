@@ -484,6 +484,9 @@ Calibration Plugins
    * - :ref:`calibration_plugins:Diffusion Rate Test`
      - Simulate molecule diffusion and fit a graph of mean-squared displacement to determine the diffusion coefficient.
 
+   * - :ref:`calibration_plugins:Diffusion Depth of Field`
+     - Simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF.
+
 
 Tool Plugins
 ------------
