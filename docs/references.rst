@@ -59,6 +59,10 @@ Etheridge TJ, Carr AM & Herbert AD (2022)
 GDSC SMLM: Single-molecule localisation microscopy software for ImageJ [version 1; peer review: 1 approved].
 *Wellcome Open Res* 7:241.
 
+Hansen AS, Woringer M, Grimm JB, Lavis LD, Tjian R & Darzacq X (2018)
+Robust model-based analysis of single-particle tracking experiments with Spot-On.
+*eLife* 7, e33125.
+ 
 Heel M & Schatz M (2005)
 Fourier shell correlation threshold criteria.
 *Journal of Structural Biology* 151(3): 250–262.
