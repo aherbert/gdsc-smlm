@@ -327,8 +327,8 @@ public class DiffusionDepthOfField implements PlugIn {
         // for each diffusion coefficient and time frame
         final int[][] observed = new int[step.length][maxT];
         for (;;) {
-          final int p = position.decrementAndGet();
-          if (p < 0) {
+          final int pos = position.decrementAndGet();
+          if (pos < 0) {
             break;
           }
           // Simulate the track from the origin
@@ -337,8 +337,9 @@ public class DiffusionDepthOfField implements PlugIn {
             z += sampler.sample();
             zn[i] = z;
           }
-          // Simulate across the depth of field
-          z = (p / (total - 1.0)) * halfDz;
+          // Simulate across the depth of field [-z/2, z/2]
+          final double p = pos / (total - 1.0);
+          z = (1 - p) * halfDz - p * halfDz;
           // for each diffusion rate test: |z| < z/2
           for (int j = 0; j < step.length; j++) {
             final double s = step[j];
