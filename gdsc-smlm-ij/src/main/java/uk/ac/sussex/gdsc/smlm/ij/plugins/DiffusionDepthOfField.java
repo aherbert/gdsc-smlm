@@ -41,16 +41,35 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
+import uk.ac.sussex.gdsc.smlm.fitting.DiffusionAnalysis;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 
 /**
  * Move a set of molecules within a depth-of-field (DoF) to generate a distribution of the
@@ -64,7 +83,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
  * <pre>
  * dz_corr = dz + a * sqrt(D) + b
  * </pre>
- * 
+ *
  * <p>The corrected depth of field can be used to compute the probability that a diffusing molecule
  * remains within the depth-of-field after a given time. This is based on the Spot-On model
  * described in the methods section of the paper:
@@ -77,8 +96,6 @@ public class DiffusionDepthOfField implements PlugIn {
   private static final String TITLE = "Diffusion Depth of Field";
 
   private static final AtomicReference<TextWindow> TABLE_REF = new AtomicReference<>();
-
-  // private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
   /** The plugin settings. */
   private Settings pluginSettings;
@@ -100,16 +117,26 @@ public class DiffusionDepthOfField implements PlugIn {
     double maxD;
     int sampleD;
 
+    int repeats;
+    double minA;
+    double maxA;
+    double minB;
+    double maxB;
+
     Settings() {
       depthOfField = 750;
       exposureTime = 10;
       gap = 1;
-      // Set simulation defaults from the SpotOn paper
-      numberOfMolecules = 50000;
-      maxT = 15;
+      // SpotOn paper used: n=50000, maxT=15; D in [1, 12]
+      numberOfMolecules = 100000;
+      maxT = 10;
       minD = 1;
       maxD = 12;
-      sampleD = 13;
+      sampleD = 20;
+      // Fitting
+      repeats = 3;
+      maxA = 0.3;
+      maxB = 0.3;
     }
 
     Settings(Settings source) {
@@ -122,6 +149,12 @@ public class DiffusionDepthOfField implements PlugIn {
       minD = source.minD;
       maxD = source.maxD;
       sampleD = source.sampleD;
+
+      repeats = source.repeats;
+      minA = source.minA;
+      maxA = source.maxA;
+      minB = source.minB;
+      maxB = source.maxB;
     }
 
     Settings copy() {
@@ -155,42 +188,133 @@ public class DiffusionDepthOfField implements PlugIn {
     if (!showDialog()) {
       return;
     }
+    final int threadCount = Prefs.getThreads();
+    final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
+    try {
+      final double[][] probability = simulateRemaining(threadCount, executor);
+
+      // Fit the observed probability
+      final double[] ab = fitRemaining(probability, threadCount, executor);
+
+      addToResultTable(ab);
+
+      final double[][] fittedProbability = createProbability(ab);
+
+      plotRemaining(probability, fittedProbability);
+
+    } finally {
+      executor.shutdown();
+    }
+
+    ImageJUtils.finished(TITLE + " done");
+  }
+
+  private boolean showDialog() {
+    final GenericDialog gd = new GenericDialog(TITLE);
+
+    gd.addNumericField("Depth_of_field", pluginSettings.depthOfField, 1, 6, "nm");
+    gd.addNumericField("Exposure_time", pluginSettings.exposureTime, 1, 6, "ms");
+    gd.addSlider("Gap", 1, 5, pluginSettings.gap);
+
+    gd.addNumericField("Number_of_molecules", pluginSettings.numberOfMolecules);
+    gd.addNumericField("Max_t", pluginSettings.maxT);
+    gd.addNumericField("Min_D", pluginSettings.minD, 3, 6, "um^2/s");
+    gd.addNumericField("Max_D", pluginSettings.maxD, 3, 6, "um^2/s");
+    gd.addSlider("Sample_D", 2, 30, pluginSettings.sampleD);
+
+    gd.addSlider("Repeats", 0, 5, pluginSettings.repeats);
+    gd.addNumericField("Min_A", pluginSettings.minA, 3);
+    gd.addNumericField("Max_A", pluginSettings.maxA, 3);
+    gd.addNumericField("Min_B", pluginSettings.minB, 3);
+    gd.addNumericField("Max_B", pluginSettings.maxB, 3);
+
+    gd.addHelp(HelpUrls.getUrl("diffusion-depth-of-field"));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return false;
+    }
+
+    pluginSettings.depthOfField = gd.getNextNumber();
+    pluginSettings.exposureTime = gd.getNextNumber();
+    pluginSettings.gap = (int) gd.getNextNumber();
+
+    pluginSettings.numberOfMolecules = (int) gd.getNextNumber();
+    pluginSettings.maxT = (int) gd.getNextNumber();
+    pluginSettings.minD = gd.getNextNumber();
+    pluginSettings.maxD = gd.getNextNumber();
+    pluginSettings.sampleD = (int) gd.getNextNumber();
+
+    pluginSettings.repeats = (int) gd.getNextNumber();
+    pluginSettings.minA = gd.getNextNumber();
+    pluginSettings.maxA = gd.getNextNumber();
+    pluginSettings.minB = gd.getNextNumber();
+    pluginSettings.maxB = gd.getNextNumber();
+
+    // Check arguments
+    try {
+      ParameterUtils.isAboveZero("Depth of Field", pluginSettings.depthOfField);
+      ParameterUtils.isAboveZero("Exposure time", pluginSettings.exposureTime);
+      ParameterUtils.isAboveZero("Gap", pluginSettings.gap);
+
+      ParameterUtils.isAboveZero("Number of molecules", pluginSettings.numberOfMolecules);
+      ParameterUtils.isAboveZero("Max T", pluginSettings.maxT);
+      ParameterUtils.isAboveZero("Min D", pluginSettings.minD);
+      ParameterUtils.isAboveZero("Max D", pluginSettings.maxD);
+      ParameterUtils.isAbove("Sample D", pluginSettings.sampleD, 1);
+
+      ParameterUtils.isPositive("Repeats", pluginSettings.repeats);
+      ParameterUtils.isPositive("Min A", pluginSettings.minA);
+      ParameterUtils.isAboveZero("Max A", pluginSettings.maxA);
+      ParameterUtils.isPositive("Min B", pluginSettings.minB);
+      ParameterUtils.isAboveZero("Max B", pluginSettings.maxB);
+
+      ParameterUtils.isEqualOrAbove("Max D", pluginSettings.maxD, pluginSettings.minD);
+      ParameterUtils.isEqualOrAbove("Max A", pluginSettings.maxA, pluginSettings.minA);
+      ParameterUtils.isEqualOrAbove("Max B", pluginSettings.maxB, pluginSettings.minB);
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(TITLE, ex.getMessage());
+      return false;
+    }
+
+    if (gd.invalidNumber()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Simulate the probability of remaining in the depth-of-field.
+   *
+   * <p>Returns a probability for each diffusion coefficient over time.
+   *
+   * @param threadCount the thread count
+   * @param executor the executor
+   * @return the probability
+   */
+  private double[][] simulateRemaining(int threadCount, ExecutorService executor) {
     IJ.showStatus("Simulating tracks...");
+
     final double halfDz = pluginSettings.depthOfField / 2000;
     final double dt = pluginSettings.exposureTime / 1000;
     final double g = pluginSettings.gap;
     final int maxT = pluginSettings.maxT;
 
-    // Fit correction coefficient a and b.
-    // Compute: dz_corr = dz + a * sqrt(D) + b
-    //
-    // dz_corr is used to compute the probability of remaining within the depth-of-field
-    // P(dt, dz_corr, D) and fit to the empirical distribution from the simulation.
-
     // Simulate tracks across the depth of field.
     // Each track is scaled using the diffusion coefficient and the molecule tested if
     // it remains in the depth-of-field.
 
-    // Sample diffusion coefficients
-    final double[] sampleD = IntStream.rangeClosed(1, pluginSettings.sampleD).mapToDouble(i -> {
-      // interpolate D in [min, max] using [1, n] as [0, 1]
-      final double p = (i - 1.0) / (pluginSettings.sampleD - 1);
-      return (1 - p) * pluginSettings.minD + p * pluginSettings.maxD;
-    }).toArray();
+    final double[] sampleD = createDiffusionCoefficients();
     // Create the Gaussian step for each diffusion coefficient
     final double[] step = Arrays.stream(sampleD).map(
         // Std.dev of Gaussian for the step size: sqrt(2D * dt)
         d -> Math.sqrt(2 * d * dt)).toArray();
 
-    final int threadCount = Prefs.getThreads();
-    final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
     final List<Future<int[][]>> futures = new LinkedList<>();
 
     final int total = pluginSettings.numberOfMolecules;
     final Ticker ticker = ImageJUtils.createTicker(total, threadCount);
-
-    // TODO: Add a MSD total for the steps and get the simulated D
 
     final AtomicInteger position = new AtomicInteger(total);
     for (int n = 0; n < threadCount; n++) {
@@ -210,7 +334,8 @@ public class DiffusionDepthOfField implements PlugIn {
           // Simulate the track from the origin
           double z = 0;
           for (int i = 0; i < maxT; i++) {
-            zn[i] = z += sampler.sample();
+            z += sampler.sample();
+            zn[i] = z;
           }
           // Simulate across the depth of field
           z = (p / (total - 1.0)) * halfDz;
@@ -239,13 +364,11 @@ public class DiffusionDepthOfField implements PlugIn {
     // Finish processing data
     ConcurrencyUtils.waitForCompletionUncheckedT(futures);
 
-    executor.shutdown();
-
     // Collate results
     final double[][] probability = new double[step.length][maxT];
-    for (Future<int[][]> f : futures) {
+    for (final Future<int[][]> f : futures) {
       try {
-        int[][] observed = f.get();
+        final int[][] observed = f.get();
         for (int j = 0; j < observed.length; j++) {
           for (int i = 0; i < maxT; i++) {
             probability[j][i] += observed[j][i];
@@ -261,124 +384,279 @@ public class DiffusionDepthOfField implements PlugIn {
       }
     }
 
-    ImageJUtils.finished(TITLE + " done");
+    return probability;
+  }
+
+  /**
+   * Creates the diffusion coefficients.
+   *
+   * <p>Returns the configured number of samples log-uniformly distributed from min D to max D.
+   *
+   * @return the diffusion coefficients
+   */
+  private double[] createDiffusionCoefficients() {
+    // Sample diffusion coefficients
+    // Use logarithmic scale
+    final double lnMin = Math.log(pluginSettings.minD);
+    final double lnMax = Math.log(pluginSettings.maxD);
+    final double[] sampleD = IntStream.rangeClosed(1, pluginSettings.sampleD).mapToDouble(i -> {
+      // interpolate D in [min, max] using [1, n] as [0, 1]
+      final double p = (i - 1.0) / (pluginSettings.sampleD - 1);
+      return Math.exp((1 - p) * lnMin + p * lnMax);
+    }).toArray();
+    return sampleD;
+  }
+
+  /**
+   * Plot the probability of remaining in the depth of field.
+   *
+   * @param probability the simulated probability
+   * @param fitted the fitted probability
+   */
+  private void plotRemaining(final double[][] probability, double[][] fitted) {
+    final double dt = pluginSettings.exposureTime / 1000;
+    final int maxT = pluginSettings.maxT;
 
     // Plot the observed distribution.
     // For each D add a line for all time steps
     final float[] time = SimpleArrayUtils.newArray(maxT, 1.0f, 1.0f);
     SimpleArrayUtils.apply(time, x -> (float) (x * dt));
-    final String title = TITLE + " observed";
+    final String title = TITLE + " probability";
     final Plot plot = new Plot(title, "Time (seconds)", "Probability");
-    LUT lut = LutHelper.createLut(LutColour.RED_BLUE);
+    LUT lut = LutHelper.createLut(LutColour.RED);
     for (int i = 0; i < probability.length; i++) {
-      plot.setColor(LutHelper.getColour(lut, i + 1, 1, probability.length));
+      plot.setColor(LutHelper.getColour(lut, 2 * (i + 1), 1, 2 * probability.length));
       plot.addPoints(time, SimpleArrayUtils.toFloat(probability[i]), Plot.LINE);
+    }
+    lut = LutHelper.createLut(LutColour.BLUE);
+    for (int i = 0; i < fitted.length; i++) {
+      plot.setColor(LutHelper.getColour(lut, 2 * (i + 1), 1, 2 * fitted.length));
+      plot.addPoints(time, SimpleArrayUtils.toFloat(fitted[i]), Plot.CIRCLE);
     }
     plot.setColor(Color.black);
     plot.setLimits(dt * 0.5, dt * maxT + dt * 0.5, 0, 1);
 
     ImageJUtils.display(title, plot);
-
-    // TODO:
-    // Move simulation to a method ???
-    // Fit the observed probability
-    // Add a table of results
-    // Plot the fitted p(remaining) for each diffusion coefficient (use points or change LUTs)
   }
 
-  private boolean showDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
+  /**
+   * Fit the probability of remaining in the depth of field.
+   *
+   * <p>Fit correction coefficient a and b.
+   *
+   * <pre>
+   * dz_corr = dz + a * sqrt(D) + b
+   * </pre>
+   *
+   * <p>dz_corr is used to compute the probability of remaining within the depth-of-field P(dt,
+   * dz_corr, D) and fit to the empirical distribution from the simulation.
+   *
+   * @param probability the probability
+   * @param threadCount the thread count
+   * @param executor the executor
+   * @return the coefficients
+   */
+  private double[] fitRemaining(double[][] probability, int threadCount, ExecutorService executor) {
+    if (pluginSettings.repeats == 0) {
+      // Allows arbitrary plotting of values. Typically these are zero.
+      return new double[] {pluginSettings.minA, pluginSettings.minB};
+    }
+    IJ.showStatus("Fitting probability...");
 
-    gd.addNumericField("Depth_of_field", pluginSettings.depthOfField, 1, 6, "nm");
-    gd.addNumericField("Exposure_time", pluginSettings.exposureTime, 1, 6, "ms");
-    gd.addSlider("Gap", 1, 5, pluginSettings.gap);
+    final double dt = pluginSettings.exposureTime / 1000;
+    final double dz = pluginSettings.depthOfField / 1000;
 
-    gd.addNumericField("Number_of_molecules", pluginSettings.numberOfMolecules);
-    gd.addNumericField("Max_t", pluginSettings.maxT);
-    gd.addNumericField("Min_D", pluginSettings.minD, 3, 6, "um^2/s");
-    gd.addNumericField("Max_D", pluginSettings.maxD, 3, 6, "um^2/s");
-    gd.addSlider("Sample_D", 2, 15, pluginSettings.sampleD);
 
-    gd.addHelp(HelpUrls.getUrl("diffusion-depth-of-field"));
-    gd.showDialog();
-    if (gd.wasCanceled()) {
-      return false;
+    final MultivariateFunction function = new DepthOfFieldFunction(dt, dz,
+        createDiffusionCoefficients(), probability, threadCount, executor);
+
+    final MaxEval maxEval = new MaxEval(2000);
+    final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
+
+    final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
+
+    double best = Double.POSITIVE_INFINITY;
+    double[] result = new double[2];
+
+    final ObjectiveFunction fun = new ObjectiveFunction(function);
+    final SimpleBounds bounds = new SimpleBounds(new double[2],
+        new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY});
+    final CustomPowellOptimizer.BasisStep step =
+        new CustomPowellOptimizer.BasisStep(new double[] {0.02, 0.01});
+    final UniformRandomProvider rng = UniformRandomProviders.create();
+
+    final Ticker ticker = ImageJUtils.createTicker(pluginSettings.repeats, 1);
+    for (int n = 1; n <= pluginSettings.repeats; n++) {
+      try {
+        // Guess in range
+        final double[] start = {rng.nextDouble(pluginSettings.minA, pluginSettings.maxA),
+            rng.nextDouble(pluginSettings.minB, pluginSettings.maxB),};
+
+        final PointValuePair solution = powellOptimizer.optimize(maxEval, fun, bounds, step,
+            GoalType.MINIMIZE, new InitialGuess(start));
+
+        LoggerUtils.log(logger, Level.INFO, "[%d] Fit : SS = %s (%d evaluations)", n,
+            solution.getValue(), powellOptimizer.getEvaluations());
+        if (solution.getValue() < best) {
+          best = solution.getValue();
+          result = solution.getPointRef();
+        }
+      } catch (final TooManyEvaluationsException ex) {
+        LoggerUtils.log(logger, Level.INFO,
+            "Powell optimiser [%d] failed : Too many evaluation (%d)", n,
+            powellOptimizer.getEvaluations());
+      } catch (final TooManyIterationsException ex) {
+        LoggerUtils.log(logger, Level.INFO,
+            "Powell optimiser [%d] failed : Too many iterations (%d)", n,
+            powellOptimizer.getIterations());
+      } catch (final ConvergenceException ex) {
+        LoggerUtils.log(logger, Level.INFO, "Powell optimiser [%d] failed to fit : %s", n,
+            ex.getMessage());
+      }
+      ticker.tick();
     }
 
-    pluginSettings.depthOfField = gd.getNextNumber();
-    pluginSettings.exposureTime = gd.getNextNumber();
-    pluginSettings.gap = (int) gd.getNextNumber();
-
-    pluginSettings.numberOfMolecules = (int) gd.getNextNumber();
-    pluginSettings.maxT = (int) gd.getNextNumber();
-    pluginSettings.minD = gd.getNextNumber();
-    pluginSettings.maxD = gd.getNextNumber();
-    pluginSettings.sampleD = (int) gd.getNextNumber();
-
-    // Check arguments
-    try {
-      ParameterUtils.isAboveZero("Depth of Field", pluginSettings.depthOfField);
-      ParameterUtils.isAboveZero("Exposure time", pluginSettings.exposureTime);
-      ParameterUtils.isAboveZero("Gap", pluginSettings.gap);
-
-      ParameterUtils.isAboveZero("Number of molecules", pluginSettings.numberOfMolecules);
-      ParameterUtils.isAboveZero("Max T", pluginSettings.maxT);
-      ParameterUtils.isAboveZero("Min D", pluginSettings.minD);
-      ParameterUtils.isAboveZero("Max D", pluginSettings.maxD);
-      ParameterUtils.isAbove("Sample D", pluginSettings.sampleD, 1);
-
-      ParameterUtils.isEqualOrAbove("Max D", pluginSettings.maxD, pluginSettings.minD);
-    } catch (final IllegalArgumentException ex) {
-      IJ.error(TITLE, ex.getMessage());
-      return false;
-    }
-
-    if (gd.invalidNumber()) {
-      return false;
-    }
-
-    return true;
+    return result;
   }
-  //
-  // private TextWindow createMsdTable(double baseMsd) {
-  // return ImageJUtils.refresh(TABLE_REF, () -> {
-  // return new TextWindow("MSD Analysis", createHeader(baseMsd), "", 800, 300);
-  // });
-  // }
-  //
-  // private String createHeader(double baseMsd) {
-  // final double apparentD = baseMsd / 4;
-  // final StringBuilder sb = new StringBuilder(256);
-//    //@formatter:off
-//    sb.append(settings.getDiffusionRate()).append('\t')
-//      .append(myPrecision).append('\t')
-//      .append(MathUtils.rounded(apparentD)).append('\t')
-//      .append(MathUtils.rounded(1.0 / settings.getStepsPerSecond())).append('\t')
-//      .append(myAggregateSteps).append('\t');
-//    //@formatter:on
-  // // Exposure time is the aggregated frame time
-  // exposureTime = myAggregateSteps / settings.getStepsPerSecond();
-  // sb.append(MathUtils.rounded(exposureTime)).append('\t');
-  // prefix = sb.toString();
-  // return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\t"
-  // + "Frame (s)\tt (s)\tn\tN\tMSD (um^2)\tD (um^2/s)";
-  // }
-  //
-  // private String addResult(int step, double sum, int count) {
-  // final StringBuilder sb = new StringBuilder();
-  // // Exposure time is the aggregated frame time
-  // final double msd = (sum / count) / conversionFactor;
-  // // Jump distance separation is the number of steps
-  // final double t = step / settings.getStepsPerSecond();
-//    //@formatter:off
-//    sb.append(prefix)
-//      .append(MathUtils.rounded(t)).append('\t')
-//      .append(MathUtils.rounded(t / exposureTime)).append('\t')
-//      .append(count).append('\t')
-//      // Not rounded to preserve precision
-//      .append(msd).append('\t')
-//      .append(msd / (4 * t));
-//    //@formatter:on
-  // return sb.toString();
-  // }
+
+  private void addToResultTable(double[] ab) {
+    createTable().append(addResult(ab));
+  }
+
+  private TextWindow createTable() {
+    return ImageJUtils.refresh(TABLE_REF, () -> {
+      return new TextWindow(TITLE + " Analysis", createHeader(), "", 800, 300);
+    });
+  }
+
+  private String createHeader() {
+    return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "min D (um^2/s)",
+        "max D (um^2/s)", "sample D", "a", "b",}).collect(Collectors.joining("\t"));
+  }
+
+  private String addResult(double[] ab) {
+    final StringBuilder sb = new StringBuilder();
+    //@formatter:off
+    sb.append(MathUtils.rounded(pluginSettings.depthOfField)).append('\t')
+      .append(MathUtils.rounded(pluginSettings.exposureTime)).append('\t')
+      .append(pluginSettings.gap).append('\t')
+      .append(pluginSettings.numberOfMolecules).append('\t')
+      .append(pluginSettings.maxT).append('\t')
+      .append(MathUtils.rounded(pluginSettings.minD)).append('\t')
+      .append(MathUtils.rounded(pluginSettings.maxD)).append('\t')
+      .append(pluginSettings.sampleD).append('\t')
+      .append(MathUtils.rounded(ab[0])).append('\t')
+      .append(MathUtils.rounded(ab[1]))
+      ;
+    //@formatter:on
+    return sb.toString();
+  }
+
+  private static CustomPowellOptimizer createCustomPowellOptimizer() {
+    final double rel = 1e-8;
+    final double abs = 1e-100;
+    final boolean basisConvergence = false;
+    return new CustomPowellOptimizer(rel, abs, null, basisConvergence);
+  }
+
+  private double[][] createProbability(double[] ab) {
+    final double dt = pluginSettings.exposureTime / 1000;
+    final double dz = pluginSettings.depthOfField / 1000;
+    final double[] diffusionCoefficients = createDiffusionCoefficients();
+
+    final double a = ab[0];
+    final double b = ab[1];
+    final double[][] probability = new double[diffusionCoefficients.length][pluginSettings.maxT];
+
+    for (int i = 0; i < probability.length; i++) {
+      final double d = diffusionCoefficients[i];
+      for (int j = 0; j < probability[i].length; j++) {
+        final double dz_corr = dz + a * Math.sqrt(d) + b;
+        probability[i][j] = DiffusionAnalysis.remaining(dt * (j + 1), dz_corr, d);
+      }
+    }
+
+    return probability;
+  }
+
+  /**
+   * Function to evaluate the squared distance between the simulated probability and the computed
+   * probability using P(dt, dz_corr, D) where z_corr is dz + a * sqrt(D) + b.
+   *
+   * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
+   */
+  static class DepthOfFieldFunction implements MultivariateFunction {
+    double dt;
+    double dz;
+    double[] diffusionCoefficients;
+    double[][] probability;
+    int threadCount;
+    ExecutorService executor;
+
+    DepthOfFieldFunction(double dt, double dz, double[] diffusionCoefficients,
+        double[][] probability, int threadCount, ExecutorService executor) {
+      this.dt = dt;
+      this.dz = dz;
+      this.diffusionCoefficients = diffusionCoefficients;
+      this.probability = probability;
+      this.threadCount = threadCount;
+      this.executor = executor;
+    }
+
+    @Override
+    public double value(double[] point) {
+      final double a = point[0];
+      final double b = point[1];
+      if (threadCount < 2 || executor == null) {
+        double ss = 0;
+        for (int i = 0; i < probability.length; i++) {
+          final double d = diffusionCoefficients[i];
+          for (int j = 0; j < probability[i].length; j++) {
+            final double dz_corr = dz + a * Math.sqrt(d) + b;
+            final double p = DiffusionAnalysis.remaining(dt * (j + 1), dz_corr, d);
+            final double dp = probability[i][j] - p;
+            ss += dp * dp;
+          }
+        }
+        return ss;
+      }
+
+      final List<Future<Double>> futures = new LinkedList<>();
+      final int maxj = probability[0].length;
+      final AtomicInteger position = new AtomicInteger(probability.length * maxj);
+
+      for (int n = 0; n < threadCount; n++) {
+        futures.add(executor.submit(() -> {
+          double ss = 0;
+          for (;;) {
+            final int p = position.decrementAndGet();
+            if (p < 0) {
+              break;
+            }
+            final int i = p / maxj;
+            final int j = p % maxj;
+
+            final double d = diffusionCoefficients[i];
+            final double dz_corr = dz + a * Math.sqrt(d) + b;
+            final double dp =
+                probability[i][j] - DiffusionAnalysis.remaining(dt * (j + 1), dz_corr, d);
+            ss += dp * dp;
+          }
+          return ss;
+        }));
+      }
+
+      // Finish processing data
+      ConcurrencyUtils.waitForCompletionUncheckedT(futures);
+      double ss = 0;
+      for (final Future<Double> f : futures) {
+        try {
+          ss += f.get();
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return ss;
+    }
+  }
 }
