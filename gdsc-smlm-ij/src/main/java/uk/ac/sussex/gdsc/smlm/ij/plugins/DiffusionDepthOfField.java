@@ -218,7 +218,7 @@ public class DiffusionDepthOfField implements PlugIn {
     gd.addSlider("Gap", 1, 5, pluginSettings.gap);
 
     gd.addNumericField("Number_of_molecules", pluginSettings.numberOfMolecules);
-    gd.addNumericField("Max_t", pluginSettings.maxT);
+    gd.addSlider("Max_t", 5, 15, pluginSettings.maxT);
     gd.addNumericField("Min_D", pluginSettings.minD, 3, 6, "um^2/s");
     gd.addNumericField("Max_D", pluginSettings.maxD, 3, 6, "um^2/s");
     gd.addSlider("Sample_D", 2, 30, pluginSettings.sampleD);
