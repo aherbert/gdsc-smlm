@@ -14,6 +14,8 @@ Minor release of GDSC SMLM.
   plugin to allow weighted fitting where each trace contributes equally to the fit irrespective
   of the trace length. This reduces bias introduced by long lasting immobile molecules (more jumps)
   and short lasting fast diffusing molecules (fewer jumps).
+* Added the :numref:`{name} <calibration_plugins:Diffusion Depth of Field>` plugin to model the
+  probabiity of a diffusing molecule remaining in the depth of field.
 
 
 Version 2.0

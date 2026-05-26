@@ -1527,5 +1527,129 @@ The precision error has the effect of increasing the mean-squared displacement f
 Diffusion Depth of Field
 ------------------------
 
-The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF.
+The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF. This plugin is based on the methods described in the `SpotOn` paper by Hansen `et al` (2018).
+
+
+Depth of Field Model
+~~~~~~~~~~~~~~~~~~~~
+
+The depth of field (:math:`\Delta z`) is the distance in the z-axis that can be used to identify a localisation in a super-resolution microscope experiment. When a molecule leaves the depth of field it is lost. This results in under-counting of molecules when using jump distances from multiple frames. Assuming absorbing boundaries such that a molecule touching the edge of the depth of field is lost, the fraction of molecules with diffusion coefficient :math:`D` that remain at time delay :math:`\Delta t` is given by:
+
+.. math::
+
+    \mathit{P}(\Delta t, \Delta z, D) = \frac{1}{\Delta z} \int_{-\Delta z / 2}^{\Delta z / 2} \left\{ 1 - \sum_{n=0}^{\inf} (-1)^n \left[ \text{erfc} \left( \frac{ \frac{(2n+1)\Delta z}{2} - z }{\sqrt{4D \Delta t}} \right) + \text{erfc} \left( \frac{ \frac{(2n+1)\Delta z}{2} + z }{\sqrt{4D \Delta t}} \right) \right] \right\} \text{d}z
+
+Note that this is for absorbing boundaries. In practice a molecule may diffuse out of the depth of field and then re-enter it. This may be approximately accounted for by using a larger depth of field :math:`\Delta z_{\text{corr}}` based on coefficient :math:`a` and :math:`b` for a given depth of field :math:`\Delta z`, time delay :math:`\Delta t` and allowed number of gaps :math:`g` in the track:
+
+.. math::
+
+    \Delta z_{\text{corr}} = \Delta z + a(\Delta z, \Delta t, g) + b(\Delta z, \Delta t, g)
+
+..
+  No index
+
+Analysis
+~~~~~~~~
+
+The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. The fraction of molecules within the depth of field at each time step is computed. By simulating a range of diffusion coeffcients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
+
+Fitting is performed using random starting points for the coefficients within a specified range. Fitted coefficients are not bound by this range but they must be positive. A number of repeats can be configured. If the number of repeats is set to zero then fitting is not performed and the plugin will display results using the configured minimum initial value for coefficient estimates. This option can be used to show the effect of absorbing boundaries if coeffecients are zero, or used to plot specific coefficient values.
+
+The plugin has the following parameters:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Depth of field
+     - The depth of field.
+
+   * - Exposure time
+     - The time step (exposure time) for each frame.
+
+   * - Gap
+     - The maximum allowed time gap between localisations in a track. Use 1 for continuous tracks. Greater than 1 allows a molecule to leave the depth of field and re-enter.
+
+   * - Number of molecules
+     - The number of molecules in the simulation.
+
+   * - Max t
+     - The maximum number of frames in the simulation.
+
+   * - Min D
+     - The minimum diffusion coefficient in the simulation.
+
+   * - Max D
+     - The maximum diffusion coefficient in the simulation.
+
+   * - Sample D
+     - The number of samples of the diffusion coefficient. Samples are log-uniformly distributed in the range specified for D.
+
+   * - Repeats
+     - The number of repeats for the fitting. Fitted is randomly initialised for coefficient a and b.
+
+   * - Min A
+     - The minimum initial value for fitting coefficient a.
+
+   * - Max A
+     - The maximum initial value for fitting coefficient a.
+
+   * - Min B
+     - The minimum initial value for fitting coefficient b.
+
+   * - Max B
+     - The maximum initial value for fitting coefficient b.
+
+The simulated fraction remaining is plotted using lines with the fitted probability shown as points (:numref:`Figure %s <fig_depth_of_field_probability>`). Note that the corrected depth of field is an approximation and the fitted points may both under-estimate and over-estimate the fraction remaining depending on the diffusion time. The effect of no correction can be viewed using zero for the number of fit repeats.
+
+.. _fig_depth_of_field_probability:
+.. figure:: images/depth_of_field_probability.png
+    :align: center
+    :figwidth: 80%
+
+    Depth of field simulation plot
+
+    Simulated fraction remaining in red lines; fitted probability in blue points.
+
+Fitting results are output to a summary table:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - **Column**
+     - Description
+
+   * - dz
+     - The depth of field.
+
+   * - dt
+     - The time step (exposure time) for each frame.
+
+   * - g
+     - The maximum allowed time gap (in frames) between localisations in a track.
+
+   * - n
+     - The number of molecules in the simulation.
+
+   * - max t
+     - The maximum number of frames in the simulation.
+
+   * - min D
+     - The minimum diffusion coefficient in the simulation.
+
+   * - max D
+     - The maximum diffusion coefficient in the simulation.
+
+   * - sample D
+     - The number of samples of the diffusion coefficient.
+
+   * - a
+     - The fitted coefficient `a`.
+
+   * - b
+     - The fitted coefficient `b`.
 
