@@ -765,6 +765,8 @@ Clicking the ``OK`` button begins the analysis. The HWHM for each dimension is e
     :align: center
     :figwidth: 80%
 
+    Half-width at half-maxima (HWHM) curve
+
 A dialog is shown that displays the current z-centre and FWHM (full-width at half-maxima) stored for the PSF and a new z-centre and FWHM defined by the HWHM curve (see :numref:`Figure %s <fig_hwhm_curve_dialog>`). Upon initialisation the minimum of the combined HWHM defines the new z-centre of the PSF. This can be moved using the dialog slider and the position of this slice is highlighted on the HWHM curve in green. The original PSF image is updated to the selected slice for reference. This allows choosing a new centre based on the HWHM curve. If the ``Yes`` button is selected the new z-centre and/or the new HWHM can be saved to the metadata for the PSF image. Note that the metadata for a PSF image is stored in the ImageJ info property and can be viewed using ``Image > Show Info...``.
 
 .. _fig_hwhm_curve_dialog:
@@ -772,6 +774,7 @@ A dialog is shown that displays the current z-centre and FWHM (full-width at hal
     :align: center
     :figwidth: 80%
 
+    Interactive dialog to allow updating the PSF using the half-width at half-maxima (HWHM) curve
 
 .. index:: ! Cubic Spline Manager
 
