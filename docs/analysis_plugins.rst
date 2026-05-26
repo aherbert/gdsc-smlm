@@ -1432,15 +1432,53 @@ See also :ref:`analysis_plugins:Trace Molecules (Multi)` which performs tracing 
 Track Diffusion Analysis
 ------------------------
 
-The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the `SpotOn` paper by Hansen `et al` (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
+The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the `Spot-On` paper by Hansen `et al` (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
 
 The plugin uses multiple input datasets that have been assigned to tracks using tracing. A traced dataset is identified using the Id field on the results from each dataset.
 
 Analysis
 ~~~~~~~~
 
-Text.
+The probability of a particle starting at the origin and ending at location :math:`r = (x, y)` after a time delay :math:`\Delta t` is given by:
 
+.. math::
+
+    P(r, \Delta t) = N \frac{r}{2D \Delta t} e^{-\frac{r^2}{4D \Delta t}}
+
+where :math:`N` is a normalisation constant with units of length. This is ommitted from subsequent expressions. To account for localisation error :math:`\sigma` the probability is adjusted:
+
+.. math::
+
+    P(r, \Delta t) = N \frac{r}{2(D \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D \Delta t + \sigma^2)}}
+
+A multi-population state with molecules diffusing at different rates is created using a composition with the fraction of each population :math:`F` multiplied by the probability of the observed distance for each respective diffusion constant. This ignores state transitions and so models the steady state of the populations.
+
+Note that a diffusing molecule may move out of the depth of field. This can cause significant under counting of fast molecules with increasing time delay. The probability that a moving molecule will remain in the depth of field can be computed. Details of the probability model are provided in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin. To account for molecules re-entering the depth of field a correction factor is fitted to simulated diffusion experiments. The fraction of moving molecules is thus multiplied by the probability that the molecule will remain within the depth of field :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)` computed using the corrected depth of field :math:`\Delta z_{\text{corr}}` based on coefficient :math:`a` and :math:`b` for a given depth of field :math:`\Delta z`, time delay :math:`\Delta t` and allowed number of gaps :math:`g` in the track:
+
+.. math::
+
+    \Delta z_{\text{corr}} = \Delta z + a(\Delta z, \Delta t, g) + b(\Delta z, \Delta t, g)
+
+The steady-state model for a 2-state population with bound fraction :math:`F_1` and diffusion coefficients :math:`D_1` and :math:`D_2` is:
+
+.. math::
+
+    \begin{aligned}
+    P_2(r, \Delta t) &= F_1 \frac{r}{2(D_1 \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D_1 \Delta t + \sigma^2)}} \\
+    &+ (1 - F_1) \mathit{P}(\Delta t, \Delta z_{\text{corr}}, D_2) \frac{r}{2(D_2 \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D_2 \Delta t + \sigma^2)}}
+    \end{aligned}
+
+The steady-state model for a 3-state population with bound fraction :math:`F_1`, slow diffusing fraction :math:`F_2`, and diffusion coefficients :math:`D_1`, :math:`D_2` and :math:`D_3` is:
+
+.. math::
+
+    \begin{aligned}
+    P_3(r, \Delta t) &= F_1 \frac{r}{2(D_1 \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D_1 \Delta t + \sigma^2)}} \\
+    &+ F_2 \mathit{P}(\Delta t, \Delta z_{\text{corr}}, D_2) \frac{r}{2(D_2 \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D_2 \Delta t + \sigma^2)}} \\
+    &+ (1 - F_1 - F_2) \mathit{P}(\Delta t, \Delta z_{\text{corr}}, D_3) \frac{r}{2(D_3 \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D_3 \Delta t + \sigma^2)}}
+    \end{aligned}
+
+The probability model can be fit using the observed distances from tracks using different time delays, for example delays of 1 to 5 frames. The observations can be fit using maximum likelihood estimation (MLE), or a cumulative histogram fit using least squares fitting against a numerical integration of the probabilty model over suitable bin sizes.
 
 Parameters
 ~~~~~~~~~~

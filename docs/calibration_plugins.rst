@@ -1527,7 +1527,7 @@ The precision error has the effect of increasing the mean-squared displacement f
 Diffusion Depth of Field
 ------------------------
 
-The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF. This plugin is based on the methods described in the `SpotOn` paper by Hansen `et al` (2018).
+The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF. This plugin is based on the methods described in the `Spot-On` paper by Hansen `et al` (2018).
 
 
 Depth of Field Model
