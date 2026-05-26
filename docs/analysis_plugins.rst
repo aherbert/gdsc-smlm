@@ -1427,6 +1427,32 @@ Note that the plugin supports the ``ImageJ`` recorder to allow running within an
 See also :ref:`analysis_plugins:Trace Molecules (Multi)` which performs tracing on multiple datasets; each dataset is traced individually and no aggregate analysis is performed.
 
 
+.. index:: ! Track Diffusion Analysis
+
+Track Diffusion Analysis
+------------------------
+
+The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the `SpotOn` paper by Hansen `et al` (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
+
+The plugin uses multiple input datasets that have been assigned to tracks using tracing. A traced dataset is identified using the Id field on the results from each dataset.
+
+Analysis
+~~~~~~~~
+
+Text.
+
+
+Parameters
+~~~~~~~~~~
+
+Text.
+
+Output
+~~~~~~
+
+Text.
+
+
 .. index:: ! Trace Length Analysis
 
 Trace Length Analysis
