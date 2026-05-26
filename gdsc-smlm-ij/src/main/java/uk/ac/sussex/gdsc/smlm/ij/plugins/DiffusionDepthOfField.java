@@ -55,6 +55,7 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
@@ -129,7 +130,7 @@ public class DiffusionDepthOfField implements PlugIn {
       gap = 1;
       // SpotOn paper used: n=50000, maxT=15; D in [1, 12]
       numberOfMolecules = 100000;
-      maxT = 10;
+      maxT = 15;
       minD = 1;
       maxD = 12;
       sampleD = 20;
@@ -317,9 +318,11 @@ public class DiffusionDepthOfField implements PlugIn {
     final Ticker ticker = ImageJUtils.createTicker(total, threadCount);
 
     final AtomicInteger position = new AtomicInteger(total);
+    final JumpableUniformRandomProvider rng =
+        UniformRandomProviders.createJumpable();
     for (int n = 0; n < threadCount; n++) {
       final NormalizedGaussianSampler sampler =
-          SamplerUtils.createNormalizedGaussianSampler(UniformRandomProviders.create());
+          SamplerUtils.createNormalizedGaussianSampler(rng.jump());
       futures.add(executor.submit(() -> {
         // Simulated track z-position from origin (unscaled)
         final double[] zn = new double[maxT];
@@ -531,7 +534,7 @@ public class DiffusionDepthOfField implements PlugIn {
   }
 
   private String createHeader() {
-    return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "min D (um^2/s)",
+    return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "g", "seed", "n", "max t", "min D (um^2/s)",
         "max D (um^2/s)", "sample D", "a", "b",}).collect(Collectors.joining("\t"));
   }
 
