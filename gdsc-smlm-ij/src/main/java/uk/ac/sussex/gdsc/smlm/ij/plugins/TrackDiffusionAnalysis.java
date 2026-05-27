@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.numbers.core.DD;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -110,6 +111,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double a;
     double b;
 
+    int groupSize;
     int repeats;
     double minD;
     double maxD;
@@ -134,6 +136,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       binWidth = 0.01;
 
+      groupSize = 5;
       repeats = 3;
       minD = 1;
       maxD = 5;
@@ -161,6 +164,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       a = source.a;
       b = source.b;
 
+      groupSize = source.groupSize;
       repeats = source.repeats;
       minD = source.minD;
       maxD = source.maxD;
@@ -243,18 +247,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final float[][] distances = getDistances(allResults);
 
-      plotDistances(distances);
+      final float[][] gDistances = groupDistances(distances);
 
-      // final double[][] probability = simulateRemaining(threadCount, executor);
-      //
-      // // Fit the observed probability
-      // final double[] ab = fitRemaining(probability, threadCount, executor);
-      //
-      // addToResultTable(ab);
-      //
-      // final double[][] fittedProbability = createProbability(ab);
-      //
-      // plotRemaining(probability, fittedProbability);
+      // TODO
+      // Fit the 2-state model
+      // Fit the 3-state model
+      // Plot the best fit on the PDF
+
+      plotDistances(distances);
 
     } finally {
       executor.shutdown();
@@ -466,7 +466,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("A", settings.a, 4);
     gd.addNumericField("B", settings.b, 4);
 
-    gd.addSlider("Repeats", 0, 5, settings.repeats);
+    gd.addNumericField("Group_size", settings.groupSize, 0);
+    gd.addSlider("Repeats", 1, 5, settings.repeats);
     gd.addNumericField("Min_D", settings.minD, 3, 6, "um^2/s");
     gd.addNumericField("Max_D", settings.maxD, 3, 6, "um^2/s");
 
@@ -485,6 +486,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.a = gd.getNextNumber();
     settings.b = gd.getNextNumber();
 
+    settings.groupSize = (int) gd.getNextNumber();
     settings.repeats = (int) gd.getNextNumber();
     settings.minD = gd.getNextNumber();
     settings.maxD = gd.getNextNumber();
@@ -500,7 +502,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ParameterUtils.isPositive("A", settings.a);
       ParameterUtils.isPositive("B", settings.b);
 
-      ParameterUtils.isPositive("Repeats", settings.repeats);
+      ParameterUtils.isPositive("Group size", settings.groupSize);
+      ParameterUtils.isAboveZero("Repeats", settings.repeats);
       ParameterUtils.isAboveZero("Min D", settings.minD);
       ParameterUtils.isAboveZero("Max D", settings.maxD);
 
@@ -651,12 +654,50 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final int[] sizes = IntStream.rangeClosed(1, maxT).map(i -> distances[i].size()).toArray();
     ImageJUtils.log("Distance counts: %s", Arrays.toString(sizes));
 
+    // Avoid fitting when there is no data
+    final int time = SimpleArrayUtils.findIndex(sizes, i -> i == 0);
+    if (time >= 0) {
+      throw new IllegalStateException("No sizes for time delay: " + (time + 1));
+    }
+
     // Convert to sorted arrays
     return IntStream.rangeClosed(1, maxT).mapToObj(i -> {
       final float[] data = distances[i].toFloatArray();
       Arrays.sort(data);
       return data;
     }).toArray(float[][]::new);
+  }
+
+  /**
+   * Group the distances into average distances in each group. This can be used to reduce the number
+   * of observations for fitting.
+   *
+   * @param distances the distances (must be sorted)
+   * @return the grouped distances
+   */
+  private float[][] groupDistances(float[][] distances) {
+    final int groupSize = settings.groupSize;
+    if (groupSize < 2) {
+      return distances;
+    }
+    final List<FloatArrayList> groupDistances = new LocalList<>();
+    for (final float[] d : distances) {
+      final FloatArrayList data = new FloatArrayList();
+      for (int i = 0; i < d.length; i += groupSize) {
+        double sum = 0;
+        final int end = Math.min(i + groupSize, d.length);
+        for (int j = i; j < end; j++) {
+          sum += d[j];
+        }
+        data.add((float) (sum / (end - i)));
+      }
+      groupDistances.add(data);
+    }
+
+    final int[] sizes = groupDistances.stream().mapToInt(FloatArrayList::size).toArray();
+    ImageJUtils.log("Grouped distance counts: %s", Arrays.toString(sizes));
+
+    return groupDistances.stream().map(FloatArrayList::toFloatArray).toArray(float[][]::new);
   }
 
   private void plotDistances(float[][] distances) {
@@ -742,82 +783,188 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   /**
-   * Function to evaluate the squared distance between the simulated probability and the computed
-   * probability using P(dt, dz_corr, D) where z_corr is dz + a * sqrt(D) + b.
+   * Creates the weights for each time delay. These are used to evenly balance the different number
+   * of observations for each time delay. The weight for is maxN / N where N is the number of
+   * observations for the time delay.
+   *
+   * @param distances the distances
+   * @return the weights
+   */
+  private static double[] createWeights(float[][] distances) {
+    final int[] sizes = Arrays.stream(distances).mapToInt(x -> x.length).toArray();
+    final double maxSize = Arrays.stream(sizes).max().getAsInt();
+    return Arrays.stream(sizes).mapToDouble(size -> maxSize / size).toArray();
+  }
+
+  /**
+   * Function to evaluate the log-likelihood of the observed distances for the two-state diffusion
+   * model.
    *
    * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
    */
-  static class DepthOfFieldFunction implements MultivariateFunction {
+  static class TwoStateModelFunction implements MultivariateFunction {
     double dt;
     double dz;
-    double[] diffusionCoefficients;
-    double[][] probability;
-    int threadCount;
+    float[][] distances;
     ExecutorService executor;
+    double[] weights;
 
-    DepthOfFieldFunction(double dt, double dz, double[] diffusionCoefficients,
-        double[][] probability, int threadCount, ExecutorService executor) {
+    TwoStateModelFunction(double dt, double dz, float[][] distances, ExecutorService executor) {
       this.dt = dt;
       this.dz = dz;
-      this.diffusionCoefficients = diffusionCoefficients;
-      this.probability = probability;
-      this.threadCount = threadCount;
+      this.distances = distances;
       this.executor = executor;
+      weights = createWeights(distances);
     }
 
     @Override
     public double value(double[] point) {
-      final double a = point[0];
-      final double b = point[1];
-      if (threadCount < 2 || executor == null) {
-        double ss = 0;
-        for (int i = 0; i < probability.length; i++) {
-          final double d = diffusionCoefficients[i];
-          for (int j = 0; j < probability[i].length; j++) {
-            final double dz_corr = dz + a * Math.sqrt(d) + b;
-            final double p = DiffusionAnalysis.remaining(dt * (j + 1), dz_corr, d);
-            final double dp = probability[i][j] - p;
-            ss += dp * dp;
-          }
+      final double sum = point[0] + point[2];
+      final double f1 = point[0] / sum;
+      final double d1 = point[1];
+      final double f2 = point[2] / sum;
+      final double d2 = point[3];
+      final double sigma = point[4];
+
+      // Note: This function assumes d1 is the bound fraction.
+      // If the fractions are sorted using d2 < d1 then this
+      // create a non-smooth function at the transition which can have
+      // poor fitting behaviour for an optimiser that is
+      // following a optimisation direction.
+      // It is assumed that if d1 and d2 are initialised sufficiently
+      // far apart with d1 << d2 then the two populations will
+      // be correctly fit. An option is to also compute p_remaining
+      // for the bound fraction.
+
+      if (executor == null) {
+        DD ll = DD.ZERO;
+        for (int time = 0; time < distances.length; time++) {
+          ll = ll.add(compute(f1, d1, f2, d2, sigma, time));
         }
-        return ss;
+        return ll.doubleValue();
       }
 
-      final List<Future<Double>> futures = new LinkedList<>();
-      final int maxj = probability[0].length;
-      final AtomicInteger position = new AtomicInteger(probability.length * maxj);
+      final List<Future<DD>> futures = new LinkedList<>();
 
-      for (int n = 0; n < threadCount; n++) {
-        futures.add(executor.submit(() -> {
-          double ss = 0;
-          for (;;) {
-            final int p = position.decrementAndGet();
-            if (p < 0) {
-              break;
-            }
-            final int i = p / maxj;
-            final int j = p % maxj;
-
-            final double d = diffusionCoefficients[i];
-            final double dz_corr = dz + a * Math.sqrt(d) + b;
-            final double dp =
-                probability[i][j] - DiffusionAnalysis.remaining(dt * (j + 1), dz_corr, d);
-            ss += dp * dp;
-          }
-          return ss;
-        }));
+      for (int n = distances.length; --n >= 0;) {
+        final int time = n;
+        futures.add(executor.submit(() -> compute(f1, d1, f2, d2, sigma, time)));
       }
 
       // Finish processing data
-      double ss = 0;
-      for (final Future<Double> f : futures) {
+      DD ll = DD.ZERO;
+      for (final Future<DD> f : futures) {
         try {
-          ss += f.get();
+          ll = ll.add(f.get());
         } catch (InterruptedException | ExecutionException e) {
           throw new RuntimeException(e);
         }
       }
-      return ss;
+      return ll.doubleValue();
+    }
+
+    private DD compute(double f1, double d1, double f2, double d2, double sigma, int time) {
+      DD ll = DD.ZERO;
+      final float[] d = distances[time];
+      final double deltaT = dt * (time + 1);
+      final double p2 = DiffusionAnalysis.remaining(deltaT, dz, d2);
+      final double denom1 = 0.25 * (d1 * deltaT + sigma * sigma);
+      final double denom2 = 0.25 * (d2 * deltaT + sigma * sigma);
+      for (final float r : d) {
+        final double p = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
+        ll = ll.add(Math.log(p));
+      }
+      return ll.multiply(weights[time]);
+    }
+  }
+
+  /**
+   * Function to evaluate the log-likelihood of the observed distances for the three-state diffusion
+   * model.
+   *
+   * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
+   */
+  static class ThreeStateModelFunction implements MultivariateFunction {
+    double dt;
+    double dz;
+    float[][] distances;
+    ExecutorService executor;
+    double[] weights;
+
+    ThreeStateModelFunction(double dt, double dz, float[][] distances, ExecutorService executor) {
+      this.dt = dt;
+      this.dz = dz;
+      this.distances = distances;
+      this.executor = executor;
+      weights = createWeights(distances);
+    }
+
+    @Override
+    public double value(double[] point) {
+      final double sum = point[0] + point[2] + point[4];
+      final double f1 = point[0] / sum;
+      final double d1 = point[1];
+      final double f2 = point[2] / sum;
+      final double d2 = point[3];
+      final double f3 = point[4] / sum;
+      final double d3 = point[5];
+      final double sigma = point[6];
+
+      // Note: This function assumes d1 is the bound fraction.
+      // If the fractions are sorted then this
+      // create a non-smooth function at the transitions which can have
+      // poor fitting behaviour for an optimiser that is
+      // following a optimisation direction.
+      // It is assumed that if d are initialised sufficiently
+      // far apart with d1 << d2 << d3 then the three populations will
+      // be correctly fit. An option is to also compute p_remaining
+      // for the bound fraction.
+
+      if (executor == null) {
+        DD ll = DD.ZERO;
+        for (int time = 0; time < distances.length; time++) {
+          ll = ll.add(compute(f1, d1, f2, d2, f3, d3, sigma, time));
+        }
+        return ll.doubleValue();
+      }
+
+      final List<Future<DD>> futures = new LinkedList<>();
+
+      for (int n = distances.length; --n >= 0;) {
+        final int time = n;
+        futures.add(executor.submit(() -> compute(f1, d1, f2, d2, f3, d3, sigma, time)));
+      }
+
+      // Finish processing data
+      DD ll = DD.ZERO;
+      for (final Future<DD> f : futures) {
+        try {
+          ll = ll.add(f.get());
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return ll.doubleValue();
+    }
+
+    private DD compute(double f1, double d1, double f2, double d2, double f3, double d3,
+        double sigma, int time) {
+      DD ll = DD.ZERO;
+      final float[] d = distances[time];
+      final double deltaT = dt * (time + 1);
+      final double p2 = DiffusionAnalysis.remaining(deltaT, dz, d2);
+      final double p3 = DiffusionAnalysis.remaining(deltaT, dz, d3);
+      final double denom1 = 0.25 * (d1 * deltaT + sigma * sigma);
+      final double denom2 = 0.25 * (d2 * deltaT + sigma * sigma);
+      final double denom3 = 0.25 * (d3 * deltaT + sigma * sigma);
+      for (final float r : d) {
+        final double p = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        ll = ll.add(Math.log(p));
+      }
+      return ll.multiply(weights[time]);
     }
   }
 }
