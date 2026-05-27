@@ -32,6 +32,7 @@ import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -51,6 +52,7 @@ import org.apache.commons.rng.simple.RandomSource;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -65,7 +67,6 @@ import uk.ac.sussex.gdsc.smlm.fitting.DiffusionAnalysis;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
 import uk.ac.sussex.gdsc.smlm.results.IdPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 
@@ -102,6 +103,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double depthOfField;
     int gap;
     int maxT;
+    int offsets;
+
+    double binWidth;
 
     double a;
     double b;
@@ -122,9 +126,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     Settings() {
       selected = new LocalList<>();
+
       depthOfField = 750;
       gap = 1;
-      maxT = 5;
+      maxT = 7;
+      offsets = 0;
+
+      binWidth = 0.01;
+
       repeats = 3;
       minD = 1;
       maxD = 5;
@@ -133,7 +142,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       numberOfMolecules = 50000;
       simT = 10;
       precision = 30;
-      f1 = 0.5;
+      f1 = 0.2;
       d1 = 0.01;
       d2 = 1.5;
       d3 = 5;
@@ -145,6 +154,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       depthOfField = source.depthOfField;
       gap = source.gap;
       maxT = source.maxT;
+      offsets = source.offsets;
+
+      binWidth = source.binWidth;
 
       a = source.a;
       b = source.b;
@@ -446,7 +458,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
 
     gd.addNumericField("Depth_of_field", settings.depthOfField, 1, 6, "nm");
-    gd.addSlider("Max_t", 3, 7, settings.maxT);
+    gd.addSlider("Max_t", 3, 10, settings.maxT);
+    gd.addSlider("Offsets", 0, 5, settings.offsets);
+
+    gd.addNumericField("Bin_width", settings.binWidth, -3);
 
     gd.addNumericField("A", settings.a, 4);
     gd.addNumericField("B", settings.b, 4);
@@ -463,6 +478,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     settings.depthOfField = gd.getNextNumber();
     settings.maxT = (int) gd.getNextNumber();
+    settings.offsets = (int) gd.getNextNumber();
+
+    settings.binWidth = gd.getNextNumber();
 
     settings.a = gd.getNextNumber();
     settings.b = gd.getNextNumber();
@@ -475,6 +493,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     try {
       ParameterUtils.isAboveZero("Depth of Field", settings.depthOfField);
       ParameterUtils.isAboveZero("Max T", settings.maxT);
+      ParameterUtils.isPositive("Offsets", settings.offsets);
+
+      ParameterUtils.isAboveZero("Bin width", settings.binWidth);
 
       ParameterUtils.isPositive("A", settings.a);
       ParameterUtils.isPositive("B", settings.b);
@@ -597,7 +618,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         if (r.getId() != id[0]) {
           id[0] = r.getId();
           // Process track
-          for (int i = 0; i < track.size(); i++) {
+          final int maxStart = Math.min(track.size() - 1, settings.offsets + 1);
+          for (int i = 0; i < maxStart; i++) {
             final Position origin = track.get(i);
             for (int j = i + 1; j < track.size(); j++) {
               final Position position = track.get(j);
@@ -625,6 +647,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
         }
       }
     }
+
+    final int[] sizes = IntStream.rangeClosed(1, maxT).map(i -> distances[i].size()).toArray();
+    ImageJUtils.log("Distance counts: %s", Arrays.toString(sizes));
+
     // Convert to sorted arrays
     return IntStream.rangeClosed(1, maxT).mapToObj(i -> {
       final float[] data = distances[i].toFloatArray();
@@ -634,16 +660,16 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private void plotDistances(float[][] distances) {
-    final String title = TITLE + " distances";
-    final Plot plot = new Plot(title, "Distance (um)", "Probability");
+    String title = TITLE + " distance CDF";
+    Plot plot = new Plot(title, "Distance (um)", "Probability");
     double maxD = 0.01;
-    final LUT lut = LutHelper.createLut(LutColour.RAINBOW, false);
+    final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
     for (int i = 0; i < distances.length; i++) {
       final float[] x = distances[i];
       if (x.length == 0) {
         continue;
       }
-      plot.setColor(LutHelper.getColour(lut, i + 1, 1, distances.length));
+      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
       final double scale = 1.0 / x.length;
       SimpleArrayUtils.apply(y, f -> (float) (f * scale));
@@ -653,7 +679,66 @@ public class TrackDiffusionAnalysis implements PlugIn {
     plot.setColor(Color.black);
     plot.setLimits(0, maxD, 0, 1.05);
 
-    ImageJUtils.display(title, plot);
+    final WindowOrganiser wo = new WindowOrganiser();
+    ImageJUtils.display(title, plot, 0, wo);
+
+    title = TITLE + " distance PDF";
+    plot = new Plot(title, "Distance (um)", "Probability");
+    final float binWidth = (float) settings.binWidth;
+    float maxP = 0;
+    for (int i = 0; i < distances.length; i++) {
+      final float[] x = distances[i];
+      if (x.length == 0) {
+        continue;
+      }
+      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      final float[] y = createPdf(binWidth, x);
+      final float[] r = SimpleArrayUtils.newArray(x.length, binWidth / 2, binWidth);
+      maxP = MathUtils.maxDefault(maxP, y);
+      plot.addPoints(r, y, Plot.BAR);
+    }
+    plot.setColor(Color.black);
+    plot.setLimits(0, maxD, 0, maxP * 1.05);
+
+    ImageJUtils.display(title, plot, 0, wo);
+    wo.tile();
+  }
+
+  /**
+   * Creates the probabilty density function.
+   *
+   * @param binWidth the bin width
+   * @param distances the distances (must be sorted)
+   * @return the pdf
+   */
+  private static float[] createPdf(float binWidth, float[] distances) {
+    final IntArrayList counts = new IntArrayList();
+    double max = binWidth;
+    int bin = 1;
+    int count = 0;
+    for (final float d : distances) {
+      if (d >= max) {
+        counts.add(count);
+        bin++;
+        max = bin * binWidth;
+        while (d >= max) {
+          counts.add(0);
+          bin++;
+          max = bin * binWidth;
+        }
+        count = 1;
+      } else {
+        count++;
+      }
+    }
+    counts.add(count);
+
+    final double scale = 1.0 / distances.length;
+    final float[] pdf = new float[counts.size()];
+    for (int i = 0; i < pdf.length; i++) {
+      pdf[i] = (float) (counts.getInt(i) * scale);
+    }
+    return pdf;
   }
 
   /**
