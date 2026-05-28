@@ -364,9 +364,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
       cw.setDistanceUnit(DistanceUnit.UM);
       results.setCalibration(cw.getCalibration());
       results.setName(TITLE);
+      MemoryPeakResults.addResults(results);
+
       // Uncomment to allow rendering the dataset (which requires pixel units)
       // results.convertToPreferredUnits();
-      MemoryPeakResults.addResults(results);
+
+      // Pre-select the simulation
+      if (settings.selected.isEmpty()) {
+        settings.selected.add(TITLE);
+      }
 
       // Build final results in memory
       for (final Future<MemoryPeakResults> f : futures) {
