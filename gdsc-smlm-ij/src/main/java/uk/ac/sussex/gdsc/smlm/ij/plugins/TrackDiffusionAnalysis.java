@@ -147,6 +147,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     boolean fitPrecision;
     boolean fitThreeState;
+    boolean fitMle;
     double significanceLevel;
 
     Settings() {
@@ -205,6 +206,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       fitPrecision = source.fitPrecision;
       fitThreeState = source.fitThreeState;
+      fitMle = source.fitMle;
       significanceLevel = source.significanceLevel;
     }
 
@@ -272,14 +274,21 @@ public class TrackDiffusionAnalysis implements PlugIn {
     logger = ImageJPluginLoggerHelper.getLogger(getClass());
 
     final float[][] distances = getDistances(allResults);
-    final float[][] gDistances = groupDistances(distances);
+    final float[][] pdf = createPdf(distances);
 
     final int threadCount = Prefs.getThreads();
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
     try {
-      final PointValuePair result = fitDistances(gDistances, executor);
-      plotDistances(distances, result, executor);
+      PointValuePair result;
+      // Update the fit method to accept distances or pdf and fit MLE or SS
+      if (settings.fitMle) {
+        final float[][] gDistances = groupDistances(distances);
+        result = fitDistances(gDistances, executor, true);
+      } else {
+        result = fitDistances(pdf, executor, false);
+      }
+      plotDistances(distances, pdf, result, executor);
     } finally {
       executor.shutdown();
     }
@@ -507,6 +516,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     gd.addCheckbox("Fit_precision", settings.fitPrecision);
     gd.addCheckbox("Fit_three_state", settings.fitThreeState);
+    gd.addCheckbox("Fit_MLE", settings.fitMle);
     gd.addNumericField("significanceLevel", settings.significanceLevel, -3);
 
     gd.addHelp(HelpUrls.getUrl("track-diffusion-analysis"));
@@ -532,6 +542,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     settings.fitPrecision = gd.getNextBoolean();
     settings.fitThreeState = gd.getNextBoolean();
+    settings.fitMle = gd.getNextBoolean();
     settings.significanceLevel = gd.getNextNumber();
 
     // Check arguments
@@ -760,25 +771,35 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return groupDistances.stream().map(FloatArrayList::toFloatArray).toArray(float[][]::new);
   }
 
-  private PointValuePair fitDistances(float[][] distances, ExecutorService executor) {
-    final PointValuePair result2 = fitTwoStateDistances(distances, executor);
+  private PointValuePair fitDistances(float[][] distances, ExecutorService executor, boolean mle) {
+    final PointValuePair result2 = fitTwoStateDistances(distances, executor, mle);
     if (result2 == null) {
       return null;
     }
     addToResultTable(result2);
-    final PointValuePair result3 = fitThreeStateDistances(distances, executor);
+    final PointValuePair result3 = fitThreeStateDistances(distances, executor, mle);
     if (result3 != null) {
       addToResultTable(result3);
+      double ll2 = result2.getValue();
+      double ll3 = result3.getValue();
+
+      if (!mle) {
+        // Choose best model for SS using approximate log-likelihood
+        final int n = distances.length * distances[0].length;
+        ll2 = MathUtils.getLogLikelihood(ll2, n);
+        ll3 = MathUtils.getLogLikelihood(ll3, n);
+      }
+
       // Select best fit using log-likelihood ratio test
-      final double llr = 2 * (result3.getValue() - result2.getValue());
+      final double llr = 2 * (ll3 - ll2);
       if (llr >= 0) {
         // The difference in the number of fitted parameters will be 2:
         // i.e. 1 extra diffusion coefficient and population fraction
         final double q = ChiSquaredDistributionTable.computeQValue(llr, 2);
         final boolean reject = q > settings.significanceLevel;
         LoggerUtils.log(logger, Level.INFO,
-            "Two-state -> three-state : MLE = %s -> %s, LLR = %s, q-value = %s (Reject=%b)",
-            MathUtils.rounded(result2.getValue(), 4), MathUtils.rounded(result3.getValue(), 4),
+            "Two-state -> three-state : LL = %s -> %s, LLR = %s, q-value = %s (Reject=%b)",
+            MathUtils.rounded(ll2, 4), MathUtils.rounded(ll3, 4),
             MathUtils.rounded(llr, 4), MathUtils.rounded(q, 4), reject);
         if (!reject) {
           return result3;
@@ -788,7 +809,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return result2;
   }
 
-  private PointValuePair fitTwoStateDistances(float[][] distances, ExecutorService executor) {
+  private PointValuePair fitTwoStateDistances(float[][] distances, ExecutorService executor,
+      boolean mle) {
     IJ.showStatus("Fitting two-state model...");
 
     final double dt = exposureTime;
@@ -805,9 +827,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // fit: f1, d1, f2, d2, sigma
     // Note that f2 = 1 - f1 so the number of fitted parameters is 4.
     // However for convenience f2 is also a fitted parameter for the optimiser.
-    final MultivariateFunction function =
-        new TwoStateModelFunction(dt, dz, settings.a, settings.b, precision, distances, executor);
-    final ObjectiveFunction fun = new ObjectiveFunction(function);
+    final ObjectiveFunction fun;
+    final GoalType goalType;
+    if (mle) {
+      fun = new ObjectiveFunction(new TwoStateModelFunction(dt, dz, settings.a, settings.b,
+          precision, distances, executor));
+      goalType = GoalType.MAXIMIZE;
+    } else {
+      fun = new ObjectiveFunction(new TwoStateSSFunction(dt, dz, settings.a, settings.b, precision,
+          settings.binWidth, distances, executor));
+      goalType = GoalType.MINIMIZE;
+      best = Double.POSITIVE_INFINITY;
+    }
     final SimpleBounds bounds = new SimpleBounds(addPrecision(new double[] {0, 0.001, 0, 0.1}, 0),
         addPrecision(new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY}, 0.1));
     final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
@@ -818,25 +849,34 @@ public class TrackDiffusionAnalysis implements PlugIn {
       try {
         // Guess in range
         final double[] start = addPrecision(new double[] {
-                // Bound fraction
-                rng.nextDouble(0.1, 0.9), rng.nextDouble(0.1),
-                // Free fraction
-                0, rng.nextDouble(settings.minD, settings.maxD)},
-                // precision
-                rng.nextDouble(0.01, 0.03));
+            // Bound fraction
+            rng.nextDouble(0.1, 0.9), rng.nextDouble(0.1),
+            // Free fraction
+            0, rng.nextDouble(settings.minD, settings.maxD)},
+            // precision
+            rng.nextDouble(0.01, 0.03));
         // Set f2
         start[2] = 1 - start[0];
 
-        final PointValuePair solution = powellOptimizer.optimize(maxEval, fun, bounds, step,
-            GoalType.MAXIMIZE, new InitialGuess(start));
+        final PointValuePair solution =
+            powellOptimizer.optimize(maxEval, fun, bounds, step, goalType, new InitialGuess(start));
 
-        LoggerUtils.log(logger, Level.INFO,
-            "Two-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n, solution.getValue(),
-            MathUtils.getAkaikeInformationCriterion(solution.getValue(), 4),
-            powellOptimizer.getEvaluations());
-        if (solution.getValue() > best) {
-          best = solution.getValue();
-          result = solution;
+        if (mle) {
+          LoggerUtils.log(logger, Level.INFO,
+              "Two-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n,
+              solution.getValue(), MathUtils.getAkaikeInformationCriterion(solution.getValue(), 4),
+              powellOptimizer.getEvaluations());
+          if (solution.getValue() > best) {
+            best = solution.getValue();
+            result = solution;
+          }
+        } else {
+          LoggerUtils.log(logger, Level.INFO, "Two-state fit [%d]: SS = %s (%d evaluations)", n,
+              solution.getValue(), powellOptimizer.getEvaluations());
+          if (solution.getValue() < best) {
+            best = solution.getValue();
+            result = solution;
+          }
         }
       } catch (final TooManyEvaluationsException ex) {
         LoggerUtils.log(logger, Level.INFO,
@@ -855,25 +895,29 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     if (result != null) {
       // Normalise fractions
-      final double[] r = result.getPointRef();
-      final double sum = r[0] + r[2];
-      r[0] /= sum;
-      r[2] /= sum;
-      // Sort (in event that the free fraction is slower than the bound)
-      if (r[3] < r[1]) {
-        final double f = r[0];
-        final double d = r[1];
-        r[0] = r[2];
-        r[1] = r[3];
-        r[2] = f;
-        r[3] = d;
-      }
+      sort2state(result.getPointRef());
     }
 
     return result;
   }
 
-  private PointValuePair fitThreeStateDistances(float[][] distances, ExecutorService executor) {
+  private static void sort2state(final double[] r) {
+    final double sum = r[0] + r[2];
+    r[0] /= sum;
+    r[2] /= sum;
+    // Sort (in event that the free fraction is slower than the bound)
+    if (r[3] < r[1]) {
+      final double f = r[0];
+      final double d = r[1];
+      r[0] = r[2];
+      r[1] = r[3];
+      r[2] = f;
+      r[3] = d;
+    }
+  }
+
+  private PointValuePair fitThreeStateDistances(float[][] distances, ExecutorService executor,
+      boolean mle) {
     if (!settings.fitThreeState) {
       return null;
     }
@@ -895,9 +939,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // Note that f3 = 1 - f1 - f2 so the number of fitted parameters is 6.
     // However the optimiser does not support compound constraints (f1+f2<=1)
     // so for convenience f3 is also a fitted parameter for the optimiser.
-    final MultivariateFunction function =
-        new ThreeStateModelFunction(dt, dz, settings.a, settings.b, precision, distances, executor);
-    final ObjectiveFunction fun = new ObjectiveFunction(function);
+    final ObjectiveFunction fun;
+    final GoalType goalType;
+    if (mle) {
+      fun = new ObjectiveFunction(new ThreeStateModelFunction(dt, dz, settings.a, settings.b,
+          precision, distances, executor));
+      goalType = GoalType.MAXIMIZE;
+    } else {
+      fun = new ObjectiveFunction(new ThreeStateSSFunction(dt, dz, settings.a, settings.b,
+          precision, settings.binWidth, distances, executor));
+      goalType = GoalType.MINIMIZE;
+      best = Double.POSITIVE_INFINITY;
+    }
     final SimpleBounds bounds =
         new SimpleBounds(addPrecision(new double[] {0, 0.001, 0, 0.1, 0, 0.1}, 0), addPrecision(
             new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1));
@@ -921,16 +974,25 @@ public class TrackDiffusionAnalysis implements PlugIn {
         // Set f3
         start[4] = 1 - start[0] - start[2];
 
-        final PointValuePair solution = powellOptimizer.optimize(maxEval, fun, bounds, step,
-            GoalType.MAXIMIZE, new InitialGuess(start));
+        final PointValuePair solution =
+            powellOptimizer.optimize(maxEval, fun, bounds, step, goalType, new InitialGuess(start));
 
-        LoggerUtils.log(logger, Level.INFO,
-            "Three-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n,
-            solution.getValue(), MathUtils.getAkaikeInformationCriterion(solution.getValue(), 4),
-            powellOptimizer.getEvaluations());
-        if (solution.getValue() > best) {
-          best = solution.getValue();
-          result = solution;
+        if (mle) {
+          LoggerUtils.log(logger, Level.INFO,
+              "Three-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n,
+              solution.getValue(), MathUtils.getAkaikeInformationCriterion(solution.getValue(), 4),
+              powellOptimizer.getEvaluations());
+          if (solution.getValue() > best) {
+            best = solution.getValue();
+            result = solution;
+          }
+        } else {
+          LoggerUtils.log(logger, Level.INFO, "Three-state fit [%d]: SS = %s (%d evaluations)", n,
+              solution.getValue(), powellOptimizer.getEvaluations());
+          if (solution.getValue() < best) {
+            best = solution.getValue();
+            result = solution;
+          }
         }
       } catch (final TooManyEvaluationsException ex) {
         LoggerUtils.log(logger, Level.INFO,
@@ -948,15 +1010,35 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      // Normalise fractions
-      final double[] r = result.getPointRef();
-      final double sum = r[0] + r[2] + r[4];
-      r[0] /= sum;
-      r[2] /= sum;
-      r[4] /= sum;
-      // Sort (in event that the free fraction is slower than the bound)
-      double f;
-      double d;
+      sort3state(result.getPointRef());
+    }
+
+    return result;
+  }
+
+  private static void sort3state(final double[] r) {
+    final double sum = r[0] + r[2] + r[4];
+    r[0] /= sum;
+    r[2] /= sum;
+    r[4] /= sum;
+    // Sort (in event that the free fraction is slower than the bound)
+    double f;
+    double d;
+    if (r[3] < r[1]) {
+      f = r[0];
+      d = r[1];
+      r[0] = r[2];
+      r[1] = r[3];
+      r[2] = f;
+      r[3] = d;
+    }
+    if (r[5] < r[3]) {
+      f = r[2];
+      d = r[3];
+      r[2] = r[4];
+      r[3] = r[5];
+      r[4] = f;
+      r[5] = d;
       if (r[3] < r[1]) {
         f = r[0];
         d = r[1];
@@ -965,25 +1047,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         r[2] = f;
         r[3] = d;
       }
-      if (r[5] < r[3]) {
-        f = r[2];
-        d = r[3];
-        r[2] = r[4];
-        r[3] = r[5];
-        r[4] = f;
-        r[5] = d;
-        if (r[3] < r[1]) {
-          f = r[0];
-          d = r[1];
-          r[0] = r[2];
-          r[1] = r[3];
-          r[2] = f;
-          r[3] = d;
-        }
-      }
     }
-
-    return result;
   }
 
   private static CustomPowellOptimizer createCustomPowellOptimizer() {
@@ -1015,7 +1079,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private String createHeader() {
     return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "offsets", "precision (nm)",
         "fit precision", "a", "b", "group size", "repeats", "min D (um^2/s)", "max D (um^2/s)", "F",
-        "D", "sigma (nm)", "MLE"}).collect(Collectors.joining("\t"));
+        "D", "sigma (nm)", "Value"}).collect(Collectors.joining("\t"));
   }
 
   private String addResult(PointValuePair result) {
@@ -1035,13 +1099,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ;
     //@formatter:on
     if (result != null) {
-      double[] fit = result.getPointRef();
-      int n = fit.length / 2;
-      String f = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i]))
+      final double[] fit = result.getPointRef();
+      final int n = fit.length / 2;
+      final String f = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i]))
           .collect(Collectors.joining(", "));
-      String d = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i + 1]))
+      final String d = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i + 1]))
           .collect(Collectors.joining(", "));
-      double precision = (fit.length & 1) == 1 ? fit[2 * n] * 1e3 : settings.precision;
+      final double precision = (fit.length & 1) == 1 ? fit[2 * n] * 1e3 : settings.precision;
       sb.append('\t').append(f).append('\t').append(d).append('\t')
           .append(MathUtils.rounded(precision)).append('\t')
           .append(MathUtils.rounded(result.getValue()));
@@ -1049,87 +1113,24 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return sb.toString();
   }
 
-  private void plotDistances(float[][] distances, PointValuePair result, ExecutorService executor) {
-    IJ.showStatus("Plotting results...");
-    String title = TITLE + " distance CDF";
-    Plot plot = new Plot(title, "Distance (um)", "Probability");
-    double maxD = 0.01;
-    final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
-    for (int i = 0; i < distances.length; i++) {
-      final float[] x = distances[i];
-      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
-      final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
-      final double scale = 1.0 / x.length;
-      SimpleArrayUtils.apply(y, f -> (float) (f * scale));
-      maxD = Math.max(maxD, x[x.length - 1]);
-      plot.addPoints(x, y, Plot.LINE);
-    }
-    plot.setColor(Color.black);
-    plot.setLimits(0, maxD, 0, 1.05);
+  private float[][] createPdf(float[][] distances) {
+    IJ.showStatus("Creating PDF...");
 
-    final WindowOrganiser wo = new WindowOrganiser();
-    ImageJUtils.display(title, plot, 0, wo);
-
-    title = TITLE + " distance PDF";
-    plot = new Plot(title, "Distance (um)", "Probability");
     final float binWidth = (float) settings.binWidth;
-    float maxP = 0;
-    float[][] evalDistances = new float[distances.length][];
+    final float[][] pdf = new float[distances.length][];
+    int n = 0;
     for (int i = 0; i < distances.length; i++) {
       final float[] x = distances[i];
-      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
-      final float[] y = createPdf(binWidth, x);
-      final float[] r = SimpleArrayUtils.newArray(y.length, binWidth / 2, binWidth);
-      maxP = MathUtils.maxDefault(maxP, y);
-      plot.addPoints(r, y, Plot.BAR);
-
-      // Evaluate the PDF using Simpson integration: use [a, (a+b)/2, b] for each bin [a, b].
-      evalDistances[i] = SimpleArrayUtils.newArray(y.length * 2 + 1, 0, binWidth * 0.5f);
-    }
-    plot.setColor(Color.black);
-    plot.setLimits(0, maxD, 0, maxP * 1.05);
-
-    ImageJUtils.display(title, plot, 0, wo);
-    wo.tile();
-
-    if (result == null) {
-      return;
+      pdf[i] = createPdf(binWidth, x);
+      n = Math.max(n, pdf[i].length);
     }
 
-    // Compute fitted PDF.
-    // Use Simpson integration for each bin.
-
-    final double dt = exposureTime;
-    final double dz = settings.depthOfField / 1000;
-    final double precision = settings.precision / 1000;
-    double[][] p;
-    double[] fit = result.getPointRef();
-    if (fit.length < 6) {
-      p = new TwoStateModelFunction(dt, dz, settings.a, settings.b, precision, evalDistances,
-          executor).evaluate(fit);
-    } else {
-      p = new ThreeStateModelFunction(dt, dz, settings.a, settings.b, precision, evalDistances,
-          executor).evaluate(fit);
+    // Zero pad to max length
+    for (int i = 0; i < distances.length; i++) {
+      pdf[i] = Arrays.copyOf(pdf[i], n);
     }
 
-    for (int i = 0; i < evalDistances.length; i++) {
-      final double[] pi = p[i];
-      final int n = pi.length / 2;
-      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
-      final float[] y = new float[n];
-      for (int j = 0; j < y.length; j++) {
-        int index = j * 2;
-        y[j] = (float) ((pi[index] + 4 * pi[index + 1] + pi[index + 2]) / 6);
-      }
-      // The computed probability will be lower for increasing time-delay
-      // as the diffusing molecules are lost. Normalise to sum to 1 so
-      // the curve matches the empirical PDF (which sums to 1).
-      double s = 1.0 / MathUtils.sum(y);
-      SimpleArrayUtils.apply(y, f -> (float) (f * s));
-
-      final float[] r = SimpleArrayUtils.newArray(y.length, binWidth / 2, binWidth);
-      plot.addPoints(r, y, Plot.CIRCLE);
-    }
+    return pdf;
   }
 
   /**
@@ -1169,6 +1170,86 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return pdf;
   }
 
+  private void plotDistances(float[][] distances, float[][] pdf, PointValuePair result,
+      ExecutorService executor) {
+    IJ.showStatus("Plotting results...");
+    String title = TITLE + " distance CDF";
+    Plot plot = new Plot(title, "Distance (um)", "Probability");
+    double maxD = 0.01;
+    final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
+    for (int i = 0; i < distances.length; i++) {
+      final float[] x = distances[i];
+      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
+      final double scale = 1.0 / x.length;
+      SimpleArrayUtils.apply(y, f -> (float) (f * scale));
+      maxD = Math.max(maxD, x[x.length - 1]);
+      plot.addPoints(x, y, Plot.LINE);
+    }
+    plot.setColor(Color.black);
+    plot.setLimits(0, maxD, 0, 1.05);
+
+    final WindowOrganiser wo = new WindowOrganiser();
+    ImageJUtils.display(title, plot, 0, wo);
+
+    title = TITLE + " distance PDF";
+    plot = new Plot(title, "Distance (um)", "Probability");
+    final float binWidth = (float) settings.binWidth;
+    final float[] r = SimpleArrayUtils.newArray(pdf[0].length, binWidth / 2, binWidth);
+    float maxP = 0;
+    for (int i = 0; i < distances.length; i++) {
+      final float[] y = pdf[i];
+      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      maxP = MathUtils.maxDefault(maxP, y);
+      plot.addPoints(r, y, Plot.BAR);
+    }
+    plot.setColor(Color.black);
+    plot.setLimits(0, maxD, 0, maxP * 1.05);
+
+    ImageJUtils.display(title, plot, 0, wo);
+    wo.tile();
+
+    if (result == null) {
+      return;
+    }
+
+    // Compute fitted PDF.
+    // Evaluate the PDF using Simpson integration: use [a, (a+b)/2, b] for each bin [a, b].
+    final float[][] evalDistances = new float[distances.length][];
+    Arrays.fill(evalDistances, SimpleArrayUtils.newArray(r.length * 2 + 1, 0, binWidth * 0.5f));
+
+    final double dt = exposureTime;
+    final double dz = settings.depthOfField / 1000;
+    final double precision = settings.precision / 1000;
+    double[][] p;
+    final double[] fit = result.getPointRef();
+    if (fit.length < 6) {
+      p = new TwoStateModelFunction(dt, dz, settings.a, settings.b, precision, evalDistances,
+          executor).evaluate(fit);
+    } else {
+      p = new ThreeStateModelFunction(dt, dz, settings.a, settings.b, precision, evalDistances,
+          executor).evaluate(fit);
+    }
+
+    for (int i = 0; i < evalDistances.length; i++) {
+      final double[] pi = p[i];
+      final int n = pi.length / 2;
+      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      final float[] y = new float[n];
+      for (int j = 0; j < y.length; j++) {
+        final int index = j * 2;
+        y[j] = (float) ((pi[index] + 4 * pi[index + 1] + pi[index + 2]) / 6);
+      }
+      // The computed probability will be lower for increasing time-delay
+      // as the diffusing molecules are lost. Normalise to sum to 1 so
+      // the curve matches the empirical PDF (which sums to 1).
+      final double s = 1.0 / MathUtils.sum(y);
+      SimpleArrayUtils.apply(y, f -> (float) (f * s));
+
+      plot.addPoints(r, y, Plot.CIRCLE);
+    }
+  }
+
   /**
    * Creates the weights for each time delay. These are used to evenly balance the different number
    * of observations for each time delay. The weight for is maxN / N where N is the number of
@@ -1182,6 +1263,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double maxSize = Arrays.stream(sizes).max().getAsInt();
     return Arrays.stream(sizes).mapToDouble(size -> maxSize / size).toArray();
   }
+
+  // Implementation Note:
+  //
+  // The functions assumes d1 is the bound fraction.
+  // If the fractions are sorted before evaluation then this
+  // creates a non-smooth function at the transition which can have
+  // poor fitting behaviour for an optimiser that is
+  // following a optimisation direction.
+  // It is assumed that if d values are initialised sufficiently
+  // far apart with d1 << d2 << d3 then the populations will
+  // be correctly fit. An option is to also compute p_remaining
+  // for the bound fraction. In practice this is always close to 1
+  // when d1 is bound. It does avoid issues if the d values overlap.
 
   /**
    * Function to evaluate the log-likelihood of the observed distances for the two-state diffusion
@@ -1220,18 +1314,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d2 = point[3];
       final double sigma = point.length > 4 ? point[4] : precision;
 
-      // Note: This function assumes d1 is the bound fraction.
-      // If the fractions are sorted using d2 < d1 then this
-      // create a non-smooth function at the transition which can have
-      // poor fitting behaviour for an optimiser that is
-      // following a optimisation direction.
-      // It is assumed that if d1 and d2 are initialised sufficiently
-      // far apart with d1 << d2 then the two populations will
-      // be correctly fit. An option is to also compute p_remaining
-      // for the bound fraction.
+      DD ll = DD.ZERO;
 
       if (executor == null) {
-        DD ll = DD.ZERO;
         for (int time = 0; time < distances.length; time++) {
           ll = ll.add(compute(f1, d1, f2, d2, sigma, time));
         }
@@ -1246,7 +1331,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
       }
 
       // Finish processing data
-      DD ll = DD.ZERO;
       for (final Future<DD> f : futures) {
         try {
           ll = ll.add(f.get());
@@ -1366,18 +1450,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d3 = point[5];
       final double sigma = point.length > 6 ? point[6] : precision;
 
-      // Note: This function assumes d1 is the bound fraction.
-      // If the fractions are sorted then this
-      // create a non-smooth function at the transitions which can have
-      // poor fitting behaviour for an optimiser that is
-      // following a optimisation direction.
-      // It is assumed that if d are initialised sufficiently
-      // far apart with d1 << d2 << d3 then the three populations will
-      // be correctly fit. An option is to also compute p_remaining
-      // for the bound fraction.
+      DD ll = DD.ZERO;
 
       if (executor == null) {
-        DD ll = DD.ZERO;
         for (int time = 0; time < distances.length; time++) {
           ll = ll.add(compute(f1, d1, f2, d2, f3, d3, sigma, time));
         }
@@ -1392,7 +1467,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
       }
 
       // Finish processing data
-      DD ll = DD.ZERO;
       for (final Future<DD> f : futures) {
         try {
           ll = ll.add(f.get());
@@ -1479,6 +1553,212 @@ public class TrackDiffusionAnalysis implements PlugIn {
             + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
       }
       return p;
+    }
+  }
+
+  /**
+   * Function to evaluate the sum-of-squares of the observed PDF for the two-state diffusion model.
+   *
+   * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
+   */
+  static class TwoStateSSFunction implements MultivariateFunction {
+    double dt;
+    double dz;
+    double a;
+    double b;
+    double precision;
+    double[] distances;
+    float[][] pdf;
+    ExecutorService executor;
+
+    TwoStateSSFunction(double dt, double dz, double a, double b, double precision, double dr,
+        float[][] pdf, ExecutorService executor) {
+      this.dt = dt;
+      this.dz = dz;
+      this.a = a;
+      this.b = b;
+      this.precision = precision;
+      this.distances = SimpleArrayUtils.newArray(pdf[0].length * 2 + 1, 0, dr * 0.5);
+      this.pdf = pdf;
+      this.executor = executor;
+    }
+
+    @Override
+    public double value(double[] point) {
+      final double sum = point[0] + point[2];
+      final double f1 = point[0] / sum;
+      final double d1 = point[1];
+      final double f2 = point[2] / sum;
+      final double d2 = point[3];
+      final double sigma = point.length > 4 ? point[4] : precision;
+
+      double ss = 0;
+
+      if (executor == null) {
+        for (int time = 0; time < pdf.length; time++) {
+          ss += compute(f1, d1, f2, d2, sigma, time);
+        }
+        return ss;
+      }
+
+      final List<Future<Double>> futures = new LinkedList<>();
+
+      for (int n = pdf.length; --n >= 0;) {
+        final int time = n;
+        futures.add(executor.submit(() -> compute(f1, d1, f2, d2, sigma, time)));
+      }
+
+      // Finish processing data
+      for (final Future<Double> f : futures) {
+        try {
+          ss += f.get();
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return ss;
+    }
+
+    private double compute(double f1, double d1, double f2, double d2, double sigma, int time) {
+      double ss = 0;
+      final double deltaT = dt * (time + 1);
+      // Use corrected depth-of-field
+      final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
+      final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
+      final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
+      final double[] d = distances;
+      final double[] p = new double[d.length];
+      for (int i = 0; i < p.length; i++) {
+        final double r = d[i];
+        p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
+      }
+      normalise(p);
+      final float[] obs = pdf[time];
+      for (int i = 0; i < obs.length; i++) {
+        final int index = i << 1;
+        // Simpson integration using points [a, (a+b)/2, b] for bin [a, b]
+        final double dp = (p[index] + 4 * p[index + 1] + p[index + 2]) / 6 - obs[i];
+        ss += dp * dp;
+      }
+      return ss;
+    }
+
+    /**
+     * Normalise to sum to 1 so the curve matches the empirical PDF (which sums to 1).
+     *
+     * @param p the pdf
+     */
+    static void normalise(double[] p) {
+      // Use composite Simpson's 1/3 rule integration
+      double s4 = 0;
+      double s2 = 0;
+      for (int i = p.length - 2; i >= 1; i -= 2) {
+        s4 += p[i];
+      }
+      for (int i = p.length - 3; i >= 2; i -= 2) {
+        s2 += p[i];
+      }
+      final double sum = p[0] + 4 * s4 + 2 * s2 + p[p.length - 1];
+      final double inverseSum = 6 / sum;
+      for (int i = 0; i < p.length; i++) {
+        p[i] *= inverseSum;
+      }
+    }
+  }
+
+  /**
+   * Function to evaluate the sum-of-squares of the observed PDF for the two-state diffusion model.
+   *
+   * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
+   */
+  static class ThreeStateSSFunction implements MultivariateFunction {
+    double dt;
+    double dz;
+    double a;
+    double b;
+    double precision;
+    double[] distances;
+    float[][] pdf;
+    ExecutorService executor;
+
+    ThreeStateSSFunction(double dt, double dz, double a, double b, double precision, double dr,
+        float[][] pdf, ExecutorService executor) {
+      this.dt = dt;
+      this.dz = dz;
+      this.a = a;
+      this.b = b;
+      this.precision = precision;
+      this.distances = SimpleArrayUtils.newArray(pdf[0].length * 2 + 1, 0, dr * 0.5);
+      this.pdf = pdf;
+      this.executor = executor;
+    }
+
+    @Override
+    public double value(double[] point) {
+      final double sum = point[0] + point[2] + point[4];
+      final double f1 = point[0] / sum;
+      final double d1 = point[1];
+      final double f2 = point[2] / sum;
+      final double d2 = point[3];
+      final double f3 = point[4] / sum;
+      final double d3 = point[5];
+      final double sigma = point.length > 6 ? point[6] : precision;
+
+      double ss = 0;
+
+      if (executor == null) {
+        for (int time = 0; time < pdf.length; time++) {
+          ss += compute(f1, d1, f2, d2, f3, d3, sigma, time);
+        }
+        return ss;
+      }
+
+      final List<Future<Double>> futures = new LinkedList<>();
+
+      for (int n = pdf.length; --n >= 0;) {
+        final int time = n;
+        futures.add(executor.submit(() -> compute(f1, d1, f2, d2, f3, d3, sigma, time)));
+      }
+
+      // Finish processing data
+      for (final Future<Double> f : futures) {
+        try {
+          ss += f.get();
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return ss;
+    }
+
+    private double compute(double f1, double d1, double f2, double d2, double f3, double d3,
+        double sigma, int time) {
+      double ss = 0;
+      final double deltaT = dt * (time + 1);
+      // Use corrected depth-of-field
+      final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
+      final double p3 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d3) + b, d3);
+      final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
+      final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
+      final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
+      final double[] d = distances;
+      final double[] p = new double[d.length];
+      for (int i = 0; i < p.length; i++) {
+        final double r = d[i];
+        p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+      }
+      TwoStateSSFunction.normalise(p);
+      final float[] obs = pdf[time];
+      for (int i = 0; i < obs.length; i++) {
+        final int index = i << 1;
+        // Simpson integration using points [a, (a+b)/2, b] for bin [a, b]
+        final double dp = (p[index] + 4 * p[index + 1] + p[index + 2]) / 6 - obs[i];
+        ss += dp * dp;
+      }
+      return ss;
     }
   }
 }
