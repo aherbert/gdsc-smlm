@@ -466,7 +466,6 @@ public class DiffusionDepthOfField implements PlugIn {
     final double dt = settings.exposureTime / 1000;
     final double dz = settings.depthOfField / 1000;
 
-
     final MultivariateFunction function = new DepthOfFieldFunction(dt, dz,
         createDiffusionCoefficients(), probability, threadCount, executor);
 
