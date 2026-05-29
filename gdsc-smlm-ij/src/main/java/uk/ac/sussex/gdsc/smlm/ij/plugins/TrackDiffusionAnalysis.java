@@ -1231,6 +1231,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           executor).evaluate(fit);
     }
 
+    plot.setLineWidth(2f);
     for (int i = 0; i < evalDistances.length; i++) {
       final double[] pi = p[i];
       final int n = pi.length / 2;
@@ -1238,7 +1239,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final float[] y = new float[n];
       for (int j = 0; j < y.length; j++) {
         final int index = j * 2;
-        y[j] = (float) ((pi[index] + 4 * pi[index + 1] + pi[index + 2]) / 6);
+        // Avoid divide by 6 as we normalise to 1 below
+        y[j] = (float) (pi[index] + 4 * pi[index + 1] + pi[index + 2]);
       }
       // The computed probability will be lower for increasing time-delay
       // as the diffusing molecules are lost. Normalise to sum to 1 so
@@ -1246,7 +1248,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double s = 1.0 / MathUtils.sum(y);
       SimpleArrayUtils.apply(y, f -> (float) (f * s));
 
-      plot.addPoints(r, y, Plot.CIRCLE);
+      plot.addPoints(r, y, Plot.DOT);
     }
   }
 
