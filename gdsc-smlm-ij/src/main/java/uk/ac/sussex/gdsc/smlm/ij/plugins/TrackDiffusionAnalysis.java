@@ -1173,53 +1173,55 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private void plotDistances(float[][] distances, float[][] pdf, PointValuePair result,
       ExecutorService executor) {
+    // TODO: Option to plot on separate graphs
+    // Option to only plot PDF.
+
     IJ.showStatus("Plotting results...");
     String title = TITLE + " distance CDF";
-    Plot plot = new Plot(title, "Distance (um)", "Probability");
+    Plot cdfPlot = new Plot(title, "Distance (um)", "Probability");
     double maxD = 0.01;
     final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
     for (int i = 0; i < distances.length; i++) {
       final float[] x = distances[i];
-      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
       final double scale = 1.0 / x.length;
       SimpleArrayUtils.apply(y, f -> (float) (f * scale));
       maxD = Math.max(maxD, x[x.length - 1]);
-      plot.addPoints(x, y, Plot.LINE);
+      cdfPlot.addPoints(x, y, Plot.LINE);
     }
-    plot.setColor(Color.black);
-    plot.setLimits(0, maxD, 0, 1.05);
+    cdfPlot.setColor(Color.black);
+    cdfPlot.setLimits(0, maxD, 0, 1.05);
 
     final double toMillies = exposureTime * 1e3;
-    final String labels = IntStream.rangeClosed(1, distances.length).mapToObj(
-        i -> MathUtils.rounded(i * toMillies) + "ms")
-        .collect(Collectors.joining("\n"));
-    final Font font = plot.getCurrentFont();
-    plot.setFontSize(9);
-    plot.addLegend(labels, "bottom-right");
-    plot.setFont(font);
+    final String labels = IntStream.rangeClosed(1, distances.length)
+        .mapToObj(i -> MathUtils.rounded(i * toMillies) + "ms").collect(Collectors.joining("\n"));
+    final Font font = cdfPlot.getCurrentFont();
+    cdfPlot.setFontSize(9);
+    cdfPlot.addLegend(labels, "bottom-right");
+    cdfPlot.setFont(font);
 
     final WindowOrganiser wo = new WindowOrganiser();
-    ImageJUtils.display(title, plot, 0, wo);
+    ImageJUtils.display(title, cdfPlot, 0, wo);
 
     title = TITLE + " distance PDF";
-    plot = new Plot(title, "Distance (um)", "Probability");
+    Plot pdfPlot = new Plot(title, "Distance (um)", "Probability");
     final float binWidth = (float) settings.binWidth;
     final float[] r = SimpleArrayUtils.newArray(pdf[0].length, binWidth / 2, binWidth);
     float maxP = 0;
     for (int i = 0; i < distances.length; i++) {
       final float[] y = pdf[i];
-      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      pdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       maxP = MathUtils.maxDefault(maxP, y);
-      plot.addPoints(r, y, Plot.BAR);
+      pdfPlot.addPoints(r, y, Plot.BAR);
     }
-    plot.setColor(Color.black);
-    plot.setLimits(0, maxD, 0, maxP * 1.05);
-    plot.setFontSize(9);
-    plot.addLegend(labels, "top-right");
-    plot.setFont(font);
+    pdfPlot.setColor(Color.black);
+    pdfPlot.setLimits(0, maxD, 0, maxP * 1.05);
+    pdfPlot.setFontSize(9);
+    pdfPlot.addLegend(labels, "top-right");
+    pdfPlot.setFont(font);
 
-    ImageJUtils.display(title, plot, 0, wo);
+    ImageJUtils.display(title, pdfPlot, 0, wo);
     wo.tile();
 
     if (result == null) {
@@ -1244,11 +1246,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
           executor).evaluate(fit);
     }
 
-    plot.setLineWidth(2f);
+    cdfPlot.setLineWidth(2f);
+    pdfPlot.setLineWidth(2f);
     for (int i = 0; i < evalDistances.length; i++) {
       final double[] pi = p[i];
       final int n = pi.length / 2;
-      plot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      pdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       final float[] y = new float[n];
       for (int j = 0; j < y.length; j++) {
         final int index = j * 2;
@@ -1261,7 +1265,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double s = 1.0 / MathUtils.sum(y);
       SimpleArrayUtils.apply(y, f -> (float) (f * s));
 
-      plot.addPoints(r, y, Plot.DOT);
+      pdfPlot.addPoints(r, y, Plot.DOT);
+      // Cumulative sum
+      double sum = 0;
+      float[] yy = new float[n];
+      for (int j = 0; j < yy.length; j++) {
+        sum += y[j];
+        yy[j] = (float) sum;
+      }
+      cdfPlot.addPoints(r, yy, Plot.DOT);
     }
   }
 
