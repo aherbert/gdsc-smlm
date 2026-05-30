@@ -151,6 +151,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     boolean fitMle;
     double significanceLevel;
 
+    boolean showCdf;
+
     Settings() {
       selected = new LocalList<>();
 
@@ -209,6 +211,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       fitThreeState = source.fitThreeState;
       fitMle = source.fitMle;
       significanceLevel = source.significanceLevel;
+
+      showCdf = source.showCdf;
     }
 
     Settings copy() {
@@ -520,6 +524,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addCheckbox("Fit_MLE", settings.fitMle);
     gd.addNumericField("significanceLevel", settings.significanceLevel, -3);
 
+    gd.addCheckbox("Show_CDF", settings.showCdf);
+
     gd.addHelp(HelpUrls.getUrl("track-diffusion-analysis"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -545,6 +551,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.fitThreeState = gd.getNextBoolean();
     settings.fitMle = gd.getNextBoolean();
     settings.significanceLevel = gd.getNextNumber();
+
+    settings.showCdf = gd.getNextBoolean();
 
     // Check arguments
     try {
@@ -1176,38 +1184,42 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private void plotDistances(float[][] distances, float[][] pdf, PointValuePair result,
       ExecutorService executor) {
     // TODO: Option to plot on separate graphs
-    // Option to only plot PDF.
 
     IJ.showStatus("Plotting results...");
-    String title = TITLE + " distance CDF";
-    Plot cdfPlot = new Plot(title, "Distance (um)", "Probability");
-    double maxD = 0.01;
-    final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
-    for (int i = 0; i < distances.length; i++) {
-      final float[] x = distances[i];
-      cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
-      final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
-      final double scale = 1.0 / x.length;
-      SimpleArrayUtils.apply(y, f -> (float) (f * scale));
-      maxD = Math.max(maxD, x[x.length - 1]);
-      cdfPlot.addPoints(x, y, Plot.LINE);
-    }
-    cdfPlot.setColor(Color.black);
-    cdfPlot.setLimits(0, maxD, 0, 1.05);
 
     final double toMillies = exposureTime * 1e3;
     final String labels = IntStream.rangeClosed(1, distances.length)
         .mapToObj(i -> MathUtils.rounded(i * toMillies) + "ms").collect(Collectors.joining("\n"));
-    final Font font = cdfPlot.getCurrentFont();
-    cdfPlot.setFontSize(9);
-    cdfPlot.addLegend(labels, "bottom-right");
-    cdfPlot.setFont(font);
-
     final WindowOrganiser wo = new WindowOrganiser();
-    ImageJUtils.display(title, cdfPlot, 0, wo);
+    final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
 
-    title = TITLE + " distance PDF";
-    Plot pdfPlot = new Plot(title, "Distance (um)", "Probability");
+    Plot cdfPlot = null;
+    if (settings.showCdf) {
+      final String title = TITLE + " distance CDF";
+      cdfPlot = new Plot(title, "Distance (um)", "Probability");
+      double maxD = 0.01;
+      for (int i = 0; i < distances.length; i++) {
+        final float[] x = distances[i];
+        cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+        final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
+        final double scale = 1.0 / x.length;
+        SimpleArrayUtils.apply(y, f -> (float) (f * scale));
+        maxD = Math.max(maxD, x[x.length - 1]);
+        cdfPlot.addPoints(x, y, Plot.LINE);
+      }
+      cdfPlot.setColor(Color.black);
+      cdfPlot.setLimits(0, maxD, 0, 1.05);
+
+      final Font font = cdfPlot.getCurrentFont();
+      cdfPlot.setFontSize(9);
+      cdfPlot.addLegend(labels, "bottom-right");
+      cdfPlot.setFont(font);
+
+      ImageJUtils.display(title, cdfPlot, 0, wo);
+    }
+
+    final String title = TITLE + " distance PDF";
+    final Plot pdfPlot = new Plot(title, "Distance (um)", "Probability");
     final float binWidth = (float) settings.binWidth;
     final float[] r = SimpleArrayUtils.newArray(pdf[0].length, binWidth / 2, binWidth);
     float maxP = 0;
@@ -1218,7 +1230,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       pdfPlot.addPoints(r, y, Plot.BAR);
     }
     pdfPlot.setColor(Color.black);
-    pdfPlot.setLimits(0, maxD, 0, maxP * 1.05);
+    pdfPlot.setLimits(0, r[r.length - 1], 0, maxP * 1.05);
+
+    final Font font = pdfPlot.getCurrentFont();
     pdfPlot.setFontSize(9);
     pdfPlot.addLegend(labels, "top-right");
     pdfPlot.setFont(font);
@@ -1248,12 +1262,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
           executor).evaluate(fit);
     }
 
-    cdfPlot.setLineWidth(2f);
+    if (cdfPlot != null) {
+      cdfPlot.setLineWidth(2f);
+    }
     pdfPlot.setLineWidth(2f);
     for (int i = 0; i < evalDistances.length; i++) {
       final double[] pi = p[i];
       final int n = pi.length / 2;
-      cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       pdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       final float[] y = new float[n];
       for (int j = 0; j < y.length; j++) {
@@ -1268,9 +1283,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
       SimpleArrayUtils.apply(y, f -> (float) (f * s));
 
       pdfPlot.addPoints(r, y, Plot.DOT);
+
       // Cumulative sum
+      if (cdfPlot == null) {
+        continue;
+      }
+      cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       double sum = 0;
-      float[] yy = new float[n];
+      final float[] yy = new float[n];
       for (int j = 0; j < yy.length; j++) {
         sum += y[j];
         yy[j] = (float) sum;
