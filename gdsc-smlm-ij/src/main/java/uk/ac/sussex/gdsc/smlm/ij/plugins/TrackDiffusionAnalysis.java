@@ -34,6 +34,7 @@ import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
+import java.awt.Font;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -799,8 +800,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         final boolean reject = q > settings.significanceLevel;
         LoggerUtils.log(logger, Level.INFO,
             "Two-state -> three-state : LL = %s -> %s, LLR = %s, q-value = %s (Reject=%b)",
-            MathUtils.rounded(ll2, 4), MathUtils.rounded(ll3, 4),
-            MathUtils.rounded(llr, 4), MathUtils.rounded(q, 4), reject);
+            MathUtils.rounded(ll2, 4), MathUtils.rounded(ll3, 4), MathUtils.rounded(llr, 4),
+            MathUtils.rounded(q, 4), reject);
         if (!reject) {
           return result3;
         }
@@ -1189,6 +1190,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
     plot.setColor(Color.black);
     plot.setLimits(0, maxD, 0, 1.05);
 
+    final double toMillies = exposureTime * 1e3;
+    final String labels = IntStream.rangeClosed(1, distances.length).mapToObj(
+        i -> MathUtils.rounded(i * toMillies) + "ms")
+        .collect(Collectors.joining("\n"));
+    final Font font = plot.getCurrentFont();
+    plot.setFontSize(9);
+    plot.addLegend(labels, "bottom-right");
+    plot.setFont(font);
+
     final WindowOrganiser wo = new WindowOrganiser();
     ImageJUtils.display(title, plot, 0, wo);
 
@@ -1205,6 +1215,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
     plot.setColor(Color.black);
     plot.setLimits(0, maxD, 0, maxP * 1.05);
+    plot.setFontSize(9);
+    plot.addLegend(labels, "top-right");
+    plot.setFont(font);
 
     ImageJUtils.display(title, plot, 0, wo);
     wo.tile();
