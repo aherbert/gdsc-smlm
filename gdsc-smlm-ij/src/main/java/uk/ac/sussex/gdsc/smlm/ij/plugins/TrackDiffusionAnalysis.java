@@ -840,7 +840,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
     }
-    final SimpleBounds bounds = new SimpleBounds(addPrecision(new double[] {0, 0.001, 0, 0.1}, 0),
+    final double minD = Math.min(0.1, settings.minD);
+    final SimpleBounds bounds = new SimpleBounds(addPrecision(new double[] {0, 0.0, 0, minD}, 0),
         addPrecision(new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY}, 0.1));
     final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
         addPrecision(new double[] {0.1, 0.01, 0.1, 0.5}, 0.001));
@@ -952,8 +953,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
     }
+    final double minD = Math.min(0.1, settings.minD);
     final SimpleBounds bounds =
-        new SimpleBounds(addPrecision(new double[] {0, 0.001, 0, 0.1, 0, 0.1}, 0), addPrecision(
+        new SimpleBounds(addPrecision(new double[] {0, 0.0, 0, minD, 0, minD}, 0), addPrecision(
             new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1));
     final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
         addPrecision(new double[] {0.1, 0.01, 0.1, 0.5, 0.1, 0.5}, 0.001));
