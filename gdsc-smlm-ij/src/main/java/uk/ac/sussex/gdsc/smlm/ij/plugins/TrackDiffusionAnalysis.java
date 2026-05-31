@@ -1677,12 +1677,37 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
       final double[] d = distances;
       final double[] p = new double[d.length];
-      for (int i = 0; i < p.length; i++) {
-        final double r = d[i];
+      // We have 2n+1 distances r for n observations.
+      // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
+      double sum = 0;
+      // i=0 : pdf(r=0) = 0
+      double last = 0;
+      double r = 0;
+      for (int i = 1; i < p.length; i += 2) {
+        r = d[i];
         p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
+        r = d[i + 1];
+        p[i + 1] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
+        sum += last + 4 * p[i] + p[i + 1];
+        last = p[i + 1];
       }
-      normalise(p);
+      // Continue the integration until terms are insignificant
+      while (last / sum > 1e-5) {
+        r += d[1];
+        final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
+        r += d[1];
+        final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
+        sum += last + 4 * x + y;
+        last = y;
+      }
+      final double inverseSum = 6 / sum;
+      for (int i = 0; i < p.length; i++) {
+        p[i] *= inverseSum;
+      }
       final float[] obs = pdf[time];
       for (int i = 0; i < obs.length; i++) {
         final int index = i << 1;
@@ -1693,27 +1718,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return ss;
     }
 
-    /**
-     * Normalise to sum to 1 so the curve matches the empirical PDF (which sums to 1).
-     *
-     * @param p the pdf
-     */
-    static void normalise(double[] p) {
-      // Use composite Simpson's 1/3 rule integration
-      double s4 = 0;
-      double s2 = 0;
-      for (int i = p.length - 2; i >= 1; i -= 2) {
-        s4 += p[i];
-      }
-      for (int i = p.length - 3; i >= 2; i -= 2) {
-        s2 += p[i];
-      }
-      final double sum = p[0] + 4 * s4 + 2 * s2 + p[p.length - 1];
-      final double inverseSum = 6 / sum;
-      for (int i = 0; i < p.length; i++) {
-        p[i] *= inverseSum;
-      }
-    }
+    // TODO: new functions:
+    // double[][] pdf(double[] value)
+    // double logLikelihood(double[] value)
   }
 
   /**
@@ -1793,13 +1800,41 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
       final double[] d = distances;
       final double[] p = new double[d.length];
-      for (int i = 0; i < p.length; i++) {
-        final double r = d[i];
+      // We have 2n+1 distances r for n observations.
+      // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
+      double sum = 0;
+      // i=0 : pdf(r=0) = 0
+      double last = 0;
+      double r = 0;
+      for (int i = 1; i < p.length; i += 2) {
+        r = d[i];
         p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
             + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        r = d[i + 1];
+        p[i + 1] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        sum += last + 4 * p[i] + p[i + 1];
+        last = p[i + 1];
       }
-      TwoStateSSFunction.normalise(p);
+      // Continue the integration until terms are insignificant
+      while (last / sum > 1e-5) {
+        r += d[1];
+        final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        r += d[1];
+        final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        sum += last + 4 * x + y;
+        last = y;
+      }
+      final double inverseSum = 6 / sum;
+      for (int i = 0; i < p.length; i++) {
+        p[i] *= inverseSum;
+      }
       final float[] obs = pdf[time];
       for (int i = 0; i < obs.length; i++) {
         final int index = i << 1;
