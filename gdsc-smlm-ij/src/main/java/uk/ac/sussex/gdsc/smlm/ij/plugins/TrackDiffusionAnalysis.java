@@ -48,7 +48,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -58,7 +57,6 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.numbers.core.DD;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -1279,20 +1277,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
    * of observations for each time delay. The weight for is maxN / N where N is the number of
    * observations for the time delay.
    *
-   * @param distances the distances
-   * @return the weights
-   */
-  private static double[] createWeights(float[][] distances) {
-    final int[] sizes = Arrays.stream(distances).mapToInt(x -> x.length).toArray();
-    final double maxSize = Arrays.stream(sizes).max().getAsInt();
-    return Arrays.stream(sizes).mapToDouble(size -> maxSize / size).toArray();
-  }
-
-  /**
-   * Creates the weights for each time delay. These are used to evenly balance the different number
-   * of observations for each time delay. The weight for is maxN / N where N is the number of
-   * observations for the time delay.
-   *
    * @param counts the observed counts
    * @return the weights
    */
@@ -1304,6 +1288,26 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   // Implementation Note:
   //
+  // Note that the Spot-On PDF function is the probability density of the observed distribution.
+  // It is not a true probability density function that sums to 1. This is because the mixture
+  // of probabilities for each fraction discards some of the probability for the moving
+  // fractions (out-of-focus correction). As the fraction of moving particles increases the sum of
+  // the PDF will decrease. Thus the PDF cannot be used directly in maximum likelihood estimation.
+  // In order to use the PDF as a likelihood function it is integrated over the range
+  // of the function where PDF(r) significantly contributes to the sum. Then the values
+  // are normalised so the sum is 1.
+  //
+  // This corrected PDF is either fit to the observed PDF using least squares fitting, or
+  // used as a likelihood function for maximum likelihood estimation (MLE). For performance
+  // MLE uses binned counts of the observations with the entire bin using the same likelihood. 
+  //
+  // Note that least squares fitting weights all observations the same as the empirical PDF
+  // for each time delay is the same size. MLE fitting sums n * log(likelihood) where n
+  // is the count of observations at each histogram bin. Since shorter time delays
+  // have more observations this will bias MLE. To compensate the time delays are weighted
+  // using their total number of observations so that the weighted number of observations
+  // for each time delay are the same (i.e. sum w * n * log(likelihood)).
+  //
   // The functions assumes d1 is the bound fraction.
   // If the fractions are sorted before evaluation then this
   // creates a non-smooth function at the transition which can have
@@ -1314,285 +1318,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
   // be correctly fit. An option is to also compute p_remaining
   // for the bound fraction. In practice this is always close to 1
   // when d1 is bound. It does avoid issues if the d values overlap.
-
-  /**
-   * Function to evaluate the log-likelihood of the observed distances for the two-state diffusion
-   * model.
-   *
-   * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
-   */
-  static class TwoStateModelFunction implements MultivariateFunction {
-    double dt;
-    double dz;
-    double a;
-    double b;
-    double precision;
-    float[][] distances;
-    ExecutorService executor;
-    double[] weights;
-
-    TwoStateModelFunction(double dt, double dz, double a, double b, double precision,
-        float[][] distances, ExecutorService executor) {
-      this.dt = dt;
-      this.dz = dz;
-      this.a = a;
-      this.b = b;
-      this.precision = precision;
-      this.distances = distances;
-      this.executor = executor;
-      weights = createWeights(distances);
-    }
-
-    @Override
-    public double value(double[] point) {
-      final double sum = point[0] + point[2];
-      final double f1 = point[0] / sum;
-      final double d1 = point[1];
-      final double f2 = point[2] / sum;
-      final double d2 = point[3];
-      final double sigma = point.length > 4 ? point[4] : precision;
-
-      DD ll = DD.ZERO;
-
-      if (executor == null) {
-        for (int time = 0; time < distances.length; time++) {
-          ll = ll.add(compute(f1, d1, f2, d2, sigma, time));
-        }
-        return ll.doubleValue();
-      }
-
-      final List<Future<DD>> futures = new LinkedList<>();
-
-      for (int n = distances.length; --n >= 0;) {
-        final int time = n;
-        futures.add(executor.submit(() -> compute(f1, d1, f2, d2, sigma, time)));
-      }
-
-      // Finish processing data
-      for (final Future<DD> f : futures) {
-        try {
-          ll = ll.add(f.get());
-        } catch (InterruptedException | ExecutionException e) {
-          throw new RuntimeException(e);
-        }
-      }
-      return ll.doubleValue();
-    }
-
-    private DD compute(double f1, double d1, double f2, double d2, double sigma, int time) {
-      DD ll = DD.ZERO;
-      final float[] d = distances[time];
-      final double deltaT = dt * (time + 1);
-      // Use corrected depth-of-field
-      final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
-      final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
-      final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
-      for (final float r : d) {
-        final double p = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
-            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
-        ll = ll.add(Math.log(p));
-      }
-      return ll.multiply(weights[time]);
-    }
-
-    double[][] evaluate(double[] point) {
-      final double sum = point[0] + point[2];
-      final double f1 = point[0] / sum;
-      final double d1 = point[1];
-      final double f2 = point[2] / sum;
-      final double d2 = point[3];
-      final double sigma = point.length > 4 ? point[4] : precision;
-
-      final double[][] p = new double[distances.length][];
-
-      if (executor == null) {
-        for (int time = 0; time < distances.length; time++) {
-          p[time] = evaluate(f1, d1, f2, d2, sigma, time);
-        }
-        return p;
-      }
-
-      final List<Future<double[]>> futures = new LinkedList<>();
-
-      for (int n = 0; n < distances.length; n++) {
-        final int time = n;
-        futures.add(executor.submit(() -> evaluate(f1, d1, f2, d2, sigma, time)));
-      }
-
-      // Finish processing data
-      int n = 0;
-      for (final Future<double[]> f : futures) {
-        try {
-          p[n++] = f.get();
-        } catch (InterruptedException | ExecutionException e) {
-          throw new RuntimeException(e);
-        }
-      }
-      return p;
-    }
-
-    private double[] evaluate(double f1, double d1, double f2, double d2, double sigma, int time) {
-      final float[] d = distances[time];
-      final double deltaT = dt * (time + 1);
-      // Use corrected depth-of-field
-      final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
-      final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
-      final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
-      final double[] p = new double[d.length];
-      for (int i = 0; i < d.length; i++) {
-        final double r = d[i];
-        p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
-            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
-      }
-      return p;
-    }
-  }
-
-  /**
-   * Function to evaluate the log-likelihood of the observed distances for the three-state diffusion
-   * model.
-   *
-   * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
-   */
-  static class ThreeStateModelFunction implements MultivariateFunction {
-    double dt;
-    double dz;
-    double a;
-    double b;
-    double precision;
-
-    float[][] distances;
-    ExecutorService executor;
-    double[] weights;
-
-    ThreeStateModelFunction(double dt, double dz, double a, double b, double precision,
-        float[][] distances, ExecutorService executor) {
-      this.dt = dt;
-      this.dz = dz;
-      this.a = a;
-      this.b = b;
-      this.precision = precision;
-      this.distances = distances;
-      this.executor = executor;
-      weights = createWeights(distances);
-    }
-
-    @Override
-    public double value(double[] point) {
-      final double sum = point[0] + point[2] + point[4];
-      final double f1 = point[0] / sum;
-      final double d1 = point[1];
-      final double f2 = point[2] / sum;
-      final double d2 = point[3];
-      final double f3 = point[4] / sum;
-      final double d3 = point[5];
-      final double sigma = point.length > 6 ? point[6] : precision;
-
-      DD ll = DD.ZERO;
-
-      if (executor == null) {
-        for (int time = 0; time < distances.length; time++) {
-          ll = ll.add(compute(f1, d1, f2, d2, f3, d3, sigma, time));
-        }
-        return ll.doubleValue();
-      }
-
-      final List<Future<DD>> futures = new LinkedList<>();
-
-      for (int n = distances.length; --n >= 0;) {
-        final int time = n;
-        futures.add(executor.submit(() -> compute(f1, d1, f2, d2, f3, d3, sigma, time)));
-      }
-
-      // Finish processing data
-      for (final Future<DD> f : futures) {
-        try {
-          ll = ll.add(f.get());
-        } catch (InterruptedException | ExecutionException e) {
-          throw new RuntimeException(e);
-        }
-      }
-      return ll.doubleValue();
-    }
-
-    private DD compute(double f1, double d1, double f2, double d2, double f3, double d3,
-        double sigma, int time) {
-      DD ll = DD.ZERO;
-      final float[] d = distances[time];
-      final double deltaT = dt * (time + 1);
-      // Use corrected depth-of-field
-      final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
-      final double p3 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d3) + b, d3);
-      final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
-      final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
-      final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
-      for (final float r : d) {
-        final double p = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
-            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
-            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
-        ll = ll.add(Math.log(p));
-      }
-      return ll.multiply(weights[time]);
-    }
-
-    double[][] evaluate(double[] point) {
-      final double sum = point[0] + point[2] + point[4];
-      final double f1 = point[0] / sum;
-      final double d1 = point[1];
-      final double f2 = point[2] / sum;
-      final double d2 = point[3];
-      final double f3 = point[4] / sum;
-      final double d3 = point[5];
-      final double sigma = point.length > 6 ? point[6] : precision;
-
-      final double[][] p = new double[distances.length][];
-
-      if (executor == null) {
-        for (int time = 0; time < distances.length; time++) {
-          p[time] = evaluate(f1, d1, f2, d2, f3, d3, sigma, time);
-        }
-        return p;
-      }
-
-      final List<Future<double[]>> futures = new LinkedList<>();
-
-      for (int n = 0; n < distances.length; n++) {
-        final int time = n;
-        futures.add(executor.submit(() -> evaluate(f1, d1, f2, d2, f3, d3, sigma, time)));
-      }
-
-      // Finish processing data
-      int n = 0;
-      for (final Future<double[]> f : futures) {
-        try {
-          p[n++] = f.get();
-        } catch (InterruptedException | ExecutionException e) {
-          throw new RuntimeException(e);
-        }
-      }
-      return p;
-    }
-
-    private double[] evaluate(double f1, double d1, double f2, double d2, double f3, double d3,
-        double sigma, int time) {
-      final float[] d = distances[time];
-      final double deltaT = dt * (time + 1);
-      // Use corrected depth-of-field
-      final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
-      final double p3 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d3) + b, d3);
-      final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
-      final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
-      final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
-      final double[] p = new double[d.length];
-      for (int i = 0; i < d.length; i++) {
-        final double r = d[i];
-        p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
-            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
-            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
-      }
-      return p;
-    }
-  }
 
   /**
    * Function to evaluate the two-state diffusion model. Creates a binned PDF for the model.
