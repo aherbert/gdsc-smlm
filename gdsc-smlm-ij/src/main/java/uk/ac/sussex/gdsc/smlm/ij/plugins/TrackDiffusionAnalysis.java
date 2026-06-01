@@ -365,6 +365,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
             double y = 0;
             double z = rng.nextDouble(-halfDz, halfDz);
             int last = 0;
+            // Ensure all tracks have unique frames to allow tracing the dataset
+            // Each track should be separated by maxT frames so tracing even with
+            // small frame gaps will not join stationary molecules at the origin.
+            final int frame = pos * (2 * maxT);
             for (int i = 1; i <= maxT; i++) {
               x += sampler.sample() * d;
               y += sampler.sample() * d;
@@ -378,7 +382,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
                 }
                 last = i;
                 // Add localisation precision
-                observed.add(new IdPeakResult(i, (float) (x + sampler.sample() * precision),
+                observed.add(new IdPeakResult(frame + i, (float) (x + sampler.sample() * precision),
                     (float) (y + sampler.sample() * precision), 1f, id));
               }
             }
@@ -755,12 +759,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       double ll3 = result3.getValue();
 
       if (!mle) {
-        // Choose best model for SS using approximate log-likelihood
-        // final int n = pdf.length * pdf[0].length;
-        // ll2 = MathUtils.getLogLikelihood(ll2, n);
-        // ll3 = MathUtils.getLogLikelihood(ll3, n);
-
-        // Use MLE to choose best model
+        // Use MLE to choose best model. Attempts to use adjusted R2 or mapping
+        // the SS to log-likelihood (see MathUtils.getLogLikelihood) were not as robust.
         final double dt = exposureTime;
         final double dz = settings.depthOfField / 1000;
         final double precision = settings.precision / 1000;
@@ -1062,9 +1062,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private String createHeader() {
-    return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "offsets", "precision (nm)",
-        "fit precision", "a", "b", "repeats", "min D (um^2/s)", "max D (um^2/s)", "F",
-        "D", "sigma (nm)", "Value"}).collect(Collectors.joining("\t"));
+    return Arrays.stream(
+        new String[] {"dz (nm)", "dt (ms)", "offsets", "precision (nm)", "fit precision", "a", "b",
+            "repeats", "min D (um^2/s)", "max D (um^2/s)", "F", "D", "sigma (nm)", "Value"})
+        .collect(Collectors.joining("\t"));
   }
 
   private String addResult(PointValuePair result) {
