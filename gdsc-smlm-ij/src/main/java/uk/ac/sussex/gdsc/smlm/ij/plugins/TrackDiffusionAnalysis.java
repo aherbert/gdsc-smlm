@@ -150,6 +150,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double significanceLevel;
 
     boolean showCdf;
+    boolean showSeparatePlots;
 
     Settings() {
       selected = new LocalList<>();
@@ -211,6 +212,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       significanceLevel = source.significanceLevel;
 
       showCdf = source.showCdf;
+      showSeparatePlots = source.showSeparatePlots;
     }
 
     Settings copy() {
@@ -517,6 +519,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("significanceLevel", settings.significanceLevel, -3);
 
     gd.addCheckbox("Show_CDF", settings.showCdf);
+    gd.addCheckbox("Seperate_plots", settings.showSeparatePlots);
 
     gd.addHelp(HelpUrls.getUrl("track-diffusion-analysis"));
     gd.showDialog();
@@ -545,6 +548,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.significanceLevel = gd.getNextNumber();
 
     settings.showCdf = gd.getNextBoolean();
+    settings.showSeparatePlots = gd.getNextBoolean();
 
     // Check arguments
     try {
@@ -1091,8 +1095,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           .collect(Collectors.joining(", "));
       final double precision = (fit.length & 1) == 1 ? fit[2 * n] * 1e3 : settings.precision;
       sb.append('\t').append(f).append('\t').append(d).append('\t')
-          .append(MathUtils.rounded(precision)).append('\t')
-          .append(result.getValue());
+          .append(MathUtils.rounded(precision)).append('\t').append(result.getValue());
     }
     return sb.toString();
   }
@@ -1172,51 +1175,86 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final WindowOrganiser wo = new WindowOrganiser();
     final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
 
-    Plot cdfPlot = null;
+    Plot[] cdfPlot = null;
     if (settings.showCdf) {
-      final String title = TITLE + " distance CDF";
-      cdfPlot = new Plot(title, "Distance (um)", "Probability");
+      final String[] title = new String[distances.length];
+      cdfPlot = new Plot[distances.length];
+      if (settings.showSeparatePlots) {
+        for (int i = 0; i < distances.length; i++) {
+          title[i] = TITLE + " distance CDF " + MathUtils.rounded((i + 1) * toMillies) + "ms";
+          cdfPlot[i] = new Plot(title[i], "Distance (um)", "Probability");
+        }
+      } else {
+        title[0] = TITLE + " distance CDF";
+        cdfPlot[0] = new Plot(title[0], "Distance (um)", "Probability");
+        Arrays.fill(cdfPlot, cdfPlot[0]);
+      }
       double maxD = 0.01;
       for (int i = 0; i < distances.length; i++) {
         final float[] x = distances[i];
-        cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+        cdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
         final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
         final double scale = 1.0 / x.length;
         SimpleArrayUtils.apply(y, f -> (float) (f * scale));
         maxD = Math.max(maxD, x[x.length - 1]);
-        cdfPlot.addPoints(x, y, Plot.LINE);
+        cdfPlot[i].addPoints(x, y, Plot.LINE);
+        cdfPlot[i].setColor(Color.black);
       }
-      cdfPlot.setColor(Color.black);
-      cdfPlot.setLimits(0, maxD, 0, 1.05);
+      for (int i = 0; i < distances.length; i++) {
+        cdfPlot[i].setLimits(0, maxD, 0, 1.05);
+      }
 
-      final Font font = cdfPlot.getCurrentFont();
-      cdfPlot.setFontSize(9);
-      cdfPlot.addLegend(labels, "bottom-right");
-      cdfPlot.setFont(font);
-
-      ImageJUtils.display(title, cdfPlot, 0, wo);
+      if (settings.showSeparatePlots) {
+        for (int i = 0; i < distances.length; i++) {
+          ImageJUtils.display(title[i], cdfPlot[i], 0, wo);
+        }
+      } else {
+        final Font font = cdfPlot[0].getCurrentFont();
+        cdfPlot[0].setFontSize(9);
+        cdfPlot[0].addLegend(labels, "bottom-right");
+        cdfPlot[0].setFont(font);
+        ImageJUtils.display(title[0], cdfPlot[0], 0, wo);
+      }
     }
 
-    final String title = TITLE + " distance PDF";
-    final Plot pdfPlot = new Plot(title, "Distance (um)", "Probability");
+    final String[] title = new String[distances.length];
+    final Plot[] pdfPlot = new Plot[distances.length];
+    if (settings.showSeparatePlots) {
+      for (int i = 0; i < distances.length; i++) {
+        title[i] = TITLE + " distance PDF " + MathUtils.rounded((i + 1) * toMillies) + "ms";
+        pdfPlot[i] = new Plot(title[i], "Distance (um)", "Probability");
+      }
+    } else {
+      title[0] = TITLE + " distance PDF";
+      pdfPlot[0] = new Plot(title[0], "Distance (um)", "Probability");
+      Arrays.fill(pdfPlot, pdfPlot[0]);
+    }
     final float binWidth = (float) settings.binWidth;
     final float[] r = SimpleArrayUtils.newArray(pdf[0].length, binWidth / 2, binWidth);
     float maxP = 0;
     for (int i = 0; i < distances.length; i++) {
       final float[] y = pdf[i];
-      pdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      pdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       maxP = MathUtils.maxDefault(maxP, y);
-      pdfPlot.addPoints(r, y, Plot.BAR);
+      pdfPlot[i].addPoints(r, y, Plot.BAR);
+      pdfPlot[i].setColor(Color.black);
     }
-    pdfPlot.setColor(Color.black);
-    pdfPlot.setLimits(0, r[r.length - 1], 0, maxP * 1.05);
+    for (int i = 0; i < distances.length; i++) {
+      pdfPlot[i].setLimits(0, r[r.length - 1], 0, maxP * 1.05);
+    }
 
-    final Font font = pdfPlot.getCurrentFont();
-    pdfPlot.setFontSize(9);
-    pdfPlot.addLegend(labels, "top-right");
-    pdfPlot.setFont(font);
+    if (settings.showSeparatePlots) {
+      for (int i = 0; i < distances.length; i++) {
+        ImageJUtils.display(title[i], pdfPlot[i], 0, wo);
+      }
+    } else {
+      final Font font = pdfPlot[0].getCurrentFont();
+      pdfPlot[0].setFontSize(9);
+      pdfPlot[0].addLegend(labels, "top-right");
+      pdfPlot[0].setFont(font);
+      ImageJUtils.display(title[0], pdfPlot[0], 0, wo);
+    }
 
-    ImageJUtils.display(title, pdfPlot, 0, wo);
     wo.tile();
 
     if (result == null) {
@@ -1241,34 +1279,32 @@ public class TrackDiffusionAnalysis implements PlugIn {
           executor).pdf(fit);
     }
 
-    if (cdfPlot != null) {
-      cdfPlot.setLineWidth(2f);
-    }
-    pdfPlot.setLineWidth(2f);
     for (int i = 0; i < evalDistances.length; i++) {
       final double[] pi = p[i];
       final int n = pi.length / 2;
-      pdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      pdfPlot[i].setLineWidth(2f);
+      pdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       final float[] y = new float[n];
       for (int j = 0; j < y.length; j++) {
         final int index = j * 2;
         y[j] = (float) ((pi[index] + 4 * pi[index + 1] + pi[index + 2]) / 6);
       }
 
-      pdfPlot.addPoints(r, y, Plot.DOT);
+      pdfPlot[i].addPoints(r, y, Plot.DOT);
 
       // Cumulative sum
       if (cdfPlot == null) {
         continue;
       }
-      cdfPlot.setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      cdfPlot[i].setLineWidth(2f);
+      cdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       double sum = 0;
       final float[] yy = new float[n];
       for (int j = 0; j < yy.length; j++) {
         sum += y[j];
         yy[j] = (float) sum;
       }
-      cdfPlot.addPoints(r, yy, Plot.DOT);
+      cdfPlot[i].addPoints(r, yy, Plot.DOT);
     }
   }
 
@@ -1299,7 +1335,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   //
   // This corrected PDF is either fit to the observed PDF using least squares fitting, or
   // used as a likelihood function for maximum likelihood estimation (MLE). For performance
-  // MLE uses binned counts of the observations with the entire bin using the same likelihood. 
+  // MLE uses binned counts of the observations with the entire bin using the same likelihood.
   //
   // Note that least squares fitting weights all observations the same as the empirical PDF
   // for each time delay is the same size. MLE fitting sums n * log(likelihood) where n
