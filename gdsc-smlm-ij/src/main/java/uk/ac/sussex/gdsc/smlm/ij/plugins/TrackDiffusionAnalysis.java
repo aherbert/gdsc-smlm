@@ -286,7 +286,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
     try {
-      PointValuePair result = fitDistances(counts, pdf, executor, settings.fitMle);
+      final PointValuePair result = fitDistances(counts, pdf, executor, settings.fitMle);
       plotDistances(distances, pdf, result, executor);
     } finally {
       executor.shutdown();
@@ -1393,7 +1393,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       this.a = a;
       this.b = b;
       this.precision = precision;
-      int n = Arrays.stream(pdf).mapToInt(x -> x.length).max().getAsInt();
+      final int n = Arrays.stream(pdf).mapToInt(x -> x.length).max().getAsInt();
       this.distances = SimpleArrayUtils.newArray(n * 2 + 1, 0, dr * 0.5);
       this.pdf = pdf;
       this.executor = executor;
@@ -1406,7 +1406,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       this.a = a;
       this.b = b;
       this.precision = precision;
-      int n = Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt();
+      final int n = Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt();
       this.distances = SimpleArrayUtils.newArray(n * 2 + 1, 0, dr * 0.5);
       this.counts = counts;
       this.executor = executor;
@@ -1586,7 +1586,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       this.a = a;
       this.b = b;
       this.precision = precision;
-      int n = Arrays.stream(pdf).mapToInt(x -> x.length).max().getAsInt();
+      final int n = Arrays.stream(pdf).mapToInt(x -> x.length).max().getAsInt();
       this.distances = SimpleArrayUtils.newArray(n * 2 + 1, 0, dr * 0.5);
       this.pdf = pdf;
       this.executor = executor;
@@ -1599,7 +1599,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       this.a = a;
       this.b = b;
       this.precision = precision;
-      int n = Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt();
+      final int n = Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt();
       this.distances = SimpleArrayUtils.newArray(n * 2 + 1, 0, dr * 0.5);
       this.counts = counts;
       this.executor = executor;
