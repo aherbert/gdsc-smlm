@@ -129,7 +129,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double a;
     double b;
 
-    int groupSize;
     int repeats;
     double minD;
     double maxD;
@@ -162,7 +161,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       binWidth = 0.01;
 
-      groupSize = 5;
       repeats = 3;
       minD = 1;
       maxD = 5;
@@ -192,7 +190,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
       a = source.a;
       b = source.b;
 
-      groupSize = source.groupSize;
       repeats = source.repeats;
       minD = source.minD;
       maxD = source.maxD;
@@ -509,7 +506,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("A", settings.a, 4);
     gd.addNumericField("B", settings.b, 4);
 
-    gd.addNumericField("Group_size", settings.groupSize, 0);
     gd.addSlider("Repeats", 1, 5, settings.repeats);
     gd.addNumericField("Min_D", settings.minD, 3, 6, "um^2/s");
     gd.addNumericField("Max_D", settings.maxD, 3, 6, "um^2/s");
@@ -538,7 +534,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.a = gd.getNextNumber();
     settings.b = gd.getNextNumber();
 
-    settings.groupSize = (int) gd.getNextNumber();
     settings.repeats = (int) gd.getNextNumber();
     settings.minD = gd.getNextNumber();
     settings.maxD = gd.getNextNumber();
@@ -563,7 +558,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ParameterUtils.isPositive("A", settings.a);
       ParameterUtils.isPositive("B", settings.b);
 
-      ParameterUtils.isPositive("Group size", settings.groupSize);
       ParameterUtils.isAboveZero("Repeats", settings.repeats);
       ParameterUtils.isAboveZero("Min D", settings.minD);
       ParameterUtils.isAboveZero("Max D", settings.maxD);
@@ -1067,7 +1061,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private String createHeader() {
     return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "offsets", "precision (nm)",
-        "fit precision", "a", "b", "group size", "repeats", "min D (um^2/s)", "max D (um^2/s)", "F",
+        "fit precision", "a", "b", "repeats", "min D (um^2/s)", "max D (um^2/s)", "F",
         "D", "sigma (nm)", "Value"}).collect(Collectors.joining("\t"));
   }
 
@@ -1081,7 +1075,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
       .append(settings.fitPrecision).append('\t')
       .append(MathUtils.rounded(settings.a)).append('\t')
       .append(MathUtils.rounded(settings.b)).append('\t')
-      .append(settings.groupSize).append('\t')
       .append(settings.repeats).append('\t')
       .append(MathUtils.rounded(settings.minD)).append('\t')
       .append(MathUtils.rounded(settings.maxD))
