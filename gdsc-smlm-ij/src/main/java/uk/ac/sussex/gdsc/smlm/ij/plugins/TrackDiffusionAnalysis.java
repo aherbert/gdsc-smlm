@@ -1157,13 +1157,22 @@ public class TrackDiffusionAnalysis implements PlugIn {
       pdf[i] = p;
     }
 
+    // Check the t=1 PDF is not truncated
+    final double maxP = MathUtils.max(pdf[0]);
+    final float endP = pdf[0][counts[0].length - 1];
+    if (endP / maxP > 1e-3) {
+      logger.warning(() -> String.format(
+          "Possible truncation of observed distances: pdf(r=%s, dt=%s ms)=%s (fraction of max %s)",
+          MathUtils.rounded(settings.binWidth * counts[0].length),
+          MathUtils.rounded(exposureTime * 1e3), MathUtils.rounded(endP),
+          MathUtils.rounded(endP / maxP)));
+    }
+
     return pdf;
   }
 
   private void plotDistances(float[][] distances, float[][] pdf, PointValuePair result,
       ExecutorService executor) {
-    // TODO: Option to plot on separate graphs
-
     IJ.showStatus("Plotting results...");
 
     final double toMillies = exposureTime * 1e3;
