@@ -74,6 +74,7 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -1057,25 +1058,29 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private TextWindow createTable() {
     return ImageJUtils.refresh(TABLE_REF, () -> {
-      return new TextWindow(TITLE + " Analysis", createHeader(), "", 800, 300);
+      return new TextWindow(TITLE + " Analysis", createHeader(), "", 1500, 300);
     });
   }
 
   private String createHeader() {
-    return Arrays.stream(
-        new String[] {"dz (nm)", "dt (ms)", "offsets", "precision (nm)", "fit precision", "a", "b",
-            "repeats", "min D (um^2/s)", "max D (um^2/s)", "F", "D", "sigma (nm)", "Value"})
+    return Arrays
+        .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "offsets", "precision", "a", "b",
+            "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
         .collect(Collectors.joining("\t"));
   }
 
   private String addResult(PointValuePair result) {
     final StringBuilder sb = new StringBuilder();
+    sb.append(settings.selected.get(0));
+    if (settings.selected.size() > 1) {
+      sb.append(" + ").append(TextUtils.pleural(settings.selected.size() - 1, "other"));
+    }
+    sb.append('\t');
     //@formatter:off
     sb.append(MathUtils.rounded(settings.depthOfField)).append('\t')
       .append(MathUtils.rounded(exposureTime * 1e3)).append('\t')
       .append(settings.offsets).append('\t')
       .append(MathUtils.rounded(settings.precision)).append('\t')
-      .append(settings.fitPrecision).append('\t')
       .append(MathUtils.rounded(settings.a)).append('\t')
       .append(MathUtils.rounded(settings.b)).append('\t')
       .append(settings.repeats).append('\t')
