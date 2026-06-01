@@ -28,6 +28,7 @@ import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.text.TextWindow;
@@ -503,6 +504,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     gd.addNumericField("Bin_width", settings.binWidth, -3);
 
+    gd.addMessage("z_corr = z + a * D + b");
     gd.addNumericField("A", settings.a, 4);
     gd.addNumericField("B", settings.b, 4);
 
@@ -1200,6 +1202,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       if (settings.showSeparatePlots) {
         for (int i = 0; i < distances.length; i++) {
+          cdfPlot[i].setFrameSize(PlotWindow.plotWidth, PlotWindow.plotHeight / 2);
           ImageJUtils.display(title[i], cdfPlot[i], 0, wo);
         }
       } else {
@@ -1239,6 +1242,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     if (settings.showSeparatePlots) {
       for (int i = 0; i < distances.length; i++) {
+        pdfPlot[i].setFrameSize(PlotWindow.plotWidth, PlotWindow.plotHeight / 2);
         ImageJUtils.display(title[i], pdfPlot[i], 0, wo);
       }
     } else {
