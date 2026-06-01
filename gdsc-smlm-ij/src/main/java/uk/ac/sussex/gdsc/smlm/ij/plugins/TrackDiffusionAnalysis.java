@@ -175,6 +175,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       d1 = 0.01;
       d2 = 1.5;
       d3 = 5;
+      fitMle = true;
       significanceLevel = 0.05;
     }
 
