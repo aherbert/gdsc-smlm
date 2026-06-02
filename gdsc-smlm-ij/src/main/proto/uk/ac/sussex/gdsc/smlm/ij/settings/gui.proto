@@ -265,6 +265,36 @@ message ClusteringSettings {
   int32 analysis_mode = 45;
 }
 
+// Contain the settings for the Track Diffusion Analysis plugin
+message TrackDiffusionAnalysisSettings {
+  repeated string selected = 1;
+  double depth_of_field = 2;
+  int32 gap = 3;
+  int32 max_t = 4;
+  int32 offsets = 5;
+  double bin_width = 6;
+  double a = 7;
+  double b = 8;
+  int32 repeats = 9;
+  double min_d = 10;
+  double max_d = 11;
+  double exposure_time = 12;
+  int32 number_of_molecules = 13;
+  int32 sim_t = 14;
+  double precision = 15;
+  double f1 = 16;
+  double f2 = 17;
+  double d1 = 18;
+  double d2 = 19;
+  double d3 = 20;
+  bool fit_precision = 21;
+  bool fit_three_state = 22;
+  bool fit_mle = 23;
+  double significance_level = 24;
+  bool show_cdf = 25;
+  bool show_separate_plots = 26;
+}
+
 // Contains the settings for the events in the OPTICS GUI
 message OpticsEventSettings {
   bool show_selection_table = 1;

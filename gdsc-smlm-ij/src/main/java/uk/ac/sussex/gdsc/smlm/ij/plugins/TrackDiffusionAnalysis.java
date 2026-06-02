@@ -83,6 +83,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.fitting.DiffusionAnalysis;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TrackDiffusionAnalysisSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import uk.ac.sussex.gdsc.smlm.results.IdPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -110,131 +112,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private Logger logger;
 
   /** The plugin settings. */
-  private Settings settings;
-
-  /**
-   * Contains the settings that are the re-usable state of the plugin.
-   */
-  private static class Settings {
-    /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
-
-    List<String> selected;
-
-    double depthOfField;
-    int gap;
-    int maxT;
-    int offsets;
-
-    double binWidth;
-
-    double a;
-    double b;
-
-    int repeats;
-    double minD;
-    double maxD;
-
-    double exposureTime;
-    int numberOfMolecules;
-    int simT;
-    double precision;
-    double f1;
-    double f2;
-    double d1;
-    double d2;
-    double d3;
-
-    boolean fitPrecision;
-    boolean fitThreeState;
-    boolean fitMle;
-    double significanceLevel;
-
-    boolean showCdf;
-    boolean showSeparatePlots;
-
-    Settings() {
-      selected = new LocalList<>();
-
-      depthOfField = 750;
-      gap = 1;
-      maxT = 7;
-      offsets = 0;
-
-      binWidth = 0.01;
-
-      repeats = 3;
-      minD = 1;
-      maxD = 5;
-
-      exposureTime = 10;
-      numberOfMolecules = 50000;
-      simT = 10;
-      precision = 30;
-      f1 = 0.2;
-      d1 = 0.01;
-      d2 = 1.5;
-      d3 = 5;
-      fitMle = true;
-      significanceLevel = 0.05;
-    }
-
-    Settings(Settings source) {
-      selected = new LocalList<>(source.selected);
-
-      depthOfField = source.depthOfField;
-      gap = source.gap;
-      maxT = source.maxT;
-      offsets = source.offsets;
-
-      binWidth = source.binWidth;
-
-      a = source.a;
-      b = source.b;
-
-      repeats = source.repeats;
-      minD = source.minD;
-      maxD = source.maxD;
-
-      exposureTime = source.exposureTime;
-      numberOfMolecules = source.numberOfMolecules;
-      simT = source.simT;
-      precision = source.precision;
-      f1 = source.f1;
-      f2 = source.f2;
-      d1 = source.d1;
-      d2 = source.d2;
-      d3 = source.d3;
-
-      fitPrecision = source.fitPrecision;
-      fitThreeState = source.fitThreeState;
-      fitMle = source.fitMle;
-      significanceLevel = source.significanceLevel;
-
-      showCdf = source.showCdf;
-      showSeparatePlots = source.showSeparatePlots;
-    }
-
-    Settings copy() {
-      return new Settings(this);
-    }
-
-    /**
-     * Load a copy of the settings.
-     *
-     * @return the settings
-     */
-    static Settings load() {
-      return INSTANCE.get().copy();
-    }
-
-    /**
-     * Save the settings. This can be called only once as it saves via a reference.
-     */
-    void save() {
-      INSTANCE.set(this);
-    }
-  }
+  private TrackDiffusionAnalysisSettings.Builder settings;
 
   /**
    * Store the localisation position.
@@ -267,8 +145,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return;
     }
 
-    settings = Settings.load();
-    settings.save();
+    settings = SettingsManager.readTrackDiffusionAnalysisSettings(0).toBuilder();
 
     final List<MemoryPeakResults> allResults = new LocalList<>();
 
@@ -286,7 +163,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
     try {
-      final PointValuePair result = fitDistances(counts, pdf, executor, settings.fitMle);
+      final PointValuePair result = fitDistances(counts, pdf, executor, settings.getFitMle());
       plotDistances(distances, pdf, result, executor);
     } finally {
       executor.shutdown();
@@ -306,23 +183,23 @@ public class TrackDiffusionAnalysis implements PlugIn {
     try {
       IJ.showStatus("Simulating tracks...");
 
-      final double halfDz = settings.depthOfField / 2000;
-      final double dt = settings.exposureTime / 1000;
-      final int g = settings.gap;
-      final int maxT = settings.simT;
+      final double halfDz = settings.getDepthOfField() / 2000;
+      final double dt = settings.getExposureTime() / 1000;
+      final int g = settings.getGap();
+      final int maxT = settings.getSimT();
 
       // Sample populations
-      final double p1 = settings.f1;
-      final double p2 = settings.f2 > 0 ? p1 + settings.f2 : 1;
+      final double p1 = settings.getF1();
+      final double p2 = settings.getF2() > 0 ? p1 + settings.getF2() : 1;
 
       // Precision in um (used for the units of the tracks)
-      final double precision = settings.precision / 1000;
+      final double precision = settings.getPrecision() / 1000;
 
       // Simulate tracks across the depth of field.
       // Each track is scaled using the diffusion coefficient and the molecule tested if
       // it remains in the depth-of-field.
 
-      final double[] sampleD = {settings.d1, settings.d2, settings.d3};
+      final double[] sampleD = {settings.getD1(), settings.getD2(), settings.getD3()};
       // Create the Gaussian step for each diffusion coefficient
       final double[] step = Arrays.stream(sampleD).map(
           // Std.dev of Gaussian for the step size: sqrt(2D * dt)
@@ -330,7 +207,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final List<Future<MemoryPeakResults>> futures = new LinkedList<>();
 
-      final int total = settings.numberOfMolecules;
+      final int total = settings.getNumberOfMolecules();
       final Ticker ticker = ImageJUtils.createTicker(total, threadCount);
 
       final AtomicInteger position = new AtomicInteger(total);
@@ -395,7 +272,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final MemoryPeakResults results = new MemoryPeakResults(total);
       final CalibrationWriter cw = new CalibrationWriter();
-      cw.setExposureTime(settings.exposureTime);
+      cw.setExposureTime(settings.getExposureTime());
       cw.setNmPerPixel(100);
       cw.setDistanceUnit(DistanceUnit.UM);
       results.setCalibration(cw.getCalibration());
@@ -404,14 +281,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       // Uncomment to allow rendering the dataset (which requires pixel units)
       // results.convertToPreferredUnits();
-
-      // Pre-select the simulation
-      if (settings.selected.isEmpty()) {
-        settings.selected.add(TITLE);
-        // These are fitted values for the simulation defaults
-        settings.a = 0.19;
-        settings.b = 0.06;
-      }
 
       // Build final results in memory
       for (final Future<MemoryPeakResults> f : futures) {
@@ -430,24 +299,23 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private boolean showSimulationDialog() {
-    settings = Settings.load();
-    settings.save();
+    settings = SettingsManager.readTrackDiffusionAnalysisSettings(0).toBuilder();
 
     final GenericDialog gd = new GenericDialog(TITLE);
 
-    gd.addNumericField("Depth_of_field", settings.depthOfField, 1, 6, "nm");
-    gd.addNumericField("Exposure_time", settings.exposureTime, 1, 6, "ms");
-    gd.addSlider("Gap", 1, 5, settings.gap);
+    gd.addNumericField("Depth_of_field", settings.getDepthOfField(), 1, 6, "nm");
+    gd.addNumericField("Exposure_time", settings.getExposureTime(), 1, 6, "ms");
+    gd.addSlider("Gap", 1, 5, settings.getGap());
 
-    gd.addNumericField("Number_of_molecules", settings.numberOfMolecules);
-    gd.addSlider("Max_t", 5, 15, settings.simT);
+    gd.addNumericField("Number_of_molecules", settings.getNumberOfMolecules());
+    gd.addSlider("Max_t", 5, 15, settings.getSimT());
 
-    gd.addNumericField("Precision", settings.precision, 1, 6, "nm");
-    gd.addNumericField("F1", settings.f1, 3);
-    gd.addNumericField("F2", settings.f2, 3);
-    gd.addNumericField("D1", settings.d1, 3, 6, "um^2/s");
-    gd.addNumericField("D2", settings.d2, 3, 6, "um^2/s");
-    gd.addNumericField("D3", settings.d3, 3, 6, "um^2/s");
+    gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
+    gd.addNumericField("F1", settings.getF1(), 3);
+    gd.addNumericField("F2", settings.getF2(), 3);
+    gd.addNumericField("D1", settings.getD1(), 3, 6, "um^2/s");
+    gd.addNumericField("D2", settings.getD2(), 3, 6, "um^2/s");
+    gd.addNumericField("D3", settings.getD3(), 3, 6, "um^2/s");
 
     gd.addHelp(HelpUrls.getUrl("diffusion-depth-of-field"));
     gd.showDialog();
@@ -455,37 +323,39 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return false;
     }
 
-    settings.depthOfField = gd.getNextNumber();
-    settings.exposureTime = gd.getNextNumber();
-    settings.gap = (int) gd.getNextNumber();
+    settings.setDepthOfField(gd.getNextNumber());
+    settings.setExposureTime(gd.getNextNumber());
+    settings.setGap((int) gd.getNextNumber());
 
-    settings.numberOfMolecules = (int) gd.getNextNumber();
-    settings.simT = (int) gd.getNextNumber();
+    settings.setNumberOfMolecules((int) gd.getNextNumber());
+    settings.setSimT((int) gd.getNextNumber());
 
-    settings.precision = gd.getNextNumber();
-    settings.f1 = gd.getNextNumber();
-    settings.f2 = gd.getNextNumber();
-    settings.d1 = gd.getNextNumber();
-    settings.d2 = gd.getNextNumber();
-    settings.d3 = gd.getNextNumber();
+    settings.setPrecision(gd.getNextNumber());
+    settings.setF1(gd.getNextNumber());
+    settings.setF2(gd.getNextNumber());
+    settings.setD1(gd.getNextNumber());
+    settings.setD2(gd.getNextNumber());
+    settings.setD3(gd.getNextNumber());
+
+    SettingsManager.writeSettings(settings.build());
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Depth of Field", settings.depthOfField);
-      ParameterUtils.isAboveZero("Exposure time", settings.exposureTime);
-      ParameterUtils.isAboveZero("Gap", settings.gap);
+      ParameterUtils.isAboveZero("Depth of Field", settings.getDepthOfField());
+      ParameterUtils.isAboveZero("Exposure time", settings.getExposureTime());
+      ParameterUtils.isAboveZero("Gap", settings.getGap());
 
-      ParameterUtils.isAboveZero("Number of molecules", settings.numberOfMolecules);
-      ParameterUtils.isAboveZero("Max T", settings.simT);
+      ParameterUtils.isAboveZero("Number of molecules", settings.getNumberOfMolecules());
+      ParameterUtils.isAboveZero("Max T", settings.getSimT());
 
-      ParameterUtils.isPositive("Precision", settings.precision);
-      ParameterUtils.isAboveZero("F1", settings.f1);
-      ParameterUtils.isPositive("F2", settings.f2);
-      ParameterUtils.isPositive("D1", settings.d1);
-      ParameterUtils.isPositive("D2", settings.d2);
-      ParameterUtils.isPositive("D3", settings.d3);
+      ParameterUtils.isPositive("Precision", settings.getPrecision());
+      ParameterUtils.isAboveZero("F1", settings.getF1());
+      ParameterUtils.isPositive("F2", settings.getF2());
+      ParameterUtils.isPositive("D1", settings.getD1());
+      ParameterUtils.isPositive("D2", settings.getD2());
+      ParameterUtils.isPositive("D3", settings.getD3());
 
-      ParameterUtils.isBelow("F1 + F2", settings.f1 + settings.f2, 1);
+      ParameterUtils.isBelow("F1 + F2", settings.getF1() + settings.getF2(), 1);
 
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -502,28 +372,28 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private boolean showDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
 
-    gd.addNumericField("Depth_of_field", settings.depthOfField, 1, 6, "nm");
-    gd.addSlider("Max_t", 3, 10, settings.maxT);
-    gd.addSlider("Offsets", 0, 5, settings.offsets);
-    gd.addNumericField("Precision", settings.precision, 1, 6, "nm");
+    gd.addNumericField("Depth_of_field", settings.getDepthOfField(), 1, 6, "nm");
+    gd.addSlider("Max_t", 3, 10, settings.getMaxT());
+    gd.addSlider("Offsets", 0, 5, settings.getOffsets());
+    gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
 
-    gd.addNumericField("Bin_width", settings.binWidth, -3);
+    gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
 
     gd.addMessage("z_corr = z + a * D + b");
-    gd.addNumericField("A", settings.a, 4);
-    gd.addNumericField("B", settings.b, 4);
+    gd.addNumericField("A", settings.getA(), 4);
+    gd.addNumericField("B", settings.getB(), 4);
 
-    gd.addSlider("Repeats", 1, 5, settings.repeats);
-    gd.addNumericField("Min_D", settings.minD, 3, 6, "um^2/s");
-    gd.addNumericField("Max_D", settings.maxD, 3, 6, "um^2/s");
+    gd.addSlider("Repeats", 1, 5, settings.getRepeats());
+    gd.addNumericField("Min_D", settings.getMinD(), 3, 6, "um^2/s");
+    gd.addNumericField("Max_D", settings.getMaxD(), 3, 6, "um^2/s");
 
-    gd.addCheckbox("Fit_precision", settings.fitPrecision);
-    gd.addCheckbox("Fit_three_state", settings.fitThreeState);
-    gd.addCheckbox("Fit_MLE", settings.fitMle);
-    gd.addNumericField("significanceLevel", settings.significanceLevel, -3);
+    gd.addCheckbox("Fit_precision", settings.getFitPrecision());
+    gd.addCheckbox("Fit_three_state", settings.getFitThreeState());
+    gd.addCheckbox("Fit_MLE", settings.getFitMle());
+    gd.addNumericField("significanceLevel", settings.getSignificanceLevel(), -3);
 
-    gd.addCheckbox("Show_CDF", settings.showCdf);
-    gd.addCheckbox("Seperate_plots", settings.showSeparatePlots);
+    gd.addCheckbox("Show_CDF", settings.getShowCdf());
+    gd.addCheckbox("Seperate_plots", settings.getShowSeparatePlots());
 
     gd.addHelp(HelpUrls.getUrl("track-diffusion-analysis"));
     gd.showDialog();
@@ -531,46 +401,48 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return false;
     }
 
-    settings.depthOfField = gd.getNextNumber();
-    settings.maxT = (int) gd.getNextNumber();
-    settings.offsets = (int) gd.getNextNumber();
-    settings.precision = gd.getNextNumber();
+    settings.setDepthOfField(gd.getNextNumber());
+    settings.setMaxT((int) gd.getNextNumber());
+    settings.setOffsets((int) gd.getNextNumber());
+    settings.setPrecision(gd.getNextNumber());
 
-    settings.binWidth = gd.getNextNumber();
+    settings.setBinWidth(gd.getNextNumber());
 
-    settings.a = gd.getNextNumber();
-    settings.b = gd.getNextNumber();
+    settings.setA(gd.getNextNumber());
+    settings.setB(gd.getNextNumber());
 
-    settings.repeats = (int) gd.getNextNumber();
-    settings.minD = gd.getNextNumber();
-    settings.maxD = gd.getNextNumber();
+    settings.setRepeats((int) gd.getNextNumber());
+    settings.setMinD(gd.getNextNumber());
+    settings.setMaxD(gd.getNextNumber());
 
-    settings.fitPrecision = gd.getNextBoolean();
-    settings.fitThreeState = gd.getNextBoolean();
-    settings.fitMle = gd.getNextBoolean();
-    settings.significanceLevel = gd.getNextNumber();
+    settings.setFitPrecision(gd.getNextBoolean());
+    settings.setFitThreeState(gd.getNextBoolean());
+    settings.setFitMle(gd.getNextBoolean());
+    settings.setSignificanceLevel(gd.getNextNumber());
 
-    settings.showCdf = gd.getNextBoolean();
-    settings.showSeparatePlots = gd.getNextBoolean();
+    settings.setShowCdf(gd.getNextBoolean());
+    settings.setShowSeparatePlots(gd.getNextBoolean());
+
+    SettingsManager.writeSettings(settings.build());
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Depth of Field", settings.depthOfField);
-      ParameterUtils.isAboveZero("Max T", settings.maxT);
-      ParameterUtils.isPositive("Offsets", settings.offsets);
-      ParameterUtils.isPositive("Precision", settings.precision);
+      ParameterUtils.isAboveZero("Depth of Field", settings.getDepthOfField());
+      ParameterUtils.isAboveZero("Max T", settings.getMaxT());
+      ParameterUtils.isPositive("Offsets", settings.getOffsets());
+      ParameterUtils.isPositive("Precision", settings.getPrecision());
 
-      ParameterUtils.isAboveZero("Bin width", settings.binWidth);
+      ParameterUtils.isAboveZero("Bin width", settings.getBinWidth());
 
-      ParameterUtils.isPositive("A", settings.a);
-      ParameterUtils.isPositive("B", settings.b);
+      ParameterUtils.isPositive("A", settings.getA());
+      ParameterUtils.isPositive("B", settings.getB());
 
-      ParameterUtils.isAboveZero("Repeats", settings.repeats);
-      ParameterUtils.isAboveZero("Min D", settings.minD);
-      ParameterUtils.isAboveZero("Max D", settings.maxD);
-      ParameterUtils.isAboveZero("Significance level", settings.significanceLevel);
+      ParameterUtils.isAboveZero("Repeats", settings.getRepeats());
+      ParameterUtils.isAboveZero("Min D", settings.getMinD());
+      ParameterUtils.isAboveZero("Max D", settings.getMaxD());
+      ParameterUtils.isAboveZero("Significance level", settings.getSignificanceLevel());
 
-      ParameterUtils.isEqualOrAbove("Max D", settings.maxD, settings.minD);
+      ParameterUtils.isEqualOrAbove("Max D", settings.getMaxD(), settings.getMinD());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -588,7 +460,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // items.
     final MultiDialog md = new MultiDialog(TITLE, items);
     md.setDisplayConverter(items.getDisplayConverter());
-    md.setSelected(settings.selected);
+    md.setSelected(settings.getSelectedList());
     md.setHelpUrl(HelpUrls.getUrl("track-diffusion-analysis"));
 
     md.showDialog();
@@ -602,7 +474,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       IJ.error(TITLE, "No results were selected");
       return false;
     }
-    settings.selected = selected;
+    settings.clearSelected();
+    selected.forEach(settings::addSelected);
+    SettingsManager.writeSettings(settings.build());
 
     for (final String name : selected) {
       final MemoryPeakResults r = MemoryPeakResults.getResults(name);
@@ -674,7 +548,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
    * @return distances
    */
   private float[][] getDistances(List<MemoryPeakResults> allResults) {
-    final int maxT = settings.maxT;
+    final int maxT = settings.getMaxT();
     final FloatArrayList[] distances =
         IntStream.rangeClosed(0, maxT).mapToObj(FloatArrayList::new).toArray(FloatArrayList[]::new);
     final List<Position> track = new LocalList<>();
@@ -685,7 +559,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         if (r.getId() != id[0]) {
           id[0] = r.getId();
           // Process track
-          final int maxStart = Math.min(track.size() - 1, settings.offsets + 1);
+          final int maxStart = Math.min(track.size() - 1, settings.getOffsets() + 1);
           for (int i = 0; i < maxStart; i++) {
             final Position origin = track.get(i);
             for (int j = i + 1; j < track.size(); j++) {
@@ -763,11 +637,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
         // Use MLE to choose best model. Attempts to use adjusted R2 or mapping
         // the SS to log-likelihood (see MathUtils.getLogLikelihood) were not as robust.
         final double dt = exposureTime;
-        final double dz = settings.depthOfField / 1000;
-        final double precision = settings.precision / 1000;
-        ll2 = new TwoStateFunction(dt, dz, settings.a, settings.b, precision, settings.binWidth,
+        final double dz = settings.getDepthOfField() / 1000;
+        final double precision = settings.getPrecision() / 1000;
+        ll2 = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, settings.getBinWidth(),
             counts, executor).logLikelihood(result2.getPointRef());
-        ll3 = new ThreeStateFunction(dt, dz, settings.a, settings.b, precision, settings.binWidth,
+        ll3 = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, settings.getBinWidth(),
             counts, executor).logLikelihood(result3.getPointRef());
       }
 
@@ -777,7 +651,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         // The difference in the number of fitted parameters will be 2:
         // i.e. 1 extra diffusion coefficient and population fraction
         final double q = ChiSquaredDistributionTable.computeQValue(llr, 2);
-        final boolean reject = q > settings.significanceLevel;
+        final boolean reject = q > settings.getSignificanceLevel();
         LoggerUtils.log(logger, Level.INFO,
             "Two-state -> three-state : LL = %s -> %s, LLR = %s, q-value = %s (Reject=%b)", ll2,
             ll3, MathUtils.rounded(llr, 4), MathUtils.rounded(q, 4), reject);
@@ -798,8 +672,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     IJ.showStatus("Fitting two-state model...");
 
     final double dt = exposureTime;
-    final double dz = settings.depthOfField / 1000;
-    final double precision = settings.precision / 1000;
+    final double dz = settings.getDepthOfField() / 1000;
+    final double precision = settings.getPrecision() / 1000;
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
     final MaxEval maxEval = new MaxEval(2000);
@@ -814,30 +688,30 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ObjectiveFunction fun;
     final GoalType goalType;
     if (mle) {
-      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.a, settings.b, precision,
-          settings.binWidth, counts, executor)::logLikelihood);
+      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
+          settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
     } else {
-      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.a, settings.b, precision,
-          settings.binWidth, distances, executor)::sumOfSquares);
+      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
+          settings.getBinWidth(), distances, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
     }
-    final double minD = Math.min(0.1, settings.minD);
+    final double minD = Math.min(0.1, settings.getMinD());
     final SimpleBounds bounds = new SimpleBounds(addPrecision(new double[] {0, 0.0, 0, minD}, 0),
         addPrecision(new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY}, 0.1));
     final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
         addPrecision(new double[] {0.1, 0.01, 0.1, 0.5}, 0.001));
 
-    final Ticker ticker = ImageJUtils.createTicker(settings.repeats, 1);
-    for (int n = 1; n <= settings.repeats; n++) {
+    final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
+    for (int n = 1; n <= settings.getRepeats(); n++) {
       try {
         // Guess in range
         final double[] start = addPrecision(new double[] {
             // Bound fraction
             rng.nextDouble(0.1, 0.9), rng.nextDouble(0.1),
             // Free fraction
-            0, rng.nextDouble(settings.minD, settings.maxD)},
+            0, rng.nextDouble(settings.getMinD(), settings.getMaxD())},
             // precision
             rng.nextDouble(0.01, 0.03));
         // Set f2
@@ -903,15 +777,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private PointValuePair fitThreeStateDistances(int[][] counts, float[][] pdf,
       ExecutorService executor, boolean mle) {
-    if (!settings.fitThreeState) {
+    if (!settings.getFitThreeState()) {
       return null;
     }
 
     IJ.showStatus("Fitting three-state model...");
 
     final double dt = exposureTime;
-    final double dz = settings.depthOfField / 1000;
-    final double precision = settings.precision / 1000;
+    final double dz = settings.getDepthOfField() / 1000;
+    final double precision = settings.getPrecision() / 1000;
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
     final MaxEval maxEval = new MaxEval(2000);
@@ -927,34 +801,34 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ObjectiveFunction fun;
     final GoalType goalType;
     if (mle) {
-      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.a, settings.b, precision,
-          settings.binWidth, counts, executor)::logLikelihood);
+      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
+          settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
     } else {
-      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.a, settings.b, precision,
-          settings.binWidth, pdf, executor)::sumOfSquares);
+      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
+          settings.getBinWidth(), pdf, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
     }
-    final double minD = Math.min(0.1, settings.minD);
+    final double minD = Math.min(0.1, settings.getMinD());
     final SimpleBounds bounds =
         new SimpleBounds(addPrecision(new double[] {0, 0.0, 0, minD, 0, minD}, 0), addPrecision(
             new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1));
     final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
         addPrecision(new double[] {0.1, 0.01, 0.1, 0.5, 0.1, 0.5}, 0.001));
 
-    final Ticker ticker = ImageJUtils.createTicker(settings.repeats, 1);
-    final double range = settings.maxD - settings.minD;
-    for (int n = 1; n <= settings.repeats; n++) {
+    final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
+    final double range = settings.getMaxD() - settings.getMinD();
+    for (int n = 1; n <= settings.getRepeats(); n++) {
       try {
         // Guess in range
         final double[] start = addPrecision(new double[] {
             // Bound fraction
             rng.nextDouble(0.1, 0.4), rng.nextDouble(0.1),
             // Slow fraction
-            rng.nextDouble(0.1, 0.4), rng.nextDouble(settings.minD, settings.minD + range / 3),
+            rng.nextDouble(0.1, 0.4), rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 3),
             // Fast fraction
-            0, rng.nextDouble(settings.maxD - range / 3, settings.maxD)},
+            0, rng.nextDouble(settings.getMaxD() - range / 3, settings.getMaxD())},
             // precision
             precision * rng.nextDouble(0.9, 1.1));
         // Set f3
@@ -1044,7 +918,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private double[] addPrecision(double[] a, double p) {
-    if (settings.fitPrecision) {
+    if (settings.getFitPrecision()) {
       final double[] b = Arrays.copyOf(a, a.length + 1);
       b[a.length] = p;
       return b;
@@ -1071,20 +945,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private String addResult(PointValuePair result) {
     final StringBuilder sb = new StringBuilder();
-    sb.append(settings.selected.get(0));
-    if (settings.selected.size() > 1) {
-      sb.append(" + ").append(TextUtils.pleural(settings.selected.size() - 1, "other"));
+    sb.append(settings.getSelected(0));
+    if (settings.getSelectedCount() > 1) {
+      sb.append(" + ").append(TextUtils.pleural(settings.getSelectedCount()- 1, "other"));
     }
     sb.append('\t');
     //@formatter:off
-    sb.append(MathUtils.rounded(settings.depthOfField)).append('\t')
+    sb.append(MathUtils.rounded(settings.getDepthOfField())).append('\t')
       .append(MathUtils.rounded(exposureTime * 1e3)).append('\t')
-      .append(settings.offsets).append('\t')
-      .append(MathUtils.rounded(settings.a)).append('\t')
-      .append(MathUtils.rounded(settings.b)).append('\t')
-      .append(settings.repeats).append('\t')
-      .append(MathUtils.rounded(settings.minD)).append('\t')
-      .append(MathUtils.rounded(settings.maxD))
+      .append(settings.getOffsets()).append('\t')
+      .append(MathUtils.rounded(settings.getA())).append('\t')
+      .append(MathUtils.rounded(settings.getB())).append('\t')
+      .append(settings.getRepeats()).append('\t')
+      .append(MathUtils.rounded(settings.getMinD())).append('\t')
+      .append(MathUtils.rounded(settings.getMaxD()))
       ;
     //@formatter:on
     if (result != null) {
@@ -1094,7 +968,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           .collect(Collectors.joining(", "));
       final String d = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i + 1]))
           .collect(Collectors.joining(", "));
-      final double precision = (fit.length & 1) == 1 ? fit[2 * n] * 1e3 : settings.precision;
+      final double precision = (fit.length & 1) == 1 ? fit[2 * n] * 1e3 : settings.getPrecision();
       sb.append('\t').append(f).append('\t').append(d).append('\t')
           .append(MathUtils.rounded(precision)).append('\t').append(result.getValue());
     }
@@ -1104,7 +978,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private int[][] createCounts(float[][] distances) {
     IJ.showStatus("Creating histograms...");
 
-    final float binWidth = (float) settings.binWidth;
+    final float binWidth = (float) settings.getBinWidth();
     final int[][] counts = new int[distances.length][];
     for (int i = 0; i < distances.length; i++) {
       final float[] x = distances[i];
@@ -1167,7 +1041,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     if (endP / maxP > 1e-3) {
       logger.warning(() -> String.format(
           "Possible truncation of observed distances: pdf(r=%s, dt=%s ms)=%s (fraction of max %s)",
-          MathUtils.rounded(settings.binWidth * counts[0].length),
+          MathUtils.rounded(settings.getBinWidth() * counts[0].length),
           MathUtils.rounded(exposureTime * 1e3), MathUtils.rounded(endP),
           MathUtils.rounded(endP / maxP)));
     }
@@ -1186,10 +1060,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
 
     Plot[] cdfPlot = null;
-    if (settings.showCdf) {
+    if (settings.getShowCdf()) {
       final String[] title = new String[distances.length];
       cdfPlot = new Plot[distances.length];
-      if (settings.showSeparatePlots) {
+      if (settings.getShowSeparatePlots()) {
         for (int i = 0; i < distances.length; i++) {
           title[i] = TITLE + " distance CDF " + MathUtils.rounded((i + 1) * toMillies) + "ms";
           cdfPlot[i] = new Plot(title[i], "Distance (um)", "Probability");
@@ -1214,7 +1088,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         cdfPlot[i].setLimits(0, maxD, 0, 1.05);
       }
 
-      if (settings.showSeparatePlots) {
+      if (settings.getShowSeparatePlots()) {
         for (int i = 0; i < distances.length; i++) {
           cdfPlot[i].setFrameSize(PlotWindow.plotWidth, PlotWindow.plotHeight / 2);
           ImageJUtils.display(title[i], cdfPlot[i], 0, wo);
@@ -1230,7 +1104,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     final String[] title = new String[distances.length];
     final Plot[] pdfPlot = new Plot[distances.length];
-    if (settings.showSeparatePlots) {
+    if (settings.getShowSeparatePlots()) {
       for (int i = 0; i < distances.length; i++) {
         title[i] = TITLE + " distance PDF " + MathUtils.rounded((i + 1) * toMillies) + "ms";
         pdfPlot[i] = new Plot(title[i], "Distance (um)", "Probability");
@@ -1240,7 +1114,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       pdfPlot[0] = new Plot(title[0], "Distance (um)", "Probability");
       Arrays.fill(pdfPlot, pdfPlot[0]);
     }
-    final float binWidth = (float) settings.binWidth;
+    final float binWidth = (float) settings.getBinWidth();
     final float[] r = SimpleArrayUtils.newArray(pdf[0].length, binWidth / 2, binWidth);
     float maxP = 0;
     for (int i = 0; i < distances.length; i++) {
@@ -1254,7 +1128,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       pdfPlot[i].setLimits(0, r[r.length - 1], 0, maxP * 1.05);
     }
 
-    if (settings.showSeparatePlots) {
+    if (settings.getShowSeparatePlots()) {
       for (int i = 0; i < distances.length; i++) {
         pdfPlot[i].setFrameSize(PlotWindow.plotWidth, PlotWindow.plotHeight / 2);
         ImageJUtils.display(title[i], pdfPlot[i], 0, wo);
@@ -1279,15 +1153,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
     Arrays.fill(evalDistances, SimpleArrayUtils.newArray(r.length * 2 + 1, 0, binWidth * 0.5f));
 
     final double dt = exposureTime;
-    final double dz = settings.depthOfField / 1000;
-    final double precision = settings.precision / 1000;
+    final double dz = settings.getDepthOfField() / 1000;
+    final double precision = settings.getPrecision() / 1000;
     double[][] p;
     final double[] fit = result.getPointRef();
     if (fit.length < 6) {
-      p = new TwoStateFunction(dt, dz, settings.a, settings.b, precision, binWidth, evalDistances,
+      p = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth, evalDistances,
           executor).pdf(fit);
     } else {
-      p = new ThreeStateFunction(dt, dz, settings.a, settings.b, precision, binWidth, evalDistances,
+      p = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth, evalDistances,
           executor).pdf(fit);
     }
 

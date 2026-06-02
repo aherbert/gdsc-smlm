@@ -71,6 +71,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PeakFitPreviewSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SaveLocalisationsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TcPalmAnalysisSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TrackDiffusionAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
 
@@ -258,6 +259,35 @@ public final class GuiSettings {
       builder.setOnIntensityWeight(config.getLocalDiffusionWeight());
       builder.setDisappearanceDecayFactor(config.getDisappearanceDecayFactor());
       builder.setDisappearanceThreshold(config.getDisappearanceThreshold());
+      INSTANCE = builder.build();
+    }
+  }
+
+  /** The default TrackDiffusionAnalysisSettings. */
+  public static class DefaultTrackDiffusionAnalysisSettings {
+    /** Default settings instance. */
+    public static final TrackDiffusionAnalysisSettings INSTANCE;
+
+    static {
+      final TrackDiffusionAnalysisSettings.Builder builder = TrackDiffusionAnalysisSettings.newBuilder();
+      builder.setDepthOfField(750);
+      builder.setGap(1);
+      builder.setMaxT(7);
+      builder.setOffsets(0);
+      builder.setBinWidth(0.01);
+      builder.setRepeats(3);
+      builder.setMinD(1);
+      builder.setMaxD(5);
+      builder.setExposureTime(10);
+      builder.setNumberOfMolecules(50000);
+      builder.setSimT(10);
+      builder.setPrecision(30);
+      builder.setF1(0.2);
+      builder.setD1(0.01);
+      builder.setD2(1.5);
+      builder.setD3(5);
+      builder.setFitMle(true);
+      builder.setSignificanceLevel(0.05);
       INSTANCE = builder.build();
     }
   }

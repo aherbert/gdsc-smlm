@@ -102,6 +102,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SaveLocalisationsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.SummariseResultsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TcPalmAnalysisSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TrackDiffusionAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TranslateResultsSettings;
 
 /**
@@ -1048,6 +1049,16 @@ public final class SettingsManager {
    */
   public static ClusteringSettings readClusteringSettings(int flags) {
     return new ConfigurationReader<>(GuiSettings.DefaultClusteringSettings.INSTANCE).read(flags);
+  }
+
+  /**
+   * Read the TrackDiffusionAnalysisSettings from the settings file in the settings directory.
+   *
+   * @param flags the flags
+   * @return the TrackDiffusionAnalysisSettings
+   */
+  public static TrackDiffusionAnalysisSettings readTrackDiffusionAnalysisSettings(int flags) {
+    return new ConfigurationReader<>(GuiSettings.DefaultTrackDiffusionAnalysisSettings.INSTANCE).read(flags);
   }
 
   /**
