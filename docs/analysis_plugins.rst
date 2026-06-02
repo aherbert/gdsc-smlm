@@ -1478,17 +1478,186 @@ The steady-state model for a 3-state population with bound fraction :math:`F_1`,
     &+ (1 - F_1 - F_2) \mathit{P}(\Delta t, \Delta z_{\text{corr}}, D_3) \frac{r}{2(D_3 \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D_3 \Delta t + \sigma^2)}}
     \end{aligned}
 
-The probability model can be fit using the observed distances from tracks using different time delays, for example delays of 1 to 5 frames. The observations can be fit using maximum likelihood estimation (MLE), or a cumulative histogram fit using least squares fitting against a numerical integration of the probabilty model over suitable bin sizes.
+The probability model can be fit using the observed distances from tracks using different time delays, for example delays of 1 to 5 frames. The observations can be fit against a numerical integration of the probabilty model over suitable bin sizes using either maximum likelihood estimation (MLE) or least squares fitting.
+
+If the number of observed distances is low then fitting may be unreliable. A simulation can be performed to generate data for a set number of molecules. This can be used to determine how many tracks are required for a reliable fit to an expected population with specified diffusion coefficients.
+
+The number of observed distances can be increased by using successive frames from the start of the track as the origin, for example an offset of 1 will compute distances from the track using the second localisation as the origin. This will increase the number of observed distances but will lead to under representation of long distances at large time delays.
 
 Parameters
 ~~~~~~~~~~
 
-Text.
+The following parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Depth of field
+     - The depth of field.
+
+   * - Max t
+     - The maximum time step :math:`-\Delta t` to use for diffusion distances (in frames).
+
+   * - Offsets
+     - The number of offsets to use for the origin of the track. Each offset will incease the count of diffusion distances but may lead to under representation of long distances at large time delays.
+
+   * - Precision
+     - The localisation precision. This can be fixed, or a fitted parameter.
+
+   * - Bin width
+     - The bin width for the histogram counts used to create the observed PDF.
+
+   * - A
+     - The depth-of-field correction coefficient a (see :ref:`calibration_plugins:Diffusion Depth of Field` plugin).
+
+   * - B
+     - The depth-of-field correction coefficient b (see :ref:`calibration_plugins:Diffusion Depth of Field` plugin).
+
+   * - Repeats
+     - The number of repeats for fitting. Each repeat uses a random initialisation for the parameters; multiple repeats can avoid choosing a local minima for the final result.
+
+   * - Min D
+     - The minimum diffusion coefficient to use when initialising the mobile population. If the three-state model is used the slow fraction will initialise using the lower third of the range and the fast fraction the upper third of the range ([min D, max D]).
+
+   * - Max D
+     - The maximum diffusion coefficient to use when initialising the mobile population.
+
+   * - Fit precision
+     - If ``true`` then the precision is a fitted parameter, otherwise it is fixed at the provided value.
+
+   * - Fit three state
+     - If ``true`` then the three-state model is fitted in addition to the two-state model. A log-likelihood ratio test is performed to choose the best model.
+
+   * - Significance level
+     - The significance level for the log-likelihood ratio test.
+
+   * - Show CDF
+     - If ``true`` then the CDF plot is displayed. The fitted PDF plot is always displayed.
+
+   * - Separate plots
+     - If ``true`` then use a separate plot for each time delay, otherwise show all on the same plot.
 
 Output
 ~~~~~~
 
-Text.
+The analysis will record progress to the ``ImageJ`` log window:
+
+- The total number of distances for each time delay.
+- The fit result for each repeat.
+- The result of the significance test comparing the two-state and three-state model.
+
+Note that the choice of the three-state model should also consider the biological rational for the fitted parameters. For example a population fraction may be too small; the diffusion coefficients for the two mobile populations are effectively the same; or a diffusion coefficient is too fast.
+
+The observed PDF and the fit are plotted for each time delay (:numref:`Figure %s <fig_track_diffusion_analysis_pdf>`). This may optionally be separated into a plot for each time delay.
+
+.. _fig_track_diffusion_analysis_pdf:
+.. figure:: images/track_diffusion_analysis_pdf.png
+    :align: center
+    :figwidth: 80%
+
+    Observed and fitted PDF of diffusion distances
+
+A summary table is shown containing the model parameters. The following columns are reported:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Field
+     - Description
+
+   * - Dataset
+     - The title of the input data.
+
+   * - dz
+     - The depth of field.
+
+   * - dt
+     - The exposure time. This is the time delay for 1 frame.
+
+   * - Offsets
+     - The number of offsets to use for the origin of the track.
+
+   * - A
+     - The depth-of-field correction coefficient a.
+
+   * - B
+     - The depth-of-field correction coefficient b.
+
+   * - Repeats
+     - The number of repeats for fitting.
+
+   * - Min D
+     - The minimum diffusion coefficient to use when initialising the mobile population.
+
+   * - Max D
+     - The maximum diffusion coefficient to use when initialising the mobile population.
+
+   * - F
+     - The fitted fractions for the population.
+
+   * - D
+     - The fitted diffusion coefficients for the population.
+
+   * - sigma
+     - The localisation precision (either fitted or fixed).
+
+   * - Value
+     - The fit value, either the sum-of-squares or the log-likelihood.
+
+Simulation
+~~~~~~~~~~
+
+If the ``Shift`` key is held when executing the plugin then a simulation of molecule diffusion is performed. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. Molecules are randomly allocated a specified diffusion coefficient based of the fractions of each population. Three dimensional Brownian diffusion is simulated for a configured number of time steps. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it starts a new track. The simulated tracks are saved to memory. These are idealised tracks with perfect tracing of molecules within an exact depth of field. The localisations may be retraced using the :ref:`analysis_plugins:Trace Diffusion` plugin.
+
+The following parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Depth of field
+     - The depth of field.
+
+   * - Exposure time
+     - The time step (exposure time) for each frame.
+
+   * - Gap
+     - The maximum allowed time gap between localisations in a track. Use 1 for continuous tracks. Greater than 1 allows a molecule to leave the depth of field and re-enter.
+
+   * - Number of molecules
+     - The number of molecules in the simulation.
+
+   * - Max t
+     - The maximum number of frames in the simulation.
+
+   * - Precision
+     - The localisation error added to the recorded x and y coordinates.
+
+   * - F1
+     - The fraction of the population with diffusion coefficient D1.
+
+   * - F2
+     - The fraction of the population with diffusion coefficient D2. If set to zero then F2 = 1 - F1 for a two-state simulation. If above zero then F3 = 1 - F1 - F2 for a three-state simulation.
+
+   * - D1
+     - The diffusion coefficient for the first class of molecules.
+
+   * - D2
+     - The diffusion coefficient for the second class of molecules.
+
+   * - D3
+     - The diffusion coefficient for the third class of molecules.
+
+
+The simulation allows experimenting with the number of samples required to obtain satisfactory results for the fitting of observed diffusion distance distributions.
 
 
 .. index:: ! Trace Length Analysis

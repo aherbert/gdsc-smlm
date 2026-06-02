@@ -1064,8 +1064,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private String createHeader() {
     return Arrays
-        .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "offsets", "precision", "a", "b",
-            "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
+        .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "offsets", "a", "b", "repeats",
+            "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
         .collect(Collectors.joining("\t"));
   }
 
@@ -1080,7 +1080,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
     sb.append(MathUtils.rounded(settings.depthOfField)).append('\t')
       .append(MathUtils.rounded(exposureTime * 1e3)).append('\t')
       .append(settings.offsets).append('\t')
-      .append(MathUtils.rounded(settings.precision)).append('\t')
       .append(MathUtils.rounded(settings.a)).append('\t')
       .append(MathUtils.rounded(settings.b)).append('\t')
       .append(settings.repeats).append('\t')

@@ -270,6 +270,9 @@ Analysis Plugins
    * - :ref:`analysis_plugins:Trace Diffusion (Multi)`
      - Allows the ``Trace Diffusion`` plugin to be run with multiple input datasets.
 
+   * - :ref:`analysis_plugins:Track Diffusion Analysis`
+     - Fit diffusion coefficients of a mixed population of fixed and moving molecules using a model that accounts for diffusion out of the depth-of-field.
+
    * - :ref:`analysis_plugins:Trace Length Analysis`
      - Analyses the track length of traced data.
 
