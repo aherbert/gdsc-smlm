@@ -570,7 +570,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final int maxT = settings.getMaxT();
     final FloatArrayList[] distances =
         IntStream.rangeClosed(0, maxT).mapToObj(FloatArrayList::new).toArray(FloatArrayList[]::new);
-    final List<Position> track = new LocalList<>();
+    final LocalList<Position> track = new LocalList<>();
     for (final MemoryPeakResults results : allResults) {
       results.sort(IdFramePeakResultComparator.INSTANCE);
       final int[] id = {-1};
@@ -580,9 +580,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
           // Process track
           final int maxStart = Math.min(track.size() - 1, settings.getOffsets() + 1);
           for (int i = 0; i < maxStart; i++) {
-            final Position origin = track.get(i);
+            final Position origin = track.unsafeGet(i);
             for (int j = i + 1; j < track.size(); j++) {
-              final Position position = track.get(j);
+              final Position position = track.unsafeGet(j);
               final int g = position.t - origin.t;
               if (g > maxT) {
                 break;
@@ -596,9 +596,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       });
       // Process final track
       for (int i = 0; i < track.size(); i++) {
-        final Position origin = track.get(i);
+        final Position origin = track.unsafeGet(i);
         for (int j = i + 1; j < track.size(); j++) {
-          final Position position = track.get(i);
+          final Position position = track.unsafeGet(i);
           final int g = position.t - origin.t;
           if (g > maxT) {
             break;
