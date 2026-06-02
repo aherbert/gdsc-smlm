@@ -36,12 +36,14 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.TextField;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -370,9 +372,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private boolean showDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
-    gd.addNumericField("Depth_of_field", settings.getDepthOfField(), 1, 6, "nm");
+    TextField tfZ =
+        gd.addAndGetNumericField("Depth_of_field", settings.getDepthOfField(), 1, 6, "nm");
     gd.addSlider("Max_t", 3, 10, settings.getMaxT());
     gd.addSlider("Offsets", 0, 5, settings.getOffsets());
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
@@ -380,8 +383,24 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
 
     gd.addMessage("z_corr = z + a * D + b");
-    gd.addNumericField("A", settings.getA(), 4);
-    gd.addNumericField("B", settings.getB(), 4);
+    TextField tfA = gd.addAndGetNumericField("A", settings.getA(), 4);
+    TextField tfB = gd.addAndGetNumericField("B", settings.getB(), 4);
+    gd.addButton("Calibrate", e -> {
+      // Run on non GUI thread and while running disable this plugin dialog
+      gd.setEnabled(false);
+      ForkJoinPool.commonPool().execute(() -> {
+        try {
+          final double dz = Double.parseDouble(tfZ.getText());
+          final double[] ab = new DiffusionDepthOfField().run(dz);
+          if (ab != null) {
+            tfA.setText(MathUtils.rounded(ab[0]));
+            tfB.setText(MathUtils.rounded(ab[1]));
+          }
+        } finally {
+          gd.setEnabled(true);
+        }
+      });
+    });
 
     gd.addSlider("Repeats", 1, 5, settings.getRepeats());
     gd.addNumericField("Min_D", settings.getMinD(), 3, 6, "um^2/s");
@@ -639,10 +658,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
         final double dt = exposureTime;
         final double dz = settings.getDepthOfField() / 1000;
         final double precision = settings.getPrecision() / 1000;
-        ll2 = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, settings.getBinWidth(),
-            counts, executor).logLikelihood(result2.getPointRef());
-        ll3 = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, settings.getBinWidth(),
-            counts, executor).logLikelihood(result3.getPointRef());
+        ll2 = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
+            settings.getBinWidth(), counts, executor).logLikelihood(result2.getPointRef());
+        ll3 = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
+            settings.getBinWidth(), counts, executor).logLikelihood(result3.getPointRef());
       }
 
       // Select best fit using log-likelihood ratio test
@@ -688,12 +707,12 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ObjectiveFunction fun;
     final GoalType goalType;
     if (mle) {
-      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
-          settings.getBinWidth(), counts, executor)::logLikelihood);
+      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
     } else {
-      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
-          settings.getBinWidth(), distances, executor)::sumOfSquares);
+      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, settings.getBinWidth(), distances, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
     }
@@ -801,12 +820,12 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ObjectiveFunction fun;
     final GoalType goalType;
     if (mle) {
-      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
-          settings.getBinWidth(), counts, executor)::logLikelihood);
+      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
     } else {
-      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
-          settings.getBinWidth(), pdf, executor)::sumOfSquares);
+      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, settings.getBinWidth(), pdf, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
     }
@@ -826,7 +845,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
             // Bound fraction
             rng.nextDouble(0.1, 0.4), rng.nextDouble(0.1),
             // Slow fraction
-            rng.nextDouble(0.1, 0.4), rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 3),
+            rng.nextDouble(0.1, 0.4),
+            rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 3),
             // Fast fraction
             0, rng.nextDouble(settings.getMaxD() - range / 3, settings.getMaxD())},
             // precision
@@ -947,7 +967,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final StringBuilder sb = new StringBuilder();
     sb.append(settings.getSelected(0));
     if (settings.getSelectedCount() > 1) {
-      sb.append(" + ").append(TextUtils.pleural(settings.getSelectedCount()- 1, "other"));
+      sb.append(" + ").append(TextUtils.pleural(settings.getSelectedCount() - 1, "other"));
     }
     sb.append('\t');
     //@formatter:off
@@ -1158,11 +1178,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double[][] p;
     final double[] fit = result.getPointRef();
     if (fit.length < 6) {
-      p = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth, evalDistances,
-          executor).pdf(fit);
+      p = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
+          evalDistances, executor).pdf(fit);
     } else {
-      p = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth, evalDistances,
-          executor).pdf(fit);
+      p = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
+          evalDistances, executor).pdf(fit);
     }
 
     for (int i = 0; i < evalDistances.length; i++) {

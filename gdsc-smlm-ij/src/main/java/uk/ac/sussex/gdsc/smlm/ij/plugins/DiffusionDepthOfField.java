@@ -183,19 +183,32 @@ public class DiffusionDepthOfField implements PlugIn {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     settings = Settings.load();
+    run(settings);
+  }
+
+  double[] run(double dz) {
+    settings = Settings.load();
+    if (dz > 0) {
+      settings.depthOfField = dz;
+    }
+    return run(settings);
+  }
+
+  private double[] run(Settings settings) {
     settings.save();
 
     if (!showDialog()) {
-      return;
+      return null;
     }
     final int threadCount = Prefs.getThreads();
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
+    double[] ab = null;
     try {
       final double[][] probability = simulateRemaining(threadCount, executor);
 
       // Fit the observed probability
-      final double[] ab = fitRemaining(probability, threadCount, executor);
+      ab = fitRemaining(probability, threadCount, executor);
 
       addToResultTable(ab);
 
@@ -208,6 +221,7 @@ public class DiffusionDepthOfField implements PlugIn {
     }
 
     ImageJUtils.finished(TITLE + " done");
+    return ab;
   }
 
   private boolean showDialog() {
