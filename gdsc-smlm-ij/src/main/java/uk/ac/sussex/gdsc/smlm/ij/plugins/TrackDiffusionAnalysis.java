@@ -212,7 +212,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final int total = settings.getNumberOfMolecules();
       final Ticker ticker = ImageJUtils.createTicker(total, threadCount);
 
-      final AtomicInteger position = new AtomicInteger(total);
+      final AtomicInteger position = new AtomicInteger();
       final AtomicInteger nextId = new AtomicInteger();
       // Require 4 dimension equi-distributed sampler
       final JumpableUniformRandomProvider parentRng =
@@ -225,8 +225,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
           final MemoryPeakResults observed = new MemoryPeakResults(total);
 
           for (;;) {
-            final int pos = position.decrementAndGet();
-            if (pos < 0) {
+            final int pos = position.incrementAndGet();
+            if (pos > total) {
               break;
             }
             // Molecule type
@@ -686,7 +686,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return result2;
   }
 
-  private PointValuePair fitTwoStateDistances(int[][] counts, float[][] distances,
+  private PointValuePair fitTwoStateDistances(int[][] counts, float[][] pdf,
       ExecutorService executor, boolean mle) {
     IJ.showStatus("Fitting two-state model...");
 
@@ -712,7 +712,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       goalType = GoalType.MAXIMIZE;
     } else {
       fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
-          precision, settings.getBinWidth(), distances, executor)::sumOfSquares);
+          precision, settings.getBinWidth(), pdf, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
     }
@@ -742,15 +742,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
         if (mle) {
           LoggerUtils.log(logger, Level.INFO,
               "Two-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n,
-              solution.getValue(), MathUtils.getAkaikeInformationCriterion(solution.getValue(), 4),
+              solution.getValue(),
+              MathUtils.getAkaikeInformationCriterion(solution.getValue(), start.length - 1),
               powellOptimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
             result = solution;
           }
         } else {
-          LoggerUtils.log(logger, Level.INFO, "Two-state fit [%d]: SS = %s (%d evaluations)", n,
-              solution.getValue(), powellOptimizer.getEvaluations());
+          LoggerUtils.log(logger, Level.INFO,
+              "Two-state fit [%d]: SS = %s, delta AIC = %s (%d evaluations)", n,
+              solution.getValue(), MathUtils.getDeltaAkaikeInformationCriterion(solution.getValue(),
+                  pdf[0].length * pdf.length, start.length - 1),
+              powellOptimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
             result = solution;
@@ -860,15 +864,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
         if (mle) {
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n,
-              solution.getValue(), MathUtils.getAkaikeInformationCriterion(solution.getValue(), 4),
+              solution.getValue(),
+              MathUtils.getAkaikeInformationCriterion(solution.getValue(), start.length - 1),
               powellOptimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
             result = solution;
           }
         } else {
-          LoggerUtils.log(logger, Level.INFO, "Three-state fit [%d]: SS = %s (%d evaluations)", n,
-              solution.getValue(), powellOptimizer.getEvaluations());
+          LoggerUtils.log(logger, Level.INFO,
+              "Three-state fit [%d]: SS = %s, delta AIC = %s (%d evaluations)", n,
+              solution.getValue(), MathUtils.getDeltaAkaikeInformationCriterion(solution.getValue(),
+                  pdf[0].length * pdf.length, start.length - 1),
+              powellOptimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
             result = solution;
