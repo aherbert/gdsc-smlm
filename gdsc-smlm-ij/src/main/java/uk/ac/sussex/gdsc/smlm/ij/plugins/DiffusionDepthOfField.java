@@ -543,7 +543,7 @@ public class DiffusionDepthOfField implements PlugIn {
   }
 
   private String createHeader() {
-    return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "g", "seed", "n", "max t", "min D (um^2/s)",
+    return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "min D (um^2/s)",
         "max D (um^2/s)", "sample D", "a", "b",}).collect(Collectors.joining("\t"));
   }
 
