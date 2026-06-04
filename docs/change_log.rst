@@ -16,6 +16,9 @@ Minor release of GDSC SMLM.
   and short lasting fast diffusing molecules (fewer jumps).
 * Added the :numref:`{name} <calibration_plugins:Diffusion Depth of Field>` plugin to model the
   probabiity of a diffusing molecule remaining in the depth of field.
+* Added the :numref:`{name} <analysis_plugins:Track Diffusion Analysis>` plugin to fit diffusion
+  coefficients of a mixed population of fixed and moving molecules using a model that accounts
+  for diffusion out of the depth-of-field.
 
 
 Version 2.0
