@@ -82,6 +82,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.fitting.DiffusionAnalysis;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
@@ -257,8 +258,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
                 // Record molecule
                 // Check the gap from the last time it was in the depth-of-field
                 if (i - last > g) {
+                  break;
                   // Start a new track
-                  id = nextId.incrementAndGet();
+                  //id = nextId.incrementAndGet();
                 }
                 last = i;
                 // Add localisation precision
@@ -277,6 +279,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       cw.setExposureTime(settings.getExposureTime());
       cw.setNmPerPixel(100);
       cw.setDistanceUnit(DistanceUnit.UM);
+      cw.setIntensityUnit(IntensityUnit.COUNT);
       results.setCalibration(cw.getCalibration());
       results.setName(TITLE);
       MemoryPeakResults.addResults(results);
@@ -292,7 +295,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
           throw new RuntimeException(e);
         }
       }
-
     } finally {
       executor.shutdown();
     }
