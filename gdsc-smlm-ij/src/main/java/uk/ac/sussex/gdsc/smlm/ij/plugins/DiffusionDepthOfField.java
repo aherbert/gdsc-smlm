@@ -128,9 +128,10 @@ public class DiffusionDepthOfField implements PlugIn {
       exposureTime = 10;
       gap = 1;
       // SpotOn paper used: n=50000, maxT=15; D in [1, 12]
+      // Using a lower min D anchors the fit to slower moving molecules.
       numberOfMolecules = 100000;
       maxT = 15;
-      minD = 1;
+      minD = 0.2;
       maxD = 12;
       sampleD = 20;
       // Fitting
@@ -331,8 +332,7 @@ public class DiffusionDepthOfField implements PlugIn {
     final Ticker ticker = ImageJUtils.createTicker(total, threadCount);
 
     final AtomicInteger position = new AtomicInteger(total);
-    final JumpableUniformRandomProvider rng =
-        UniformRandomProviders.createJumpable();
+    final JumpableUniformRandomProvider rng = UniformRandomProviders.createJumpable();
     for (int n = 0; n < threadCount; n++) {
       final NormalizedGaussianSampler sampler =
           SamplerUtils.createNormalizedGaussianSampler(rng.jump());
@@ -480,13 +480,19 @@ public class DiffusionDepthOfField implements PlugIn {
     final double dt = settings.exposureTime / 1000;
     final double dz = settings.depthOfField / 1000;
 
-    final MultivariateFunction function = new DepthOfFieldFunction(dt, dz,
-        createDiffusionCoefficients(), probability, threadCount, executor);
+    final double[] diffusionCoefficients = createDiffusionCoefficients();
+
+    final MultivariateFunction function =
+        new DepthOfFieldFunction(dt, dz, diffusionCoefficients, probability, threadCount, executor);
 
     final MaxEval maxEval = new MaxEval(2000);
     final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
 
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
+
+    logger.log(Level.INFO,
+        () -> Arrays.stream(diffusionCoefficients).mapToObj(d -> MathUtils.rounded(d))
+            .collect(Collectors.joining(", ", "Diffusion coefficients: ", "")));
 
     double best = Double.POSITIVE_INFINITY;
     double[] result = new double[2];
@@ -538,7 +544,7 @@ public class DiffusionDepthOfField implements PlugIn {
 
   private TextWindow createTable() {
     return ImageJUtils.refresh(TABLE_REF, () -> {
-      return new TextWindow(TITLE + " Analysis", createHeader(), "", 800, 300);
+      return new TextWindow(TITLE + " Analysis", createHeader(), "", 900, 300);
     });
   }
 
