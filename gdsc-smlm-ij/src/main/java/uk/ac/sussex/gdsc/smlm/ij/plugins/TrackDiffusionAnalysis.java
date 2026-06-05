@@ -38,7 +38,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.TextField;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -64,6 +63,7 @@ import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.simple.RandomSource;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -76,6 +76,7 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
@@ -91,6 +92,8 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import uk.ac.sussex.gdsc.smlm.results.IdPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 
@@ -120,7 +123,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   /**
    * Store the localisation position.
    */
-  static class Position {
+  private static class Position {
     int t;
     float x;
     float y;
@@ -129,6 +132,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
       this.t = t;
       this.x = x;
       this.y = y;
+    }
+  }
+
+  /**
+   * Store the localisation with the z position.
+   */
+  private static class XyzPeakResult extends IdPeakResult {
+    private static final long serialVersionUID = 20260605;
+
+    XyzPeakResult(int t, double x, double y, double z, int id) {
+      // Fixed intensity of 1
+      super(t, (float) x, (float) y, 1f, id);
+      setZPosition((float) z);
     }
   }
 
@@ -208,7 +224,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           // Std.dev of Gaussian for the step size: sqrt(2D * dt)
           d -> Math.sqrt(2 * d * dt)).toArray();
 
-      final List<Future<MemoryPeakResults>> futures = new LinkedList<>();
+      final List<Future<MemoryPeakResults>> futures = new LocalList<>(threadCount);
 
       final int total = settings.getNumberOfMolecules();
       final Ticker ticker = ImageJUtils.createTicker(total, threadCount);
@@ -250,6 +266,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
             // Each track should be separated by maxT frames so tracing even with
             // small frame gaps will not join stationary molecules at the origin.
             final int frame = pos * (2 * maxT);
+            // Record the origin
+            observed.add(new XyzPeakResult(frame, x + sampler.sample() * precision,
+                y + sampler.sample() * precision, z, id));
             for (int i = 1; i <= maxT; i++) {
               x += sampler.sample() * d;
               y += sampler.sample() * d;
@@ -264,8 +283,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
                 }
                 last = i;
                 // Add localisation precision
-                observed.add(new IdPeakResult(frame + i, (float) (x + sampler.sample() * precision),
-                    (float) (y + sampler.sample() * precision), 1f, id));
+                observed.add(new XyzPeakResult(frame + i, x + sampler.sample() * precision,
+                    y + sampler.sample() * precision, z, id));
               }
             }
             ticker.tick();
@@ -295,6 +314,17 @@ public class TrackDiffusionAnalysis implements PlugIn {
           throw new RuntimeException(e);
         }
       }
+
+      final StoredData data = new StoredData();
+      // Already sorted by ID. Store each start z.
+      final FrameCounter c = new FrameCounter();
+      results.forEach((PeakResultProcedure) peak -> {
+        if (c.advance(peak.getId())) {
+          data.add(peak.getZPosition());
+        }
+      });
+      new HistogramPlotBuilder("Track Origin", data, "z (um)").show();
+
     } finally {
       executor.shutdown();
     }
@@ -573,6 +603,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final FloatArrayList[] distances =
         IntStream.rangeClosed(0, maxT).mapToObj(FloatArrayList::new).toArray(FloatArrayList[]::new);
     final LocalList<Position> track = new LocalList<>();
+
     for (final MemoryPeakResults results : allResults) {
       results.sort(IdFramePeakResultComparator.INSTANCE);
       final int[] id = {-1};
