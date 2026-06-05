@@ -257,7 +257,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
               d = step[2];
             }
             // Simulate the track from the origin within the depth of field
-            int id = nextId.incrementAndGet();
+            final int id = nextId.incrementAndGet();
             double x = 0;
             double y = 0;
             double z = rng.nextDouble(-halfDz, halfDz);
@@ -406,7 +406,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
-    TextField tfZ =
+    final TextField tfZ =
         gd.addAndGetNumericField("Depth_of_field", settings.getDepthOfField(), 1, 6, "nm");
     gd.addSlider("Max_t", 3, 10, settings.getMaxT());
     gd.addSlider("Offsets", 0, 5, settings.getOffsets());
@@ -415,8 +415,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
 
     gd.addMessage("z_corr = z + a * D + b");
-    TextField tfA = gd.addAndGetNumericField("A", settings.getA(), 4);
-    TextField tfB = gd.addAndGetNumericField("B", settings.getB(), 4);
+    final TextField tfA = gd.addAndGetNumericField("A", settings.getA(), 4);
+    final TextField tfB = gd.addAndGetNumericField("B", settings.getB(), 4);
     gd.addButton("Calibrate", e -> {
       // Run on non GUI thread and while running disable this plugin dialog
       gd.setEnabled(false);
@@ -682,38 +682,41 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final PointValuePair result3 = fitThreeStateDistances(counts, pdf, executor, mle);
     if (result3 != null) {
       addToResultTable(result3);
-      double ll2 = result2.getValue();
-      double ll3 = result3.getValue();
 
       if (!mle) {
-        // Use MLE to choose best model. Attempts to use adjusted R2 or mapping
-        // the SS to log-likelihood (see MathUtils.getLogLikelihood) were not as robust.
-        final double dt = exposureTime;
-        final double dz = settings.getDepthOfField() / 1000;
-        final double precision = settings.getPrecision() / 1000;
-        ll2 = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
-            settings.getBinWidth(), counts, executor).logLikelihood(result2.getPointRef());
-        ll3 = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision,
-            settings.getBinWidth(), counts, executor).logLikelihood(result3.getPointRef());
-      }
-
-      // Select best fit using log-likelihood ratio test
-      final double llr = 2 * (ll3 - ll2);
-      if (llr >= 0) {
-        // The difference in the number of fitted parameters will be 2:
-        // i.e. 1 extra diffusion coefficient and population fraction
-        final double q = ChiSquaredDistributionTable.computeQValue(llr, 2);
-        final boolean reject = q > settings.getSignificanceLevel();
-        LoggerUtils.log(logger, Level.INFO,
-            "Two-state -> three-state : LL = %s -> %s, LLR = %s, q-value = %s (Reject=%b)", ll2,
-            ll3, MathUtils.rounded(llr, 4), MathUtils.rounded(q, 4), reject);
+        // Select best fit using BIC
+        final int numberOfPoints = pdf[0].length * pdf.length;
+        final double bic2 = MathUtils.getDeltaBayesianInformationCriterion(result2.getValue(),
+            numberOfPoints, result2.getPointRef().length - 1);
+        final double bic3 = MathUtils.getDeltaBayesianInformationCriterion(result3.getValue(),
+            numberOfPoints, result3.getPointRef().length - 1);
+        final boolean reject = bic3 >= bic2;
+        LoggerUtils.log(logger, Level.INFO, "Two-state -> three-state : BIC = %s -> %s (Reject=%b)",
+            bic2, bic3, reject);
         if (!reject) {
           return result3;
         }
       } else {
-        LoggerUtils.log(logger, Level.INFO,
-            "Two-state -> three-state : LL = %s -> %s, LLR = %s : No improvement", ll2, ll3,
-            MathUtils.rounded(llr, 4));
+        // Select best fit using log-likelihood ratio test
+        final double ll2 = result2.getValue();
+        final double ll3 = result3.getValue();
+        final double llr = 2 * (ll3 - ll2);
+        if (llr >= 0) {
+          // The difference in the number of fitted parameters will be 2:
+          // i.e. 1 extra diffusion coefficient and population fraction
+          final double q = ChiSquaredDistributionTable.computeQValue(llr, 2);
+          final boolean reject = q > settings.getSignificanceLevel();
+          LoggerUtils.log(logger, Level.INFO,
+              "Two-state -> three-state : LL = %s -> %s, LLR = %s, q-value = %s (Reject=%b)", ll2,
+              ll3, MathUtils.rounded(llr, 4), MathUtils.rounded(q, 4), reject);
+          if (!reject) {
+            return result3;
+          }
+        } else {
+          LoggerUtils.log(logger, Level.INFO,
+              "Two-state -> three-state : LL = %s -> %s, LLR = %s : No improvement", ll2, ll3,
+              MathUtils.rounded(llr, 4));
+        }
       }
     }
     return result2;
@@ -739,15 +742,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // However for convenience f2 is also a fitted parameter for the optimiser.
     final ObjectiveFunction fun;
     final GoalType goalType;
+    final int numberOfPoints;
     if (mle) {
       fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
           precision, settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
+      numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
     } else {
       fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
           precision, settings.getBinWidth(), pdf, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
+      numberOfPoints = pdf[0].length * pdf.length;
     }
     final double minD = Math.min(0.1, settings.getMinD());
     final SimpleBounds bounds = new SimpleBounds(addPrecision(new double[] {0, 0.0, 0, minD}, 0),
@@ -774,9 +780,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
         if (mle) {
           LoggerUtils.log(logger, Level.INFO,
-              "Two-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n,
-              solution.getValue(),
-              MathUtils.getAkaikeInformationCriterion(solution.getValue(), start.length - 1),
+              "Two-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
+              MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length - 1,
+                  numberOfPoints),
               powellOptimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
@@ -784,9 +790,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
           }
         } else {
           LoggerUtils.log(logger, Level.INFO,
-              "Two-state fit [%d]: SS = %s, delta AIC = %s (%d evaluations)", n,
-              solution.getValue(), MathUtils.getDeltaAkaikeInformationCriterion(solution.getValue(),
-                  pdf[0].length * pdf.length, start.length - 1),
+              "Two-state fit [%d]: SS = %s, delta BIC = %s (%d evaluations)", n,
+              solution.getValue(),
+              MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(), numberOfPoints,
+                  start.length - 1),
               powellOptimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
@@ -856,15 +863,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // so for convenience f3 is also a fitted parameter for the optimiser.
     final ObjectiveFunction fun;
     final GoalType goalType;
+    final int numberOfPoints;
     if (mle) {
       fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
           precision, settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
+      numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
     } else {
       fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
           precision, settings.getBinWidth(), pdf, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
+      numberOfPoints = pdf[0].length * pdf.length;
     }
     final double minD = Math.min(0.1, settings.getMinD());
     final SimpleBounds bounds =
@@ -896,9 +906,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
         if (mle) {
           LoggerUtils.log(logger, Level.INFO,
-              "Three-state fit [%d]: MLE = %s, Akaike IC = %s (%d evaluations)", n,
-              solution.getValue(),
-              MathUtils.getAkaikeInformationCriterion(solution.getValue(), start.length - 1),
+              "Three-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
+              MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length - 1,
+                  numberOfPoints),
               powellOptimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
@@ -906,9 +916,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
           }
         } else {
           LoggerUtils.log(logger, Level.INFO,
-              "Three-state fit [%d]: SS = %s, delta AIC = %s (%d evaluations)", n,
-              solution.getValue(), MathUtils.getDeltaAkaikeInformationCriterion(solution.getValue(),
-                  pdf[0].length * pdf.length, start.length - 1),
+              "Three-state fit [%d]: SS = %s, delta BIC = %s (%d evaluations)", n,
+              solution.getValue(),
+              MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(), numberOfPoints,
+                  start.length - 1),
               powellOptimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
