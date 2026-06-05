@@ -275,7 +275,7 @@ public final class GuiSettings {
       builder.setMaxT(7);
       builder.setOffsets(0);
       builder.setBinWidth(0.01);
-      builder.setRepeats(3);
+      builder.setRepeats(5);
       builder.setMinD(1);
       builder.setMaxD(5);
       builder.setExposureTime(10);
@@ -286,7 +286,6 @@ public final class GuiSettings {
       builder.setD1(0.01);
       builder.setD2(1.5);
       builder.setD3(5);
-      builder.setFitMle(true);
       builder.setSignificanceLevel(0.05);
       INSTANCE = builder.build();
     }
