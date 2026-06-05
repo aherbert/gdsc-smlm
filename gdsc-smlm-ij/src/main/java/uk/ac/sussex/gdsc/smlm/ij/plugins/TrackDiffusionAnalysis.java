@@ -279,7 +279,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
                 if (i - last > g) {
                   break;
                   // Start a new track
-                  //id = nextId.incrementAndGet();
+                  // id = nextId.incrementAndGet();
                 }
                 last = i;
                 // Add localisation precision
@@ -999,8 +999,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private String createHeader() {
     return Arrays
-        .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "offsets", "a", "b", "repeats",
-            "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
+        .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "max t", "offsets", "a", "b",
+            "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
         .collect(Collectors.joining("\t"));
   }
 
@@ -1014,6 +1014,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     //@formatter:off
     sb.append(MathUtils.rounded(settings.getDepthOfField())).append('\t')
       .append(MathUtils.rounded(exposureTime * 1e3)).append('\t')
+      .append(settings.getMaxT()).append('\t')
       .append(settings.getOffsets()).append('\t')
       .append(MathUtils.rounded(settings.getA())).append('\t')
       .append(MathUtils.rounded(settings.getB())).append('\t')

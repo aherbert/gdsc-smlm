@@ -1579,6 +1579,9 @@ A summary table is shown containing the model parameters. The following columns 
    * - dt
      - The exposure time. This is the time delay for 1 frame.
 
+   * - Max t
+     - The maximum time step :math:`-\Delta t` to use for diffusion distances (in frames).
+
    * - Offsets
      - The number of offsets to use for the origin of the track.
 
