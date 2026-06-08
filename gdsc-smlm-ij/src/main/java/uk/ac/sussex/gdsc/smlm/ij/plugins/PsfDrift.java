@@ -228,6 +228,10 @@ public class PsfDrift implements PlugIn {
     }
   }
 
+  private enum JobResult {
+    INVALID_FIT, OUTSIDE_BOUNDS, BAD_SIGNAL, BAD_X_WIDTH, BAD_Y_WIDTH, OK;
+  }
+
   /**
    * Used to allow multi-threading of the fitting method.
    */
@@ -348,7 +352,8 @@ public class PsfDrift implements PlugIn {
         // Account for 0.5 pixel offset during fitting
         params[Gaussian2DFunction.X_POSITION] += 0.5;
         params[Gaussian2DFunction.Y_POSITION] += 0.5;
-        if (isValid(status, params, width)) {
+        final JobResult r = isValid(status, params, width);
+        if (r == JobResult.OK) {
           // XXX Decide what results are needed for analysis
           // Store all the results for later analysis
           // results[resultPosition] = params;
@@ -358,9 +363,9 @@ public class PsfDrift implements PlugIn {
                   pixelPitch * (params[Gaussian2DFunction.Y_POSITION] - cy), job.z};
           // System.out.printf("Fit " + job + ". %f,%f\n", results[resultPosition][0],
           // results[resultPosition][1]);
+          // } else {
+          // System.out.println("Failed to fit " + job + ". " + r + ": " + status);
         }
-        // else:
-        // System.out.println("Failed to fit " + job + ". " + status);
         resultPosition += total;
       }
     }
@@ -384,11 +389,13 @@ public class PsfDrift implements PlugIn {
         ub[Gaussian2DFunction.ANGLE] = Math.PI;
         lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
         ub[Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
-        final double wf = 1.5;
-        lb[Gaussian2DFunction.X_SD] = sx / wf;
-        ub[Gaussian2DFunction.X_SD] = sx * 5;
-        lb[Gaussian2DFunction.Y_SD] = sy / wf;
-        ub[Gaussian2DFunction.Y_SD] = sy * 5;
+        // Set the bounds to constrain within the configured width factor
+        final double wf1 = Math.min(fitConfig2.getMinWidthFactor() * 0.5, 0.5);
+        final double wf2 = Math.max(fitConfig2.getMaxWidthFactor() * 2.0, 5);
+        lb[Gaussian2DFunction.X_SD] = sx * wf1;
+        ub[Gaussian2DFunction.X_SD] = sx * wf2;
+        lb[Gaussian2DFunction.Y_SD] = sy * wf1;
+        ub[Gaussian2DFunction.Y_SD] = sy * wf2;
       }
     }
 
@@ -404,22 +411,22 @@ public class PsfDrift implements PlugIn {
       solver.setConstraints(lc, uc);
     }
 
-    private boolean isValid(FitStatus status, double[] params, int size) {
+    private JobResult isValid(FitStatus status, double[] params, int size) {
       if (status != FitStatus.OK) {
-        return false;
+        return JobResult.INVALID_FIT;
       }
 
       // Reject fits that are outside the bounds of the data
       if (params[Gaussian2DFunction.X_POSITION] < 0 || params[Gaussian2DFunction.Y_POSITION] < 0
           || params[Gaussian2DFunction.X_POSITION] > size
           || params[Gaussian2DFunction.Y_POSITION] > size) {
-        return false;
+        return JobResult.OUTSIDE_BOUNDS;
       }
 
       // Reject fits that do not correctly estimate the signal
       if (params[Gaussian2DFunction.SIGNAL] < lb[Gaussian2DFunction.SIGNAL]
           || params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL]) {
-        return false;
+        return JobResult.BAD_SIGNAL;
       }
 
       // Reject fits that have a background too far from zero
@@ -434,11 +441,14 @@ public class PsfDrift implements PlugIn {
       if (fitConfig2.isXSdFitting()
           && (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD]
               || params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])) {
-        return false;
+        return JobResult.BAD_X_WIDTH;
       }
-      return !(fitConfig2.isYSdFitting()
+      if (fitConfig2.isYSdFitting()
           && (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD]
-              || params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD]));
+              || params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])) {
+        return JobResult.BAD_Y_WIDTH;
+      }
+      return JobResult.OK;
     }
   }
 
@@ -583,6 +593,7 @@ public class PsfDrift implements PlugIn {
         psfSettings.getPixelSize() * (psfSettings.getFwhm() / Gaussian2DFunction.SD_TO_FWHM_FACTOR),
         a);
     fitConfig.setInitialPeakStdDev(sa / a);
+    ImageJUtils.log(TITLE + ": Initial PSF width: %.3f", sa / a);
     fitConfig.setBackgroundFitting(settings.backgroundFitting);
     fitConfig.setNotSignalFitting(false);
     fitConfig.setComputeDeviations(false);
@@ -700,6 +711,8 @@ public class PsfDrift implements PlugIn {
       }
     }
     if (recall[centre] < settings.recallLimit) {
+      displayPlot("Recall", "Recall", zPosition, recall, null, null, 0, nZ - 1);
+      IJ.error(TITLE, "Recall at the PSF centre is below the recall limit");
       return;
     }
     int start = centre;
