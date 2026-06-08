@@ -63,7 +63,14 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.ParameterValidator;
+import org.apache.commons.math3.fitting.leastsquares.ValueAndJacobianFunction;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
@@ -1296,6 +1303,21 @@ public class PsfDrift implements PlugIn {
     final AtomicInteger pos = new AtomicInteger(n);
     final List<Future<?>> futures = new LocalList<>(n);
     final double[] hwhm = new double[n];
+    final ParameterValidator validator = params -> {
+      // Signal must be above zero
+      if (params.getEntry(0) < 1e-16) {
+        params.setEntry(0, 1e-16);
+      }
+      // SD must be above zero
+      if (params.getEntry(2) < 1e-6) {
+        params.setEntry(2, 1e-6);
+      }
+      // Background must be positive
+      if (params.getEntry(3) < 0) {
+        params.setEntry(3, 0);
+      }
+      return params;
+    };
     for (int t = nThreads; --t >= 0;) {
       futures.add(executor.submit(() -> {
         final double[] proj = new double[w];
@@ -1346,17 +1368,21 @@ public class PsfDrift implements PlugIn {
           final LeastSquaresProblem problem = new LeastSquaresBuilder()
               .maxEvaluations(Integer.MAX_VALUE)
               .maxIterations(3000)
-              .start(new double[] {a, b, c})
+              .start(new double[] {a, b, c, 0})
               .target(proj)
               .weight(weights)
-              .model(function::value, function::jacobian)
+              .model(function)
+              .lazyEvaluation(true)
+              .parameterValidator(validator)
               .build();
           //@formatter:on
           try {
             final Optimum lvmSolution = lvmOptimizer.optimize(problem);
+            // System.out.printf("%s, %s, %s -> %s%n", a, b, c,
+            // Arrays.toString(lvmSolution.getPoint().toArray()));
             hwhm[p] = lvmSolution.getPoint().getEntry(2);
-          } catch (final TooManyIterationsException | ConvergenceException ex) {
-            // Ignore
+          } catch (final TooManyIterationsException | ConvergenceException ignored) {
+            // System.out.printf("Failed: %s%n", ignored.getMessage());
           }
         }
       }));
@@ -1368,7 +1394,7 @@ public class PsfDrift implements PlugIn {
   /**
    * Function to compute a Gaussian and its partial derivative.
    */
-  private class GaussianFunction {
+  private class GaussianFunction implements ValueAndJacobianFunction {
     private final int w;
 
     GaussianFunction(int w) {
@@ -1379,11 +1405,12 @@ public class PsfDrift implements PlugIn {
       final double a = params[0];
       final double b = params[1];
       final double c = params[2];
+      final double d = params[3];
       final double denom = 2 * c * c;
       final double[] y = new double[w];
       for (int x = 0; x < w; x++) {
         final double dx = x - b;
-        y[x] = a * Math.exp(-dx * dx / denom);
+        y[x] = d + a * Math.exp(-dx * dx / denom);
       }
       return y;
     }
@@ -1393,15 +1420,32 @@ public class PsfDrift implements PlugIn {
       final double b = params[1];
       final double c = params[2];
       final double denom = 2 * c * c;
-      final double[][] y = new double[w][3];
+      final double[][] y = new double[w][4];
       for (int x = 0; x < w; x++) {
         final double dx = x - b;
         final double exp = Math.exp(-dx * dx / denom);
         y[x][0] = exp;
         y[x][1] = exp * a * dx * 2 / denom;
         y[x][2] = exp * a * dx * dx * 2 / denom / c;
+        y[x][3] = 1;
       }
       return y;
+    }
+
+    @Override
+    public Pair<RealVector, RealMatrix> value(RealVector point) {
+      final double[] params = point.toArray();
+      return new Pair<>(computeValue(params), computeJacobian(params));
+    }
+
+    @Override
+    public RealVector computeValue(double[] params) {
+      return new ArrayRealVector(value(params), false);
+    }
+
+    @Override
+    public RealMatrix computeJacobian(double[] params) {
+      return new Array2DRowRealMatrix(jacobian(params), false);
     }
   }
 
