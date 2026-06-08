@@ -19,6 +19,8 @@ Minor release of GDSC SMLM.
 * Added the :numref:`{name} <analysis_plugins:Track Diffusion Analysis>` plugin to fit diffusion
   coefficients of a mixed population of fixed and moving molecules using a model that accounts
   for diffusion out of the depth-of-field.
+* Update the :numref:`{name} <model_plugins:PSF HWHM>` plugin to allow fitting a 1D Gaussian
+  to the projection of the X and Y axes.
 
 
 Version 2.0
