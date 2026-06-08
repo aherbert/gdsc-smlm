@@ -572,6 +572,9 @@ Parameters
 
        Note that this can be used to check that the existing drift curve is correct for the given image reconstruction and fitting settings.
 
+   * - Noise fraction
+     - The threshold for the fraction of the maximum value to use for the PSF image noise floor. Values have the noise floor subtracted; negatives are set to zero. The noise floor reduces the contribution of noise at the edge of the image to the image sum.
+
    * - Scale
      - The reduction scale for the PSF.
 
@@ -754,6 +757,9 @@ When the plugin is run the following parameters can be configured:
 
    * - Use offset
      - Use a calibrated PSF centre drift curve stored in the PSF to define the centre of each slice. Otherwise use the pixel centre of the input image as the centre of each slice.
+
+   * - Noise fraction
+     - The threshold for the fraction of the maximum value to use for the PSF image noise floor. Values have the noise floor subtracted; negatives are set to zero. The noise floor reduces the contribution of noise at the edge of the image to the image sum.
 
    * - Smoothing
      - The smoothing to apply to the curve. This is the bandwidth parameter for a LOESS smoothing algorithm and corresponds to the fraction of surrounding data used for local smoothing of each point.
@@ -1181,7 +1187,7 @@ When the plugin is run it will check all open images for the PSF settings in the
 
 The PSF image pixel scale may not match the simulation; ideally the PSF image should have a smaller pixel scale than the output image so that many pixels from the PSF cover one pixel in the output image. The resolution of the output, i.e. the accuracy of the centre of the spot, will be determined by the ratio between the two image scales. For example a PSF image of 15nm/pixel and an output width of 100nm/pixel will have a resolution of 15/100 = 0.15 pixels.
 
-During initialisation the PSF image is normalised so the z-centre has a sum of 1 (and all the other slices are scaled appropriately). A cumulative image is then calculated for each slice. No cumulative image is allowed a total above 1.
+During initialisation the PSF image has background noise subtracted. The noise fraction parameter configures the noise floor threshold using a fraction of the maximum value in each image plane. After subtraction of the noise floor all values below zero are set to zero. Background subtraction reduces the effect of pixels far from the PSF origin contributing to the signal. After background subtraction the PSF is normalised so the z-centre has a sum of 1 (and all the other slices are scaled appropriately). A cumulative image is then calculated for each slice. No cumulative image is allowed a total above 1.
 
 PSF sampling is performed by selecting the appropriate slice from the image using the z-depth. The z-centre is specified using the middle of the slice so if the slice depth is 30nm then both -10 and 10 will be sampled from the centre slice. A random sample from 0 to 1 is taken and used to look up the appropriate pixel within the cumulative image for that slice. This sampled PSF pixel is then mapped to the output and the location added to the image. Note that if the cumulative total for the slice is below 1 then the sample may be ignored. This is allowed since the image PSF has a limited size (i.e. does not have infinite dimensions). Missed samples are unlikely to effect the output image as the pixels are very far from the PSF centre.
 

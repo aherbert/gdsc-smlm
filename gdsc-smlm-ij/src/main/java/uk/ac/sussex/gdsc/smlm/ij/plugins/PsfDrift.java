@@ -140,6 +140,7 @@ public class PsfDrift implements PlugIn {
     double smoothing;
     boolean updateCentre;
     boolean updateHwhm;
+    double noiseFraction;
 
     Settings() {
       // Set defaults
@@ -158,6 +159,7 @@ public class PsfDrift implements PlugIn {
       smoothing = 0.1;
       updateCentre = true;
       updateHwhm = true;
+      noiseFraction = 5e-2;
     }
 
     Settings(Settings source) {
@@ -179,6 +181,7 @@ public class PsfDrift implements PlugIn {
       smoothing = source.smoothing;
       updateCentre = source.updateCentre;
       updateHwhm = source.updateHwhm;
+      noiseFraction = source.noiseFraction;
     }
 
     Settings copy() {
@@ -475,6 +478,7 @@ public class PsfDrift implements PlugIn {
     gd.addMessage("Select the input PSF image");
     gd.addChoice("PSF", titles.toArray(new String[0]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
+    gd.addNumericField("Noise_fraction", settings.noiseFraction);
     gd.addNumericField("Scale", settings.scale, 2);
     gd.addNumericField("z_depth", settings.zDepth, 2, 6, "nm");
     gd.addNumericField("Grid_size", settings.gridSize, 0);
@@ -504,6 +508,7 @@ public class PsfDrift implements PlugIn {
 
     settings.title = gd.getNextChoice();
     settings.useOffset = gd.getNextBoolean();
+    settings.noiseFraction = gd.getNextNumber();
     settings.scale = gd.getNextNumber();
     settings.zDepth = gd.getNextNumber();
     settings.gridSize = (int) gd.getNextNumber();
@@ -955,10 +960,9 @@ public class PsfDrift implements PlugIn {
     final double unitsPerSlice = 1; // So we can move from -depth to depth
 
     // Extract data uses index not slice number as arguments so subtract 1
-    final double noiseFraction = 1e-3;
     final float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
-    final ImagePsfModel model =
-        new ImagePsfModel(image, zCentre - lower, unitsPerPixel, unitsPerSlice, noiseFraction);
+    final ImagePsfModel model = new ImagePsfModel(image, zCentre - lower, unitsPerPixel,
+        unitsPerSlice, settings.noiseFraction);
 
     // Add the calibrated centres
     final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
@@ -1104,6 +1108,7 @@ public class PsfDrift implements PlugIn {
     settings = Settings.load();
     gd.addChoice("PSF", titles.toArray(new String[0]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
+    gd.addNumericField("Noise_fraction", settings.noiseFraction);
     gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
     gd.addHelp(HelpUrls.getUrl("psf-hwhm"));
@@ -1114,6 +1119,7 @@ public class PsfDrift implements PlugIn {
 
     settings.title = gd.getNextChoice();
     settings.useOffset = gd.getNextBoolean();
+    settings.noiseFraction = gd.getNextNumber();
     settings.smoothing = gd.getNextNumber();
     settings.save();
 

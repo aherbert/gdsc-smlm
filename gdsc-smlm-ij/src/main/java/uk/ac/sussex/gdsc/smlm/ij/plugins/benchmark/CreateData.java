@@ -2708,7 +2708,7 @@ public class CreateData implements PlugIn {
         upper = Math.max(upper, zCentre);
       }
 
-      final double noiseFraction = 1e-3;
+      final double noiseFraction = settings.getPsfNoiseFraction();
       final float[][] image = extractImageStack(imp, lower, upper);
       final ImagePsfModel model = new ImagePsfModel(image, zCentre - lower,
           psfSettings.getPixelSize() / settings.getPixelPitch(), unitsPerSlice, noiseFraction);
@@ -3786,7 +3786,8 @@ public class CreateData implements PlugIn {
     sb.append(" QE=").append(settings.getQuantumEfficiency()).append('\t')
         .append(settings.getPsfModel());
     if (psfModelType == PSF_MODEL_IMAGE) {
-      sb.append(" Image").append(settings.getPsfImageName());
+      sb.append(" Name=").append(settings.getPsfImageName()).append(" NoiseFraction=")
+          .append(settings.getPsfNoiseFraction());
     } else if (psfModelType == PSF_MODEL_ASTIGMATISM) {
       sb.append(" model=").append(settings.getAstigmatismModel());
     } else {
@@ -4325,6 +4326,7 @@ public class CreateData implements PlugIn {
         addHeaderLine(formatter, "PSF_model", settings.getPsfModel());
         if (psfModelType == PSF_MODEL_IMAGE) {
           addHeaderLine(formatter, "PSF_image", settings.getPsfImageName());
+          addHeaderLine(formatter, "PSF_noise_fraction", settings.getPsfNoiseFraction());
         } else if (psfModelType == PSF_MODEL_ASTIGMATISM) {
           addHeaderLine(formatter, "Astigmatism_model", settings.getAstigmatismModel());
           // Q. Should the actual model be appended?
@@ -4869,6 +4871,7 @@ public class CreateData implements PlugIn {
         // Get the image
         if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_IMAGE])) {
           egd.addChoice("PSF_image", images, settings.getPsfImageName());
+          egd.addNumericField("PSF_noise_fraction", settings.getPsfNoiseFraction());
         } else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM])) {
           type = 1;
           egd.addChoice("Astigmatism_model", astigmatismModels, settings.getAstigmatismModel());
@@ -4893,6 +4896,7 @@ public class CreateData implements PlugIn {
         }
         if (type == 0) {
           settings.setPsfImageName(egd.getNextChoice());
+          settings.setPsfNoiseFraction(egd.getNextNumber());
         } else if (type == 1) {
           settings
               .setAstigmatismModel(AstigmatismModelManager.removeFormatting(egd.getNextChoice()));

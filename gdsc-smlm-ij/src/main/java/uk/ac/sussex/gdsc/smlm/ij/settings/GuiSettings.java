@@ -173,6 +173,7 @@ public final class GuiSettings {
       builder.setDensityRadius(3);
       builder.setDepthOfField(250);
       builder.setDepthOfFocus(450);
+      builder.setPsfNoiseFraction(5e-2);
       INSTANCE = builder.build();
     }
   }
@@ -269,7 +270,8 @@ public final class GuiSettings {
     public static final TrackDiffusionAnalysisSettings INSTANCE;
 
     static {
-      final TrackDiffusionAnalysisSettings.Builder builder = TrackDiffusionAnalysisSettings.newBuilder();
+      final TrackDiffusionAnalysisSettings.Builder builder =
+          TrackDiffusionAnalysisSettings.newBuilder();
       builder.setDepthOfField(750);
       builder.setGap(1);
       builder.setMaxT(7);
