@@ -47,12 +47,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
@@ -141,6 +152,7 @@ public class PsfDrift implements PlugIn {
     boolean updateCentre;
     boolean updateHwhm;
     double noiseFraction;
+    boolean fitGaussian;
 
     Settings() {
       // Set defaults
@@ -182,6 +194,7 @@ public class PsfDrift implements PlugIn {
       updateCentre = source.updateCentre;
       updateHwhm = source.updateHwhm;
       noiseFraction = source.noiseFraction;
+      fitGaussian = source.fitGaussian;
     }
 
     Settings copy() {
@@ -1109,6 +1122,7 @@ public class PsfDrift implements PlugIn {
     gd.addChoice("PSF", titles.toArray(new String[0]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
     gd.addNumericField("Noise_fraction", settings.noiseFraction);
+    gd.addCheckbox("Fit_SD", settings.fitGaussian);
     gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
     gd.addHelp(HelpUrls.getUrl("psf-hwhm"));
@@ -1120,6 +1134,7 @@ public class PsfDrift implements PlugIn {
     settings.title = gd.getNextChoice();
     settings.useOffset = gd.getNextBoolean();
     settings.noiseFraction = gd.getNextNumber();
+    settings.fitGaussian = gd.getNextBoolean();
     settings.smoothing = gd.getNextNumber();
     settings.save();
 
@@ -1135,10 +1150,26 @@ public class PsfDrift implements PlugIn {
     }
 
     final int size = imp.getStackSize();
-    final ImagePsfModel psf = createImagePsf(1, size, 1);
 
-    final double[] w0 = psf.getAllHwhm0();
-    final double[] w1 = psf.getAllHwhm1();
+    // Get HWHM
+    final double[] w0;
+    final double[] w1;
+    if (settings.fitGaussian) {
+      // Fit a 1D Gaussian to projections
+      final int nThreads = Prefs.getThreads();
+      final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+      try {
+        final float[][] image = CreateData.extractImageStack(imp, 0, size - 1);
+        w0 = fitGaussian(image, false, nThreads, executor);
+        w1 = fitGaussian(image, true, nThreads, executor);
+      } finally {
+        executor.shutdown();
+      }
+    } else {
+      final ImagePsfModel psf = createImagePsf(1, size, 1);
+      w0 = psf.getAllHwhm0();
+      w1 = psf.getAllHwhm1();
+    }
 
     // Extract valid values (some can be NaN)
     double[] sw0 = new double[w0.length];
@@ -1258,6 +1289,122 @@ public class PsfDrift implements PlugIn {
     }
   }
 
+  private double[] fitGaussian(float[][] image, boolean dim0, int nThreads,
+      ExecutorService executor) {
+    final int n = image.length;
+    final int w = (int) Math.sqrt(image[0].length);
+    final AtomicInteger pos = new AtomicInteger(n);
+    final List<Future<?>> futures = new LocalList<>(n);
+    final double[] hwhm = new double[n];
+    for (int t = nThreads; --t >= 0;) {
+      futures.add(executor.submit(() -> {
+        final double[] proj = new double[w];
+        final LevenbergMarquardtOptimizer lvmOptimizer = new LevenbergMarquardtOptimizer();
+        final GaussianFunction function = new GaussianFunction(w);
+        final DiagonalMatrix weights = new DiagonalMatrix(SimpleArrayUtils.newDoubleArray(w, 1));
+        while (true) {
+          final int p = pos.decrementAndGet();
+          if (p < 0) {
+            break;
+          }
+          // Use the mean and the standard deviation in the specified dimension.
+          final float[] data = image[p];
+          if (dim0) {
+            for (int x = 0; x < w; x++) {
+              double s = 0;
+              for (int y = 0, offset = x; y < w; y++, offset += w) {
+                s += data[offset];
+              }
+              proj[x] = s;
+            }
+          } else {
+            for (int y = 0, offset = 0; y < w; y++) {
+              double s = 0;
+              for (int x = 0; x < w; x++, offset++) {
+                s += data[offset];
+              }
+              proj[y] = s;
+            }
+          }
+          // Determine the mean
+          double sumx = 0;
+          double sumw = 0;
+          for (int x = 0; x < w; x++) {
+            sumx += x * proj[x];
+            sumw += proj[x];
+          }
+          final double b = sumx / sumw;
+          // Determine the standard deviation
+          double sumxx = 0;
+          for (int x = 0; x < w; x++) {
+            sumxx += (x - b) * (x - b) * proj[x];
+          }
+          final double c = Math.sqrt(sumxx / sumw) * Gaussian2DFunction.SD_TO_HWHM_FACTOR;
+          final double a = MathUtils.max(proj);
+          // Fit initial Gaussian
+          //@formatter:off
+          final LeastSquaresProblem problem = new LeastSquaresBuilder()
+              .maxEvaluations(Integer.MAX_VALUE)
+              .maxIterations(3000)
+              .start(new double[] {a, b, c})
+              .target(proj)
+              .weight(weights)
+              .model(function::value, function::jacobian)
+              .build();
+          //@formatter:on
+          try {
+            final Optimum lvmSolution = lvmOptimizer.optimize(problem);
+            hwhm[p] = lvmSolution.getPoint().getEntry(2);
+          } catch (final TooManyIterationsException | ConvergenceException ex) {
+            // Ignore
+          }
+        }
+      }));
+    }
+    ConcurrencyUtils.waitForCompletionUnchecked(futures);
+    return hwhm;
+  }
+
+  /**
+   * Function to compute a Gaussian and its partial derivative.
+   */
+  private class GaussianFunction {
+    private final int w;
+
+    GaussianFunction(int w) {
+      this.w = w;
+    }
+
+    double[] value(double[] params) {
+      final double a = params[0];
+      final double b = params[1];
+      final double c = params[2];
+      final double denom = 2 * c * c;
+      final double[] y = new double[w];
+      for (int x = 0; x < w; x++) {
+        final double dx = x - b;
+        y[x] = a * Math.exp(-dx * dx / denom);
+      }
+      return y;
+    }
+
+    double[][] jacobian(double[] params) {
+      final double a = params[0];
+      final double b = params[1];
+      final double c = params[2];
+      final double denom = 2 * c * c;
+      final double[][] y = new double[w][3];
+      for (int x = 0; x < w; x++) {
+        final double dx = x - b;
+        final double exp = Math.exp(-dx * dx / denom);
+        y[x][0] = exp;
+        y[x][1] = exp * a * dx * 2 / denom;
+        y[x][2] = exp * a * dx * dx * 2 / denom / c;
+      }
+      return y;
+    }
+  }
+
   /**
    * Dialog listener to allow interactive update of the PSF plots.
    */
@@ -1301,8 +1448,10 @@ public class PsfDrift implements PlugIn {
 
     private void update() {
       final double fwhm = getFwhm();
-      label.setText(String.format("FWHM = %s px (%s nm)", MathUtils.rounded(fwhm),
-          MathUtils.rounded(fwhm * scale)));
+      final double sd = fwhm / Gaussian2DFunction.SD_TO_FWHM_FACTOR;
+      label.setText(String.format("FWHM = %s px (%s nm). SD = %s px (%s nm)",
+          MathUtils.rounded(fwhm), MathUtils.rounded(fwhm * scale), MathUtils.rounded(sd),
+          MathUtils.rounded(sd * scale)));
 
       final Plot plot = pw.getPlot();
 
