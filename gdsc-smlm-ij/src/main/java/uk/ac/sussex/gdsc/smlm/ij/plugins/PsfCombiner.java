@@ -196,8 +196,9 @@ public class PsfCombiner implements PlugIn {
         final GenericDialog gd = new GenericDialog(TITLE);
         ImageJUtils.addMessage(gd,
             "The range of the PSFs is different:\nStart %d to %d\nEnd %d to %d\n"
-                + "Size %d to %d\n \nCrop to the smallest?",
-            minStart, maxStart, minEnd, maxEnd, minSize, maxSize);
+                + "Size %d to %d\n \nCrop to the smallest ([%d, %d]: %dx%d)?",
+            minStart, maxStart, minEnd, maxEnd, minSize, maxSize, maxStart, minEnd, minSize,
+            minSize);
         gd.enableYesNoCancel();
         gd.addHelp(HelpUrls.getUrl("psf-combiner"));
         gd.showDialog();
@@ -370,7 +371,8 @@ public class PsfCombiner implements PlugIn {
     }
 
     int getEnd() {
-      return start + psfStack.getSize();
+      // End is inclusive
+      return start + psfStack.getSize() - 1;
     }
 
     int getSize() {
