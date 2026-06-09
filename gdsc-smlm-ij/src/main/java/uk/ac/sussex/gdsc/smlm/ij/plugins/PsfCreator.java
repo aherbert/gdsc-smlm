@@ -896,7 +896,7 @@ public class PsfCreator implements PlugInFilter {
     results.setSortAfterEnd(true);
     results.begin();
     final int threadCount = Prefs.getThreads();
-    //fitConfig.setLog(uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper.getDefaultLogger());
+    // fitConfig.setLog(uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper.getDefaultLogger());
     final FitEngine engine = FitEngine.create(config,
         SynchronizedPeakResults.create(results, threadCount), threadCount, FitQueue.BLOCKING);
 
@@ -2945,7 +2945,7 @@ public class PsfCreator implements PlugInFilter {
     final double[] wz = ImageWindow.tukeyEdge(finalPsf.psf.length, settings.getWindow());
 
     // Normalisation so the max intensity frame is one
-    final float[][] psf = finalPsf.psf;
+    float[][] psf = finalPsf.psf;
     final int maxz = psf.length;
     final double[] sum = new double[maxz];
     for (int z = 0; z < maxz; z++) {
@@ -2974,6 +2974,14 @@ public class PsfCreator implements PlugInFilter {
     plot.setColor(Color.black);
     plot.addPoints(slice, sum, Plot.LINE);
     ImageJUtils.display(TITLE_SIGNAL, plot);
+
+    // Image PSF with window function has zero pixels at the XYZ borders.
+    // We can crop the image stack by 1 pixel.
+    if (settings.getOutputType() == OUTPUT_TYPE_IMAGE_PSF && settings.getWindow() > 0) {
+      finalPsf = finalPsf.cropEdge();
+      psf = finalPsf.psf;
+      zCentre--;
+    }
 
     // Create a new extracted PSF and show
     ImageJUtils.showStatus("Displaying PSF");
@@ -4970,6 +4978,23 @@ public class PsfCreator implements PlugInFilter {
       final ExtractedPsf p =
           new ExtractedPsf(psf, maxx, centre.shift(0, 0, -zShift), magnification);
       p.stackZCentre = zCentre + zShift;
+      return p;
+    }
+
+    /**
+     * Crop 1 pixel edge from the PSF.
+     *
+     * @return the extracted psf
+     */
+    ExtractedPsf cropEdge() {
+      Rectangle r = new Rectangle(1, 1, maxx - 2, maxx - 2);
+      float[][] newPsf = new float[psf.length - 2][];
+      for (int i = 0; i < newPsf.length; i++) {
+        newPsf[i] = ImageExtractor.wrap(psf[i + 1], maxx, maxx).crop(r);
+      }
+      final ExtractedPsf p =
+          new ExtractedPsf(newPsf, maxx - 2, centre.shift(-1, -1, -1), magnification);
+      p.stackZCentre = this.stackZCentre - 1;
       return p;
     }
 
