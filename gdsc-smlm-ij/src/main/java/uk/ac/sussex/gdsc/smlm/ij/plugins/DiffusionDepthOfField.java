@@ -58,6 +58,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -115,6 +116,7 @@ public class DiffusionDepthOfField implements PlugIn {
     int numberOfMolecules;
     int maxT;
     boolean allowRestarts;
+    double halfLife;
     double minD;
     double maxD;
     int sampleD;
@@ -133,6 +135,7 @@ public class DiffusionDepthOfField implements PlugIn {
       // Using a lower min D anchors the fit to slower moving molecules.
       numberOfMolecules = 100000;
       maxT = 15;
+      halfLife = 15;
       minD = 0.2;
       maxD = 12;
       sampleD = 20;
@@ -149,6 +152,7 @@ public class DiffusionDepthOfField implements PlugIn {
 
       numberOfMolecules = source.numberOfMolecules;
       maxT = source.maxT;
+      halfLife = source.halfLife;
       allowRestarts = source.allowRestarts;
       minD = source.minD;
       maxD = source.maxD;
@@ -238,6 +242,7 @@ public class DiffusionDepthOfField implements PlugIn {
     gd.addNumericField("Number_of_molecules", settings.numberOfMolecules);
     gd.addSlider("Max_t", 5, 15, settings.maxT);
     gd.addCheckbox("Allow_restarts", settings.allowRestarts);
+    gd.addNumericField("Half_life", settings.halfLife);
     gd.addNumericField("Min_D", settings.minD, 3, 6, "um^2/s");
     gd.addNumericField("Max_D", settings.maxD, 3, 6, "um^2/s");
     gd.addSlider("Sample_D", 2, 30, settings.sampleD);
@@ -261,6 +266,7 @@ public class DiffusionDepthOfField implements PlugIn {
     settings.numberOfMolecules = (int) gd.getNextNumber();
     settings.maxT = (int) gd.getNextNumber();
     settings.allowRestarts = gd.getNextBoolean();
+    settings.halfLife = gd.getNextNumber();
     settings.minD = gd.getNextNumber();
     settings.maxD = gd.getNextNumber();
     settings.sampleD = (int) gd.getNextNumber();
@@ -292,6 +298,10 @@ public class DiffusionDepthOfField implements PlugIn {
       ParameterUtils.isEqualOrAbove("Max D", settings.maxD, settings.minD);
       ParameterUtils.isEqualOrAbove("Max A", settings.maxA, settings.minA);
       ParameterUtils.isEqualOrAbove("Max B", settings.maxB, settings.minB);
+
+      if (settings.allowRestarts) {
+        ParameterUtils.isAboveZero("Half-life with restarts", settings.halfLife);
+      }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -321,6 +331,7 @@ public class DiffusionDepthOfField implements PlugIn {
     final int g = settings.gap;
     final int maxT = settings.maxT;
     final boolean allowRestarts = settings.allowRestarts;
+    final double halfLife = settings.halfLife;
 
     // Create the depth of field detector
     // TODO: Allow loading this from file as a look-up table
@@ -347,9 +358,11 @@ public class DiffusionDepthOfField implements PlugIn {
     for (int n = 0; n < threadCount; n++) {
       final NormalizedGaussianSampler sampler =
           SamplerUtils.createNormalizedGaussianSampler(rng.jump());
+      // If no restarts then there is no requirement for a half-life.
+      // The half-life parameter can be zero and the track will reach max T.
+      final ContinuousSampler lifeSampler =
+          halfLife <= 0 ? () -> maxT : SamplerUtils.createExponentialSampler(rng.jump(), halfLife);
       futures.add(executor.submit(() -> {
-        // Simulated track z-position from origin (unscaled)
-        final double[] zn = new double[maxT];
         final int[] tracks = new int[step.length];
         // Count of number of molecules inside the depth of field
         // for each diffusion coefficient and time frame
@@ -359,15 +372,11 @@ public class DiffusionDepthOfField implements PlugIn {
           if (pos < 0) {
             break;
           }
-          // Simulate the track from the origin
-          double z = 0;
-          for (int i = 0; i < maxT; i++) {
-            z += sampler.sample();
-            zn[i] = z;
-          }
+          // Create a lifetime within the depth-of-field.
+          final int lifetime = (int) lifeSampler.sample();
           // Simulate across the depth of field [-z/2, z/2]
           final double p = pos / (total - 1.0);
-          z = (1 - p) * halfDz - p * halfDz;
+          final double originZ = (1 - p) * halfDz - p * halfDz;
           // for each diffusion rate test: |z| < z/2
           for (int j = 0; j < step.length; j++) {
             final double s = step[j];
@@ -375,31 +384,40 @@ public class DiffusionDepthOfField implements PlugIn {
             // Last frame the molecule was inside the DoF
             int last = -1;
             // Origin inside the DoF
-            int origin = -1;
+            int originT = -1;
+            double z = originZ;
             if (dof.test(z)) {
-              origin = 0;
+              // Track started: i - originT = steps - 1
+              originT = 0;
               tracks[j]++;
             }
-            // TODO: Add a half-life for the molecule: sample the lifetime from an exponential
-            for (int i = 0; i < maxT; i++) {
-              if (dof.test(z + zn[i] * s)) {
-                if (origin < 0) {
+            // Diffuse until lifetime expires
+            for (int i = 0; i < lifetime; i++) {
+              z += sampler.sample() * s;
+              if (dof.test(z)) {
+                if (originT < 0) {
                   // Start a track
-                  // Add 1 to the origin so that i - origin = steps - 1
-                  origin = i + 1;
+                  // Add 1 to the origin so that i - originT = steps - 1
+                  originT = i + 1;
                   tracks[j]++;
-                } else {
-                  obs[i - origin]++;
+                } else if (i - originT < maxT) {
+                  // Record the track
+                  obs[i - originT]++;
                 }
                 last = i;
               } else if (i - last >= g) {
-                // Above the configured gap size; molecule has been lost
+                // Above the configured gap size; molecule has been lost.
+                // ---
+                // Note: No check if there is a track started. If a new untracked molecule
+                // is immediately lost then the number of molecules will be lower and the
+                // result is ignored. This is only an issue if the detector for the
+                // depth-of-field is poor and is solved by using more molecules.
+                // ---
                 if (allowRestarts) {
                   // Allow restarting a new track. Signal that the track is unstarted using -1.
-                  // This can artificially increase the activations around the edge of the
-                  // depth of field. It can also truncate tracks that are within
-                  // the depth of field after maxT.
-                  origin = -1;
+                  // This can increase the activations around the edge of the
+                  // depth of field.
+                  originT = -1;
                 } else {
                   break;
                 }
@@ -585,13 +603,14 @@ public class DiffusionDepthOfField implements PlugIn {
 
   private TextWindow createTable() {
     return ImageJUtils.refresh(TABLE_REF, () -> {
-      return new TextWindow(TITLE + " Analysis", createHeader(), "", 900, 300);
+      return new TextWindow(TITLE + " Analysis", createHeader(), "", 1200, 300);
     });
   }
 
   private String createHeader() {
-    return Arrays.stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "restarts",
-        "min D (um^2/s)", "max D (um^2/s)", "sample D", "a", "b",})
+    return Arrays
+        .stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "restarts", "half-life",
+            "min D (um^2/s)", "max D (um^2/s)", "sample D", "a", "b",})
         .collect(Collectors.joining("\t"));
   }
 
@@ -604,6 +623,7 @@ public class DiffusionDepthOfField implements PlugIn {
       .append(settings.numberOfMolecules).append('\t')
       .append(settings.maxT).append('\t')
       .append(settings.allowRestarts).append('\t')
+      .append(MathUtils.rounded(settings.halfLife)).append('\t')
       .append(MathUtils.rounded(settings.minD)).append('\t')
       .append(MathUtils.rounded(settings.maxD)).append('\t')
       .append(settings.sampleD).append('\t')

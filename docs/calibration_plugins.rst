@@ -1551,7 +1551,7 @@ Note that this is for absorbing boundaries. In practice a molecule may diffuse o
 Analysis
 ~~~~~~~~
 
-The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. The fraction of molecules within the depth of field at each time step is computed. By simulating a range of diffusion coeffcients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
+The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps, or for the molecule lifetime sampled from an exponential with the specified mean lifetime. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. If restarts are allowed then the diffusion continues until the lifetime expires. If the molecule re-enters the depth of field a new track is started. The fraction of molecules within the depth of field at each time step of a track is computed. By simulating a range of diffusion coeffcients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
 
 Fitting is performed using random starting points for the coefficients within a specified range. Fitted coefficients are not bound by this range but they must be positive. A number of repeats can be configured. If the number of repeats is set to zero then fitting is not performed and the plugin will display results using the configured minimum initial value for coefficient estimates. This option can be used to show the effect of absorbing boundaries if coeffecients are zero, or used to plot specific coefficient values.
 
@@ -1576,11 +1576,14 @@ The plugin has the following parameters:
    * - Number of molecules
      - The number of molecules in the simulation.
 
-   * - Allow restarts
-     - If ``true`` then molecules that are outside the depth-of-field for the maximum ``gap`` distance can re-enter the depth-of-field and start a new track. Otherwise the molecule is lost. Restarts allows an increase in tracks starting close to the edge of the depth-of-field, and can result in truncation of tracks at ``Max T``.
-
    * - Max t
      - The maximum number of frames in the simulation.
+
+   * - Allow restarts
+     - If ``true`` then molecules that are outside the depth-of-field for the maximum ``gap`` distance can re-enter the depth-of-field and start a new track. Otherwise the molecule is lost. Restarts allows an increase in tracks starting close to the edge of the depth-of-field.
+
+   * - Half-life
+     - The molecule half-life within the depth-of-field. This is required when using ``Restarts`` to allow the molecules to bleach. Set to zero to disable when not using ``Restarts``.
 
    * - Min D
      - The minimum diffusion coefficient in the simulation.
@@ -1643,6 +1646,9 @@ Fitting results are output to a summary table:
 
    * - restarts
      - If a molecule can re-enter the depth-of-field and start a new track.
+
+   * - half-life
+     - The molecule half-life within the depth-of-field.
 
    * - min D
      - The minimum diffusion coefficient in the simulation.
