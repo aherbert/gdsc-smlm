@@ -1576,6 +1576,9 @@ The plugin has the following parameters:
    * - Number of molecules
      - The number of molecules in the simulation.
 
+   * - Allow restarts
+     - If ``true`` then molecules that are outside the depth-of-field for the maximum ``gap`` distance can re-enter the depth-of-field and start a new track. Otherwise the molecule is lost. Restarts allows an increase in tracks starting close to the edge of the depth-of-field, and can result in truncation of tracks at ``Max T``.
+
    * - Max t
      - The maximum number of frames in the simulation.
 
@@ -1637,6 +1640,9 @@ Fitting results are output to a summary table:
 
    * - max t
      - The maximum number of frames in the simulation.
+
+   * - restarts
+     - If a molecule can re-enter the depth-of-field and start a new track.
 
    * - min D
      - The minimum diffusion coefficient in the simulation.
