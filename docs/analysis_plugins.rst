@@ -1508,8 +1508,14 @@ The following parameters can be set:
    * - Precision
      - The localisation precision. This can be fixed, or a fitted parameter.
 
+   * - Fit mode
+     - The mode used for fitting.
+
    * - Bin width
      - The bin width for the histogram counts used to create the observed PDF.
+
+   * - CDF bin width
+     - The bin width for the histogram counts used to create the CDF for fitting. Note the plotted CDF does not use this value as the plot uses all the sorted distances.
 
    * - A
      - The depth-of-field correction coefficient a (see :ref:`calibration_plugins:Diffusion Depth of Field` plugin).
@@ -1540,6 +1546,9 @@ The following parameters can be set:
 
    * - Separate plots
      - If ``true`` then use a separate plot for each time delay, otherwise show all on the same plot.
+
+   * - Plot max r
+     - The initial limit for the maximum distance on the plot x-axis. Set to zero to ignore and use the full data limit. Note the plot can be rescaled after display to show the entire range of data with the plot ``More >>`` options.
 
 Output
 ~~~~~~

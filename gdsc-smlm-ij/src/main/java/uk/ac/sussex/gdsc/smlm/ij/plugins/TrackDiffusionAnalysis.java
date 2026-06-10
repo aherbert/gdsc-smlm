@@ -412,7 +412,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addSlider("Offsets", 0, 5, settings.getOffsets());
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
 
+    gd.addChoice("Fit_mode", new String[] {"PDF", "CDF"}, settings.getFitMode());
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
+    gd.addNumericField("CDF_bin_width", settings.getCdfBinWidth(), -3);
 
     gd.addMessage("z_corr = z + a * sqrt(D) + b");
     final TextField tfA = gd.addAndGetNumericField("A", settings.getA(), 4);
@@ -440,11 +442,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     gd.addCheckbox("Fit_precision", settings.getFitPrecision());
     gd.addCheckbox("Fit_three_state", settings.getFitThreeState());
-    gd.addCheckbox("Fit_MLE", settings.getFitMle());
-    gd.addNumericField("significanceLevel", settings.getSignificanceLevel(), -3);
+    gd.addNumericField("Significance_level", settings.getSignificanceLevel(), -3);
 
     gd.addCheckbox("Show_CDF", settings.getShowCdf());
     gd.addCheckbox("Seperate_plots", settings.getShowSeparatePlots());
+    gd.addNumericField("Plot_max_r", settings.getPlotMaxR());
 
     gd.addHelp(HelpUrls.getUrl("track-diffusion-analysis"));
     gd.showDialog();
@@ -457,7 +459,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.setOffsets((int) gd.getNextNumber());
     settings.setPrecision(gd.getNextNumber());
 
+    settings.setFitMode(gd.getNextChoiceIndex());
     settings.setBinWidth(gd.getNextNumber());
+    settings.setCdfBinWidth(gd.getNextNumber());
 
     settings.setA(gd.getNextNumber());
     settings.setB(gd.getNextNumber());
@@ -468,11 +472,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     settings.setFitPrecision(gd.getNextBoolean());
     settings.setFitThreeState(gd.getNextBoolean());
-    settings.setFitMle(gd.getNextBoolean());
     settings.setSignificanceLevel(gd.getNextNumber());
 
     settings.setShowCdf(gd.getNextBoolean());
     settings.setShowSeparatePlots(gd.getNextBoolean());
+    settings.setPlotMaxR(gd.getNextNumber());
 
     SettingsManager.writeSettings(settings.build());
 
@@ -484,6 +488,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ParameterUtils.isPositive("Precision", settings.getPrecision());
 
       ParameterUtils.isAboveZero("Bin width", settings.getBinWidth());
+      ParameterUtils.isPositive("CDF bin width", settings.getCdfBinWidth());
 
       ParameterUtils.isPositive("A", settings.getA());
       ParameterUtils.isPositive("B", settings.getB());
@@ -1149,19 +1154,22 @@ public class TrackDiffusionAnalysis implements PlugIn {
         cdfPlot[0] = new Plot(title[0], "Distance (um)", "Probability");
         Arrays.fill(cdfPlot, cdfPlot[0]);
       }
-      double maxD = 0.01;
+      double maxR = 0.01;
       for (int i = 0; i < distances.length; i++) {
         final float[] x = distances[i];
         cdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
         final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
         final double scale = 1.0 / x.length;
         SimpleArrayUtils.apply(y, f -> (float) (f * scale));
-        maxD = Math.max(maxD, x[x.length - 1]);
+        maxR = Math.max(maxR, x[x.length - 1]);
         cdfPlot[i].addPoints(x, y, Plot.LINE);
         cdfPlot[i].setColor(Color.black);
       }
+      if (settings.getPlotMaxR() > 0) {
+        maxR = MathUtils.clip(0.01, maxR, settings.getPlotMaxR());
+      }
       for (int i = 0; i < distances.length; i++) {
-        cdfPlot[i].setLimits(0, maxD, 0, 1.05);
+        cdfPlot[i].setLimits(0, maxR, 0, 1.05);
       }
 
       if (settings.getShowSeparatePlots()) {
@@ -1200,8 +1208,12 @@ public class TrackDiffusionAnalysis implements PlugIn {
       pdfPlot[i].addPoints(r, y, Plot.BAR);
       pdfPlot[i].setColor(Color.black);
     }
+    double maxR = r[r.length - 1];
+    if (settings.getPlotMaxR() > 0) {
+      maxR = MathUtils.clip(0.01, maxR, settings.getPlotMaxR());
+    }
     for (int i = 0; i < distances.length; i++) {
-      pdfPlot[i].setLimits(0, r[r.length - 1], 0, maxP * 1.05);
+      pdfPlot[i].setLimits(0, maxR, 0, maxP * 1.05);
     }
 
     if (settings.getShowSeparatePlots()) {

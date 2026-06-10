@@ -295,6 +295,9 @@ message TrackDiffusionAnalysisSettings {
   double significance_level = 24;
   bool show_cdf = 25;
   bool show_separate_plots = 26;
+  int32 fit_mode = 27;
+  double cdf_bin_width = 28;
+  double plot_max_r = 29;
 }
 
 // Contains the settings for the events in the OPTICS GUI
