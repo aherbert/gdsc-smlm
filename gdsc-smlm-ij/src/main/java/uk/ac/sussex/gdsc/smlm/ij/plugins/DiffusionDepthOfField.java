@@ -135,7 +135,6 @@ public class DiffusionDepthOfField implements PlugIn {
       // Using a lower min D anchors the fit to slower moving molecules.
       numberOfMolecules = 100000;
       maxT = 15;
-      halfLife = 15;
       minD = 0.2;
       maxD = 12;
       sampleD = 20;
