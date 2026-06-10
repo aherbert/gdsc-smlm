@@ -3112,7 +3112,7 @@ public class PsfCreator implements PlugInFilter {
       }
 
       // Create a PSF and select the z-centre
-      zSelector.setPsf(new ExtractedPsf(psf, bounds.width, bounds.height));
+      zSelector.setPsf(new ExtractedPsf(psf, bounds.width, bounds.height, 1));
       zSelector.analyse();
       zSelector.guessZCentre();
 
@@ -4075,7 +4075,8 @@ public class PsfCreator implements PlugInFilter {
         psf2[i] = ie.crop(bounds);
       }
 
-      final ExtractedPsf cropped = new ExtractedPsf(psf2, bounds.width, bounds.height);
+      final ExtractedPsf cropped =
+          new ExtractedPsf(psf2, bounds.width, bounds.height, psf.magnification);
       cropped.stackZCentre = MathUtils.clip(1, size, psf.stackZCentre - start);
       return cropped;
     }
@@ -4774,9 +4775,9 @@ public class PsfCreator implements PlugInFilter {
       maxy = size;
     }
 
-    ExtractedPsf(float[][] psf, int maxx, int maxy) {
+    ExtractedPsf(float[][] psf, int maxx, int maxy, int magnification) {
       this.centre = new BasePoint(0, 0, 0);
-      this.magnification = 1;
+      this.magnification = magnification;
       stackZCentre = -1; // Not used
       this.psf = psf;
       this.maxx = maxx;
