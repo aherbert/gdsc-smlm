@@ -536,10 +536,7 @@ public class PsfCreator implements PlugInFilter {
   }
 
   private void runUsingFitting() {
-    if (!showFittingDialog()) {
-      return;
-    }
-    if (!loadConfiguration()) {
+    if (!showFittingDialog() || !loadConfiguration()) {
       return;
     }
 
@@ -1494,10 +1491,7 @@ public class PsfCreator implements PlugInFilter {
    * @param n The denominator
    */
   public static void normaliseUsingSpots(ImageStack psf, int n) {
-    if (psf == null || psf.getSize() == 0) {
-      return;
-    }
-    if (!(psf.getPixels(1) instanceof float[])) {
+    if (psf == null || psf.getSize() == 0 || !(psf.getPixels(1) instanceof float[])) {
       return;
     }
     for (int i = 0; i < psf.getSize(); i++) {
@@ -1520,10 +1514,7 @@ public class PsfCreator implements PlugInFilter {
    * @param subtractBackground Normalise so everything below the background is zero
    */
   public static void normalise(ImageStack psf, int n, double sigma, boolean subtractBackground) {
-    if (psf == null || psf.getSize() == 0) {
-      return;
-    }
-    if (!(psf.getPixels(1) instanceof float[])) {
+    if (psf == null || psf.getSize() == 0 || !(psf.getPixels(1) instanceof float[])) {
       return;
     }
     final double cx = psf.getWidth() * 0.5;
@@ -1589,10 +1580,7 @@ public class PsfCreator implements PlugInFilter {
    * @param n The frame number
    */
   public static void normalise(ImageStack psf, int n) {
-    if (psf == null || psf.getSize() == 0) {
-      return;
-    }
-    if (!(psf.getPixels(1) instanceof float[])) {
+    if (psf == null || psf.getSize() == 0 || !(psf.getPixels(1) instanceof float[])) {
       return;
     }
     final double sum = MathUtils.sum((float[]) psf.getPixels(n));
@@ -1800,10 +1788,7 @@ public class PsfCreator implements PlugInFilter {
     final boolean is3D = (settings.getMode() == MODE_ALIGNMENT && zRadius > 0);
 
     for (int i = 0; i < n; i++) {
-      if (excluded != null && excluded[i]) {
-        continue;
-      }
-      if (bad[i]) {
+      if ((excluded != null && excluded[i]) || bad[i]) {
         continue;
       }
       // Check intersect with others
@@ -4988,8 +4973,8 @@ public class PsfCreator implements PlugInFilter {
      * @return the extracted psf
      */
     ExtractedPsf cropEdge() {
-      Rectangle r = new Rectangle(1, 1, maxx - 2, maxx - 2);
-      float[][] newPsf = new float[psf.length - 2][];
+      final Rectangle r = new Rectangle(1, 1, maxx - 2, maxx - 2);
+      final float[][] newPsf = new float[psf.length - 2][];
       for (int i = 0; i < newPsf.length; i++) {
         newPsf[i] = ImageExtractor.wrap(psf[i + 1], maxx, maxx).crop(r);
       }
