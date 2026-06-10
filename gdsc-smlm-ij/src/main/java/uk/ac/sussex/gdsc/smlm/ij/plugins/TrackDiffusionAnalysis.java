@@ -110,6 +110,9 @@ import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
  */
 public class TrackDiffusionAnalysis implements PlugIn {
   private static final String TITLE = "Track Diffusion Analysis";
+  private static final int MODE_PDF = 0;
+  private static final int MODE_CDF = 1;
+  private static final int MODE_PDF_MLE = 2;
 
   private static final AtomicReference<TextWindow> TABLE_REF = new AtomicReference<>();
 
@@ -175,14 +178,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
     logger = ImageJPluginLoggerHelper.getLogger(getClass());
 
     final float[][] distances = getDistances(allResults);
-    final int[][] counts = createCounts(distances);
+    // Create counts and PDF for plotting/fitting; and optionally CDF for fitting only
+    final int[][] counts = createCounts(distances, (float) settings.getBinWidth());
     final float[][] pdf = createPdf(counts);
+    float[][] df = pdf;
+    if (settings.getFitMode() == MODE_CDF) {
+      df = createPdf(createCounts(distances, (float) settings.getCdfBinWidth()));
+    }
 
     final int threadCount = Prefs.getThreads();
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
     try {
-      final PointValuePair result = fitDistances(counts, pdf, executor, settings.getFitMle());
+      final PointValuePair result = fitDistances(counts, df, executor, settings.getFitMode());
       plotDistances(distances, pdf, result, executor);
     } finally {
       executor.shutdown();
@@ -412,7 +420,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addSlider("Offsets", 0, 5, settings.getOffsets());
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
 
-    gd.addChoice("Fit_mode", new String[] {"PDF", "CDF"}, settings.getFitMode());
+    gd.addChoice("Fit_mode", new String[] {"PDF", "CDF", "PDF_MLE"}, settings.getFitMode());
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
     gd.addNumericField("CDF_bin_width", settings.getCdfBinWidth(), -3);
 
@@ -678,17 +686,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private PointValuePair fitDistances(int[][] counts, float[][] pdf, ExecutorService executor,
-      boolean mle) {
-    final PointValuePair result2 = fitTwoStateDistances(counts, pdf, executor, mle);
+      int mode) {
+    // TODO: Support CDF fitting
+    final PointValuePair result2 = fitTwoStateDistances(counts, pdf, executor, mode);
     if (result2 == null) {
       return null;
     }
     addToResultTable(result2);
-    final PointValuePair result3 = fitThreeStateDistances(counts, pdf, executor, mle);
+    final PointValuePair result3 = fitThreeStateDistances(counts, pdf, executor, mode);
     if (result3 != null) {
       addToResultTable(result3);
 
-      if (!mle) {
+      if (mode != MODE_PDF_MLE) {
         // Select best fit using BIC
         final int numberOfPoints = pdf[0].length * pdf.length;
         final double bic2 = MathUtils.getDeltaBayesianInformationCriterion(result2.getValue(),
@@ -728,7 +737,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private PointValuePair fitTwoStateDistances(int[][] counts, float[][] pdf,
-      ExecutorService executor, boolean mle) {
+      ExecutorService executor, int mode) {
     IJ.showStatus("Fitting two-state model...");
 
     final double dt = exposureTime;
@@ -747,7 +756,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ObjectiveFunction fun;
     final GoalType goalType;
     final int numberOfPoints;
-    if (mle) {
+    if (mode == MODE_PDF_MLE) {
       fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
           precision, settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
@@ -780,7 +789,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         final PointValuePair solution =
             powellOptimizer.optimize(maxEval, fun, bounds, step, goalType, new InitialGuess(start));
 
-        if (mle) {
+        if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
               "Two-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
               MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length,
@@ -845,7 +854,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private PointValuePair fitThreeStateDistances(int[][] counts, float[][] pdf,
-      ExecutorService executor, boolean mle) {
+      ExecutorService executor, int mode) {
     if (!settings.getFitThreeState()) {
       return null;
     }
@@ -872,7 +881,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ObjectiveFunction fun;
     final GoalType goalType;
     final int numberOfPoints;
-    if (mle) {
+    if (mode == MODE_PDF_MLE) {
       fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
           precision, settings.getBinWidth(), counts, executor)::logLikelihood);
       goalType = GoalType.MAXIMIZE;
@@ -912,7 +921,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         final PointValuePair solution =
             powellOptimizer.optimize(maxEval, fun, bounds, step, goalType, new InitialGuess(start));
 
-        if (mle) {
+        if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
               MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length - 1,
@@ -1056,10 +1065,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return sb.toString();
   }
 
-  private int[][] createCounts(float[][] distances) {
+  private static int[][] createCounts(float[][] distances, float binWidth) {
     IJ.showStatus("Creating histograms...");
 
-    final float binWidth = (float) settings.getBinWidth();
     final int[][] counts = new int[distances.length][];
     for (int i = 0; i < distances.length; i++) {
       final float[] x = distances[i];
