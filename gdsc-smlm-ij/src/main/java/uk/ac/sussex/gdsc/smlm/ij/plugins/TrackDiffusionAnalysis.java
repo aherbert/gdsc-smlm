@@ -1224,7 +1224,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     // Compute fitted PDF using a smaller bin width.
-    // Evaluate the PDF using Simpson integration: use [a, (a+b)/2, b] for each bin [a, b].
     // Scale using a power of 2.
     final int scale = 1 << 2;
     binWidth /= scale;
@@ -1250,20 +1249,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     for (int i = 0; i < distances.length; i++) {
       final double[] pi = p[i];
-      final int n = pi.length / 2;
       // pdfPlot[i].setLineWidth(2f);
       pdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
-      final float[] y = new float[n];
-      for (int j = 0; j < y.length; j++) {
-        final int index = j * 2;
-        y[j] = (float) ((pi[index] + 4 * pi[index + 1] + pi[index + 2]) / 6);
-      }
 
       // The PDF is normalised to sum to 1 so increase the height to compensate the
       // reduced bin width so the plots align.
-      final float[] yy = y.clone();
+      float[] yy = SimpleArrayUtils.toFloat(pi);
       SimpleArrayUtils.apply(yy, v -> v * scale);
-      pdfPlot[i].addPoints(r, yy.clone(), Plot.LINE);
+      pdfPlot[i].addPoints(r, yy, Plot.LINE);
 
       // Cumulative sum
       if (cdfPlot == null) {
@@ -1272,8 +1265,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       // cdfPlot[i].setLineWidth(2f);
       cdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
       double sum = 0;
+      yy = yy.clone();
       for (int j = 0; j < yy.length; j++) {
-        sum += y[j];
+        sum += pi[j];
         yy[j] = (float) sum;
       }
       cdfPlot[i].addPoints(r, yy, Plot.DOT);
@@ -1336,7 +1330,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double a;
     double b;
     double precision;
-    double[] distances;
+    double dr;
+    int n;
     float[][] pdf;
     int[][] counts;
     double[] weights;
@@ -1364,7 +1359,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       this.a = a;
       this.b = b;
       this.precision = precision;
-      this.distances = SimpleArrayUtils.newArray(n * 2 + 1, 0, dr * 0.5);
+      this.dr = 0.5 * dr;
+      this.n = n;
       this.executor = executor;
     }
   }
@@ -1441,9 +1437,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final float[] obs = pdf[time];
       double ss = 0;
       for (int i = 0; i < obs.length; i++) {
-        final int index = i << 1;
-        // Simpson integration using points [a, (a+b)/2, b] for bin [a, b]
-        final double dp = (p[index] + 4 * p[index + 1] + p[index + 2]) / 6 - obs[i];
+        final double dp = p[i] - obs[i];
         ss += dp * dp;
       }
       return ss;
@@ -1479,9 +1473,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final int[] obs = counts[time];
       double ll = 0;
       for (int i = 0; i < obs.length; i++) {
-        final int index = i << 1;
-        // Simpson integration using points [a, (a+b)/2, b] for bin [a, b]
-        ll += obs[i] * Math.log((p[index] + 4 * p[index + 1] + p[index + 2]) / 6);
+        ll += obs[i] * Math.log(p[i]);
       }
       return ll * weights[time];
     }
@@ -1493,36 +1485,37 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
       final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
       final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
-      final double[] d = distances;
-      final double[] p = new double[d.length];
+      final double[] p = new double[n];
       // We have 2n+1 distances r for n observations.
       // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
       double sum = 0;
       // i=0 : pdf(r=0) = 0
       double last = 0;
       double r = 0;
-      for (int i = 1; i < p.length; i += 2) {
-        r = d[i];
-        p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+      int j = 0;
+      for (int i = 0; i < p.length; i++) {
+        r = ++j * dr;
+        final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
-        r = d[i + 1];
-        p[i + 1] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+        r = ++j * dr;
+        final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
-        sum += last + 4 * p[i] + p[i + 1];
-        last = p[i + 1];
+        p[i] = last + 4 * x + y;
+        sum += p[i];
+        last = y;
       }
       // Continue the integration until terms are insignificant
       while (last / sum > 1e-5) {
-        r += d[1];
+        r = ++j * dr;
         final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
-        r += d[1];
+        r = ++j * dr;
         final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
         sum += last + 4 * x + y;
         last = y;
       }
-      final double inverseSum = 6 / sum;
+      final double inverseSum = 1 / sum;
       for (int i = 0; i < p.length; i++) {
         p[i] *= inverseSum;
       }
@@ -1616,9 +1609,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final float[] obs = pdf[time];
       double ss = 0;
       for (int i = 0; i < obs.length; i++) {
-        final int index = i << 1;
-        // Simpson integration using points [a, (a+b)/2, b] for bin [a, b]
-        final double dp = (p[index] + 4 * p[index + 1] + p[index + 2]) / 6 - obs[i];
+        final double dp = p[i] - obs[i];
         ss += dp * dp;
       }
       return ss;
@@ -1658,9 +1649,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final int[] obs = counts[time];
       double ll = 0;
       for (int i = 0; i < obs.length; i++) {
-        final int index = i << 1;
-        // Simpson integration using points [a, (a+b)/2, b] for bin [a, b]
-        ll += obs[i] * Math.log((p[index] + 4 * p[index + 1] + p[index + 2]) / 6);
+        ll += obs[i] * Math.log(p[i]);
       }
       return ll * weights[time];
     }
@@ -1674,40 +1663,41 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
       final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
       final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
-      final double[] d = distances;
-      final double[] p = new double[d.length];
+      final double[] p = new double[n];
       // We have 2n+1 distances r for n observations.
       // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
       double sum = 0;
       // i=0 : pdf(r=0) = 0
       double last = 0;
       double r = 0;
-      for (int i = 1; i < p.length; i += 2) {
-        r = d[i];
-        p[i] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
-            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
-            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
-        r = d[i + 1];
-        p[i + 1] = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
-            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
-            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
-        sum += last + 4 * p[i] + p[i + 1];
-        last = p[i + 1];
-      }
-      // Continue the integration until terms are insignificant
-      while (last / sum > 1e-5) {
-        r += d[1];
+      int j = 0;
+      for (int i = 0; i < p.length; i++) {
+        r = ++j * dr;
         final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
             + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
-        r += d[1];
+        r = ++j * dr;
+        final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        p[i] = last + 4 * x + y;
+        sum += p[i];
+        last = y;
+      }
+      // Continue the integration until terms are insignificant
+      while (last / sum > 1e-5) {
+        r = ++j * dr;
+        final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        r = ++j * dr;
         final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
             + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
         sum += last + 4 * x + y;
         last = y;
       }
-      final double inverseSum = 6 / sum;
+      final double inverseSum = 1 / sum;
       for (int i = 0; i < p.length; i++) {
         p[i] *= inverseSum;
       }
