@@ -1625,7 +1625,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     double logLikelihood(double[] point) {
-      final double sum = point[0] + point[2];
+      final double sum = point[0] + point[2] + point[4];
       final double f1 = point[0] / sum;
       final double d1 = point[1];
       final double f2 = point[2] / sum;
