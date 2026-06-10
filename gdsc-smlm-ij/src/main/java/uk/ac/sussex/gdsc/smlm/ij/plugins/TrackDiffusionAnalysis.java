@@ -414,7 +414,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
 
-    gd.addMessage("z_corr = z + a * D + b");
+    gd.addMessage("z_corr = z + a * sqrt(D) + b");
     final TextField tfA = gd.addAndGetNumericField("A", settings.getA(), 4);
     final TextField tfB = gd.addAndGetNumericField("B", settings.getB(), 4);
     gd.addButton("Calibrate", e -> {
