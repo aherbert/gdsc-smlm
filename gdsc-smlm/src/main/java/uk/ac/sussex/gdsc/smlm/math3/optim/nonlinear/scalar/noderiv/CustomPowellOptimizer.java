@@ -16,6 +16,7 @@
 package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv;
 
 import java.util.Arrays;
+import java.util.function.UnaryOperator;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
@@ -76,6 +77,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
   private double[] lower;
   private double[] upper;
 
+  /** The constraints. */
+  private ParameterConstraints constraints;
+
   /**
    * The initial step is used to construct the basis vectors for the search direction. By default
    * the identity matrix is used for the search. The magnitude of each diagonal position can be set
@@ -102,6 +106,16 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     public double[] getStep() {
       return step;
     }
+  }
+
+  /**
+   * Apply parameter constraints to the current parameters array {@code x} as a
+   * {@code double[]}. In constrast to the {@link org.apache.commons.math3.optim.SimpleBounds
+   * SimpleBounds} which constrain each parameter value x<sub>i</sub>, this can be used to apply
+   * constraints that are a composition of the parameters.
+   */
+  public interface ParameterConstraints extends OptimizationData, UnaryOperator<double[]> {
+    /** Composite marker interface. */
   }
 
   /**
@@ -468,6 +482,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
         positionChecker = (PositionChecker) data;
       } else if (data instanceof BasisStep) {
         basis = ((BasisStep) data).getStep();
+      } else if (data instanceof ParameterConstraints) {
+        constraints = (ParameterConstraints) data;
       }
     }
 
@@ -522,11 +538,15 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
   }
 
   /**
-   * Check the point falls within the configured bounds truncating if necessary.
+   * Check the point falls within the configured bounds (truncating if necessary),
+   * and apply any constraints for the point.
    *
    * @param point the point
    */
   void applyBounds(double[] point) {
+    if (constraints != null) {
+      point = constraints.apply(point);
+    }
     if (isUpper) {
       for (int i = 0; i < point.length; i++) {
         if (point[i] > upper[i]) {
