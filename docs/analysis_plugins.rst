@@ -1512,10 +1512,10 @@ The following parameters can be set:
      - The mode used for fitting.
 
    * - Bin width
-     - The bin width for the histogram counts used to create the observed PDF.
+     - The bin width for the histogram counts used to create the observed PDF. Used for plot display and optional fitting.
 
    * - CDF bin width
-     - The bin width for the histogram counts used to create the CDF for fitting. Note the plotted CDF does not use this value as the plot uses all the sorted distances.
+     - The bin width for the histogram counts used to create the observed CDF. Used for optional plot display and fitting. Must be equal or below the bin width for the PDF if it is used as this is for a higher resolution distribution of the data.
 
    * - A
      - The depth-of-field correction coefficient a (see :ref:`calibration_plugins:Diffusion Depth of Field` plugin).

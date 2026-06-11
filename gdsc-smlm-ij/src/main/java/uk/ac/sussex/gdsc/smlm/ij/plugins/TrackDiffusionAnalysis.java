@@ -110,7 +110,6 @@ import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
  */
 public class TrackDiffusionAnalysis implements PlugIn {
   private static final String TITLE = "Track Diffusion Analysis";
-  private static final int MODE_PDF = 0;
   private static final int MODE_CDF = 1;
   private static final int MODE_PDF_MLE = 2;
 
@@ -182,8 +181,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final int[][] counts = createCounts(distances, (float) settings.getBinWidth());
     final float[][] pdf = createPdf(counts);
     float[][] df = pdf;
-    if (settings.getFitMode() == MODE_CDF) {
-      df = createPdf(createCounts(distances, (float) settings.getCdfBinWidth()));
+    float[][] cdf = null;
+    // Note: The CDF is binned for plot display as showing all distances is slow and
+    // the plot resolution cannot show all distances.
+    if (settings.getShowCdf() || settings.getFitMode() == MODE_CDF) {
+      cdf = createCdf(createCounts(distances, (float) settings.getCdfBinWidth()));
+      // Fit the CDF as the distribution function
+      if (settings.getFitMode() == MODE_CDF) {
+        df = cdf;
+      }
     }
 
     final int threadCount = Prefs.getThreads();
@@ -191,7 +197,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     try {
       final PointValuePair result = fitDistances(counts, df, executor, settings.getFitMode());
-      plotDistances(distances, pdf, result, executor);
+      plotDistances(cdf, pdf, result, executor);
     } finally {
       executor.shutdown();
     }
@@ -277,15 +283,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
             // Record the origin
             observed.add(new XyzPeakResult(frame, x + sampler.sample() * precision,
                 y + sampler.sample() * precision, z, id));
+            // TODO: Add a half-life for the molecule: sample the lifetime from an exponential
             for (int i = 1; i <= maxT; i++) {
               x += sampler.sample() * d;
               y += sampler.sample() * d;
               z += sampler.sample() * d;
+              // TODO: Add a detector curve to replace hard boundaries for depth-of-field
               if (Math.abs(z) < halfDz) {
                 // Record molecule
                 // Check the gap from the last time it was in the depth-of-field
                 if (i - last > g) {
                   break;
+                  // TODO: Optionally allow restarting a new track.
                   // Start a new track
                   // id = nextId.incrementAndGet();
                 }
@@ -496,7 +505,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ParameterUtils.isPositive("Precision", settings.getPrecision());
 
       ParameterUtils.isAboveZero("Bin width", settings.getBinWidth());
-      ParameterUtils.isPositive("CDF bin width", settings.getCdfBinWidth());
+      ParameterUtils.isAboveZero("CDF bin width", settings.getCdfBinWidth());
 
       ParameterUtils.isPositive("A", settings.getA());
       ParameterUtils.isPositive("B", settings.getB());
@@ -507,6 +516,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ParameterUtils.isAboveZero("Significance level", settings.getSignificanceLevel());
 
       ParameterUtils.isEqualOrAbove("Max D", settings.getMaxD(), settings.getMinD());
+      if (settings.getShowCdf() || settings.getFitMode() == MODE_CDF) {
+        ParameterUtils.isEqualOrBelow("CDF bin width", settings.getCdfBinWidth(),
+            settings.getBinWidth());
+      }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -1138,22 +1151,46 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return pdf;
   }
 
-  private void plotDistances(float[][] distances, float[][] pdf, PointValuePair result,
+  private float[][] createCdf(int[][] counts) {
+    IJ.showStatus("Creating CDF...");
+
+    // Zero pad to max length
+    final int n = Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt();
+    final float[][] cdf = new float[counts.length][];
+    for (int i = 0; i < counts.length; i++) {
+      final int[] x = counts[i];
+      final double w = 1.0 / MathUtils.sum(x);
+      final float[] p = new float[n];
+      long c = 0;
+      for (int j = 0; j < x.length; j++) {
+        c += x[j];
+        p[j] = (float) (c * w);
+      }
+      for (int j = x.length; j < n; j++) {
+        p[j] = 1;
+      }
+      cdf[i] = p;
+    }
+
+    return cdf;
+  }
+
+  private void plotDistances(float[][] cdf, float[][] pdf, PointValuePair result,
       ExecutorService executor) {
     IJ.showStatus("Plotting results...");
 
     final double toMillies = exposureTime * 1e3;
-    final String labels = IntStream.rangeClosed(1, distances.length)
+    final String labels = IntStream.rangeClosed(1, pdf.length)
         .mapToObj(i -> MathUtils.rounded(i * toMillies) + "ms").collect(Collectors.joining("\n"));
     final WindowOrganiser wo = new WindowOrganiser();
     final LUT lut = LutHelper.createLut(LutColour.RED_MAGENTA_BLUE, false);
 
     Plot[] cdfPlot = null;
     if (settings.getShowCdf()) {
-      final String[] title = new String[distances.length];
-      cdfPlot = new Plot[distances.length];
+      final String[] title = new String[cdf.length];
+      cdfPlot = new Plot[cdf.length];
       if (settings.getShowSeparatePlots()) {
-        for (int i = 0; i < distances.length; i++) {
+        for (int i = 0; i < cdf.length; i++) {
           title[i] = TITLE + " distance CDF " + MathUtils.rounded((i + 1) * toMillies) + "ms";
           cdfPlot[i] = new Plot(title[i], "Distance (um)", "Probability");
         }
@@ -1162,26 +1199,26 @@ public class TrackDiffusionAnalysis implements PlugIn {
         cdfPlot[0] = new Plot(title[0], "Distance (um)", "Probability");
         Arrays.fill(cdfPlot, cdfPlot[0]);
       }
-      double maxR = 0.01;
-      for (int i = 0; i < distances.length; i++) {
-        final float[] x = distances[i];
-        cdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
-        final float[] y = SimpleArrayUtils.newArray(x.length, 1f, 1f);
-        final double scale = 1.0 / x.length;
-        SimpleArrayUtils.apply(y, f -> (float) (f * scale));
-        maxR = Math.max(maxR, x[x.length - 1]);
-        cdfPlot[i].addPoints(x, y, Plot.LINE);
+      float binWidth = (float) settings.getCdfBinWidth();
+      float[] r = SimpleArrayUtils.newArray(cdf[0].length + 1, 0, binWidth);
+      for (int i = 0; i < cdf.length; i++) {
+        // Add a zero at r=0
+        final float[] y = new float[r.length];
+        System.arraycopy(cdf[i], 0, y, 1, y.length - 1);
+        cdfPlot[i].setColor(LutHelper.getColour(lut, cdf.length - i, 1, cdf.length));
+        cdfPlot[i].addPoints(r, y, Plot.LINE);
         cdfPlot[i].setColor(Color.black);
       }
+      double maxR = r[r.length - 1];
       if (settings.getPlotMaxR() > 0) {
         maxR = MathUtils.clip(0.01, maxR, settings.getPlotMaxR());
       }
-      for (int i = 0; i < distances.length; i++) {
+      for (int i = 0; i < cdf.length; i++) {
         cdfPlot[i].setLimits(0, maxR, 0, 1.05);
       }
 
       if (settings.getShowSeparatePlots()) {
-        for (int i = 0; i < distances.length; i++) {
+        for (int i = 0; i < cdf.length; i++) {
           cdfPlot[i].setFrameSize(PlotWindow.plotWidth, PlotWindow.plotHeight / 2);
           ImageJUtils.display(title[i], cdfPlot[i], 0, wo);
         }
@@ -1194,10 +1231,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
       }
     }
 
-    final String[] title = new String[distances.length];
-    final Plot[] pdfPlot = new Plot[distances.length];
+    final String[] title = new String[pdf.length];
+    final Plot[] pdfPlot = new Plot[pdf.length];
     if (settings.getShowSeparatePlots()) {
-      for (int i = 0; i < distances.length; i++) {
+      for (int i = 0; i < pdf.length; i++) {
         title[i] = TITLE + " distance PDF " + MathUtils.rounded((i + 1) * toMillies) + "ms";
         pdfPlot[i] = new Plot(title[i], "Distance (um)", "Probability");
       }
@@ -1209,9 +1246,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     float binWidth = (float) settings.getBinWidth();
     float[] r = SimpleArrayUtils.newArray(pdf[0].length, binWidth / 2, binWidth);
     float maxP = 0;
-    for (int i = 0; i < distances.length; i++) {
+    for (int i = 0; i < pdf.length; i++) {
       final float[] y = pdf[i];
-      pdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      pdfPlot[i].setColor(LutHelper.getColour(lut, pdf.length - i, 1, pdf.length));
       maxP = MathUtils.maxDefault(maxP, y);
       pdfPlot[i].addPoints(r, y, Plot.BAR);
       pdfPlot[i].setColor(Color.black);
@@ -1220,12 +1257,12 @@ public class TrackDiffusionAnalysis implements PlugIn {
     if (settings.getPlotMaxR() > 0) {
       maxR = MathUtils.clip(0.01, maxR, settings.getPlotMaxR());
     }
-    for (int i = 0; i < distances.length; i++) {
+    for (int i = 0; i < pdf.length; i++) {
       pdfPlot[i].setLimits(0, maxR, 0, maxP * 1.05);
     }
 
     if (settings.getShowSeparatePlots()) {
-      for (int i = 0; i < distances.length; i++) {
+      for (int i = 0; i < pdf.length; i++) {
         pdfPlot[i].setFrameSize(PlotWindow.plotWidth, PlotWindow.plotHeight / 2);
         ImageJUtils.display(title[i], pdfPlot[i], 0, wo);
       }
@@ -1243,11 +1280,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return;
     }
 
-    // Compute fitted PDF using a smaller bin width.
+    // Compute fitted PDF using a smaller bin width for a more detailed plot.
+    // If fitting the CDF, then use the CDF bin width if it increases resolution.
     // Scale using a power of 2.
-    final int scale = 1 << 2;
-    binWidth /= scale;
-    r = SimpleArrayUtils.newArray(pdf[0].length * scale, binWidth / 2, binWidth);
+    binWidth /= 4;
+    if (cdfPlot != null && settings.getCdfBinWidth() < binWidth) {
+      binWidth = (float) settings.getCdfBinWidth();
+    }
+    final float scale = (float) (settings.getBinWidth() / binWidth);
+    r = SimpleArrayUtils.newArray((int) Math.ceil(scale * pdf[0].length), binWidth / 2, binWidth);
 
     final double dt = exposureTime;
     final double dz = settings.getDepthOfField() / 1000;
@@ -1261,16 +1302,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d2 = fit[3];
       final double sigma = fit.length > 4 ? fit[4] : precision;
       p = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
-          r.length, executor).pdf(distances.length, f1, d1, f2, d2, sigma);
+          r.length, executor).pdf(pdf.length, f1, d1, f2, d2, sigma);
     } else {
       p = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
-          r.length, executor).pdf(distances.length, fit);
+          r.length, executor).pdf(pdf.length, fit);
     }
 
-    for (int i = 0; i < distances.length; i++) {
+    for (int i = 0; i < pdf.length; i++) {
       final double[] pi = p[i];
-      // pdfPlot[i].setLineWidth(2f);
-      pdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      pdfPlot[i].setColor(LutHelper.getColour(lut, pdf.length - i, 1, pdf.length));
 
       // The PDF is normalised to sum to 1 so increase the height to compensate the
       // reduced bin width so the plots align.
@@ -1282,8 +1322,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       if (cdfPlot == null) {
         continue;
       }
-      // cdfPlot[i].setLineWidth(2f);
-      cdfPlot[i].setColor(LutHelper.getColour(lut, distances.length - i, 1, distances.length));
+      cdfPlot[i].setColor(LutHelper.getColour(lut, cdf.length - i, 1, cdf.length));
       double sum = 0;
       yy = yy.clone();
       for (int j = 0; j < yy.length; j++) {
