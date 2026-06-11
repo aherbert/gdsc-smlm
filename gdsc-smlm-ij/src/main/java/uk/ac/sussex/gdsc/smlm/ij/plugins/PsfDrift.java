@@ -1412,8 +1412,6 @@ public class PsfDrift implements PlugIn {
 
     for (int t = nThreads; --t >= 0;) {
       futures.add(executor.submit(() -> {
-        final double[] proj = new double[w];
-
         final FitConfiguration config = FitConfiguration.create();
         config.setFitSolver(FitSolver.LVM_LSE);
         config.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
