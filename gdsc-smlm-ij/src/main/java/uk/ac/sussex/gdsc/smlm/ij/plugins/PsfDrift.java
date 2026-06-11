@@ -86,12 +86,15 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.Offset;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
+import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
@@ -159,7 +162,7 @@ public class PsfDrift implements PlugIn {
     boolean updateCentre;
     boolean updateHwhm;
     double noiseFraction;
-    boolean fitGaussian;
+    int hwhmMode;
 
     Settings() {
       // Set defaults
@@ -201,7 +204,7 @@ public class PsfDrift implements PlugIn {
       updateCentre = source.updateCentre;
       updateHwhm = source.updateHwhm;
       noiseFraction = source.noiseFraction;
-      fitGaussian = source.fitGaussian;
+      hwhmMode = source.hwhmMode;
     }
 
     Settings copy() {
@@ -1122,14 +1125,14 @@ public class PsfDrift implements PlugIn {
       return;
     }
 
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Approximate the volume of the PSF as a Gaussian and\n"
         + "compute the equivalent Gaussian width.");
     settings = Settings.load();
     gd.addChoice("PSF", titles.toArray(new String[0]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
     gd.addNumericField("Noise_fraction", settings.noiseFraction);
-    gd.addCheckbox("Fit_SD", settings.fitGaussian);
+    gd.addChoice("Fit_mode", new String[] {"Integral", "1D fit", "2D fit"}, settings.hwhmMode);
     gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
     gd.addHelp(HelpUrls.getUrl("psf-hwhm"));
@@ -1141,7 +1144,7 @@ public class PsfDrift implements PlugIn {
     settings.title = gd.getNextChoice();
     settings.useOffset = gd.getNextBoolean();
     settings.noiseFraction = gd.getNextNumber();
-    settings.fitGaussian = gd.getNextBoolean();
+    settings.hwhmMode = gd.getNextChoiceIndex();
     settings.smoothing = gd.getNextNumber();
     settings.save();
 
@@ -1161,14 +1164,20 @@ public class PsfDrift implements PlugIn {
     // Get HWHM
     final double[] w0;
     final double[] w1;
-    if (settings.fitGaussian) {
+    if (settings.hwhmMode != 0) {
       // Fit a 1D Gaussian to projections
+      final float[][] image = CreateData.extractImageStack(imp, 0, size - 1);
       final int nThreads = Prefs.getThreads();
       final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
       try {
-        final float[][] image = CreateData.extractImageStack(imp, 0, size - 1);
-        w0 = fitGaussian(image, false, nThreads, executor);
-        w1 = fitGaussian(image, true, nThreads, executor);
+        if (settings.hwhmMode == 1) {
+          w0 = fitGaussian(image, false, nThreads, executor);
+          w1 = fitGaussian(image, true, nThreads, executor);
+        } else {
+          final double[][] fit = fitGaussian(image, nThreads, executor);
+          w0 = fit[0];
+          w1 = fit[1];
+        }
       } finally {
         executor.shutdown();
       }
@@ -1303,6 +1312,7 @@ public class PsfDrift implements PlugIn {
     final AtomicInteger pos = new AtomicInteger(n);
     final List<Future<?>> futures = new LocalList<>(n);
     final double[] hwhm = new double[n];
+    Arrays.fill(hwhm, Double.NaN);
     final ParameterValidator validator = params -> {
       // Signal must be above zero
       if (params.getEntry(0) < 1e-16) {
@@ -1383,6 +1393,96 @@ public class PsfDrift implements PlugIn {
             hwhm[p] = lvmSolution.getPoint().getEntry(2);
           } catch (final TooManyIterationsException | ConvergenceException ignored) {
             // System.out.printf("Failed: %s%n", ignored.getMessage());
+          }
+        }
+      }));
+    }
+    ConcurrencyUtils.waitForCompletionUnchecked(futures);
+    return hwhm;
+  }
+
+  private double[][] fitGaussian(float[][] image, int nThreads, ExecutorService executor) {
+    final int n = image.length;
+    final int w = (int) Math.sqrt(image[0].length);
+    final int minw = w >> 2;
+    final int maxw = w - minw;
+    final AtomicInteger pos = new AtomicInteger(n);
+    final List<Future<?>> futures = new LocalList<>(n);
+    final double[][] hwhm = new double[2][n];
+
+    for (int t = nThreads; --t >= 0;) {
+      futures.add(executor.submit(() -> {
+        final double[] proj = new double[w];
+
+        final FitConfiguration config = FitConfiguration.create();
+        config.setFitSolver(FitSolver.LVM_LSE);
+        config.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
+        config.setMaxIterations(100);
+        config.setRelativeThreshold(1e-6);
+        config.setAbsoluteThreshold(1e-16);
+        config.setInitialPeakStdDev(1);
+        config.setCoordinateShift(w * 0.5);
+        config.setSignalStrength(0);
+        config.setMinPhotons(0);
+        config.setMinWidthFactor(0.25);
+        config.setMaxWidthFactor(4);
+        // config.setLog(ImageJPluginLoggerHelper.getLogger(getClass()));
+
+        final Gaussian2DFitter fitter = new Gaussian2DFitter(config);
+
+        while (true) {
+          final int p = pos.decrementAndGet();
+          if (p < 0) {
+            break;
+          }
+          final double[] data = SimpleArrayUtils.toDouble(image[p]);
+          // Using the centre crop of the image, compute the weighted mean
+          // is each dimension.
+          double sum = 0;
+          double sx = 0;
+          double sy = 0;
+          for (int y = minw; y < maxw; y++) {
+            final int offset = y * w;
+            for (int x = minw; x < maxw; x++) {
+              final double v = data[offset + x];
+              sum += v;
+              sx += v * x;
+              sy += v * y;
+            }
+          }
+          final double cx = sx / sum;
+          final double cy = sy / sum;
+          // Compute standard deviation in each dimension
+          double ssx = 0;
+          double ssy = 0;
+          for (int y = minw; y < maxw; y++) {
+            final int offset = y * w;
+            for (int x = minw; x < maxw; x++) {
+              final double v = data[offset + x];
+              ssx += v * (x - cx) * (x - cx);
+              ssy += v * (y - cy) * (y - cy);
+            }
+          }
+          final double sdx = Math.sqrt(ssx / sum);
+          final double sdy = Math.sqrt(ssy / sum);
+          // Fit Gaussian
+          config.setInitialPeakStdDev0(sdx);
+          config.setInitialPeakStdDev1(sdy);
+          double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+          final double background = Gaussian2DFitter.getBackground(data, w, w, 1);
+          params[Gaussian2DFunction.BACKGROUND] = background;
+          params[Gaussian2DFunction.SIGNAL] = sum - background * (maxw - minw) * (maxw - minw);
+          params[Gaussian2DFunction.X_POSITION] = cx;
+          params[Gaussian2DFunction.Y_POSITION] = cy;
+          final FitResult result = fitter.fit(data, w, w, 1, params, new boolean[] {false}, true);
+          if (result.getStatus() == FitStatus.OK) {
+            params = result.getParameters();
+            hwhm[0][p] = params[Gaussian2DFunction.X_SD];
+            hwhm[1][p] = params[Gaussian2DFunction.Y_SD];
+            // } else {
+            // System.out.printf("Failed: [%d] (%.2f,%.2f) + (%.2f,%.2f) signal=%s: %s (%s)%n", p,
+            // cx,
+            // cy, sdx, sdy, params[1], result.getStatus(), result.getStatusData());
           }
         }
       }));

@@ -761,8 +761,8 @@ When the plugin is run the following parameters can be configured:
    * - Noise fraction
      - The threshold for the fraction of the maximum value to use for the PSF image noise floor. Values have the noise floor subtracted; negatives are set to zero. The noise floor reduces the contribution of noise at the edge of the image to the image sum. Used when approximating the Gaussian from the integral.
 
-   * - Fit SD
-     - Project the PSF in the X and Y dimensions and fit a 1D Gaussian to the projections.
+   * - Fit mode
+     - The method to use to estimate the HWHM. Approximate the integral of a 2D Gaussian at HWHM; Project the PSF in the X and Y dimensions and fit a 1D Gaussian to the projections; Fit a 2D Gaussian.
 
    * - Smoothing
      - The smoothing to apply to the curve. This is the bandwidth parameter for a LOESS smoothing algorithm and corresponds to the fraction of surrounding data used for local smoothing of each point.
