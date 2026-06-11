@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class ImagePsfModel extends PsfModel {
   /** The default noise fraction. */
-  public static final double DEFAULT_NOISE_FRACTION = 5e-2;
+  public static final double DEFAULT_NOISE_FRACTION = 1e-3;
 
   private double[][] sumImage;
   private double[][] cumulativeImage;
@@ -160,9 +160,7 @@ public class ImagePsfModel extends PsfModel {
     this.sumImage = duplicate(image);
 
     if (noiseFraction > 0) {
-      for (final double[] data : sumImage) {
-        subtractNoise(data, noiseFraction);
-      }
+      subtractNoise(sumImage, noiseFraction);
     }
 
     // Normalise so that the highest intensity frame sums to 1.
@@ -180,53 +178,6 @@ public class ImagePsfModel extends PsfModel {
     }
   }
 
-  /**
-   * The noise fraction parameter can specify how to remove noise. All pixels below the fraction of
-   * the maximum are set to zero. The remaining pixels are adjusted by the height of the first pixel
-   * below the cutoff.
-   *
-   * @param image the image
-   * @param noiseFraction the noise fraction
-   */
-  private static void subtractNoise(double[] image, double noiseFraction) {
-    double max = 0;
-    double sum = 0;
-    for (final double v : image) {
-      if (max < v) {
-        max = v;
-      }
-      sum += v;
-    }
-    if (max <= 0) {
-      return;
-    }
-    final double cutoff = max * noiseFraction;
-    // Find highest value below cutoff
-    double floor = 0;
-    for (final double v : image) {
-      if (v < cutoff && floor < v) {
-        floor = v;
-      }
-    }
-    // All pixels to be included must subtract the noise floor.
-    // All pixels below the noise floor are zeroed.
-    double sum2 = 0;
-    for (int i = 0; i < image.length; i++) {
-      final double newValue = image[i] - floor;
-      if (newValue > 0) {
-        image[i] = newValue;
-        sum2 += newValue;
-      } else {
-        image[i] = 0;
-      }
-    }
-    // Re-normalise to the same intensity
-    final double scale = sum / sum2;
-    for (int i = 0; i < image.length; i++) {
-      image[i] *= scale;
-    }
-  }
-
   private static double[][] duplicate(float[][] image) {
     final int size = image[0].length;
     final double[][] duplicate = new double[image.length][size];
@@ -240,6 +191,38 @@ public class ImagePsfModel extends PsfModel {
       }
     }
     return duplicate;
+  }
+
+  /**
+   * The noise fraction parameter can specify how to remove noise. The floor is set using 
+   * the specified fraction of the image maximum. All pixels have the floor subtracted
+   * and those below zero are set to zero. 
+   *
+   * @param image the image
+   * @param noiseFraction the noise fraction
+   */
+  private static void subtractNoise(double[][] image, double noiseFraction) {
+    if (image == null || image.length == 0) {
+      return;
+    }
+
+    double max = 0;
+    for (final double[] data : image) {
+      max = MathUtils.maxDefault(max, data);
+    }
+
+    if (max <= 0) {
+      return;
+    }
+
+    final double cutoff = max * noiseFraction;
+
+    for (final double[] data : image) {
+      for (int i = 0; i < data.length; i++) {
+        final double newValue = data[i] - cutoff;
+        data[i] = newValue < 0 ? 0 : newValue;
+      }
+    }
   }
 
   /**
