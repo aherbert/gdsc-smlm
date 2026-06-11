@@ -880,7 +880,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double precision = settings.getPrecision() / 1000;
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
-    final MaxEval maxEval = new MaxEval(2000);
+    final MaxEval maxEval = new MaxEval(5000);
     final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
 
     double best = Double.NEGATIVE_INFINITY;
@@ -1382,6 +1382,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   // be correctly fit. An option is to also compute p_remaining
   // for the bound fraction. In practice this is always close to 1
   // when d1 is bound. It does avoid issues if the d values overlap.
+  // This is avoided by using bounds on the fitted parameters.
 
   /**
    * Base function for the probability density.
@@ -1399,6 +1400,34 @@ public class TrackDiffusionAnalysis implements PlugIn {
     int[][] counts;
     double[] weights;
     ExecutorService executor;
+    /**
+     * The fraction of the current sum to terminate integration. This effectively controls how far
+     * into the distance r to proceed with the integration.
+     *
+     * <p>Initial trials used a value of 1e-5 to ensure most of the PDF was computed. This has been
+     * disabled using a term error of 1.
+     *
+     * <p>Note that the observed PDF/CDF may be a truncation of the full density as larger distances
+     * are not observed. If the full PDF is computed then this will result in a penalty applied to
+     * all distances above the final observed distance. This affects the sum-of-squares (SS) for the
+     * PDF by adding a small error term equal to the computed PDF for all r until integration is
+     * terminated. The effect on the SS for the CDF is larger. The observed CDF will be 1 at the
+     * last observed distance. The computed CDF at this point is initially far from 1, and increases
+     * to 1 over the additional distance terms computed until integration terminates. The penalty is
+     * far greater for the CDF due to summing the square of these larger differences to the observed
+     * density (compared to the PDF). Fitting will avoid this penalty by reducing the truncation of
+     * the computed PDF by using smaller diffusion coefficients.
+     *
+     * <p>The best fit to the observed distribution is made by computing the PDF using the maximum
+     * distance in the observed PDF and normalising to that sum. This effectively fits the curve of
+     * the observed PDF.
+     *
+     * <p>The maximum distance is used across all time delays so each curve has the same bin width.
+     * An alternative is to use a fixed number of bins and use a variable bin width for each.
+     * A compromise is to only integrate the computed PDF over the max distance observed for
+     * each time delay. This will alter the number of observed points.
+     */
+    double termError = 1;
 
     BaseFunction(double dt, double dz, double a, double b, double precision, double dr,
         float[][] df, boolean isCdf, ExecutorService executor) {
@@ -1579,7 +1608,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         last = y;
       }
       // Continue the integration until terms are insignificant
-      while (last / sum > 1e-5) {
+      final double error = this.termError;
+      while (last / sum > error) {
         r = ++j * dr;
         final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2);
@@ -1769,7 +1799,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         last = y;
       }
       // Continue the integration until terms are insignificant
-      while (last / sum > 1e-5) {
+      final double error = this.termError;
+      while (last / sum > error) {
         r = ++j * dr;
         final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
