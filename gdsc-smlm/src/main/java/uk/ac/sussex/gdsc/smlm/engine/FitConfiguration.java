@@ -107,6 +107,23 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   // Extract the settings for convenience
   private final CalibrationWriter calibration;
   private final PSF.Builder psf;
+
+  // Warning:
+  // The following builders are derived from the fitSettings.
+  // Any changes that will clear the fitSettings
+  // for these requires that the cached builder be recreated.
+  // Commenting out the fitSettings builder will show
+  // methods that interact with the parent fitSttings and may reset builders
+  // Note that a merge will not reset the builders. A setter for the message,
+  // or a clear on the fitSettings will clear the builders.
+  //
+  // OK:
+  // fitSettings.mergeFrom(FitSettings)
+  //
+  // Resets builder:
+  // fitSettings.clear()
+  // fitSettings.setFitSolverSettings(FitSolverSettings)
+
   private FilterSettings.Builder filterSettings;
   private FitSolverSettings.Builder fitSolverSettings;
 
@@ -289,6 +306,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    */
   public void setFitSettings(FitSettings fitSettings) {
     this.fitSettings.clear().mergeFrom(fitSettings);
+    updateFitSettings(this.fitSettings);
     initialiseState();
   }
 
