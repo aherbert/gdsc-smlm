@@ -173,7 +173,7 @@ public final class GuiSettings {
       builder.setDensityRadius(3);
       builder.setDepthOfField(250);
       builder.setDepthOfFocus(450);
-      builder.setPsfNoiseFraction(5e-2);
+      builder.setPsfNoiseFraction(1e-3);
       INSTANCE = builder.build();
     }
   }

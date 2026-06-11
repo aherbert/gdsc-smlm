@@ -181,7 +181,7 @@ public class PsfDrift implements PlugIn {
       smoothing = 0.1;
       updateCentre = true;
       updateHwhm = true;
-      noiseFraction = 5e-2;
+      noiseFraction = 1e-3;
     }
 
     Settings(Settings source) {
