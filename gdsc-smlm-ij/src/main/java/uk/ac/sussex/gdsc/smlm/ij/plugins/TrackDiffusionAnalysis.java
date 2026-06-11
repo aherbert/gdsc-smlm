@@ -698,21 +698,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return sortedDistances;
   }
 
-  private PointValuePair fitDistances(int[][] counts, float[][] pdf, ExecutorService executor,
+  private PointValuePair fitDistances(int[][] counts, float[][] df, ExecutorService executor,
       int mode) {
-    // TODO: Support CDF fitting
-    final PointValuePair result2 = fitTwoStateDistances(counts, pdf, executor, mode);
+    final PointValuePair result2 = fitTwoStateDistances(counts, df, executor, mode);
     if (result2 == null) {
       return null;
     }
     addToResultTable(result2);
-    final PointValuePair result3 = fitThreeStateDistances(counts, pdf, executor, mode);
+    final PointValuePair result3 = fitThreeStateDistances(counts, df, executor, mode);
     if (result3 != null) {
       addToResultTable(result3);
 
       if (mode != MODE_PDF_MLE) {
         // Select best fit using BIC
-        final int numberOfPoints = pdf[0].length * pdf.length;
+        final int numberOfPoints = df[0].length * df.length;
         final double bic2 = MathUtils.getDeltaBayesianInformationCriterion(result2.getValue(),
             numberOfPoints, result2.getPointRef().length - 1);
         final double bic3 = MathUtils.getDeltaBayesianInformationCriterion(result3.getValue(),
@@ -749,7 +748,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return result2;
   }
 
-  private PointValuePair fitTwoStateDistances(int[][] counts, float[][] pdf,
+  private PointValuePair fitTwoStateDistances(int[][] counts, float[][] df,
       ExecutorService executor, int mode) {
     IJ.showStatus("Fitting two-state model...");
 
@@ -775,11 +774,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
       goalType = GoalType.MAXIMIZE;
       numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
     } else {
+      final boolean isCdf = mode == MODE_CDF;
+      final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
       fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
-          precision, settings.getBinWidth(), pdf, executor)::sumOfSquares);
+          precision, binWidth, df, isCdf, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
-      numberOfPoints = pdf[0].length * pdf.length;
+      numberOfPoints = df[0].length * df.length;
     }
     final double minD = Math.min(0.1, settings.getMinD());
     final SimpleBounds bounds = new SimpleBounds(addPrecision(new double[] {0, 0.0, minD}, 0),
@@ -866,7 +867,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
   }
 
-  private PointValuePair fitThreeStateDistances(int[][] counts, float[][] pdf,
+  private PointValuePair fitThreeStateDistances(int[][] counts, float[][] df,
       ExecutorService executor, int mode) {
     if (!settings.getFitThreeState()) {
       return null;
@@ -900,11 +901,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
       goalType = GoalType.MAXIMIZE;
       numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
     } else {
+      final boolean isCdf = mode == MODE_CDF;
+      final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
       fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
-          precision, settings.getBinWidth(), pdf, executor)::sumOfSquares);
+          precision, binWidth, df, isCdf, executor)::sumOfSquares);
       goalType = GoalType.MINIMIZE;
       best = Double.POSITIVE_INFINITY;
-      numberOfPoints = pdf[0].length * pdf.length;
+      numberOfPoints = df[0].length * df.length;
     }
     final double minD = Math.min(0.1, settings.getMinD());
     final SimpleBounds bounds =
@@ -1199,8 +1202,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         cdfPlot[0] = new Plot(title[0], "Distance (um)", "Probability");
         Arrays.fill(cdfPlot, cdfPlot[0]);
       }
-      float binWidth = (float) settings.getCdfBinWidth();
-      float[] r = SimpleArrayUtils.newArray(cdf[0].length + 1, 0, binWidth);
+      final float binWidth = (float) settings.getCdfBinWidth();
+      final float[] r = SimpleArrayUtils.newArray(cdf[0].length + 1, 0, binWidth);
       for (int i = 0; i < cdf.length; i++) {
         // Add a zero at r=0
         final float[] y = new float[r.length];
@@ -1391,16 +1394,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double precision;
     double dr;
     int n;
-    float[][] pdf;
+    float[][] df;
+    boolean isCdf;
     int[][] counts;
     double[] weights;
     ExecutorService executor;
 
     BaseFunction(double dt, double dz, double a, double b, double precision, double dr,
-        float[][] pdf, ExecutorService executor) {
-      this(dt, dz, a, b, precision, dr, Arrays.stream(pdf).mapToInt(x -> x.length).max().getAsInt(),
+        float[][] df, boolean isCdf, ExecutorService executor) {
+      this(dt, dz, a, b, precision, dr, Arrays.stream(df).mapToInt(x -> x.length).max().getAsInt(),
           executor);
-      this.pdf = pdf;
+      this.df = df;
+      this.isCdf = isCdf;
     }
 
     BaseFunction(double dt, double dz, double a, double b, double precision, double dr,
@@ -1425,15 +1430,16 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
   /**
    * Function to evaluate the two-state diffusion model. Creates a binned PDF for the model.
-   * Evaluate the sum-of-squares of the observed PDF, or the log-likelihood of the observed counts.
+   * Evaluate the sum-of-squares of the observed PDF, the observed CDF, or the log-likelihood of the
+   * observed counts.
    *
    * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
    */
   static class TwoStateFunction extends BaseFunction {
 
     TwoStateFunction(double dt, double dz, double a, double b, double precision, double dr,
-        float[][] pdf, ExecutorService executor) {
-      super(dt, dz, a, b, precision, dr, pdf, executor);
+        float[][] df, boolean isCdf, ExecutorService executor) {
+      super(dt, dz, a, b, precision, dr, df, isCdf, executor);
     }
 
     TwoStateFunction(double dt, double dz, double a, double b, double precision, double dr,
@@ -1473,8 +1479,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double sigma = point.length > 3 ? point[3] : precision;
       final double f2 = 1 - f1;
 
-      final List<Future<Double>> futures = new LocalList<>(pdf.length);
-      for (int n = pdf.length; --n >= 0;) {
+      final List<Future<Double>> futures = new LocalList<>(df.length);
+      for (int n = df.length; --n >= 0;) {
         final int time = n;
         futures.add(executor.submit(() -> computeSS(f1, d1, f2, d2, sigma, time)));
       }
@@ -1493,11 +1499,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     private double computeSS(double f1, double d1, double f2, double d2, double sigma, int time) {
       final double[] p = computePdf(f1, d1, f2, d2, sigma, time);
-      final float[] obs = pdf[time];
+      final float[] obs = df[time];
       double ss = 0;
-      for (int i = 0; i < obs.length; i++) {
-        final double dp = p[i] - obs[i];
-        ss += dp * dp;
+      if (isCdf) {
+        double s = 0;
+        for (int i = 0; i < obs.length; i++) {
+          s += p[i];
+          final double dp = s - obs[i];
+          ss += dp * dp;
+        }
+      } else {
+        for (int i = 0; i < obs.length; i++) {
+          final double dp = p[i] - obs[i];
+          ss += dp * dp;
+        }
       }
       return ss;
     }
@@ -1584,15 +1599,16 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   /**
    * Function to evaluate the two-state diffusion model. Creates a binned PDF for the model.
-   * Evaluate the sum-of-squares of the observed PDF, or the log-likelihood of the observed counts.
+   * Evaluate the sum-of-squares of the observed PDF, the observed CDF, or the log-likelihood of the
+   * observed counts.
    *
    * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
    */
   static class ThreeStateFunction extends BaseFunction {
 
     ThreeStateFunction(double dt, double dz, double a, double b, double precision, double dr,
-        float[][] pdf, ExecutorService executor) {
-      super(dt, dz, a, b, precision, dr, pdf, executor);
+        float[][] df, boolean isCdf, ExecutorService executor) {
+      super(dt, dz, a, b, precision, dr, df, isCdf, executor);
     }
 
     ThreeStateFunction(double dt, double dz, double a, double b, double precision, double dr,
@@ -1644,8 +1660,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d3 = point[5];
       final double sigma = point.length > 6 ? point[6] : precision;
 
-      final List<Future<Double>> futures = new LocalList<>(pdf.length);
-      for (int n = pdf.length; --n >= 0;) {
+      final List<Future<Double>> futures = new LocalList<>(df.length);
+      for (int n = df.length; --n >= 0;) {
         final int time = n;
         futures.add(executor.submit(() -> computeSS(f1, d1, f2, d2, f3, d3, sigma, time)));
       }
@@ -1665,11 +1681,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
     private double computeSS(double f1, double d1, double f2, double d2, double f3, double d3,
         double sigma, int time) {
       final double[] p = computePdf(f1, d1, f2, d2, f3, d3, sigma, time);
-      final float[] obs = pdf[time];
+      final float[] obs = df[time];
       double ss = 0;
-      for (int i = 0; i < obs.length; i++) {
-        final double dp = p[i] - obs[i];
-        ss += dp * dp;
+      if (isCdf) {
+        double s = 0;
+        for (int i = 0; i < obs.length; i++) {
+          s += p[i];
+          final double dp = s - obs[i];
+          ss += dp * dp;
+        }
+      } else {
+        for (int i = 0; i < obs.length; i++) {
+          final double dp = p[i] - obs[i];
+          ss += dp * dp;
+        }
       }
       return ss;
     }
