@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class ImagePsfModel extends PsfModel {
   /** The default noise fraction. */
-  public static final double DEFAULT_NOISE_FRACTION = 1e-3;
+  public static final double DEFAULT_NOISE_FRACTION = 5e-2;
 
   private double[][] sumImage;
   private double[][] cumulativeImage;
