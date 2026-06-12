@@ -451,19 +451,19 @@ public class ImagePsfModel extends PsfModel {
 
     if (interpolate) {
       for (int i = 0; i < u.length; i++) {
-        lu[i] = (int) u[i];
+        lu[i] = floor(u[i]);
       }
       for (int i = 0; i < v.length; i++) {
-        lv[i] = (int) v[i];
+        lv[i] = floor(v[i]);
       }
     } else {
       // If we are not interpolating then we use the centre of the pixel so convert
       // the vertices to the pixel centre using a 0.5 pixel offset.
       for (int i = 0; i < u.length; i++) {
-        lu[i] = (int) (u[i] + 0.5);
+        lu[i] = floor(u[i] + 0.5);
       }
       for (int i = 0; i < v.length; i++) {
-        lv[i] = (int) (v[i] + 0.5);
+        lv[i] = floor(v[i] + 0.5);
       }
     }
 
@@ -527,6 +527,18 @@ public class ImagePsfModel extends PsfModel {
       pixel[i] = ((i - origin) / unitsPerPixel + xyCentre - 1);
     }
     return pixel;
+  }
+
+  /**
+   * Compute the floor of the value {@code x} as an {@code int}.
+   * Delegates to {@link Math#floor(double)} for negative values, otherwise uses
+   * integer truncation towards zero.
+   *
+   * @param x the x
+   * @return the floor
+   */
+  private static int floor(double x) {
+    return x < 0 ? (int) Math.floor(x) : (int) x;
   }
 
   private double sum(double[] rollingSum, int lowerU, int lowerV, int upperU, int upperV) {
