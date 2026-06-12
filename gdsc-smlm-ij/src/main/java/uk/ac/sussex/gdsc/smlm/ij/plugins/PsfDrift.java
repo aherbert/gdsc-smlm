@@ -646,7 +646,7 @@ public class PsfDrift implements PlugIn {
     startSlice = MathUtils.clip(1, nSlices, startSlice);
     endSlice = MathUtils.clip(1, nSlices, endSlice);
 
-    final ImagePsfModel psf = createImagePsf(startSlice, endSlice, settings.scale);
+    final ImagePsfModel psf = createImagePsf(settings.scale);
 
     final int minz = startSlice - psfSettings.getCentreImage();
     final int maxz = endSlice - psfSettings.getCentreImage();
@@ -987,23 +987,22 @@ public class PsfDrift implements PlugIn {
     plot.addPoints(x2, y2, shape);
   }
 
-  private ImagePsfModel createImagePsf(int lower, int upper, double scale) {
+  private ImagePsfModel createImagePsf(double scale) {
     final int zCentre = psfSettings.getCentreImage();
 
     final double unitsPerPixel = 1.0 / scale;
     final double unitsPerSlice = 1; // So we can move from -depth to depth
 
     // Extract data uses index not slice number as arguments so subtract 1
-    final float[][] image = CreateData.extractImageStack(imp, lower - 1, upper - 1);
-    final ImagePsfModel model = new ImagePsfModel(image, zCentre - lower, unitsPerPixel,
+    final float[][] image = CreateData.extractImageStack(imp, 0, imp.getStackSize() - 1);
+    final ImagePsfModel model = new ImagePsfModel(image, zCentre - 1, unitsPerPixel,
         unitsPerSlice, settings.noiseFraction);
 
     // Add the calibrated centres
     final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
     if (settings.useOffset && !oldOffset.isEmpty()) {
-      final int sliceOffset = lower;
       for (final Entry<Integer, Offset> entry : oldOffset.entrySet()) {
-        model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
+        model.setRelativeCentre(entry.getKey() - 1, entry.getValue().getCx(),
             entry.getValue().getCy());
       }
     } else {
@@ -1178,7 +1177,7 @@ public class PsfDrift implements PlugIn {
 
     ImagePsfModel psf = null;
     if (settings.showPsf != 0) {
-      psf = createImagePsf(1, size, 1);
+      psf = createImagePsf(1);
       final int w = imp.getWidth();
       final ImageStack stack = new ImageStack(w, w);
       final double cx = w * 0.5;
@@ -1232,7 +1231,7 @@ public class PsfDrift implements PlugIn {
       }
     } else {
       if (psf == null) {
-        psf = createImagePsf(1, size, 1);
+        psf = createImagePsf(1);
       }
       w0 = psf.getAllHwhm0();
       w1 = psf.getAllHwhm1();

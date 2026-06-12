@@ -2701,7 +2701,8 @@ public class CreateData implements PlugIn {
       lower = (lower < 0) ? 0 : (lower >= nSlices) ? nSlices - 1 : lower;
 
       // We cannot just extract the correct slices since the
-      // Image PSF requires the z-centre for normalisation
+      // Image PSF requires the maximum intensity for normalisation.
+      // The z-centre should be close-to the highest intensity so include that.
       if (!(lower <= zCentre && upper >= zCentre)) {
         // Ensure we include the zCentre
         lower = Math.min(lower, zCentre);
