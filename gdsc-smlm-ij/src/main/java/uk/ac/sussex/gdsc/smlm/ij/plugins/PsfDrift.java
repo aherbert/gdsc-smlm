@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
@@ -78,6 +79,8 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -124,6 +127,9 @@ public class PsfDrift implements PlugIn {
   /** The fit configuration. */
   FitConfiguration fitConfig = FitConfiguration.create();
 
+  /** A sampled PSF. */
+  ImagePlus psfImp;
+
   /** The centre pixel. */
   int centrePixel;
   /** The total number of PSF grid positions. */
@@ -163,6 +169,8 @@ public class PsfDrift implements PlugIn {
     boolean updateHwhm;
     double noiseFraction;
     int hwhmMode;
+    int showPsf;
+    int psfSamples;
 
     Settings() {
       // Set defaults
@@ -182,6 +190,7 @@ public class PsfDrift implements PlugIn {
       updateCentre = true;
       updateHwhm = true;
       noiseFraction = 5e-2;
+      psfSamples = 1000;
     }
 
     Settings(Settings source) {
@@ -205,6 +214,8 @@ public class PsfDrift implements PlugIn {
       updateHwhm = source.updateHwhm;
       noiseFraction = source.noiseFraction;
       hwhmMode = source.hwhmMode;
+      showPsf = source.showPsf;
+      psfSamples = source.psfSamples;
     }
 
     Settings copy() {
@@ -1132,6 +1143,8 @@ public class PsfDrift implements PlugIn {
     gd.addChoice("PSF", titles.toArray(new String[0]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
     gd.addNumericField("Noise_fraction", settings.noiseFraction);
+    gd.addChoice("Show_PSF", new String[] {"None", "Render", "Sample"}, settings.showPsf);
+    gd.addNumericField("PSF_samples", settings.psfSamples);
     gd.addChoice("Fit_mode", new String[] {"Integral", "1D fit", "2D fit"}, settings.hwhmMode);
     gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
@@ -1144,6 +1157,8 @@ public class PsfDrift implements PlugIn {
     settings.title = gd.getNextChoice();
     settings.useOffset = gd.getNextBoolean();
     settings.noiseFraction = gd.getNextNumber();
+    settings.showPsf = gd.getNextChoiceIndex();
+    settings.psfSamples = (int) gd.getNextNumber();
     settings.hwhmMode = gd.getNextChoiceIndex();
     settings.smoothing = gd.getNextNumber();
     settings.save();
@@ -1160,6 +1175,40 @@ public class PsfDrift implements PlugIn {
     }
 
     final int size = imp.getStackSize();
+
+    ImagePsfModel psf = null;
+    if (settings.showPsf != 0) {
+      psf = createImagePsf(1, size, 1);
+      final int w = imp.getWidth();
+      final ImageStack stack = new ImageStack(w, w);
+      final double cx = w * 0.5;
+      final double cz = psfSettings.getCentreImage();
+      final int s = settings.psfSamples;
+      final UniformRandomProvider rng =
+          settings.showPsf == 2 ? UniformRandomProviders.create() : null;
+      final float[] sum = new float[size];
+      for (int i = 0; i < size; i++) {
+        final float[] data = new float[w * w];
+        if (settings.showPsf == 1) {
+          psf.create3D(data, w, w, s, cx, cx, i - cz + 1, null);
+        } else {
+          psf.sample3D(data, w, w, s, cx, cx, i - cz + 1, rng);
+        }
+        sum[i] = (float) MathUtils.sum(data);
+        stack.addSlice(null, data);
+      }
+      psfImp = ImageJUtils.display(TITLE + " Sampled PSF", stack);
+      psfImp.setLut(LutHelper.createLut(LutColour.FIRE, true));
+      psfImp.setSlice((int) cz);
+      psfImp.resetDisplayRange();
+      psfImp.updateAndDraw();
+      final String title = TITLE + " Sampled PSF Intensity";
+      final Plot plot = new Plot(title, "Slice", "Intensity");
+      plot.setColor(Color.blue);
+      plot.addPoints(SimpleArrayUtils.newArray(size, 1f, 1f), sum, Plot.LINE);
+      plot.setColor(Color.black);
+      ImageJUtils.display(title, plot);
+    }
 
     // Get HWHM
     final double[] w0;
@@ -1182,7 +1231,9 @@ public class PsfDrift implements PlugIn {
         executor.shutdown();
       }
     } else {
-      final ImagePsfModel psf = createImagePsf(1, size, 1);
+      if (psf == null) {
+        psf = createImagePsf(1, size, 1);
+      }
       w0 = psf.getAllHwhm0();
       w1 = psf.getAllHwhm1();
     }
@@ -1570,7 +1621,7 @@ public class PsfDrift implements PlugIn {
       if (cx[upper] - cx[0] != upper) {
         final LinearInterpolator in = new LinearInterpolator();
         final PolynomialSplineFunction f = in.interpolate(cx, cy);
-        cx = SimpleArrayUtils.newArray(upper + 1, cx[0], 1.0);
+        cx = SimpleArrayUtils.newArray((int) (cx[upper] - cx[0]) + 1, cx[0], 1.0);
         this.cy = new double[cx.length];
         for (int i = 0; i < cx.length; i++) {
           this.cy[i] = f.value(cx[i]);
@@ -1606,6 +1657,12 @@ public class PsfDrift implements PlugIn {
       imp.setSlice(centre);
       imp.resetDisplayRange();
       imp.updateAndDraw();
+
+      if (psfImp != null) {
+        psfImp.setSlice(centre);
+        psfImp.resetDisplayRange();
+        psfImp.updateAndDraw();
+      }
     }
 
     final double getFwhm() {
