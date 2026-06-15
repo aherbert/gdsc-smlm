@@ -1650,6 +1650,9 @@ Fitting results are output to a summary table:
    * - max t
      - The maximum number of frames in the simulation.
 
+   * - Use detector
+     - If using a depth-of-field detector curve.
+
    * - restarts
      - If a molecule can re-enter the depth-of-field and start a new track.
 

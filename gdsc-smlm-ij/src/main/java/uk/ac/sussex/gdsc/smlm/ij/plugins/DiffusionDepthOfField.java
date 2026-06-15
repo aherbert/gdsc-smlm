@@ -706,8 +706,8 @@ public class DiffusionDepthOfField implements PlugIn {
 
   private String createHeader() {
     return Arrays
-        .stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "restarts", "half-life",
-            "min D (um^2/s)", "max D (um^2/s)", "sample D", "a", "b",})
+        .stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "detector", "restarts",
+            "half-life", "min D (um^2/s)", "max D (um^2/s)", "sample D", "a", "b",})
         .collect(Collectors.joining("\t"));
   }
 
@@ -719,6 +719,7 @@ public class DiffusionDepthOfField implements PlugIn {
       .append(settings.gap).append('\t')
       .append(settings.numberOfMolecules).append('\t')
       .append(settings.maxT).append('\t')
+      .append(settings.useDetector).append('\t')
       .append(settings.allowRestarts).append('\t')
       .append(MathUtils.rounded(settings.halfLife)).append('\t')
       .append(MathUtils.rounded(settings.minD)).append('\t')
