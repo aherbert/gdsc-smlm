@@ -26,15 +26,22 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.Prefs;
-import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.Color;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,12 +49,18 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoublePredicate;
+import java.util.function.DoubleUnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.NonMonotonicSequenceException;
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -62,6 +75,7 @@ import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
@@ -115,6 +129,8 @@ public class DiffusionDepthOfField implements PlugIn {
 
     int numberOfMolecules;
     int maxT;
+    boolean useDetector;
+    String detectionCurve;
     boolean allowRestarts;
     double halfLife;
     double minD;
@@ -151,6 +167,8 @@ public class DiffusionDepthOfField implements PlugIn {
 
       numberOfMolecules = source.numberOfMolecules;
       maxT = source.maxT;
+      useDetector = source.useDetector;
+      detectionCurve = source.detectionCurve;
       halfLife = source.halfLife;
       allowRestarts = source.allowRestarts;
       minD = source.minD;
@@ -232,7 +250,7 @@ public class DiffusionDepthOfField implements PlugIn {
   }
 
   private boolean showDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
     gd.addNumericField("Depth_of_field", settings.depthOfField, 1, 6, "nm");
     gd.addNumericField("Exposure_time", settings.exposureTime, 1, 6, "ms");
@@ -240,6 +258,8 @@ public class DiffusionDepthOfField implements PlugIn {
 
     gd.addNumericField("Number_of_molecules", settings.numberOfMolecules);
     gd.addSlider("Max_t", 5, 15, settings.maxT);
+    gd.addCheckbox("Use_dectector", settings.useDetector);
+    gd.addFilenameField("Detection_curve", settings.detectionCurve);
     gd.addCheckbox("Allow_restarts", settings.allowRestarts);
     gd.addNumericField("Half_life", settings.halfLife);
     gd.addNumericField("Min_D", settings.minD, 3, 6, "um^2/s");
@@ -264,6 +284,8 @@ public class DiffusionDepthOfField implements PlugIn {
 
     settings.numberOfMolecules = (int) gd.getNextNumber();
     settings.maxT = (int) gd.getNextNumber();
+    settings.useDetector = gd.getNextBoolean();
+    settings.detectionCurve = gd.getNextString();
     settings.allowRestarts = gd.getNextBoolean();
     settings.halfLife = gd.getNextNumber();
     settings.minD = gd.getNextNumber();
@@ -332,9 +354,9 @@ public class DiffusionDepthOfField implements PlugIn {
     final boolean allowRestarts = settings.allowRestarts;
     final double halfLife = settings.halfLife;
 
-    // Create the depth of field detector
-    // TODO: Allow loading this from file as a look-up table
-    final DoublePredicate dof = z -> Math.abs(z) <= halfDz;
+    // Create the depth of field detector curve
+    final DoubleUnaryOperator detectorCurve =
+        settings.useDetector ? loadDetectorCurve(settings.detectionCurve) : null;
 
     // Simulate tracks across the depth of field.
     // Each track is scaled using the diffusion coefficient and the molecule tested if
@@ -361,6 +383,13 @@ public class DiffusionDepthOfField implements PlugIn {
       // The half-life parameter can be zero and the track will reach max T.
       final ContinuousSampler lifeSampler =
           halfLife <= 0 ? () -> maxT : SamplerUtils.createExponentialSampler(rng.jump(), halfLife);
+      // Use an optional detector curve
+      final DoublePredicate dof;
+      if (settings.useDetector) {
+        dof = createDetector(detectorCurve, rng.jump());
+      } else {
+        dof = z -> Math.abs(z) <= halfDz;
+      }
       futures.add(executor.submit(() -> {
         final int[] tracks = new int[step.length];
         // Count of number of molecules inside the depth of field
@@ -372,7 +401,7 @@ public class DiffusionDepthOfField implements PlugIn {
             break;
           }
           // Create a lifetime within the depth-of-field.
-          final int lifetime = (int) lifeSampler.sample();
+          final int lifetime = (int) Math.min(lifeSampler.sample(), 20 * maxT);
           // Simulate across the depth of field [-z/2, z/2]
           final double p = pos / (total - 1.0);
           final double originZ = (1 - p) * halfDz - p * halfDz;
@@ -457,6 +486,75 @@ public class DiffusionDepthOfField implements PlugIn {
     }
 
     return probability;
+  }
+
+  /**
+   * Load a depth-of-field detector curve. The file should contains entries of: z (nm), probability.
+   * The returned detector will by calibrated in micrometers.
+   *
+   * @param detectionCurve the detection curve
+   * @return the detector curve
+   * @throws UncheckedIOException if the curve cannot be read
+   * @throws IllegalArgumentException if the curve is invalid
+   */
+  private static DoubleUnaryOperator loadDetectorCurve(String detectionCurve) {
+    try {
+      final DoubleArrayList depth = new DoubleArrayList();
+      final DoubleArrayList p = new DoubleArrayList();
+      final Pattern delim = Pattern.compile("[\t ,]");
+      Files.lines(Paths.get(detectionCurve)).forEach(line -> {
+        try (Scanner scanner = new Scanner(line)) {
+          scanner.useDelimiter(delim);
+          scanner.useLocale(Locale.ROOT);
+          final double pos = scanner.nextDouble();
+          final double prob = scanner.nextDouble();
+          if (!(prob >= 0 && prob <= 1)) {
+            throw new IllegalArgumentException("Invalid probability: " + prob);
+          }
+          depth.add(pos * 1e-3);
+          p.add(prob);
+        } catch (final InputMismatchException e) {
+          // Ignore header
+          if (!depth.isEmpty()) {
+            throw new IllegalArgumentException("Unrecognised curve entry: " + line);
+          }
+        }
+      });
+      try {
+        final PolynomialSplineFunction fun =
+            new SplineInterpolator().interpolate(depth.toDoubleArray(), p.toDoubleArray());
+        final double minZ = depth.getDouble(0);
+        final double maxZ = depth.getDouble(depth.size() - 1);
+        return z -> {
+          if (z < minZ | z > maxZ) {
+            return 0;
+          }
+          return fun.value(z);
+        };
+      } catch (NonMonotonicSequenceException | NumberIsTooSmallException e) {
+        throw new IllegalArgumentException("Invalid detector curve", e);
+      }
+    } catch (final IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  /**
+   * Creates the detector.
+   *
+   * @param detectorCurve the detector curve
+   * @param rng the source of randomness
+   * @return the detector
+   */
+  private static DoublePredicate createDetector(DoubleUnaryOperator detectorCurve,
+      UniformRandomProvider rng) {
+    return z -> {
+      final double p = detectorCurve.applyAsDouble(z);
+      if (p <= 0) {
+        return false;
+      }
+      return rng.nextDouble() < p;
+    };
   }
 
   /**

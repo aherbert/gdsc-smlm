@@ -1579,6 +1579,12 @@ The plugin has the following parameters:
    * - Max t
      - The maximum number of frames in the simulation.
 
+   * - Use detector
+     - If ``true`` use a depth-of-field detector curve. Molecules are detected at a given z depth using the detection probability. The default uses a binary detector where any z within the depth-of-field is detected.
+
+   * - Detector curve
+     - A file containing a detector curve. The file has lines containing the z depth (in nm) and the detection probability. The fields can be delimited by tab, space, or comma. The curve is interpolated using a cubic spline.
+
    * - Allow restarts
      - If ``true`` then molecules that are outside the depth-of-field for the maximum ``gap`` distance can re-enter the depth-of-field and start a new track. Otherwise the molecule is lost. Restarts allows an increase in tracks starting close to the edge of the depth-of-field.
 
