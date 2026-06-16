@@ -298,6 +298,10 @@ message TrackDiffusionAnalysisSettings {
   int32 fit_mode = 27;
   double cdf_bin_width = 28;
   double plot_max_r = 29;
+  double half_life = 30;
+  bool use_detector = 31;
+  string detector_curve_filename = 32;
+  bool allow_restarts = 33;
 }
 
 // Contains the settings for the events in the OPTICS GUI

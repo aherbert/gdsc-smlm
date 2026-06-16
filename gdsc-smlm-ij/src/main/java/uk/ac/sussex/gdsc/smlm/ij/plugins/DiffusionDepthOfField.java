@@ -410,37 +410,42 @@ public class DiffusionDepthOfField implements PlugIn {
             final double s = step[j];
             final int[] obs = observed[j];
             // Last frame the molecule was inside the DoF
-            int last = -1;
-            // Origin inside the DoF
+            int lastT = -1;
+            // Origin frame inside the DoF
             int originT = -1;
             double z = originZ;
-            if (dof.test(z)) {
-              // Track started: i - originT = steps - 1
-              originT = 0;
-              tracks[j]++;
+            // Diffuse until detected
+            int t = 0;
+            while (!dof.test(z) && t < lifetime) {
+              t++;
+              z += sampler.sample() * s;
             }
+            if (t == lifetime) {
+              // Never detected
+              break;
+            }
+            // Start a track
+            // Add 1 to the origin so that t - originT = steps - 1
+            originT = t + 1;
+            tracks[j]++;
+            lastT = t;
             // Diffuse until lifetime expires
-            for (int i = 0; i < lifetime; i++) {
+            while (t < lifetime) {
+              t++;
               z += sampler.sample() * s;
               if (dof.test(z)) {
                 if (originT < 0) {
                   // Start a track
-                  // Add 1 to the origin so that i - originT = steps - 1
-                  originT = i + 1;
+                  // Add 1 to the origin so that t - originT = steps - 1
+                  originT = t + 1;
                   tracks[j]++;
-                } else if (i - originT < maxT) {
+                } else if (t - originT < maxT) {
                   // Record the track
-                  obs[i - originT]++;
+                  obs[t - originT]++;
                 }
-                last = i;
-              } else if (i - last >= g) {
+                lastT = t;
+              } else if (t - lastT >= g) {
                 // Above the configured gap size; molecule has been lost.
-                // ---
-                // Note: No check if there is a track started. If a new untracked molecule
-                // is immediately lost then the number of molecules will be lower and the
-                // result is ignored. This is only an issue if the detector for the
-                // depth-of-field is poor and is solved by using more molecules.
-                // ---
                 if (allowRestarts) {
                   // Allow restarting a new track. Signal that the track is unstarted using -1.
                   // This can increase the activations around the edge of the
@@ -497,7 +502,7 @@ public class DiffusionDepthOfField implements PlugIn {
    * @throws UncheckedIOException if the curve cannot be read
    * @throws IllegalArgumentException if the curve is invalid
    */
-  private static DoubleUnaryOperator loadDetectorCurve(String detectionCurve) {
+  static DoubleUnaryOperator loadDetectorCurve(String detectionCurve) {
     try {
       final DoubleArrayList depth = new DoubleArrayList();
       final DoubleArrayList p = new DoubleArrayList();
@@ -546,7 +551,7 @@ public class DiffusionDepthOfField implements PlugIn {
    * @param rng the source of randomness
    * @return the detector
    */
-  private static DoublePredicate createDetector(DoubleUnaryOperator detectorCurve,
+  static DoublePredicate createDetector(DoubleUnaryOperator detectorCurve,
       UniformRandomProvider rng) {
     return z -> {
       final double p = detectorCurve.applyAsDouble(z);

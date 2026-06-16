@@ -1589,7 +1589,7 @@ The plugin has the following parameters:
      - If ``true`` then molecules that are outside the depth-of-field for the maximum ``gap`` distance can re-enter the depth-of-field and start a new track. Otherwise the molecule is lost. Restarts allows an increase in tracks starting close to the edge of the depth-of-field.
 
    * - Half-life
-     - The molecule half-life within the depth-of-field. This is required when using ``Restarts`` to allow the molecules to bleach. Set to zero to disable when not using ``Restarts``.
+     - The molecule half-life. This is required when using ``Restarts`` to allow the molecules to bleach. Set to zero to disable when not using ``Restarts``.
 
    * - Min D
      - The minimum diffusion coefficient in the simulation.

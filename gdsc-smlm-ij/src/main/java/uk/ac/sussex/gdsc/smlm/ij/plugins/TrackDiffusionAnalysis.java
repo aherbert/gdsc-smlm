@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.Prefs;
-import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
@@ -46,6 +45,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoublePredicate;
+import java.util.function.DoubleUnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -61,6 +62,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.simple.RandomSource;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -197,6 +199,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     try {
       final PointValuePair result = fitDistances(counts, df, executor, settings.getFitMode());
+      if (result != null) {
+        final double[] fit = result.getPointRef();
+        double d = fit.length < 6 ? fit[3] : fit[5];
+        checkTraceSettings(d, distances[0][distances[0].length - 1]);
+      }
       plotDistances(cdf, pdf, result, executor);
     } finally {
       executor.shutdown();
@@ -220,6 +227,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double dt = settings.getExposureTime() / 1000;
       final int g = settings.getGap();
       final int maxT = settings.getSimT();
+      final boolean allowRestarts = settings.getAllowRestarts();
+      final double halfLife = settings.getHalfLife();
+
+      // Create the depth of field detector curve
+      final DoubleUnaryOperator detectorCurve = settings.getUseDetector()
+          ? DiffusionDepthOfField.loadDetectorCurve(settings.getDetectorCurveFilename())
+          : null;
 
       // Sample populations
       final double p1 = settings.getF1();
@@ -250,16 +264,28 @@ public class TrackDiffusionAnalysis implements PlugIn {
           (JumpableUniformRandomProvider) RandomSource.XO_RO_SHI_RO_1024_PP.create();
       for (int n = 0; n < threadCount; n++) {
         final UniformRandomProvider rng = parentRng.jump();
+        // If no restarts then there is no requirement for a half-life.
+        // The half-life parameter can be zero and the track will reach max T.
+        final ContinuousSampler lifeSampler = halfLife <= 0 ? () -> maxT
+            : SamplerUtils.createExponentialSampler(parentRng.jump(), halfLife);
+        // Use an optional detector curve
+        final DoublePredicate dof;
+        if (settings.getUseDetector()) {
+          dof = DiffusionDepthOfField.createDetector(detectorCurve, parentRng.jump());
+        } else {
+          dof = z -> Math.abs(z) <= halfDz;
+        }
         futures.add(executor.submit(() -> {
           final NormalizedGaussianSampler sampler =
               SamplerUtils.createNormalizedGaussianSampler(rng);
           final MemoryPeakResults observed = new MemoryPeakResults(total);
-
           for (;;) {
             final int pos = position.incrementAndGet();
             if (pos > total) {
               break;
             }
+            // Create a lifetime within the depth-of-field.
+            final int lifetime = (int) Math.min(lifeSampler.sample(), 20 * maxT);
             // Molecule type
             final double p = rng.nextDouble();
             double d;
@@ -271,36 +297,52 @@ public class TrackDiffusionAnalysis implements PlugIn {
               d = step[2];
             }
             // Simulate the track from the origin within the depth of field
-            final int id = nextId.incrementAndGet();
+            int id = -1;
             double x = 0;
             double y = 0;
             double z = rng.nextDouble(-halfDz, halfDz);
-            int last = 0;
+            // Last frame the molecule was inside the DoF
+            int lastT = 0;
             // Ensure all tracks have unique frames to allow tracing the dataset
             // Each track should be separated by maxT frames so tracing even with
             // small frame gaps will not join stationary molecules at the origin.
-            final int frame = pos * (2 * maxT);
+            final int frame = pos * (21 * maxT);
+            // Diffuse until detected
+            int t = 0;
+            while (!dof.test(z) && t < lifetime) {
+              t++;
+              // Note: Updates to (x,y) do not matter here
+              z += sampler.sample() * d;
+            }
+            if (t == lifetime) {
+              // Never detected
+              break;
+            }
             // Record the origin
-            observed.add(new XyzPeakResult(frame, x + sampler.sample() * precision,
+            id = nextId.incrementAndGet();
+            lastT = t;
+            observed.add(new XyzPeakResult(frame + t, x + sampler.sample() * precision,
                 y + sampler.sample() * precision, z, id));
-            // TODO: Add a half-life for the molecule: sample the lifetime from an exponential
-            for (int i = 1; i <= maxT; i++) {
+            // Diffuse until lifetime expires
+            while (t < lifetime) {
+              t++;
               x += sampler.sample() * d;
               y += sampler.sample() * d;
               z += sampler.sample() * d;
-              // TODO: Add a detector curve to replace hard boundaries for depth-of-field
-              if (Math.abs(z) < halfDz) {
+              if (dof.test(z)) {
                 // Record molecule
                 // Check the gap from the last time it was in the depth-of-field
-                if (i - last > g) {
-                  break;
-                  // TODO: Optionally allow restarting a new track.
-                  // Start a new track
-                  // id = nextId.incrementAndGet();
+                if (t - lastT > g) {
+                  if (allowRestarts) {
+                    // Optionally allow restarting a new track
+                    id = nextId.incrementAndGet();
+                  } else {
+                    break;
+                  }
                 }
-                last = i;
+                lastT = t;
                 // Add localisation precision
-                observed.add(new XyzPeakResult(frame + i, x + sampler.sample() * precision,
+                observed.add(new XyzPeakResult(frame + t, x + sampler.sample() * precision,
                     y + sampler.sample() * precision, z, id));
               }
             }
@@ -352,7 +394,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private boolean showSimulationDialog() {
     settings = SettingsManager.readTrackDiffusionAnalysisSettings(0).toBuilder();
 
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
     gd.addNumericField("Depth_of_field", settings.getDepthOfField(), 1, 6, "nm");
     gd.addNumericField("Exposure_time", settings.getExposureTime(), 1, 6, "ms");
@@ -360,6 +402,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     gd.addNumericField("Number_of_molecules", settings.getNumberOfMolecules());
     gd.addSlider("Max_t", 5, 15, settings.getSimT());
+    gd.addCheckbox("Use_dectector", settings.getUseDetector());
+    gd.addFilenameField("Detector_curve", settings.getDetectorCurveFilename());
+    gd.addCheckbox("Allow_restarts", settings.getAllowRestarts());
+    gd.addNumericField("Half_life", settings.getHalfLife());
 
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
     gd.addNumericField("F1", settings.getF1(), 3);
@@ -380,6 +426,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     settings.setNumberOfMolecules((int) gd.getNextNumber());
     settings.setSimT((int) gd.getNextNumber());
+    settings.setUseDetector(gd.getNextBoolean());
+    settings.setDetectorCurveFilename(gd.getNextString());
+    settings.setAllowRestarts(gd.getNextBoolean());
+    settings.setHalfLife(gd.getNextNumber());
 
     settings.setPrecision(gd.getNextNumber());
     settings.setF1(gd.getNextNumber());
@@ -407,6 +457,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ParameterUtils.isPositive("D3", settings.getD3());
 
       ParameterUtils.isBelow("F1 + F2", settings.getF1() + settings.getF2(), 1);
+
+      if (settings.getAllowRestarts()) {
+        ParameterUtils.isAboveZero("Half-life with restarts", settings.getHalfLife());
+      }
 
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -1178,6 +1232,27 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return cdf;
   }
 
+  /**
+   * Check the tracing settings. This checks the distance used for tracing covers enough of the
+   * cumulative mean-squared distance distribution.
+   *
+   * @param d the diffusion coefficient (um^2/s)
+   * @param r the maximum observed jump distance for 1 frame (um)
+   */
+  private void checkTraceSettings(double d, double r) {
+    final double t = exposureTime;
+    // cdf(r^2) = 1 - exp(-r^2 / 4dt)
+    final double p = -Math.expm1(-r * r / (4 * d * t));
+    Level level = Level.INFO;
+    String msg = "Observed";
+    if (p < 0.95) {
+      level = Level.WARNING;
+      msg = "Possible truncation of observed";
+    }
+    LoggerUtils.log(logger, level, "%s distances for max D: cdf(r=%s, D=%s, t=%s s)=%s", msg,
+        MathUtils.rounded(r), MathUtils.rounded(d), MathUtils.rounded(t), MathUtils.rounded(p));
+  }
+
   private void plotDistances(float[][] cdf, float[][] pdf, PointValuePair result,
       ExecutorService executor) {
     IJ.showStatus("Plotting results...");
@@ -1423,9 +1498,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
      * the observed PDF.
      *
      * <p>The maximum distance is used across all time delays so each curve has the same bin width.
-     * An alternative is to use a fixed number of bins and use a variable bin width for each.
-     * A compromise is to only integrate the computed PDF over the max distance observed for
-     * each time delay. This will alter the number of observed points.
+     * An alternative is to use a fixed number of bins and use a variable bin width for each. A
+     * compromise is to only integrate the computed PDF over the max distance observed for each time
+     * delay. This will alter the number of observed points.
      */
     double termError = 1;
 

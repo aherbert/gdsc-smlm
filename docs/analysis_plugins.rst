@@ -1624,7 +1624,7 @@ A summary table is shown containing the model parameters. The following columns 
 Simulation
 ~~~~~~~~~~
 
-If the ``Shift`` key is held when executing the plugin then a simulation of molecule diffusion is performed. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. Molecules are randomly allocated a specified diffusion coefficient based of the fractions of each population. Three dimensional Brownian diffusion is simulated for a configured number of time steps. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it starts a new track. The simulated tracks are saved to memory. These are idealised tracks with perfect tracing of molecules within an exact depth of field. The localisations may be retraced using the :ref:`analysis_plugins:Trace Diffusion` plugin.
+If the ``Shift`` key is held when executing the plugin then a simulation of molecule diffusion is performed. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. Molecules are randomly allocated a specified diffusion coefficient based of the fractions of each population. Three dimensional Brownian diffusion is simulated for a configured number of time steps. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it can start a new track. The simulated tracks are saved to memory. These are idealised tracks with perfect tracing of molecules (no trace distance). The localisations may be retraced using the :ref:`analysis_plugins:Trace Diffusion` plugin.
 
 The following parameters can be set:
 
@@ -1649,6 +1649,18 @@ The following parameters can be set:
 
    * - Max t
      - The maximum number of frames in the simulation.
+
+   * - Use detector
+     - If ``true`` use a depth-of-field detector curve. Molecules are detected at a given z depth using the detection probability. The default uses a binary detector where any z within the depth-of-field is detected.
+
+   * - Detector curve
+     - A file containing a detector curve. The file has lines containing the z depth (in nm) and the detection probability. The fields can be delimited by tab, space, or comma. The curve is interpolated using a cubic spline.
+
+   * - Allow restarts
+     - If ``true`` then molecules that are outside the depth-of-field for the maximum ``gap`` distance can re-enter the depth-of-field and start a new track. Otherwise the molecule is lost. Restarts allows an increase in tracks starting close to the edge of the depth-of-field.
+
+   * - Half-life
+     - The molecule half-life. This is required when using ``Restarts`` to allow the molecules to bleach. Set to zero to disable when not using ``Restarts`` and fix lifetime to ``Max t``.
 
    * - Precision
      - The localisation error added to the recorded x and y coordinates.
