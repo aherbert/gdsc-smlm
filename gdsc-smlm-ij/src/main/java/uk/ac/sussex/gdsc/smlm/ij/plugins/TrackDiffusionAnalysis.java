@@ -201,8 +201,16 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final PointValuePair result = fitDistances(counts, df, executor, settings.getFitMode());
       if (result != null) {
         final double[] fit = result.getPointRef();
-        double d = fit.length < 6 ? fit[3] : fit[5];
-        checkTraceSettings(d, distances[0][distances[0].length - 1]);
+        double d;;
+        double sigma;
+        if (fit.length < 6) {
+          d = fit[3];
+          sigma = fit.length > 4 ? fit[4] : settings.getPrecision();
+        } else {
+          d = fit[5];
+          sigma = fit.length > 6 ? fit[6] : settings.getPrecision();
+        }
+        checkTraceSettings(distances[0][distances[0].length - 1], d, sigma);
       }
       plotDistances(cdf, pdf, result, executor);
     } finally {
@@ -1236,21 +1244,23 @@ public class TrackDiffusionAnalysis implements PlugIn {
    * Check the tracing settings. This checks the distance used for tracing covers enough of the
    * cumulative mean-squared distance distribution.
    *
-   * @param d the diffusion coefficient (um^2/s)
    * @param r the maximum observed jump distance for 1 frame (um)
+   * @param d the diffusion coefficient (um^2/s)
+   * @param sigma the localisation precision
    */
-  private void checkTraceSettings(double d, double r) {
+  private void checkTraceSettings(double r, double d, double sigma) {
     final double t = exposureTime;
-    // cdf(r^2) = 1 - exp(-r^2 / 4dt)
-    final double p = -Math.expm1(-r * r / (4 * d * t));
+    // cdf(r^2) = 1 - exp(-r^2 / 4dt+s^2)
+    final double p = -Math.expm1(-r * r / (4 * d * t + sigma * sigma));
     Level level = Level.INFO;
     String msg = "Observed";
     if (p < 0.95) {
       level = Level.WARNING;
       msg = "Possible truncation of observed";
     }
-    LoggerUtils.log(logger, level, "%s distances for max D: cdf(r=%s, D=%s, t=%s s)=%s", msg,
-        MathUtils.rounded(r), MathUtils.rounded(d), MathUtils.rounded(t), MathUtils.rounded(p));
+    LoggerUtils.log(logger, level, "%s distances for max D: cdf(r=%s, D=%s, s=%s, t=%s)=%s", msg,
+        MathUtils.rounded(r), MathUtils.rounded(d), MathUtils.rounded(sigma), MathUtils.rounded(t),
+        MathUtils.rounded(p));
   }
 
   private void plotDistances(float[][] cdf, float[][] pdf, PointValuePair result,
