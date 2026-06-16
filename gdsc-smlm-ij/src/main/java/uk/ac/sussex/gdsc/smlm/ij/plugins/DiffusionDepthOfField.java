@@ -130,7 +130,7 @@ public class DiffusionDepthOfField implements PlugIn {
     int numberOfMolecules;
     int maxT;
     boolean useDetector;
-    String detectionCurve;
+    String detectorCurve;
     boolean allowRestarts;
     double halfLife;
     double minD;
@@ -168,7 +168,7 @@ public class DiffusionDepthOfField implements PlugIn {
       numberOfMolecules = source.numberOfMolecules;
       maxT = source.maxT;
       useDetector = source.useDetector;
-      detectionCurve = source.detectionCurve;
+      detectorCurve = source.detectorCurve;
       halfLife = source.halfLife;
       allowRestarts = source.allowRestarts;
       minD = source.minD;
@@ -259,7 +259,7 @@ public class DiffusionDepthOfField implements PlugIn {
     gd.addNumericField("Number_of_molecules", settings.numberOfMolecules);
     gd.addSlider("Max_t", 5, 15, settings.maxT);
     gd.addCheckbox("Use_dectector", settings.useDetector);
-    gd.addFilenameField("Detection_curve", settings.detectionCurve);
+    gd.addFilenameField("Detector_curve", settings.detectorCurve);
     gd.addCheckbox("Allow_restarts", settings.allowRestarts);
     gd.addNumericField("Half_life", settings.halfLife);
     gd.addNumericField("Min_D", settings.minD, 3, 6, "um^2/s");
@@ -285,7 +285,7 @@ public class DiffusionDepthOfField implements PlugIn {
     settings.numberOfMolecules = (int) gd.getNextNumber();
     settings.maxT = (int) gd.getNextNumber();
     settings.useDetector = gd.getNextBoolean();
-    settings.detectionCurve = gd.getNextString();
+    settings.detectorCurve = gd.getNextString();
     settings.allowRestarts = gd.getNextBoolean();
     settings.halfLife = gd.getNextNumber();
     settings.minD = gd.getNextNumber();
@@ -356,7 +356,7 @@ public class DiffusionDepthOfField implements PlugIn {
 
     // Create the depth of field detector curve
     final DoubleUnaryOperator detectorCurve =
-        settings.useDetector ? loadDetectorCurve(settings.detectionCurve) : null;
+        settings.useDetector ? loadDetectorCurve(settings.detectorCurve) : null;
 
     // Simulate tracks across the depth of field.
     // Each track is scaled using the diffusion coefficient and the molecule tested if
