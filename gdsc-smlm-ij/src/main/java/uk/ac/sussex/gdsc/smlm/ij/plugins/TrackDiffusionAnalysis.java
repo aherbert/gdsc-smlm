@@ -906,9 +906,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       // The sigma determines the search range for the variables.
       // It should be 1/3 of the initial search region.
       args.add(new CMAESOptimizer.Sigma(addPrecision(new double[] {0.1, 0.01, 0.3}, 0.001)));
-      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(5)))));
+      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(4)))));
     } else if (settings.getOptimiserMode() == OPT_MODE_BOBYQA) {
-      optimizer = createBobyqaOptimizer(5);
+      optimizer = createBobyqaOptimizer(4);
     } else {
       optimizer = createCustomPowellOptimizer();
       args.add(
