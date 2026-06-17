@@ -54,14 +54,18 @@ import java.util.stream.IntStream;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
@@ -82,6 +86,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -517,6 +522,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       });
     });
 
+    gd.addChoice("Optimiser_mode", new String[] {"Powell", "CMA-ES"}, settings.getOptimiserMode());
     gd.addSlider("Repeats", 1, 5, settings.getRepeats());
     gd.addNumericField("Min_D", settings.getMinD(), 3, 6, "um^2/s");
     gd.addNumericField("Max_D", settings.getMaxD(), 3, 6, "um^2/s");
@@ -547,6 +553,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.setA(gd.getNextNumber());
     settings.setB(gd.getNextNumber());
 
+    settings.setOptimiserMode(gd.getNextChoiceIndex());
     settings.setRepeats((int) gd.getNextNumber());
     settings.setMinD(gd.getNextNumber());
     settings.setMaxD(gd.getNextNumber());
@@ -826,7 +833,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     PointValuePair result = null;
 
     final LocalList<OptimizationData> args = new LocalList<>();
-    args.add(new MaxEval(2000));
+    // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
+    args.add(new MaxEval(10000));
 
     // fit: f1, d1, d2, sigma
     // Note that f2 = 1 - f1
@@ -850,10 +858,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
         addPrecision(new double[] {1, 0.1, Double.POSITIVE_INFINITY}, 0.1)));
 
     MultivariateOptimizer optimizer;
-    // TODO: Try CMA-ES
-    optimizer = createCustomPowellOptimizer();
-    args.add(
-        new CustomPowellOptimizer.BasisStep(addPrecision(new double[] {0.1, 0.01, 0.5}, 0.001)));
+    if (settings.getOptimiserMode() == 1) {
+      optimizer = createCmaesOptimizer(rng);
+      // The sigma determines the search range for the variables.
+      // It should be 1/3 of the initial search region.
+      args.add(new CMAESOptimizer.Sigma(addPrecision(new double[] {0.1, 0.01, 0.3}, 0.001)));
+      args.add(
+          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(5)))));
+    } else {
+      optimizer = createCustomPowellOptimizer();
+      args.add(
+          new CustomPowellOptimizer.BasisStep(addPrecision(new double[] {0.1, 0.01, 0.3}, 0.001)));
+    }
 
     final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
     for (int n = 1; n <= settings.getRepeats(); n++) {
@@ -950,7 +966,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     PointValuePair result = null;
 
     final LocalList<OptimizationData> args = new LocalList<>();
-    args.add(new MaxEval(5000));
+    // CMA-ES can take 30 N to 30 N^2 evaluations for N parameters
+    args.add(new MaxEval(20000));
 
     // TODO: Update to not fit f3
 
@@ -979,10 +996,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
             new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1)));
 
     MultivariateOptimizer optimizer;
-    // TODO: Try CMA-ES
-    optimizer = createCustomPowellOptimizer();
-    args.add(new CustomPowellOptimizer.BasisStep(
-        addPrecision(new double[] {0.1, 0.01, 0.1, 0.5, 0.1, 0.5}, 0.001)));
+    if (settings.getOptimiserMode() == 1) {
+      optimizer = createCmaesOptimizer(rng);
+      // The sigma determines the search range for the variables.
+      // It should be 1/3 of the initial search region.
+      args.add(new CMAESOptimizer.Sigma(
+          addPrecision(new double[] {0.1, 0.01, 0.1, 0.3, 0.1, 0.3}, 0.001)));
+      args.add(
+          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(7)))));
+    } else {
+      optimizer = createCustomPowellOptimizer();
+      args.add(new CustomPowellOptimizer.BasisStep(
+          addPrecision(new double[] {0.1, 0.01, 0.1, 0.3, 0.1, 0.3}, 0.001)));
+    }
 
     final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
     final double range = settings.getMaxD() - settings.getMinD();
@@ -1030,16 +1056,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
           }
         }
       } catch (final TooManyEvaluationsException ex) {
-        LoggerUtils.log(logger, Level.INFO,
-            "Optimiser[%d] failed : Too many evaluation (%d)", n,
+        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed : Too many evaluation (%d)", n,
             optimizer.getEvaluations());
       } catch (final TooManyIterationsException ex) {
-        LoggerUtils.log(logger, Level.INFO,
-            "Optimiser[%d] failed : Too many iterations (%d)", n,
+        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed : Too many iterations (%d)", n,
             optimizer.getIterations());
       } catch (final ConvergenceException ex) {
-        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed to fit : %s", n,
-            ex.getMessage());
+        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed to fit : %s", n, ex.getMessage());
       }
       ticker.tick();
     }
@@ -1092,6 +1115,21 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return new CustomPowellOptimizer(rel, abs, null, basisConvergence);
   }
 
+  private static CMAESOptimizer createCmaesOptimizer(UniformRandomProvider rng) {
+    final double rel = 1e-8;
+    final double abs = 1e-100;
+    final int maxIterations = 2000;
+    final double stopFitness = 0;
+    final boolean isActiveCma = true;
+    final int diagonalOnly = 20;
+    final int checkFeasableCount = 1;
+    final RandomGenerator random = new RandomGeneratorAdapter(rng);
+    final boolean generateStatistics = false;
+    final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(rel, abs);
+    return new CMAESOptimizer(maxIterations, stopFitness, isActiveCma, diagonalOnly,
+        checkFeasableCount, random, generateStatistics, checker);
+  }
+
   private double[] addPrecision(double[] a, double p) {
     if (settings.getFitPrecision()) {
       final double[] b = Arrays.copyOf(a, a.length + 1);
@@ -1114,7 +1152,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private String createHeader() {
     return Arrays
         .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "max t", "offsets", "a", "b",
-            "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
+            "optimiser", "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
         .collect(Collectors.joining("\t"));
   }
 
@@ -1132,6 +1170,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       .append(settings.getOffsets()).append('\t')
       .append(MathUtils.rounded(settings.getA())).append('\t')
       .append(MathUtils.rounded(settings.getB())).append('\t')
+      .append(settings.getOptimiserMode() == 0 ? "Powell" : "CMA-ES").append('\t')
       .append(settings.getRepeats()).append('\t')
       .append(MathUtils.rounded(settings.getMinD())).append('\t')
       .append(MathUtils.rounded(settings.getMaxD()))

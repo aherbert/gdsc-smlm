@@ -1523,6 +1523,9 @@ The following parameters can be set:
    * - B
      - The depth-of-field correction coefficient b (see :ref:`calibration_plugins:Diffusion Depth of Field` plugin).
 
+   * - Optimiser mode
+     - The optimiser to use for fitting.
+
    * - Repeats
      - The number of repeats for fitting. Each repeat uses a random initialisation for the parameters; multiple repeats can avoid choosing a local minima for the final result.
 
@@ -1599,6 +1602,9 @@ A summary table is shown containing the model parameters. The following columns 
 
    * - B
      - The depth-of-field correction coefficient b.
+
+   * - Optimiser
+     - The optimiser used for fitting.
 
    * - Repeats
      - The number of repeats for fitting.
