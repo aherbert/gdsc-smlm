@@ -189,7 +189,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     logger = ImageJPluginLoggerHelper.getLogger(getClass());
 
-    final float[][] distances = getDistances(allResults);
+    final IntArrayList gapCounts = new IntArrayList();
+    final float[][] distances = getDistances(allResults, gapCounts);
     // Create counts and PDF for plotting/fitting; and optionally CDF for fitting only
     final int[][] counts = createCounts(distances, (float) settings.getBinWidth());
     final float[][] pdf = createPdf(counts);
@@ -221,7 +222,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           d = fit[5];
           sigma = fit.length > 6 ? fit[6] : settings.getPrecision();
         }
-        checkTraceSettings(distances[0][distances[0].length - 1], d, sigma);
+        checkTraceSettings(distances[0][distances[0].length - 1], d, sigma, gapCounts);
       }
       plotDistances(cdf, pdf, result, executor);
     } finally {
@@ -694,51 +695,81 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   /**
-   * Get the jump distances for each time delay.
+   * Get the jump distances for each time delay. Also count the frame gaps in the used part of the
+   * traces. In conjunction with the maximum observed distance, this allows analysis of the trace
+   * settings.
    *
    * @param allResults the results
+   * @param gapCounts the gap counts
    * @return distances
    */
-  private float[][] getDistances(List<MemoryPeakResults> allResults) {
+  private float[][] getDistances(List<MemoryPeakResults> allResults, IntArrayList gapCounts) {
     final int maxT = settings.getMaxT();
     final FloatArrayList[] distances =
         IntStream.rangeClosed(0, maxT).mapToObj(FloatArrayList::new).toArray(FloatArrayList[]::new);
     final LocalList<Position> track = new LocalList<>();
+    // Count frame gaps in the traces
+    final int[] gap = new int[11];
 
     for (final MemoryPeakResults results : allResults) {
       results.sort(IdFramePeakResultComparator.INSTANCE);
-      final int[] id = {-1};
+      final FrameCounter id = new FrameCounter(-1);
       results.forEach(DistanceUnit.UM, (XyrResultProcedure) (x, y, r) -> {
-        if (r.getId() != id[0]) {
-          id[0] = r.getId();
-          // Process track
-          final int maxStart = Math.min(track.size() - 1, settings.getOffsets() + 1);
-          for (int i = 0; i < maxStart; i++) {
-            final Position origin = track.unsafeGet(i);
-            for (int j = i + 1; j < track.size(); j++) {
-              final Position position = track.unsafeGet(j);
-              final int g = position.t - origin.t;
-              if (g > maxT) {
-                break;
+        if (id.advance(r.getId())) {
+          if (!track.isEmpty()) {
+            // Process track
+            final int maxStart = Math.min(track.size() - 1, settings.getOffsets() + 1);
+            for (int i = 0; i < maxStart; i++) {
+              final Position origin = track.unsafeGet(i);
+              for (int j = i + 1; j < track.size(); j++) {
+                final Position position = track.unsafeGet(j);
+                final int g = position.t - origin.t;
+                if (g > maxT) {
+                  break;
+                }
+                distances[g].add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
               }
-              distances[g].add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
             }
+            // Count the gaps in the trace. This is used to determine if trace settings
+            // are suitable for fitted diffusion coefficients
+            final int limit = Math.min(track.size(), maxStart + maxT + 1);
+            int t = track.unsafeGet(0).t;
+            for (int i = 1; i < limit; i++) {
+              final int tt = track.unsafeGet(i).t;
+              if (tt - t < gap.length) {
+                gap[tt - t]++;
+              }
+              t = tt;
+            }
+            track.clear();
           }
-          track.clear();
         }
         track.add(new Position(r.getFrame(), x, y));
       });
       // Process final track
-      for (int i = 0; i < track.size(); i++) {
-        final Position origin = track.unsafeGet(i);
-        for (int j = i + 1; j < track.size(); j++) {
-          final Position position = track.unsafeGet(i);
-          final int g = position.t - origin.t;
-          if (g > maxT) {
-            break;
+      if (!track.isEmpty()) {
+        final int maxStart = Math.min(track.size() - 1, settings.getOffsets() + 1);
+        for (int i = 0; i < maxStart; i++) {
+          final Position origin = track.unsafeGet(i);
+          for (int j = i + 1; j < track.size(); j++) {
+            final Position position = track.unsafeGet(i);
+            final int g = position.t - origin.t;
+            if (g > maxT) {
+              break;
+            }
+            distances[g].add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
           }
-          distances[g].add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
         }
+        final int limit = Math.min(track.size(), maxStart + maxT + 1);
+        int t = track.unsafeGet(0).t;
+        for (int i = 1; i < limit; i++) {
+          final int tt = track.unsafeGet(i).t;
+          if (tt - t < gap.length) {
+            gap[tt - t]++;
+          }
+          t = tt;
+        }
+        track.clear();
       }
     }
 
@@ -763,6 +794,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     final int[] sizes = Arrays.stream(sortedDistances).mapToInt(x -> x.length).toArray();
     LoggerUtils.log(logger, Level.INFO, "Distance counts: %s", Arrays.toString(sizes));
+
+
+    // Record the gap lengths
+    final int end = SimpleArrayUtils.findLastIndex(gap, v -> v != 0);
+    for (int i = 1; i <= end; i++) {
+      gapCounts.add(gap[i]);
+    }
+    LoggerUtils.log(logger, Level.INFO, "Gap counts: %s", Arrays.toString(gapCounts.toIntArray()));
 
     // Avoid fitting when there is no data
     final int time = SimpleArrayUtils.findIndex(sizes, i -> i == 0);
@@ -1318,20 +1357,26 @@ public class TrackDiffusionAnalysis implements PlugIn {
    * @param r the maximum observed jump distance for 1 frame (um)
    * @param d the diffusion coefficient (um^2/s)
    * @param sigma the localisation precision
+   * @param gapCounts the gap counts
    */
-  private void checkTraceSettings(double r, double d, double sigma) {
-    final double t = exposureTime;
-    // cdf(r^2) = 1 - exp(-r^2 / 4dt+s^2)
-    final double p = -Math.expm1(-r * r / (4 * d * t + sigma * sigma));
-    Level level = Level.INFO;
-    String msg = "Observed";
-    if (p < 0.95) {
-      level = Level.WARNING;
-      msg = "Possible truncation of observed";
+  private void checkTraceSettings(double r, double d, double sigma, IntArrayList gapCounts) {
+    final long sum = MathUtils.sum(gapCounts.toIntArray());
+    for (int i = 0; i < gapCounts.size(); i++) {
+      final double t = (i + 1) * exposureTime;
+      // cdf(r^2) = 1 - exp(-r^2 / 4dt+s^2)
+      final double p = -Math.expm1(-r * r / (4 * d * t + sigma * sigma));
+      Level level = Level.INFO;
+      String msg = "Observed";
+      if (p < 0.95) {
+        level = Level.WARNING;
+        msg = "Possible truncation of observed";
+      }
+      LoggerUtils.log(logger, level,
+          "%s distances (gap=%d; %s) for max D: cdf(r=%s, D=%s, s=%s, t=%s)=%s", msg, i + 1,
+          MathUtils.rounded((double) gapCounts.getInt(i) / sum), MathUtils.rounded(r),
+          MathUtils.rounded(d), MathUtils.rounded(sigma), MathUtils.rounded(t),
+          MathUtils.rounded(p));
     }
-    LoggerUtils.log(logger, level, "%s distances for max D: cdf(r=%s, D=%s, s=%s, t=%s)=%s", msg,
-        MathUtils.rounded(r), MathUtils.rounded(d), MathUtils.rounded(sigma), MathUtils.rounded(t),
-        MathUtils.rounded(p));
   }
 
   private void plotDistances(float[][] cdf, float[][] pdf, PointValuePair result,
