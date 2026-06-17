@@ -45,6 +45,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
 import java.util.logging.Level;
@@ -213,7 +214,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final PointValuePair result = fitDistances(counts, df, executor, settings.getFitMode());
       if (result != null) {
         final double[] fit = result.getPointRef();
-        double d;;
+        double d;
         double sigma;
         if (fit.length < 6) {
           d = fit[3];
@@ -814,7 +815,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private PointValuePair fitDistances(int[][] counts, float[][] df, ExecutorService executor,
       int mode) {
-    // TODO: Try a CMA-ES optimiser
     final PointValuePair result2 = fitTwoStateDistances(counts, df, executor, mode);
     if (result2 == null) {
       return null;
@@ -1013,46 +1013,49 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // CMA-ES can take 30 N to 30 N^2 evaluations for N parameters
     args.add(new MaxEval(20000));
 
-    // TODO: Update to not fit f3
-
-    // fit: f1, d1, f2, d2, f3, d3, sigma
-    // Note that f3 = 1 - f1 - f2 so the number of fitted parameters is 6.
+    // fit: f1, f2, d1, d2, d3, sigma
+    // Note that f3 = 1 - f1 - f2.
     // However the optimiser does not support compound constraints (f1+f2<=1)
-    // so for convenience f3 is also a fitted parameter for the optimiser.
+    // so any sum above 1 is penalised in the cost function.
+    // Hold a reference to the function to allow the penalty term to be computed.
+    DoubleBinaryOperator penaltyFunction;
     final int numberOfPoints;
     if (mode == MODE_PDF_MLE) {
-      args.add(new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(),
-          settings.getB(), precision, settings.getBinWidth(), counts, executor)::logLikelihood));
+      final ThreeStateFunction fun = new ThreeStateFunction(dt, dz, settings.getA(),
+          settings.getB(), precision, settings.getBinWidth(), counts, executor);
+      args.add(new ObjectiveFunction(fun::logLikelihood));
       args.add(GoalType.MAXIMIZE);
       numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
+      penaltyFunction = fun::ssPenalty;
     } else {
       final boolean isCdf = mode == MODE_CDF;
       final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
-      args.add(new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(),
-          settings.getB(), precision, binWidth, df, isCdf, executor)::sumOfSquares));
+      final ThreeStateFunction fun = new ThreeStateFunction(dt, dz, settings.getA(),
+          settings.getB(), precision, binWidth, df, isCdf, executor);
+      args.add(new ObjectiveFunction(fun::sumOfSquares));
       args.add(GoalType.MINIMIZE);
       best = Double.POSITIVE_INFINITY;
       numberOfPoints = df[0].length * df.length;
+      penaltyFunction = fun::llPenalty;
     }
     final double minD = Math.min(0.1, settings.getMinD());
-    args.add(
-        new SimpleBounds(addPrecision(new double[] {0, 0.0, 0, minD, 0, minD}, 0), addPrecision(
-            new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1)));
+    args.add(new SimpleBounds(addPrecision(new double[] {0, 0, 0.0, minD, minD}, 0), addPrecision(
+        new double[] {1, 1, 0.1, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}, 0.1)));
 
     MultivariateOptimizer optimizer;
     if (settings.getOptimiserMode() == OPT_MODE_CMAES) {
       optimizer = createCmaesOptimizer(rng);
       // The sigma determines the search range for the variables.
       // It should be 1/3 of the initial search region.
-      args.add(new CMAESOptimizer.Sigma(
-          addPrecision(new double[] {0.1, 0.01, 0.1, 0.3, 0.1, 0.3}, 0.001)));
-      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(7)))));
+      args.add(
+          new CMAESOptimizer.Sigma(addPrecision(new double[] {0.1, 0.1, 0.01, 0.3, 0.3}, 0.001)));
+      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(6)))));
     } else if (settings.getOptimiserMode() == OPT_MODE_BOBYQA) {
-      optimizer = createBobyqaOptimizer(7);
+      optimizer = createBobyqaOptimizer(6);
     } else {
       optimizer = createCustomPowellOptimizer();
       args.add(new CustomPowellOptimizer.BasisStep(
-          addPrecision(new double[] {0.1, 0.01, 0.1, 0.3, 0.1, 0.3}, 0.001)));
+          addPrecision(new double[] {0.1, 0.1, 0.01, 0.3, 0.3}, 0.001)));
     }
 
     final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
@@ -1061,22 +1064,31 @@ public class TrackDiffusionAnalysis implements PlugIn {
       try {
         // Guess in range
         final double[] start = addPrecision(new double[] {
-            // Bound fraction
-            rng.nextDouble(0.1, 0.4), rng.nextDouble(0.1),
-            // Slow fraction
+            // f1
             rng.nextDouble(0.1, 0.4),
+            // f2
+            rng.nextDouble(0.1, 0.4),
+            // d1
+            rng.nextDouble(0.1),
+            // d2
             rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 3),
-            // Fast fraction
-            0, rng.nextDouble(settings.getMaxD() - range / 3, settings.getMaxD())},
+            // d3
+            rng.nextDouble(settings.getMaxD() - range / 3, settings.getMaxD())},
             // precision
             precision * rng.nextDouble(0.9, 1.1));
-        // Set f3
-        start[4] = 1 - start[0] - start[2];
 
         args.push(new InitialGuess(start));
-        final PointValuePair solution =
+        PointValuePair solution =
             optimizer.optimize(args.toArray(new OptimizationData[args.size()]));
         args.pop();
+
+        // Note: If f1+f2 > 1 then the value will include the penalty term.
+        // Remove this from the final result.
+        final double[] a = solution.getPointRef();
+        final double penalty = penaltyFunction.applyAsDouble(a[0], a[1]);
+        if (penalty > 0) {
+          solution = new PointValuePair(a, solution.getValue() - penalty);
+        }
 
         if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
@@ -1113,7 +1125,32 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      sort3state(result.getPointRef());
+      // Computed as [f1, f2, d1, d2, d3 [, sigma]]
+      // Return as [f1, d1, f2, d2, f3, d3 [, sigma]]
+      final double[] a = result.getPointRef();
+      final double[] p = new double[a.length + 1];
+      p[0] = a[0];
+      p[1] = a[2];
+      p[2] = a[1];
+      p[3] = a[3];
+      p[5] = a[4];
+      // f3 = 1 - f1 + f2
+      // The function effectively normalises f1+f2 > 1 as it divides by the
+      // sum of the computed probability p = f1*p1 + f2*p2.
+      final double sum = p[0] + p[2];
+      if (sum > 1) {
+        // f3 = 0; normalise f1+f2
+        p[0] /= sum;
+        p[2] /= sum;
+      } else {
+        p[4] = 1 - sum;
+      }
+      // Optional sigma
+      if (a.length > 5) {
+        p[6] = a[5];
+      }
+      sort3state(p);
+      result = new PointValuePair(p, result.getValue());
     }
 
     return result;
@@ -1499,17 +1536,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double precision = settings.getPrecision() / 1000;
     double[][] p;
     final double[] fit = result.getPointRef();
+    final double f1 = fit[0];
+    final double d1 = fit[1];
+    final double f2 = fit[2];
+    final double d2 = fit[3];
     if (fit.length < 6) {
-      final double f1 = fit[0];
-      final double d1 = fit[1];
-      final double f2 = fit[2];
-      final double d2 = fit[3];
       final double sigma = fit.length > 4 ? fit[4] : precision;
       p = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
           r.length, executor).pdf(pdf.length, f1, d1, f2, d2, sigma);
     } else {
+      final double f3 = fit[4];
+      final double d3 = fit[5];
+      final double sigma = fit.length > 6 ? fit[6] : precision;
       p = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
-          r.length, executor).pdf(pdf.length, fit);
+          r.length, executor).pdf(pdf.length, f1, d1, f2, d2, f3, d3, sigma);
     }
 
     for (int i = 0; i < pdf.length; i++) {
@@ -1852,16 +1892,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       super(dt, dz, a, b, precision, dr, n, executor);
     }
 
-    double[][] pdf(int maxT, double[] point) {
-      final double sum = point[0] + point[2] + point[4];
-      final double f1 = point[0] / sum;
-      final double d1 = point[1];
-      final double f2 = point[2] / sum;
-      final double d2 = point[3];
-      final double f3 = point[4] / sum;
-      final double d3 = point[5];
-      final double sigma = point.length > 6 ? point[6] : precision;
-
+    double[][] pdf(int maxT, double f1, double d1, double f2, double d2, double f3, double d3,
+        double sigma) {
       final List<Future<double[]>> futures = new LocalList<>(maxT);
       for (int n = 0; n < maxT; n++) {
         final int time = n;
@@ -1882,14 +1914,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     double sumOfSquares(double[] point) {
-      final double sum = point[0] + point[2] + point[4];
-      final double f1 = point[0] / sum;
-      final double d1 = point[1];
-      final double f2 = point[2] / sum;
+      final double f1 = point[0];
+      final double f2 = point[1];
+      final double d1 = point[2];
       final double d2 = point[3];
-      final double f3 = point[4] / sum;
-      final double d3 = point[5];
-      final double sigma = point.length > 6 ? point[6] : precision;
+      final double d3 = point[4];
+      final double sigma = point.length > 5 ? point[5] : precision;
+      // Note if f3=0 then we could call the TwoStateFunction
+      final double f3 = Math.max(0, 1 - f1 - f2);
 
       final List<Future<Double>> futures = new LocalList<>(df.length);
       for (int n = df.length; --n >= 0;) {
@@ -1906,6 +1938,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
           throw new RuntimeException(e);
         }
       }
+      // Penalise f1+f2 > 1
+      ss += ssPenalty(f1, f2);
       return ss;
     }
 
@@ -1930,15 +1964,22 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return ss;
     }
 
+    double ssPenalty(double f1, double f2) {
+      if (f1 + f2 > 1) {
+        return (f1 + f2 - 1) * n;
+      }
+      return 0;
+    }
+
     double logLikelihood(double[] point) {
-      final double sum = point[0] + point[2] + point[4];
-      final double f1 = point[0] / sum;
-      final double d1 = point[1];
-      final double f2 = point[2] / sum;
+      final double f1 = point[0];
+      final double f2 = point[1];
+      final double d1 = point[2];
       final double d2 = point[3];
-      final double f3 = point[4] / sum;
-      final double d3 = point[5];
-      final double sigma = point.length > 6 ? point[6] : precision;
+      final double d3 = point[4];
+      final double sigma = point.length > 5 ? point[5] : precision;
+      // Note if f3=0 then we could call the TwoStateFunction
+      final double f3 = Math.max(0, 1 - f1 - f2);
 
       final List<Future<Double>> futures = new LocalList<>(counts.length);
       for (int n = counts.length; --n >= 0;) {
@@ -1955,6 +1996,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
           throw new RuntimeException(e);
         }
       }
+      // Penalise f1+f2 > 1
+      ll += llPenalty(f1, f2);
       return ll;
     }
 
@@ -1967,6 +2010,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
         ll += obs[i] * Math.log(p[i]);
       }
       return ll * weights[time];
+    }
+
+    double llPenalty(double f1, double f2) {
+      if (f1 + f2 > 1) {
+        return (f1 + f2 - 1) * n * Math.log(0.01);
+      }
+      return 0;
     }
 
     private double[] computePdf(double f1, double d1, double f2, double d2, double f3, double d3,
