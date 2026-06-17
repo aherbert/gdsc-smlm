@@ -427,7 +427,7 @@ public class JumpDistanceAnalysis {
       }
       final OptimizationData sigma = new CMAESOptimizer.Sigma(s);
       final OptimizationData popSize = new CMAESOptimizer.PopulationSize(
-          (int) (4 + Math.floor(3 * Math.log(function.x.length))));
+          (int) (4 + Math.floor(3 * Math.log(s.length))));
 
       // Iterate this for stability in the initial guess
       final CMAESOptimizer cmaesOptimizer = createCmaesOptimizer();
@@ -974,7 +974,7 @@ public class JumpDistanceAnalysis {
       }
       final OptimizationData sigma = new CMAESOptimizer.Sigma(s);
       final OptimizationData popSize = new CMAESOptimizer.PopulationSize(
-          (int) (4 + Math.floor(3 * Math.log(function.x.length))));
+          (int) (4 + Math.floor(3 * Math.log(s.length))));
 
       // Iterate this for stability in the initial guess
       final CMAESOptimizer cmaesOptimizer = createCmaesOptimizer();

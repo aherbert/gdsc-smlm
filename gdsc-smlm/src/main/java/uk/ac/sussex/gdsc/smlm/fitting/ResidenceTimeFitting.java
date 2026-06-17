@@ -1102,7 +1102,7 @@ public final class ResidenceTimeFitting {
       }
       final OptimizationData sigma = new CMAESOptimizer.Sigma(s);
       final OptimizationData popSize =
-          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(count.length))));
+          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(s.length))));
 
       // Iterate this for stability in the initial guess.
       // Note: The optimiser does not throw exceptions for too many evaluations; it returns
@@ -1266,7 +1266,7 @@ public final class ResidenceTimeFitting {
       }
       final OptimizationData sigma = new CMAESOptimizer.Sigma(s);
       final OptimizationData popSize =
-          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(count.length))));
+          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(s.length))));
 
       // Iterate this for stability in the initial guess.
       // Note: The optimiser does not throw exceptions for too many evaluations; it returns
