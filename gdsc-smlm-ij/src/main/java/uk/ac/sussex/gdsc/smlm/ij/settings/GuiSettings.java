@@ -277,7 +277,7 @@ public final class GuiSettings {
       builder.setMaxT(7);
       builder.setOffsets(0);
       builder.setBinWidth(0.01);
-      builder.setRepeats(5);
+      builder.setRepeats(3);
       builder.setMinD(1);
       builder.setMaxD(5);
       builder.setExposureTime(10);
@@ -292,6 +292,8 @@ public final class GuiSettings {
       builder.setFitMode(1);
       builder.setCdfBinWidth(0.001);
       builder.setPlotMaxR(1);
+      // CMA-ES
+      builder.setOptimiserMode(1);
       INSTANCE = builder.build();
     }
   }
