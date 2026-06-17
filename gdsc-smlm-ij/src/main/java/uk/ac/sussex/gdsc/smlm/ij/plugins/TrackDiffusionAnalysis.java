@@ -64,6 +64,7 @@ import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
@@ -121,6 +122,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private static final String TITLE = "Track Diffusion Analysis";
   private static final int MODE_CDF = 1;
   private static final int MODE_PDF_MLE = 2;
+  private static final String[] OPTIMISER_MODES = {"Powell", "CMA-ES", "BOBYQA"};
+  private static final int OPT_MODE_CMAES = 1;
+  private static final int OPT_MODE_BOBYQA = 2;
 
   private static final AtomicReference<TextWindow> TABLE_REF = new AtomicReference<>();
 
@@ -522,7 +526,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       });
     });
 
-    gd.addChoice("Optimiser_mode", new String[] {"Powell", "CMA-ES"}, settings.getOptimiserMode());
+    gd.addChoice("Optimiser_mode", OPTIMISER_MODES, settings.getOptimiserMode());
     gd.addSlider("Repeats", 1, 5, settings.getRepeats());
     gd.addNumericField("Min_D", settings.getMinD(), 3, 6, "um^2/s");
     gd.addNumericField("Max_D", settings.getMaxD(), 3, 6, "um^2/s");
@@ -858,13 +862,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
         addPrecision(new double[] {1, 0.1, Double.POSITIVE_INFINITY}, 0.1)));
 
     MultivariateOptimizer optimizer;
-    if (settings.getOptimiserMode() == 1) {
+    if (settings.getOptimiserMode() == OPT_MODE_CMAES) {
       optimizer = createCmaesOptimizer(rng);
       // The sigma determines the search range for the variables.
       // It should be 1/3 of the initial search region.
       args.add(new CMAESOptimizer.Sigma(addPrecision(new double[] {0.1, 0.01, 0.3}, 0.001)));
-      args.add(
-          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(5)))));
+      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(5)))));
+    } else if (settings.getOptimiserMode() == OPT_MODE_BOBYQA) {
+      optimizer = createBobyqaOptimizer(5);
     } else {
       optimizer = createCustomPowellOptimizer();
       args.add(
@@ -996,14 +1001,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
             new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1)));
 
     MultivariateOptimizer optimizer;
-    if (settings.getOptimiserMode() == 1) {
+    if (settings.getOptimiserMode() == OPT_MODE_CMAES) {
       optimizer = createCmaesOptimizer(rng);
       // The sigma determines the search range for the variables.
       // It should be 1/3 of the initial search region.
       args.add(new CMAESOptimizer.Sigma(
           addPrecision(new double[] {0.1, 0.01, 0.1, 0.3, 0.1, 0.3}, 0.001)));
-      args.add(
-          new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(7)))));
+      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(7)))));
+    } else if (settings.getOptimiserMode() == OPT_MODE_BOBYQA) {
+      optimizer = createBobyqaOptimizer(7);
     } else {
       optimizer = createCustomPowellOptimizer();
       args.add(new CustomPowellOptimizer.BasisStep(
@@ -1130,6 +1136,17 @@ public class TrackDiffusionAnalysis implements PlugIn {
         checkFeasableCount, random, generateStatistics, checker);
   }
 
+  private static BOBYQAOptimizer createBobyqaOptimizer(int n) {
+    final int numberOfInterpolationpoints = n + 2;
+    // Optional parameters: initialTrustRegionRadius; stoppingTrustRegionRadius.
+    // It is unclear what the initial radius should be. The default is 10.
+    // When the optimiser starts it sets the value to the minimum bound difference
+    // [upper - lower] / 3. So when using a tight bounds this settings does not
+    // matter unless we require it to be smaller.
+    // The default stopping trust radius is 1e-8.
+    return new BOBYQAOptimizer(numberOfInterpolationpoints);
+  }
+
   private double[] addPrecision(double[] a, double p) {
     if (settings.getFitPrecision()) {
       final double[] b = Arrays.copyOf(a, a.length + 1);
@@ -1170,7 +1187,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       .append(settings.getOffsets()).append('\t')
       .append(MathUtils.rounded(settings.getA())).append('\t')
       .append(MathUtils.rounded(settings.getB())).append('\t')
-      .append(settings.getOptimiserMode() == 0 ? "Powell" : "CMA-ES").append('\t')
+      .append(getOptimiserMode(settings.getOptimiserMode())).append('\t')
       .append(settings.getRepeats()).append('\t')
       .append(MathUtils.rounded(settings.getMinD())).append('\t')
       .append(MathUtils.rounded(settings.getMaxD()))
@@ -1188,6 +1205,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
           .append(MathUtils.rounded(precision)).append('\t').append(result.getValue());
     }
     return sb.toString();
+  }
+
+  private static String getOptimiserMode(int mode) {
+    if (mode > 0 && mode < OPTIMISER_MODES.length) {
+      return OPTIMISER_MODES[mode];
+    }
+    return OPTIMISER_MODES[0];
   }
 
   private static int[][] createCounts(float[][] distances, float binWidth) {
