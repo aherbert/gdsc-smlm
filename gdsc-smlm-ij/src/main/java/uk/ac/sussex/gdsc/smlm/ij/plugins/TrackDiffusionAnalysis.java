@@ -1379,7 +1379,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // Compute fitted PDF using a smaller bin width for a more detailed plot.
     // If fitting the CDF, then use the CDF bin width if it increases resolution.
     // Scale using a power of 2.
-    binWidth /= 4;
+    binWidth /= 8;
     if (cdfPlot != null && settings.getCdfBinWidth() < binWidth) {
       binWidth = (float) settings.getCdfBinWidth();
     }
