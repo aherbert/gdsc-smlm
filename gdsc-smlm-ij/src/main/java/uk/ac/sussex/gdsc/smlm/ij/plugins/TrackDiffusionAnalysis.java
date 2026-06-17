@@ -56,9 +56,11 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -762,6 +764,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private PointValuePair fitDistances(int[][] counts, float[][] df, ExecutorService executor,
       int mode) {
+    // TODO: Try a CMA-ES optimiser
     final PointValuePair result2 = fitTwoStateDistances(counts, df, executor, mode);
     if (result2 == null) {
       return null;
@@ -819,36 +822,38 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double precision = settings.getPrecision() / 1000;
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
-    final MaxEval maxEval = new MaxEval(2000);
-    final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
-
     double best = Double.NEGATIVE_INFINITY;
     PointValuePair result = null;
 
+    final LocalList<OptimizationData> args = new LocalList<>();
+    args.add(new MaxEval(2000));
+
     // fit: f1, d1, d2, sigma
     // Note that f2 = 1 - f1
-    final ObjectiveFunction fun;
-    final GoalType goalType;
     final int numberOfPoints;
     if (mode == MODE_PDF_MLE) {
-      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
-          precision, settings.getBinWidth(), counts, executor)::logLikelihood);
-      goalType = GoalType.MAXIMIZE;
+      args.add(new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, settings.getBinWidth(), counts, executor)::logLikelihood));
+      args.add(GoalType.MAXIMIZE);
       numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
     } else {
       final boolean isCdf = mode == MODE_CDF;
       final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
-      fun = new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
-          precision, binWidth, df, isCdf, executor)::sumOfSquares);
-      goalType = GoalType.MINIMIZE;
+      args.add(new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, binWidth, df, isCdf, executor)::sumOfSquares));
+      args.add(GoalType.MINIMIZE);
       best = Double.POSITIVE_INFINITY;
       numberOfPoints = df[0].length * df.length;
     }
     final double minD = Math.min(0.1, settings.getMinD());
-    final SimpleBounds bounds = new SimpleBounds(addPrecision(new double[] {0, 0.0, minD}, 0),
-        addPrecision(new double[] {1, 0.1, Double.POSITIVE_INFINITY}, 0.1));
-    final CustomPowellOptimizer.BasisStep step =
-        new CustomPowellOptimizer.BasisStep(addPrecision(new double[] {0.1, 0.01, 0.5}, 0.001));
+    args.add(new SimpleBounds(addPrecision(new double[] {0, 0.0, minD}, 0),
+        addPrecision(new double[] {1, 0.1, Double.POSITIVE_INFINITY}, 0.1)));
+
+    MultivariateOptimizer optimizer;
+    // TODO: Try CMA-ES
+    optimizer = createCustomPowellOptimizer();
+    args.add(
+        new CustomPowellOptimizer.BasisStep(addPrecision(new double[] {0.1, 0.01, 0.5}, 0.001)));
 
     final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
     for (int n = 1; n <= settings.getRepeats(); n++) {
@@ -862,15 +867,17 @@ public class TrackDiffusionAnalysis implements PlugIn {
             // precision
             rng.nextDouble(0.01, 0.03));
 
+        args.push(new InitialGuess(start));
         final PointValuePair solution =
-            powellOptimizer.optimize(maxEval, fun, bounds, step, goalType, new InitialGuess(start));
+            optimizer.optimize(args.toArray(new OptimizationData[args.size()]));
+        args.pop();
 
         if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
               "Two-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
               MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length,
                   numberOfPoints),
-              powellOptimizer.getEvaluations());
+              optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
             result = solution;
@@ -878,25 +885,22 @@ public class TrackDiffusionAnalysis implements PlugIn {
         } else {
           LoggerUtils.log(logger, Level.INFO,
               "Two-state fit [%d]: SS = %s, delta BIC = %s (%d evaluations)", n,
-              solution.getValue(),
-              MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(), numberOfPoints,
-                  start.length),
-              powellOptimizer.getEvaluations());
+              solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
+                  solution.getValue(), numberOfPoints, start.length),
+              optimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
             result = solution;
           }
         }
       } catch (final TooManyEvaluationsException ex) {
-        LoggerUtils.log(logger, Level.INFO,
-            "Powell optimiser [%d] failed : Too many evaluation (%d)", n,
-            powellOptimizer.getEvaluations());
+        LoggerUtils.log(logger, Level.INFO, "Optimiser [%d] failed : Too many evaluation (%d)", n,
+            optimizer.getEvaluations());
       } catch (final TooManyIterationsException ex) {
-        LoggerUtils.log(logger, Level.INFO,
-            "Powell optimiser [%d] failed : Too many iterations (%d)", n,
-            powellOptimizer.getIterations());
+        LoggerUtils.log(logger, Level.INFO, "Optimiser [%d] failed : Too many iterations (%d)", n,
+            optimizer.getIterations());
       } catch (final ConvergenceException ex) {
-        LoggerUtils.log(logger, Level.INFO, "Powell optimiser [%d] failed to fit : %s", n,
+        LoggerUtils.log(logger, Level.INFO, "Optimiser [%d] failed to fit : %s", n,
             ex.getMessage());
       }
       ticker.tick();
@@ -942,11 +946,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double precision = settings.getPrecision() / 1000;
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
-    final MaxEval maxEval = new MaxEval(5000);
-    final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
-
     double best = Double.NEGATIVE_INFINITY;
     PointValuePair result = null;
+
+    final LocalList<OptimizationData> args = new LocalList<>();
+    args.add(new MaxEval(5000));
 
     // TODO: Update to not fit f3
 
@@ -954,29 +958,31 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // Note that f3 = 1 - f1 - f2 so the number of fitted parameters is 6.
     // However the optimiser does not support compound constraints (f1+f2<=1)
     // so for convenience f3 is also a fitted parameter for the optimiser.
-    final ObjectiveFunction fun;
-    final GoalType goalType;
     final int numberOfPoints;
     if (mode == MODE_PDF_MLE) {
-      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
-          precision, settings.getBinWidth(), counts, executor)::logLikelihood);
-      goalType = GoalType.MAXIMIZE;
+      args.add(new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(),
+          settings.getB(), precision, settings.getBinWidth(), counts, executor)::logLikelihood));
+      args.add(GoalType.MAXIMIZE);
       numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
     } else {
       final boolean isCdf = mode == MODE_CDF;
       final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
-      fun = new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(),
-          precision, binWidth, df, isCdf, executor)::sumOfSquares);
-      goalType = GoalType.MINIMIZE;
+      args.add(new ObjectiveFunction(new ThreeStateFunction(dt, dz, settings.getA(),
+          settings.getB(), precision, binWidth, df, isCdf, executor)::sumOfSquares));
+      args.add(GoalType.MINIMIZE);
       best = Double.POSITIVE_INFINITY;
       numberOfPoints = df[0].length * df.length;
     }
     final double minD = Math.min(0.1, settings.getMinD());
-    final SimpleBounds bounds =
+    args.add(
         new SimpleBounds(addPrecision(new double[] {0, 0.0, 0, minD, 0, minD}, 0), addPrecision(
-            new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1));
-    final CustomPowellOptimizer.BasisStep step = new CustomPowellOptimizer.BasisStep(
-        addPrecision(new double[] {0.1, 0.01, 0.1, 0.5, 0.1, 0.5}, 0.001));
+            new double[] {1, 0.1, 1, Double.POSITIVE_INFINITY, 1, Double.POSITIVE_INFINITY}, 0.1)));
+
+    MultivariateOptimizer optimizer;
+    // TODO: Try CMA-ES
+    optimizer = createCustomPowellOptimizer();
+    args.add(new CustomPowellOptimizer.BasisStep(
+        addPrecision(new double[] {0.1, 0.01, 0.1, 0.5, 0.1, 0.5}, 0.001)));
 
     final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
     final double range = settings.getMaxD() - settings.getMinD();
@@ -996,15 +1002,17 @@ public class TrackDiffusionAnalysis implements PlugIn {
         // Set f3
         start[4] = 1 - start[0] - start[2];
 
+        args.push(new InitialGuess(start));
         final PointValuePair solution =
-            powellOptimizer.optimize(maxEval, fun, bounds, step, goalType, new InitialGuess(start));
+            optimizer.optimize(args.toArray(new OptimizationData[args.size()]));
+        args.pop();
 
         if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
               MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length - 1,
                   numberOfPoints),
-              powellOptimizer.getEvaluations());
+              optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
             result = solution;
@@ -1015,7 +1023,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
               solution.getValue(),
               MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(), numberOfPoints,
                   start.length - 1),
-              powellOptimizer.getEvaluations());
+              optimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
             result = solution;
@@ -1023,14 +1031,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
         }
       } catch (final TooManyEvaluationsException ex) {
         LoggerUtils.log(logger, Level.INFO,
-            "Powell optimiser [%d] failed : Too many evaluation (%d)", n,
-            powellOptimizer.getEvaluations());
+            "Optimiser[%d] failed : Too many evaluation (%d)", n,
+            optimizer.getEvaluations());
       } catch (final TooManyIterationsException ex) {
         LoggerUtils.log(logger, Level.INFO,
-            "Powell optimiser [%d] failed : Too many iterations (%d)", n,
-            powellOptimizer.getIterations());
+            "Optimiser[%d] failed : Too many iterations (%d)", n,
+            optimizer.getIterations());
       } catch (final ConvergenceException ex) {
-        LoggerUtils.log(logger, Level.INFO, "Powell optimiser [%d] failed to fit : %s", n,
+        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed to fit : %s", n,
             ex.getMessage());
       }
       ticker.tick();
