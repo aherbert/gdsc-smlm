@@ -305,8 +305,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
             if (pos > total) {
               break;
             }
-            // Create a lifetime within the depth-of-field.
-            final int lifetime = (int) Math.min(lifeSampler.sample(), 20 * maxT);
+            double z = rng.nextDouble(-halfDz, halfDz);
+            if (!dof.test(z)) {
+              // Not detected
+              break;
+            }
             // Molecule type
             final double p = rng.nextDouble();
             double d;
@@ -321,32 +324,21 @@ public class TrackDiffusionAnalysis implements PlugIn {
             int id = -1;
             double x = 0;
             double y = 0;
-            double z = rng.nextDouble(-halfDz, halfDz);
             // Last frame the molecule was inside the DoF
             int lastT = 0;
             // Ensure all tracks have unique frames to allow tracing the dataset
             // Each track should be separated by maxT frames so tracing even with
             // small frame gaps will not join stationary molecules at the origin.
             final int frame = pos * (21 * maxT);
-            // Diffuse until detected
-            int t = 0;
-            while (!dof.test(z) && t < lifetime) {
-              t++;
-              // Note: Updates to (x,y) do not matter here
-              z += sampler.sample() * d;
-            }
-            if (t == lifetime) {
-              // Never detected
-              break;
-            }
+            // Create a lifetime within the depth-of-field.
+            // Round lifetime to nearest integer using +0.5.
+            final int lifetime = (int) Math.min(0.5 + lifeSampler.sample(), 20 * maxT);
             // Record the origin
             id = nextId.incrementAndGet();
-            lastT = t;
-            observed.add(new XyzPeakResult(frame + t, x + sampler.sample() * precision,
+            observed.add(new XyzPeakResult(frame, x + sampler.sample() * precision,
                 y + sampler.sample() * precision, z, id));
             // Diffuse until lifetime expires
-            while (t < lifetime) {
-              t++;
+            for (int t = 1; t <= lifetime; t++) {
               x += sampler.sample() * d;
               y += sampler.sample() * d;
               z += sampler.sample() * d;

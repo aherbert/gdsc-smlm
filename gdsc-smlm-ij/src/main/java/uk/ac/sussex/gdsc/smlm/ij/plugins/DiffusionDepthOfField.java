@@ -400,8 +400,6 @@ public class DiffusionDepthOfField implements PlugIn {
           if (pos < 0) {
             break;
           }
-          // Create a lifetime within the depth-of-field.
-          final int lifetime = (int) Math.min(lifeSampler.sample(), 20 * maxT);
           // Simulate across the depth of field [-z/2, z/2]
           final double p = pos / (total - 1.0);
           final double originZ = (1 - p) * halfDz - p * halfDz;
@@ -409,29 +407,22 @@ public class DiffusionDepthOfField implements PlugIn {
           for (int j = 0; j < step.length; j++) {
             final double s = step[j];
             final int[] obs = observed[j];
-            // Last frame the molecule was inside the DoF
-            int lastT = -1;
-            // Origin frame inside the DoF
-            int originT = -1;
             double z = originZ;
-            // Diffuse until detected
-            int t = 0;
-            while (!dof.test(z) && t < lifetime) {
-              t++;
-              z += sampler.sample() * s;
-            }
-            if (t == lifetime) {
-              // Never detected
+            if (!dof.test(z)) {
+              // Not detected
               break;
             }
-            // Start a track
+            // Create a lifetime within the depth-of-field.
+            // Round lifetime to nearest integer using +0.5.
+            final int lifetime = (int) Math.min(0.5 + lifeSampler.sample(), 20 * maxT);
+            // Last frame the molecule was inside the DoF
+            int lastT = 0;
+            // Origin frame inside the DoF
             // Add 1 to the origin so that t - originT = steps - 1
-            originT = t + 1;
+            int originT = 1;
             tracks[j]++;
-            lastT = t;
             // Diffuse until lifetime expires
-            while (t < lifetime) {
-              t++;
+            for (int t = 1; t <= lifetime; t++) {
               z += sampler.sample() * s;
               if (dof.test(z)) {
                 if (originT < 0) {
