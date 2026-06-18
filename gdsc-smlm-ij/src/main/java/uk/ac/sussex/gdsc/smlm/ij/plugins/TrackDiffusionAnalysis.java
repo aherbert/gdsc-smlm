@@ -924,11 +924,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
             optimizer.optimize(args.toArray(new OptimizationData[args.size()]));
         args.pop();
 
+        final double[] r = createTwoStateResult(solution.getPointRef());
+        final String params = String.format("f=[%.3f, %.3f] D=[%.3f, %.3f] s=%.1f", r[0], r[2], r[1],
+            r[3], (r.length > 4 ? r[4] : precision) * 1e3);
+
         if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
-              "Two-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
-              MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length,
-                  numberOfPoints),
+              "Two-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
+              solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
+                  start.length, numberOfPoints),
               optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
@@ -936,7 +940,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           }
         } else {
           LoggerUtils.log(logger, Level.INFO,
-              "Two-state fit [%d]: SS = %s, delta BIC = %s (%d evaluations)", n,
+              "Two-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
               solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
                   solution.getValue(), numberOfPoints, start.length),
               optimizer.getEvaluations());
@@ -959,21 +963,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      // Computed as [f1, d1, d2 [, sigma]]
-      // Return as [f1, d1, f2, d2 [, sigma]]
-      final double[] a = result.getPointRef();
-      final double[] p = new double[a.length + 1];
-      System.arraycopy(a, 0, p, 0, 2);
-      p[2] = 1 - p[0];
-      System.arraycopy(a, 2, p, 3, a.length - 2);
-      sort2state(p);
-      result = new PointValuePair(p, result.getValue());
+      result = new PointValuePair(createTwoStateResult(result.getPointRef()), result.getValue());
     }
 
     return result;
   }
 
-  private static void sort2state(final double[] r) {
+  private static double[] createTwoStateResult(double[] a) {
+    // Computed as [f1, d1, d2 [, sigma]]
+    // Return as [f1, d1, f2, d2 [, sigma]]
+    final double[] r = new double[a.length + 1];
+    System.arraycopy(a, 0, r, 0, 2);
+    r[2] = 1 - r[0];
+    System.arraycopy(a, 2, r, 3, a.length - 2);
     // Sort (in event that the free fraction is slower than the bound)
     if (r[3] < r[1]) {
       final double f = r[0];
@@ -983,6 +985,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       r[2] = f;
       r[3] = d;
     }
+    return r;
   }
 
   private PointValuePair fitThreeStateDistances(int[][] counts, float[][] df,
@@ -1082,11 +1085,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
           solution = new PointValuePair(a, solution.getValue() - penalty);
         }
 
+        final double[] r = createThreeStateResult(solution.getPointRef());
+        final String params = String.format("f=[%.3f, %.3f, %.3f] D=[%.3f, %.3f, %.3f] s=%.1f", r[0],
+            r[2], r[4], r[1], r[3], r[5], (r.length > 6 ? r[6] : precision) * 1e3);
+
         if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
-              "Three-state fit [%d]: MLE = %s, BIC = %s (%d evaluations)", n, solution.getValue(),
-              MathUtils.getBayesianInformationCriterion(solution.getValue(), start.length - 1,
-                  numberOfPoints),
+              "Three-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
+              solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
+                  start.length - 1, numberOfPoints),
               optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
@@ -1094,7 +1101,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           }
         } else {
           LoggerUtils.log(logger, Level.INFO,
-              "Three-state fit [%d]: SS = %s, delta BIC = %s (%d evaluations)", n,
+              "Three-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
               solution.getValue(),
               MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(), numberOfPoints,
                   start.length - 1),
@@ -1117,42 +1124,36 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      // Computed as [f1, f2, d1, d2, d3 [, sigma]]
-      // Return as [f1, d1, f2, d2, f3, d3 [, sigma]]
-      final double[] a = result.getPointRef();
-      final double[] p = new double[a.length + 1];
-      p[0] = a[0];
-      p[1] = a[2];
-      p[2] = a[1];
-      p[3] = a[3];
-      p[5] = a[4];
-      // f3 = 1 - f1 + f2
-      // The function effectively normalises f1+f2 > 1 as it divides by the
-      // sum of the computed probability p = f1*p1 + f2*p2.
-      final double sum = p[0] + p[2];
-      if (sum > 1) {
-        // f3 = 0; normalise f1+f2
-        p[0] /= sum;
-        p[2] /= sum;
-      } else {
-        p[4] = 1 - sum;
-      }
-      // Optional sigma
-      if (a.length > 5) {
-        p[6] = a[5];
-      }
-      sort3state(p);
-      result = new PointValuePair(p, result.getValue());
+      result = new PointValuePair(createThreeStateResult(result.getPointRef()), result.getValue());
     }
 
     return result;
   }
 
-  private static void sort3state(final double[] r) {
-    final double sum = r[0] + r[2] + r[4];
-    r[0] /= sum;
-    r[2] /= sum;
-    r[4] /= sum;
+  private static double[] createThreeStateResult(double[] a) {
+    // Computed as [f1, f2, d1, d2, d3 [, sigma]]
+    // Return as [f1, d1, f2, d2, f3, d3 [, sigma]]
+    final double[] r = new double[a.length + 1];
+    r[0] = a[0];
+    r[1] = a[2];
+    r[2] = a[1];
+    r[3] = a[3];
+    r[5] = a[4];
+    // f3 = 1 - f1 + f2
+    // The function effectively normalises f1+f2 > 1 as it divides by the
+    // sum of the computed probability p = f1*p1 + f2*p2.
+    final double sum = r[0] + r[2];
+    if (sum > 1) {
+      // f3 = 0; normalise f1+f2
+      r[0] /= sum;
+      r[2] /= sum;
+    } else {
+      r[4] = 1 - sum;
+    }
+    // Optional sigma
+    if (a.length > 5) {
+      r[6] = a[5];
+    }
     // Sort (in event that the free fraction is slower than the bound)
     double f;
     double d;
@@ -1180,6 +1181,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         r[3] = d;
       }
     }
+    return r;
   }
 
   private static CustomPowellOptimizer createCustomPowellOptimizer() {
@@ -1912,7 +1914,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d2 = point[3];
       final double d3 = point[4];
       final double sigma = point.length > 5 ? point[5] : precision;
-      double sum = f1 + f2;
+      final double sum = f1 + f2;
       if (sum >= 1) {
         // Note if f3=0 then we call the TwoStateFunction and
         // penalise f1+f2 > 1
@@ -1974,7 +1976,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d2 = point[3];
       final double d3 = point[4];
       final double sigma = point.length > 5 ? point[5] : precision;
-      double sum = f1 + f2;
+      final double sum = f1 + f2;
       if (sum >= 1) {
         // Note if f3=0 then we call the TwoStateFunction and
         // penalise f1+f2 > 1
