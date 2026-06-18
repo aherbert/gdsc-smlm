@@ -1600,6 +1600,9 @@ The plugin has the following parameters:
    * - Sample D
      - The number of samples of the diffusion coefficient. Samples are log-uniformly distributed in the range specified for D.
 
+   * - Optimiser mode
+     - The optimiser to use for fitting.
+
    * - Repeats
      - The number of repeats for the fitting. Fitted is randomly initialised for coefficient a and b.
 

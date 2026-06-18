@@ -63,12 +63,19 @@ import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.JumpableUniformRandomProvider;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
@@ -80,8 +87,10 @@ import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.fitting.DiffusionAnalysis;
@@ -110,6 +119,9 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellO
  */
 public class DiffusionDepthOfField implements PlugIn {
   private static final String TITLE = "Diffusion Depth of Field";
+  private static final String[] OPTIMISER_MODES = {"Powell", "CMA-ES", "BOBYQA"};
+  private static final int OPT_MODE_CMAES = 1;
+  private static final int OPT_MODE_BOBYQA = 2;
 
   private static final AtomicReference<TextWindow> TABLE_REF = new AtomicReference<>();
 
@@ -137,6 +149,7 @@ public class DiffusionDepthOfField implements PlugIn {
     double maxD;
     int sampleD;
 
+    int optimiserMode;
     int repeats;
     double minA;
     double maxA;
@@ -155,6 +168,7 @@ public class DiffusionDepthOfField implements PlugIn {
       maxD = 12;
       sampleD = 20;
       // Fitting
+      optimiserMode = OPT_MODE_CMAES;
       repeats = 3;
       maxA = 0.3;
       maxB = 0.3;
@@ -175,6 +189,7 @@ public class DiffusionDepthOfField implements PlugIn {
       maxD = source.maxD;
       sampleD = source.sampleD;
 
+      optimiserMode = source.optimiserMode;
       repeats = source.repeats;
       minA = source.minA;
       maxA = source.maxA;
@@ -266,6 +281,7 @@ public class DiffusionDepthOfField implements PlugIn {
     gd.addNumericField("Max_D", settings.maxD, 3, 6, "um^2/s");
     gd.addSlider("Sample_D", 2, 30, settings.sampleD);
 
+    gd.addChoice("Optimiser_mode", OPTIMISER_MODES, settings.optimiserMode);
     gd.addSlider("Repeats", 0, 5, settings.repeats);
     gd.addNumericField("Min_A", settings.minA, 3);
     gd.addNumericField("Max_A", settings.maxA, 3);
@@ -292,6 +308,7 @@ public class DiffusionDepthOfField implements PlugIn {
     settings.maxD = gd.getNextNumber();
     settings.sampleD = (int) gd.getNextNumber();
 
+    settings.optimiserMode = gd.getNextChoiceIndex();
     settings.repeats = (int) gd.getNextNumber();
     settings.minA = gd.getNextNumber();
     settings.maxA = gd.getNextNumber();
@@ -637,8 +654,9 @@ public class DiffusionDepthOfField implements PlugIn {
     final MultivariateFunction function =
         new DepthOfFieldFunction(dt, dz, diffusionCoefficients, probability, threadCount, executor);
 
-    final MaxEval maxEval = new MaxEval(2000);
-    final CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
+    final LocalList<OptimizationData> args = new LocalList<>();
+    // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
+    args.add(new MaxEval(3000));
 
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
 
@@ -649,12 +667,26 @@ public class DiffusionDepthOfField implements PlugIn {
     double best = Double.POSITIVE_INFINITY;
     double[] result = new double[2];
 
-    final ObjectiveFunction fun = new ObjectiveFunction(function);
-    final SimpleBounds bounds = new SimpleBounds(new double[2],
-        new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY});
-    final CustomPowellOptimizer.BasisStep step =
-        new CustomPowellOptimizer.BasisStep(new double[] {0.02, 0.01});
+    args.add(new ObjectiveFunction(function));
+    args.add(new SimpleBounds(new double[2],
+        new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}));
+    args.add(GoalType.MINIMIZE);
+
     final UniformRandomProvider rng = UniformRandomProviders.create();
+
+    MultivariateOptimizer optimizer;
+    if (settings.optimiserMode == OPT_MODE_CMAES) {
+      optimizer = createCmaesOptimizer(rng);
+      // The sigma determines the search range for the variables.
+      // It should be 1/3 of the initial search region.
+      args.add(new CMAESOptimizer.Sigma(new double[] {0.02, 0.01}));
+      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(2)))));
+    } else if (settings.optimiserMode == OPT_MODE_BOBYQA) {
+      optimizer = createBobyqaOptimizer(2);
+    } else {
+      optimizer = createCustomPowellOptimizer();
+      args.add(new CustomPowellOptimizer.BasisStep(new double[] {0.02, 0.01}));
+    }
 
     final Ticker ticker = ImageJUtils.createTicker(settings.repeats, 1);
     for (int n = 1; n <= settings.repeats; n++) {
@@ -663,23 +695,25 @@ public class DiffusionDepthOfField implements PlugIn {
         final double[] start = {rng.nextDouble(settings.minA, settings.maxA),
             rng.nextDouble(settings.minB, settings.maxB),};
 
-        final PointValuePair solution = powellOptimizer.optimize(maxEval, fun, bounds, step,
-            GoalType.MINIMIZE, new InitialGuess(start));
+        args.push(new InitialGuess(start));
+        final PointValuePair solution =
+            optimizer.optimize(args.toArray(new OptimizationData[args.size()]));
+        args.pop();
 
-        LoggerUtils.log(logger, Level.INFO, "[%d] Fit : SS = %s (%d evaluations)", n,
-            solution.getValue(), powellOptimizer.getEvaluations());
+        final double[] r = solution.getPointRef();
+
+        LoggerUtils.log(logger, Level.INFO, "[%d] Fit [%.3f, %.3f]: SS = %s (%d evaluations)", n,
+            r[0], r[1], solution.getValue(), optimizer.getEvaluations());
         if (solution.getValue() < best) {
           best = solution.getValue();
           result = solution.getPointRef();
         }
       } catch (final TooManyEvaluationsException ex) {
-        LoggerUtils.log(logger, Level.INFO,
-            "Powell optimiser [%d] failed : Too many evaluation (%d)", n,
-            powellOptimizer.getEvaluations());
+        LoggerUtils.log(logger, Level.INFO, "Optimiser [%d] failed : Too many evaluation (%d)", n,
+            optimizer.getEvaluations());
       } catch (final TooManyIterationsException ex) {
-        LoggerUtils.log(logger, Level.INFO,
-            "Powell optimiser [%d] failed : Too many iterations (%d)", n,
-            powellOptimizer.getIterations());
+        LoggerUtils.log(logger, Level.INFO, "Optimiser [%d] failed : Too many iterations (%d)", n,
+            optimizer.getIterations());
       } catch (final ConvergenceException ex) {
         LoggerUtils.log(logger, Level.INFO, "Powell optimiser [%d] failed to fit : %s", n,
             ex.getMessage());
@@ -733,6 +767,32 @@ public class DiffusionDepthOfField implements PlugIn {
     final double abs = 1e-100;
     final boolean basisConvergence = false;
     return new CustomPowellOptimizer(rel, abs, null, basisConvergence);
+  }
+
+  private static CMAESOptimizer createCmaesOptimizer(UniformRandomProvider rng) {
+    final double rel = 1e-8;
+    final double abs = 1e-100;
+    final int maxIterations = 2000;
+    final double stopFitness = 0;
+    final boolean isActiveCma = true;
+    final int diagonalOnly = 20;
+    final int checkFeasableCount = 1;
+    final RandomGenerator random = new RandomGeneratorAdapter(rng);
+    final boolean generateStatistics = false;
+    final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(rel, abs);
+    return new CMAESOptimizer(maxIterations, stopFitness, isActiveCma, diagonalOnly,
+        checkFeasableCount, random, generateStatistics, checker);
+  }
+
+  private static BOBYQAOptimizer createBobyqaOptimizer(int n) {
+    final int numberOfInterpolationpoints = n + 2;
+    // Optional parameters: initialTrustRegionRadius; stoppingTrustRegionRadius.
+    // It is unclear what the initial radius should be. The default is 10.
+    // When the optimiser starts it sets the value to the minimum bound difference
+    // [upper - lower] / 3. So when using a tight bounds this settings does not
+    // matter unless we require it to be smaller.
+    // The default stopping trust radius is 1e-8.
+    return new BOBYQAOptimizer(numberOfInterpolationpoints);
   }
 
   private double[][] createProbability(double[] ab) {
