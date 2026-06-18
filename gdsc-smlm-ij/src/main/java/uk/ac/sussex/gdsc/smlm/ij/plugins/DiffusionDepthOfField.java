@@ -783,6 +783,10 @@ public class DiffusionDepthOfField implements PlugIn {
     public double value(double[] point) {
       final double a = point[0];
       final double b = point[1];
+      return value(dz, a, b);
+    }
+
+    private double value(double dz, double a, double b) {
       if (threadCount < 2 || executor == null) {
         double ss = 0;
         for (int i = 0; i < probability.length; i++) {
