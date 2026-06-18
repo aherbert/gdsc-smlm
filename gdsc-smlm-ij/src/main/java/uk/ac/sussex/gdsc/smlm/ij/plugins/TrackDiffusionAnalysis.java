@@ -1875,7 +1875,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
    *
    * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
    */
-  static class ThreeStateFunction extends BaseFunction {
+  static class ThreeStateFunction extends TwoStateFunction {
 
     ThreeStateFunction(double dt, double dz, double a, double b, double precision, double dr,
         float[][] df, boolean isCdf, ExecutorService executor) {
@@ -1920,8 +1920,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d2 = point[3];
       final double d3 = point[4];
       final double sigma = point.length > 5 ? point[5] : precision;
-      // Note if f3=0 then we could call the TwoStateFunction
-      final double f3 = Math.max(0, 1 - f1 - f2);
+      double sum = f1 + f2;
+      if (sum >= 1) {
+        // Note if f3=0 then we call the TwoStateFunction and
+        // penalise f1+f2 > 1
+        final double[] a = {f1 / sum, d1, d2, sigma};
+        return super.sumOfSquares(a) + ssPenalty(f1, f2);
+      }
+      final double f3 = 1 - sum;
 
       final List<Future<Double>> futures = new LocalList<>(df.length);
       for (int n = df.length; --n >= 0;) {
@@ -1938,8 +1944,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
           throw new RuntimeException(e);
         }
       }
-      // Penalise f1+f2 > 1
-      ss += ssPenalty(f1, f2);
       return ss;
     }
 
@@ -1978,8 +1982,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d2 = point[3];
       final double d3 = point[4];
       final double sigma = point.length > 5 ? point[5] : precision;
-      // Note if f3=0 then we could call the TwoStateFunction
-      final double f3 = Math.max(0, 1 - f1 - f2);
+      double sum = f1 + f2;
+      if (sum >= 1) {
+        // Note if f3=0 then we call the TwoStateFunction and
+        // penalise f1+f2 > 1
+        final double[] a = {f1 / sum, d1, d2, sigma};
+        return super.logLikelihood(a) + llPenalty(f1, f2);
+      }
+      final double f3 = 1 - sum;
 
       final List<Future<Double>> futures = new LocalList<>(counts.length);
       for (int n = counts.length; --n >= 0;) {
@@ -1996,8 +2006,6 @@ public class TrackDiffusionAnalysis implements PlugIn {
           throw new RuntimeException(e);
         }
       }
-      // Penalise f1+f2 > 1
-      ll += llPenalty(f1, f2);
       return ll;
     }
 
