@@ -913,7 +913,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         // Guess in range
         final double[] start = addPrecision(new double[] {
             // f1
-            rng.nextDouble(0.1, 0.9), 
+            rng.nextDouble(0.1, 0.9),
             // d1
             rng.nextDouble(0.1),
             // d2
