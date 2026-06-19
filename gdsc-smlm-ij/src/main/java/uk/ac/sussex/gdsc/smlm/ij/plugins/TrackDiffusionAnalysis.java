@@ -912,9 +912,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
       try {
         // Guess in range
         final double[] start = addPrecision(new double[] {
-            // Bound fraction
-            rng.nextDouble(0.1, 0.9), rng.nextDouble(0.1),
-            // Free fraction
+            // f1
+            rng.nextDouble(0.1, 0.9), 
+            // d1
+            rng.nextDouble(0.1),
+            // d2
             rng.nextDouble(settings.getMinD(), settings.getMaxD())},
             // precision
             rng.nextDouble(0.01, 0.03));
@@ -932,7 +934,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           LoggerUtils.log(logger, Level.INFO,
               "Two-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
               solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
-                  start.length, numberOfPoints),
+                  numberOfPoints, start.length),
               optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
@@ -1093,7 +1095,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
               solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
-                  start.length - 1, numberOfPoints),
+                  numberOfPoints, start.length),
               optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
@@ -1104,7 +1106,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
               "Three-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
               solution.getValue(),
               MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(), numberOfPoints,
-                  start.length - 1),
+                  start.length),
               optimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
