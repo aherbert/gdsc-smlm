@@ -1618,6 +1618,9 @@ The plugin has the following parameters:
    * - Max B
      - The maximum initial value for fitting coefficient b.
 
+   * - Negative B
+     - If ``true`` then coefficient b is allowed to be negative. This effectively allows the observed depth-of-field :math:`\Delta z + b` to be smaller than the simulation depth-of-field. It is useful when using a detector curve that may cover the depth-of-field with a partial detection probability.
+
 The simulated fraction remaining is plotted using lines with the fitted probability shown as points (:numref:`Figure %s <fig_depth_of_field_probability>`). Note that the corrected depth of field is an approximation and the fitted points may both under-estimate and over-estimate the fraction remaining depending on the diffusion time. The effect of no correction can be viewed using zero for the number of fit repeats.
 
 .. _fig_depth_of_field_probability:
@@ -1677,3 +1680,5 @@ Fitting results are output to a summary table:
    * - b
      - The fitted coefficient `b`.
 
+   * - obz z
+     - The observed depth-of-field :math:`\Delta z + b`.

@@ -154,6 +154,7 @@ public class DiffusionDepthOfField implements PlugIn {
     double maxA;
     double minB;
     double maxB;
+    boolean allowNegativeB;
 
     Settings() {
       depthOfField = 750;
@@ -171,6 +172,7 @@ public class DiffusionDepthOfField implements PlugIn {
       repeats = 3;
       maxA = 0.3;
       maxB = 0.3;
+      allowNegativeB = true;
     }
 
     Settings(Settings source) {
@@ -194,6 +196,7 @@ public class DiffusionDepthOfField implements PlugIn {
       maxA = source.maxA;
       minB = source.minB;
       maxB = source.maxB;
+      allowNegativeB = source.allowNegativeB;
     }
 
     Settings copy() {
@@ -286,6 +289,7 @@ public class DiffusionDepthOfField implements PlugIn {
     gd.addNumericField("Max_A", settings.maxA, 3);
     gd.addNumericField("Min_B", settings.minB, 3);
     gd.addNumericField("Max_B", settings.maxB, 3);
+    gd.addCheckbox("Negative_B", settings.allowNegativeB);
 
     gd.addHelp(HelpUrls.getUrl("diffusion-depth-of-field"));
     gd.showDialog();
@@ -313,6 +317,7 @@ public class DiffusionDepthOfField implements PlugIn {
     settings.maxA = gd.getNextNumber();
     settings.minB = gd.getNextNumber();
     settings.maxB = gd.getNextNumber();
+    settings.allowNegativeB = gd.getNextBoolean();
 
     // Check arguments
     try {
@@ -645,12 +650,13 @@ public class DiffusionDepthOfField implements PlugIn {
 
     final double[] diffusionCoefficients = createDiffusionCoefficients();
 
-    final MultivariateFunction function =
+    final DepthOfFieldFunction function =
         new DepthOfFieldFunction(dt, dz, diffusionCoefficients, probability, threadCount, executor);
 
     final LocalList<OptimizationData> args = new LocalList<>();
     // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
-    args.add(new MaxEval(3000));
+    args.add(new MaxEval(2000));
+    args.add(new ObjectiveFunction(function::value));
 
     final Logger logger = ImageJPluginLoggerHelper.getLogger(getClass());
 
@@ -661,9 +667,14 @@ public class DiffusionDepthOfField implements PlugIn {
     double best = Double.POSITIVE_INFINITY;
     double[] result = new double[2];
 
-    args.add(new ObjectiveFunction(function));
-    args.add(new SimpleBounds(new double[2],
-        new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}));
+    if (settings.allowNegativeB) {
+      // Allow negative b but do not allow dz + b == 0
+      args.add(new SimpleBounds(new double[] {0, -dz * 0.99},
+          new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}));
+    } else {
+      args.add(new SimpleBounds(new double[2],
+          new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}));
+    }
     args.add(GoalType.MINIMIZE);
 
     final UniformRandomProvider rng = UniformRandomProviders.create();
@@ -686,8 +697,8 @@ public class DiffusionDepthOfField implements PlugIn {
     for (int n = 1; n <= settings.repeats; n++) {
       try {
         // Guess in range
-        final double[] start = {rng.nextDouble(settings.minA, settings.maxA),
-            rng.nextDouble(settings.minB, settings.maxB),};
+        final double[] start = new double[] {rng.nextDouble(settings.minA, settings.maxA),
+            rng.nextDouble(settings.minB, settings.maxB)};
 
         args.push(new InitialGuess(start));
         final PointValuePair solution =
@@ -731,7 +742,7 @@ public class DiffusionDepthOfField implements PlugIn {
   private String createHeader() {
     return Arrays
         .stream(new String[] {"dz (nm)", "dt (ms)", "g", "n", "max t", "detector", "restarts",
-            "half-life", "min D (um^2/s)", "max D (um^2/s)", "sample D", "a", "b",})
+            "half-life", "min D (um^2/s)", "max D (um^2/s)", "sample D", "a", "b", "obs dz"})
         .collect(Collectors.joining("\t"));
   }
 
@@ -750,7 +761,8 @@ public class DiffusionDepthOfField implements PlugIn {
       .append(MathUtils.rounded(settings.maxD)).append('\t')
       .append(settings.sampleD).append('\t')
       .append(MathUtils.rounded(ab[0])).append('\t')
-      .append(MathUtils.rounded(ab[1]))
+      .append(MathUtils.rounded(ab[1])).append('\t')
+      .append(MathUtils.rounded(settings.depthOfField + 1e3 * ab[1]))
       ;
     //@formatter:on
     return sb.toString();
@@ -786,7 +798,9 @@ public class DiffusionDepthOfField implements PlugIn {
     // [upper - lower] / 3. So when using a tight bounds this settings does not
     // matter unless we require it to be smaller.
     // The default stopping trust radius is 1e-8.
-    return new BOBYQAOptimizer(numberOfInterpolationpoints);
+    final double initialTrustRegionRadius = 0.5;
+    return new BOBYQAOptimizer(numberOfInterpolationpoints, initialTrustRegionRadius,
+        BOBYQAOptimizer.DEFAULT_STOPPING_RADIUS);
   }
 
   private double[][] createProbability(double[] ab) {
@@ -837,10 +851,7 @@ public class DiffusionDepthOfField implements PlugIn {
     public double value(double[] point) {
       final double a = point[0];
       final double b = point[1];
-      return value(dz, a, b);
-    }
 
-    private double value(double dz, double a, double b) {
       if (threadCount < 2 || executor == null) {
         double ss = 0;
         for (int i = 0; i < probability.length; i++) {
