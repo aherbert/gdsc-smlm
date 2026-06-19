@@ -47,7 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoublePredicate;
-import java.util.function.DoubleUnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -97,6 +96,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.fitting.DiffusionAnalysis;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.DiffusionDepthOfField.DetectorProbability;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.TrackDiffusionAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -252,7 +252,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double halfLife = settings.getHalfLife();
 
       // Create the depth of field detector curve
-      final DoubleUnaryOperator detectorCurve = settings.getUseDetector()
+      final DetectorProbability detectorCurve = settings.getUseDetector()
           ? DiffusionDepthOfField.loadDetectorCurve(settings.getDetectorCurveFilename())
           : null;
 
@@ -925,8 +925,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         args.pop();
 
         final double[] r = createTwoStateResult(solution.getPointRef());
-        final String params = String.format("f=[%.3f, %.3f] D=[%.3f, %.3f] s=%.1f", r[0], r[2], r[1],
-            r[3], (r.length > 4 ? r[4] : precision) * 1e3);
+        final String params = String.format("f=[%.3f, %.3f] D=[%.3f, %.3f] s=%.1f", r[0], r[2],
+            r[1], r[3], (r.length > 4 ? r[4] : precision) * 1e3);
 
         if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,
@@ -1086,8 +1086,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         }
 
         final double[] r = createThreeStateResult(solution.getPointRef());
-        final String params = String.format("f=[%.3f, %.3f, %.3f] D=[%.3f, %.3f, %.3f] s=%.1f", r[0],
-            r[2], r[4], r[1], r[3], r[5], (r.length > 6 ? r[6] : precision) * 1e3);
+        final String params = String.format("f=[%.3f, %.3f, %.3f] D=[%.3f, %.3f, %.3f] s=%.1f",
+            r[0], r[2], r[4], r[1], r[3], r[5], (r.length > 6 ? r[6] : precision) * 1e3);
 
         if (mode == MODE_PDF_MLE) {
           LoggerUtils.log(logger, Level.INFO,

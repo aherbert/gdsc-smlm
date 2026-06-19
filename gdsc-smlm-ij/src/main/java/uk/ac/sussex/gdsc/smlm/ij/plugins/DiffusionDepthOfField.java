@@ -49,7 +49,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoublePredicate;
-import java.util.function.DoubleUnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -372,7 +371,7 @@ public class DiffusionDepthOfField implements PlugIn {
     final double halfLife = settings.halfLife;
 
     // Create the depth of field detector curve
-    final DoubleUnaryOperator detectorCurve =
+    final DetectorProbability detectorCurve =
         settings.useDetector ? loadDetectorCurve(settings.detectorCurve) : null;
 
     // Simulate tracks across the depth of field.
@@ -510,7 +509,7 @@ public class DiffusionDepthOfField implements PlugIn {
    * @throws UncheckedIOException if the curve cannot be read
    * @throws IllegalArgumentException if the curve is invalid
    */
-  static DoubleUnaryOperator loadDetectorCurve(String detectionCurve) {
+  static DetectorProbability loadDetectorCurve(String detectionCurve) {
     try {
       final DoubleArrayList depth = new DoubleArrayList();
       final DoubleArrayList p = new DoubleArrayList();
@@ -538,12 +537,7 @@ public class DiffusionDepthOfField implements PlugIn {
             new SplineInterpolator().interpolate(depth.toDoubleArray(), p.toDoubleArray());
         final double minZ = depth.getDouble(0);
         final double maxZ = depth.getDouble(depth.size() - 1);
-        return z -> {
-          if (z < minZ | z > maxZ) {
-            return 0;
-          }
-          return fun.value(z);
-        };
+        return new DetectorProbability(minZ, maxZ, fun);
       } catch (NonMonotonicSequenceException | NumberIsTooSmallException e) {
         throw new IllegalArgumentException("Invalid detector curve", e);
       }
@@ -555,14 +549,14 @@ public class DiffusionDepthOfField implements PlugIn {
   /**
    * Creates the detector.
    *
-   * @param detectorCurve the detector curve
+   * @param detectorProbability the detector probability
    * @param rng the source of randomness
    * @return the detector
    */
-  static DoublePredicate createDetector(DoubleUnaryOperator detectorCurve,
+  static DoublePredicate createDetector(DetectorProbability detectorProbability,
       UniformRandomProvider rng) {
     return z -> {
-      final double p = detectorCurve.applyAsDouble(z);
+      final double p = detectorProbability.getProbability(z);
       if (p <= 0) {
         return false;
       }
@@ -896,6 +890,52 @@ public class DiffusionDepthOfField implements PlugIn {
         }
       }
       return ss;
+    }
+  }
+
+  /**
+   * Detector probability for a univariate value.
+   */
+  static class DetectorProbability {
+    private final double min;
+    private final double max;
+    private final PolynomialSplineFunction fun;
+
+    DetectorProbability(double min, double max, PolynomialSplineFunction fun) {
+      this.min = min;
+      this.max = max;
+      this.fun = fun;
+    }
+
+    /**
+     * Get the probability of the specified {@code value}.
+     *
+     * @param the value
+     * @return the probability
+     */
+    double getProbability(double value) {
+      if (value < min | value > max) {
+        return 0;
+      }
+      return fun.value(value);
+    };
+
+    /**
+     * Gets the minimum.
+     *
+     * @return the minimum
+     */
+    double getMin() {
+      return min;
+    }
+
+    /**
+     * Gets the maximum.
+     *
+     * @return the maximum
+     */
+    double getMax() {
+      return max;
     }
   }
 }
