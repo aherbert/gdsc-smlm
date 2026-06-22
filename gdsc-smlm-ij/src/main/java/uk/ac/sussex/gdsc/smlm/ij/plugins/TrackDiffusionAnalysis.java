@@ -308,7 +308,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
             double z = rng.nextDouble(-halfDz, halfDz);
             if (!dof.test(z)) {
               // Not detected
-              break;
+              continue;
             }
             // Molecule type
             final double p = rng.nextDouble();

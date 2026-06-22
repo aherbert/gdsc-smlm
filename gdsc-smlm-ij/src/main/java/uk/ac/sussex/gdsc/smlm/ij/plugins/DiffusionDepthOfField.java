@@ -431,7 +431,7 @@ public class DiffusionDepthOfField implements PlugIn {
             double z = originZ;
             if (!dof.test(z)) {
               // Not detected
-              break;
+              continue;
             }
             // Create a lifetime within the depth-of-field.
             // Round lifetime to nearest integer using +0.5.
