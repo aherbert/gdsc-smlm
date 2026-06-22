@@ -424,15 +424,15 @@ public class DiffusionDepthOfField implements PlugIn {
           // Simulate across the depth of field [-z/2, z/2]
           final double p = pos / (total - 1.0);
           final double originZ = (1 - p) * halfDz - p * halfDz;
+          if (!dof.test(originZ)) {
+            // Not detected
+            continue;
+          }
           // for each diffusion rate test: |z| < z/2
           for (int j = 0; j < step.length; j++) {
             final double s = step[j];
             final int[] obs = observed[j];
             double z = originZ;
-            if (!dof.test(z)) {
-              // Not detected
-              continue;
-            }
             // Create a lifetime within the depth-of-field.
             // Round lifetime to nearest integer using +0.5.
             final int lifetime = (int) Math.min(0.5 + lifeSampler.sample(), 20 * maxT);
