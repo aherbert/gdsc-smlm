@@ -130,10 +130,9 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
         final double min = integrator.getMin();
         // spacing between adjacent new points
         final double spacing = (max - min) / np;
-        double x = min + 0.5 * spacing;    // the first new point
+        final double x = min + 0.5 * spacing;    // the first new point
         for (long i = 0; i < np; i++) {
-            sum += integrator.computeObjectiveValue(x);
-            x += spacing;
+            sum += integrator.computeObjectiveValue(x + i * spacing);
         }
         // add the new sum to previously calculated result
         s = 0.5 * (s + sum * spacing);
@@ -172,10 +171,9 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
         final double min = integrator.getMin();
         // spacing between adjacent new points
         final double spacing = (max - min) / np;
-        double x = min + 0.5 * spacing;    // the first new point
+        final double x = min + 0.5 * spacing;    // the first new point
         for (long i = 0; i < np; i++) {
-            sum += integrator.computeObjectiveValue(x);
-            x += spacing;
+            sum += integrator.computeObjectiveValue(x + i * spacing);
         }
         // add the new sum to previously calculated result
         s = 0.5 * (s + sum * spacing);
