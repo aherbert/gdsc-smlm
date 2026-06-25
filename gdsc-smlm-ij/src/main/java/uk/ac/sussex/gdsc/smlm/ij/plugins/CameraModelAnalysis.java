@@ -1405,15 +1405,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
                 // using the trapezoid rule. This will underestimate the sum.
 
                 // Note: The Simpson integrator will have computed the edge values
-                // as the first two values in the cache.
+                // as the first two values in the cache. Cache stores: x, f(x), ...
                 final double[] g = uf.list.elements();
-                final double dx = (g[3] - g[1]) / in.getN();
+                final double dx = (g[2] - g[0]) / in.getN();
                 final int total = 1 + 2 * ((int) in.getN());
                 sum = 0;
-                for (int j = 4; j < total; j += 2) {
+                for (int j = 5; j < total; j += 2) {
                   sum += g[j];
                 }
-                y[i] = (g[0] + g[2] + 2 * sum) / dx;
+                y[i] = (g[1] + g[3] + 2 * sum) / dx;
               }
             }
           }
