@@ -143,6 +143,23 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
     super(1, SIMPSON_MAX_ITERATIONS_COUNT);
   }
 
+  /**
+   * Build a Simpson integrator with given accuracies configured to suppress exceptions.
+   * The max iteration count is set to {@link #SIMPSON_MAX_ITERATIONS_COUNT} and the
+   * integration will be terminated using the max evaluations argument to
+   * {@link #integrate(int, UnivariateFunction, double, double)}.
+   *
+   * @param relativeAccuracy relative accuracy of the result
+   * @param absoluteAccuracy absolute accuracy of the result
+   */
+  public static CustomSimpsonIntegrator withNoThrow(final double relativeAccuracy,
+      final double absoluteAccuracy) {
+    final CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(relativeAccuracy,
+        absoluteAccuracy, 1, SIMPSON_MAX_ITERATIONS_COUNT);
+    in.setNoThrowOnMax(true);
+    return in;
+  }
+
   @Override
   protected double doIntegrate() {
     // This is a modification from the base SimpsonIntegrator.

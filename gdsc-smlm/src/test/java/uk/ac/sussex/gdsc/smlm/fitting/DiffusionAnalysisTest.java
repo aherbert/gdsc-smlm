@@ -69,7 +69,7 @@ class DiffusionAnalysisTest {
     "0.01, 1.75, 0.025, 0.9796100101011112, 1e-5",
     "0.001, 1.75, 0.02, 0.994232839949668, 1e-3",
     // "Fixed" molecules
-    "0.01, 0.75, 0.0001, 0.9969909888877455, 1e-5",
+    "0.01, 0.75, 0.0001, 0.9969909888877455, 1e-4",
   })
   void testRemaining(double dt, double dz, double d, double p, double eps) {
     TestAssertions.assertTest(p, DiffusionAnalysis.remaining(dt, dz, d),

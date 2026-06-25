@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.numbers.gamma.Erfc;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
@@ -66,15 +65,11 @@ public class DiffusionAnalysis {
     // using an integrator. If this fails we just use the last known result which is
     // more accurate than a sum of the same number of evenly space points.
     final int n = 200;
-    final CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(1e-8, 1e-8, 3, 63);
+    final CustomSimpsonIntegrator in = CustomSimpsonIntegrator.withNoThrow(1e-8, 1e-8);
     final double denom = 1.0 / Math.sqrt(4 * d * dt);
     final UnivariateFunction fun = z -> DiffusionAnalysis.withinBound(z, dz, denom);
-    try {
-      in.integrate(n, fun, 0, dz * 0.5);
-    } catch (TooManyEvaluationsException ignored) {
-      // Ignore this.
-      // Allow other exceptions to trickle up as they are actual errors in configuration.
-    }
+    // Max evaluations exception is suppressed
+    in.integrate(n, fun, 0, dz * 0.5);
     // result in [0, 1]
     return 2 * in.getLastSum() / dz;
   }
