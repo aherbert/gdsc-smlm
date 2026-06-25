@@ -3355,5 +3355,17 @@
           "justification": "All java3d classes have been renamed in the scijava-pom managed version"
         } ]
       }
-    } ]
+    } ],
+    "2.1" : [ {
+      "extension" : "revapi.differences",
+      "id" : "intentional-api-changes",
+      "configuration" : {
+        "differences" : [ {
+          "code" : "java.field.constantValueChanged",
+          "old": "field uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT",
+          "new": "field uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT",
+          "justification" : "The maximum iterations is limited by the number of function evaluations."
+        } ]
+      }
+    } ],
   }
