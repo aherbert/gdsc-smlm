@@ -25,6 +25,7 @@ message GUIFilterSettings {
   string filter_template = 9;
   string filter_analysis_directory = 10;
   string filter_set_filename = 11;
+  bool negate = 12;
 }
 
 // Contain the settings for the PSF Calculator

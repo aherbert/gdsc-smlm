@@ -328,38 +328,35 @@ public class FilterResults implements PlugIn {
 
     // Create the ticker with size+1 as we tick at the start of the loop
     final Ticker ticker = ImageJUtils.createTicker(results.size() + 1, 0);
+    final boolean negate = filterSettings.getNegate();
     for (int i = 0, size = results.size(); i < size; i++) {
       ticker.tick();
 
       // sp will not be null
 
       // We stored the drift=z, intensity=signal, background=snr
-      if ((sp.z[i] > filterSettings.getMaxDrift())
+      boolean fail = (sp.z[i] > filterSettings.getMaxDrift())
           || (sp.intensity[i] < filterSettings.getMinSignal())
-          || (sp.background[i] < filterSettings.getMinSnr())) {
-        continue;
-      }
+          || (sp.background[i] < filterSettings.getMinSnr());
 
       final PeakResult peakResult = sp.peakResults[i];
 
       // Check the coordinates are inside the mask
-      if (!maskFilter.match(peakResult.getFrame(), sp.x[i], sp.y[i])) {
-        continue;
-      }
+      fail = fail || !maskFilter.match(peakResult.getFrame(), sp.x[i], sp.y[i]);
 
-      if (pp != null && pp.precisions[i] > filterSettings.getMaxPrecision()) {
-        continue;
+      if (pp != null) {
+        fail = fail || pp.precisions[i] > filterSettings.getMaxPrecision();
       }
 
       if (wp != null) {
         final float width = wp.wx[i];
-        if (width < filterSettings.getMinWidth() || width > filterSettings.getMaxWidth()) {
-          continue;
-        }
+        fail = fail || width < filterSettings.getMinWidth() || width > filterSettings.getMaxWidth();
       }
 
-      // Passed all filters. Add to the results
-      newResults.add(peakResult);
+      // Add to the results
+      if (fail == negate) {
+        newResults.add(peakResult);
+      }
     }
 
     ImageJUtils.finished(TextUtils.pleural(newResults.size(), "Filtered localisation"));
@@ -389,6 +386,8 @@ public class FilterResults implements PlugIn {
     final String[] items = getImageList();
     gd.addChoice("Mask", items, filterSettings.getMaskTitle());
 
+    gd.addCheckbox("Negate", filterSettings.getNegate());
+
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -402,6 +401,7 @@ public class FilterResults implements PlugIn {
     filterSettings.setMinWidth((float) gd.getNextNumber());
     filterSettings.setMaxWidth((float) gd.getNextNumber());
     filterSettings.setMaskTitle(gd.getNextChoice());
+    filterSettings.setNegate(gd.getNextBoolean());
 
     return SettingsManager.writeSettings(filterSettings.build());
   }
