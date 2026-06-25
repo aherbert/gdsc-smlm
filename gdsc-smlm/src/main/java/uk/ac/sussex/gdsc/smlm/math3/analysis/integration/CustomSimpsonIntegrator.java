@@ -253,16 +253,17 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
     status = Status.INIT;
   }
 
-  // The following overrides are changed from protected to public to
-  // allow access by the TrapezoidIntegratorCopy.
-
   @Override
   public double getMax() {
+    // This is a legacy exposure of the property and is not required for integration function.
+    // It remains for binary compatibility.
     return super.getMax();
   }
 
   @Override
   public double getMin() {
+    // This is a legacy exposure of the property and is not required for integration function.
+    // It remains for binary compatibility.
     return super.getMin();
   }
 
