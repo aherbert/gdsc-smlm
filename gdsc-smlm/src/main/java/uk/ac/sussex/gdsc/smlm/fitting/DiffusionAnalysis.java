@@ -47,7 +47,7 @@ public class DiffusionAnalysis {
   /**
    * Compute the probability that a molecule remains within bounds {@code [-dz/2, dz/2]} when
    * diffusing with a coefficient {@code d} for time {@code dt}.
-   * 
+   *
    * <p>Note: Parameters are not validated. It is assumed they are all strictly positive and finite.
    * If {@code dt} or {@code d} are zero the probability is 1. If {@code dz} is zero the computation
    * is invalid.

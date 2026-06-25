@@ -194,9 +194,9 @@ public class ImagePsfModel extends PsfModel {
   }
 
   /**
-   * The noise fraction parameter can specify how to remove noise. The floor is set using 
+   * The noise fraction parameter can specify how to remove noise. The floor is set using
    * the specified fraction of the image maximum. All pixels have the floor subtracted
-   * and those below zero are set to zero. 
+   * and those below zero are set to zero.
    *
    * @param image the image
    * @param noiseFraction the noise fraction
