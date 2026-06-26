@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Filter results using the combination of two filters.
  *
- * <p>Note that is the filter is not a DirectFilter then the result of filtering a
+ * <p>Note that if the filter is not a DirectFilter then the result of filtering a
  * PreprocessedPeakResult is always true using that filter.
  */
 public abstract class CombinedFilter extends DirectFilter {
@@ -93,7 +93,7 @@ public abstract class CombinedFilter extends DirectFilter {
     final CombinedFilter filter = (CombinedFilter) super.clone();
     filter.filter1 = this.filter1.clone();
     filter.filter2 = this.filter2.clone();
-    initialiseState();
+    filter.initialiseState();
     return filter;
   }
 
