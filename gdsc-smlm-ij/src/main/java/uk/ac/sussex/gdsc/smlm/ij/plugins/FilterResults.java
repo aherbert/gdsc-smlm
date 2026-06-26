@@ -32,11 +32,14 @@ import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -56,6 +59,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
 public class FilterResults implements PlugIn {
   private static final String TITLE = "Filter Results";
   private static final AtomicReference<String> INPUT_OPTION_REF = new AtomicReference<>("");
+  private static final int MODE_FILTER = 0;
+  private static final int MODE_NEGATE = 1;
 
   private MemoryPeakResults results;
 
@@ -280,9 +285,14 @@ public class FilterResults implements PlugIn {
   private void filterResults() {
     checkLimits();
 
-    final MemoryPeakResults newResults = new MemoryPeakResults();
-    newResults.copySettings(results);
-    newResults.setName(results.getName() + " Filtered");
+    // Filter; negate; or split
+    final List<MemoryPeakResults> newResults = new LocalList<>(2);
+    // filter or split
+    final Consumer<PeakResult> hit =
+        createConsumer(filterSettings.getFilterMode() != MODE_NEGATE, " Filtered", newResults);
+    // negate or split
+    final Consumer<PeakResult> miss =
+        createConsumer(filterSettings.getFilterMode() != MODE_FILTER, " Unfiltered", newResults);
 
     // Initialise the mask
     CoordFilter maskFilter;
@@ -328,39 +338,62 @@ public class FilterResults implements PlugIn {
 
     // Create the ticker with size+1 as we tick at the start of the loop
     final Ticker ticker = ImageJUtils.createTicker(results.size() + 1, 0);
-    final boolean negate = filterSettings.getNegate();
     for (int i = 0, size = results.size(); i < size; i++) {
       ticker.tick();
 
       // sp will not be null
-
-      // We stored the drift=z, intensity=signal, background=snr
-      boolean fail = (sp.z[i] > filterSettings.getMaxDrift())
-          || (sp.intensity[i] < filterSettings.getMinSignal())
-          || (sp.background[i] < filterSettings.getMinSnr());
-
       final PeakResult peakResult = sp.peakResults[i];
 
-      // Check the coordinates are inside the mask
-      fail = fail || !maskFilter.match(peakResult.getFrame(), sp.x[i], sp.y[i]);
+      // We stored the drift=z, intensity=signal, background=snr
+      if ((sp.z[i] > filterSettings.getMaxDrift())
+          || (sp.intensity[i] < filterSettings.getMinSignal())
+          || (sp.background[i] < filterSettings.getMinSnr())) {
+        miss.accept(peakResult);
+        continue;
+      }
 
-      if (pp != null) {
-        fail = fail || pp.precisions[i] > filterSettings.getMaxPrecision();
+      // Check the coordinates are inside the mask
+      if (!maskFilter.match(peakResult.getFrame(), sp.x[i], sp.y[i])) {
+        miss.accept(peakResult);
+        continue;
+      }
+
+      if (pp != null && pp.precisions[i] > filterSettings.getMaxPrecision()) {
+        miss.accept(peakResult);
+        continue;
       }
 
       if (wp != null) {
         final float width = wp.wx[i];
-        fail = fail || width < filterSettings.getMinWidth() || width > filterSettings.getMaxWidth();
+        if (width < filterSettings.getMinWidth() || width > filterSettings.getMaxWidth()) {
+          miss.accept(peakResult);
+          continue;
+        }
       }
 
-      // Add to the results
-      if (fail == negate) {
-        newResults.add(peakResult);
-      }
+      // Passed all filters. Add to the results
+      hit.accept(peakResult);
     }
 
-    ImageJUtils.finished(TextUtils.pleural(newResults.size(), "Filtered localisation"));
-    MemoryPeakResults.addResults(newResults);
+    // Add datasets once finished
+    newResults.forEach(MemoryPeakResults::addResults);
+
+    ImageJUtils.finished(TextUtils.pleural(
+        newResults.stream().mapToInt(MemoryPeakResults::size).sum(), "Filtered localisation"));
+  }
+
+  private Consumer<PeakResult> createConsumer(boolean required, String suffix,
+      List<MemoryPeakResults> datasets) {
+    if (required) {
+      final MemoryPeakResults newResults = new MemoryPeakResults();
+      newResults.copySettings(results);
+      newResults.setName(results.getName() + suffix);
+      datasets.add(newResults);
+      return newResults::add;
+    }
+    return x -> {
+      // Do nothing
+    };
   }
 
   private boolean showDialog() {
@@ -386,7 +419,8 @@ public class FilterResults implements PlugIn {
     final String[] items = getImageList();
     gd.addChoice("Mask", items, filterSettings.getMaskTitle());
 
-    gd.addCheckbox("Negate", filterSettings.getNegate());
+    gd.addChoice("Mode", new String[] {"Filter", "Negate", "Split"},
+        filterSettings.getFilterMode());
 
     gd.showDialog();
 
@@ -401,7 +435,7 @@ public class FilterResults implements PlugIn {
     filterSettings.setMinWidth((float) gd.getNextNumber());
     filterSettings.setMaxWidth((float) gd.getNextNumber());
     filterSettings.setMaskTitle(gd.getNextChoice());
-    filterSettings.setNegate(gd.getNextBoolean());
+    filterSettings.setFilterMode(gd.getNextChoiceIndex());
 
     return SettingsManager.writeSettings(filterSettings.build());
   }

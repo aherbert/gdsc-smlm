@@ -1090,12 +1090,12 @@ The plugin analyses the selected results and computes limits for each of the fil
 
        If the mask is a stack then the frame of the localisation result will be used to select the mask slice.
 
-   * - Negate
-     - Set to ``true`` to return the opposite of the configured filter.
+   * - Filter mode
+     - Use ``Filter`` to create a dataset with results that pass the filters; ``Negate`` to create a dataset with results that fail the filters; or ``Split`` to create both.
 
 If any parameter is set to zero it will be ignored.
 
-The results of filtering are saved to memory with the same name and the ``Filtered`` suffix.
+The results of filtering are saved to memory with the same name and the ``Filtered`` suffix for those results that pass the filters, and the ``Unfiltered`` suffix for those result that do not pass the filters.
 
 
 .. index:: ! Crop Results

@@ -21,6 +21,8 @@ Minor release of GDSC SMLM.
   for diffusion out of the depth-of-field.
 * Update the :numref:`{name} <model_plugins:PSF HWHM>` plugin to allow fitting a 1D Gaussian
   to the projection of the X and Y axes.
+* Update the :numref:`{name} <results_plugins:Filter Results>` plugin to allow selecting results
+  that pass and/or fail the filters.
 
 
 Version 2.0
