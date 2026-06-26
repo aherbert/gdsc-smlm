@@ -23,6 +23,8 @@ Minor release of GDSC SMLM.
   to the projection of the X and Y axes.
 * Update the :numref:`{name} <results_plugins:Filter Results>` plugin to allow selecting results
   that pass and/or fail the filters.
+* Update the :numref:`{name} <results_plugins:Free Filter Results>` plugin to add a ``Negate``
+  filter.
 
 
 Version 2.0

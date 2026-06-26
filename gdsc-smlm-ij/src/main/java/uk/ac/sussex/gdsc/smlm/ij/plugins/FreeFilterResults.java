@@ -45,6 +45,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiHysteresisFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiHysteresisFilter2;
+import uk.ac.sussex.gdsc.smlm.results.filter.NegateFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter2;
@@ -203,6 +204,11 @@ public class FreeFilterResults implements PlugIn {
     demo(new OrFilter(new SnrFilter(10), new PrecisionFilter(30)));
     demo(new OrFilter(new AndFilter(new SnrFilter(10), new PrecisionFilter(30)),
         new TraceFilter(0.5, 1)));
+
+    comment("Negation of filters");
+    IJ.log("");
+    demo(new NegateFilter(new WidthFilter(2)));
+    demo(new NegateFilter(new PrecisionFilter(30)));
   }
 
   private static void demo(Filter filter) {

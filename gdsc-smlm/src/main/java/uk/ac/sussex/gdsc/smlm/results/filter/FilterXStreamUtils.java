@@ -65,6 +65,7 @@ public final class FilterXStreamUtils {
         addAlias(MultiHysteresisFilter.class);
         addAlias(MultiHysteresisFilter2.class);
         addAlias(MultiPathFilter.class);
+        addAlias(NegateFilter.class);
         addAlias(OrFilter.class);
         addAlias(PrecisionFilter.class);
         addAlias(PrecisionFilter2.class);
