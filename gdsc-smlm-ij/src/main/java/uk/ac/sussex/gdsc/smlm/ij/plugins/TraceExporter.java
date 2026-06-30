@@ -104,6 +104,7 @@ public class TraceExporter implements PlugIn {
     int maxJump;
     double wobble;
     int format;
+    boolean combined;
     boolean showTraceLengths;
     boolean save;
 
@@ -121,6 +122,7 @@ public class TraceExporter implements PlugIn {
       maxJump = source.maxJump;
       wobble = source.wobble;
       format = source.format;
+      combined = source.combined;
       showTraceLengths = source.showTraceLengths;
       save = source.save;
     }
@@ -150,7 +152,8 @@ public class TraceExporter implements PlugIn {
    * The export format.
    */
   private enum ExportFormat implements NamedObject {
-    SPOT_ON("Spot-On"), SPOT_ON_PLUS("Spot-On Plus"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS("NOBIAS"), NONE("None");
+    SPOT_ON("Spot-On"), SPOT_ON_PLUS("Spot-On Plus"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS(
+        "NOBIAS"), NONE("None");
 
     private final String name;
 
@@ -187,6 +190,10 @@ public class TraceExporter implements PlugIn {
       return;
     }
 
+    if (settings.combined) {
+      combine(allResults);
+    }
+
     for (final MemoryPeakResults results : allResults) {
       export(results);
     }
@@ -206,6 +213,7 @@ public class TraceExporter implements PlugIn {
     gd.addMessage("Specify localistion precision (wobble) to add");
     gd.addNumericField("Wobble", settings.wobble, 0, 6, "nm");
     gd.addChoice("Format", Settings.FORMAT_NAMES, settings.format);
+    gd.addCheckbox("Combined", settings.combined);
     gd.addCheckbox("Histogram_trace_lengths", settings.showTraceLengths);
     gd.addCheckbox("Save_to_memory", settings.save);
     gd.addHelp(HelpUrls.getUrl("trace-exporter"));
@@ -219,6 +227,7 @@ public class TraceExporter implements PlugIn {
     settings.maxJump = Math.max(0, (int) gd.getNextNumber());
     settings.wobble = Math.max(0, gd.getNextNumber());
     settings.format = gd.getNextChoiceIndex();
+    settings.combined = gd.getNextBoolean();
     settings.showTraceLengths = gd.getNextBoolean();
     settings.save = gd.getNextBoolean();
     settings.save();
@@ -254,6 +263,55 @@ public class TraceExporter implements PlugIn {
     }
 
     return !allResults.isEmpty();
+  }
+
+
+  private void combine(ArrayList<MemoryPeakResults> allResults) {
+    if (allResults.size() == 1) {
+      return;
+    }
+
+    final MemoryPeakResults r0 = allResults.get(0);
+    CalibrationReader cal = r0.getCalibrationReader();
+    final double t = cal.getExposureTime();
+    final double d = cal.getNmPerPixel();
+    final DistanceUnit du = cal.getDistanceUnit();
+    for (int i = 1; i < allResults.size(); i++) {
+      final MemoryPeakResults r = allResults.get(i);
+      cal = r.getCalibrationReader();
+      if (cal.getExposureTime() != t || cal.getNmPerPixel() != d || cal.getDistanceUnit() != du) {
+        IJ.error(TITLE, "Calibration must match when creating combined dataset");
+        allResults.clear();
+        return;
+      }
+    }
+
+    final MemoryPeakResults results2 = new MemoryPeakResults();
+    results2.setCalibration(r0.getCalibration());
+    results2.setName(r0.getName() + " + " + TextUtils.pleural(allResults.size() - 1, "other"));
+    final int[] idOut = {0};
+    for (MemoryPeakResults results : allResults) {
+      // Copy to allow manipulation
+      results = results.copy();
+      results.sort(IdFramePeakResultComparator.INSTANCE);
+      final FrameCounter id = new FrameCounter();
+      for (int i = 0, size = results.size(); i < size; i++) {
+        final PeakResult r = results.get(i);
+        final int j = r.getId();
+        // Only export traces
+        if (j > 0) {
+          if (id.advance(j)) {
+            idOut[0]++;
+          }
+          final AttributePeakResult r2 = new AttributePeakResult(r);
+          r2.setId(idOut[0]);
+          results2.add(r2);
+        }
+      }
+    }
+
+    allResults.clear();
+    allResults.add(results2);
   }
 
   private void export(MemoryPeakResults results) {

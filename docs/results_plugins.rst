@@ -802,6 +802,9 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
    * - Format
      - Select the output format (see :numref:`%s <results_plugins:Available Formats>`).
 
+   * - Combined
+     - Combine all datasets into a single exported dataset.
+
    * - Histogram trace lengths
      - Plot a histogram of the length of traces for each exported dataset.
 

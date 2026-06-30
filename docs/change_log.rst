@@ -25,6 +25,8 @@ Minor release of GDSC SMLM.
   that pass and/or fail the filters.
 * Update the :numref:`{name} <results_plugins:Free Filter Results>` plugin to add a ``Negate``
   filter.
+* Update the :numref:`{name} <results_plugins:Trace Exporter>` plugin to allow combining all
+  datasets to a combined export.
 
 
 Version 2.0
