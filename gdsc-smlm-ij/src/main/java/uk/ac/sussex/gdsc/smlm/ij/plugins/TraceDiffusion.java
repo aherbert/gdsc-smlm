@@ -160,6 +160,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     boolean displayDHistogram;
     boolean displayTraceLength;
     boolean displayTraceSize;
+    boolean showMsdErrorBars;
 
     boolean saveTraceDistances;
     boolean saveRawData;
@@ -182,6 +183,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       alwaysRemoveOutliers[TOTAL_SIGNAL] = false;
       displayMsdHistogram = true;
       displayDHistogram = true;
+      showMsdErrorBars = true;
       rawDataDirectory = "";
       distancesFilename = "";
       significanceLevel = 0.05;
@@ -202,6 +204,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       displayDHistogram = source.displayDHistogram;
       displayTraceLength = source.displayTraceLength;
       displayTraceSize = source.displayTraceSize;
+      showMsdErrorBars = source.showMsdErrorBars;
       saveTraceDistances = source.saveTraceDistances;
       saveRawData = source.saveRawData;
       rawDataDirectory = source.rawDataDirectory;
@@ -258,7 +261,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     // Option to pick multiple input datasets together using a list box.
 
     // This shows the dialog for selecting trace options
-    if (("multi".equals(arg) && !showMultiDialog(allResults)) || !showTraceDialog(allResults) || allResults.isEmpty()) {
+    if (("multi".equals(arg) && !showMultiDialog(allResults)) || !showTraceDialog(allResults)
+        || allResults.isEmpty()) {
       return;
     }
 
@@ -1311,6 +1315,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     gd.addCheckbox("Save_trace_distances", settings.saveTraceDistances);
     gd.addCheckbox("Save_raw_data", settings.saveRawData);
     gd.addCheckbox("Show_histograms", clusteringSettings.getShowHistograms());
+    gd.addCheckbox("Show_MSD_error_bars", settings.showMsdErrorBars);
     gd.addStringField("Title", settings.title);
 
     gd.showDialog();
@@ -1340,6 +1345,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     settings.saveTraceDistances = gd.getNextBoolean();
     settings.saveRawData = gd.getNextBoolean();
     clusteringSettings.setShowHistograms(gd.getNextBoolean());
+    settings.showMsdErrorBars = gd.getNextBoolean();
     settings.title = gd.getNextString();
 
     if (gd.invalidNumber()) {
@@ -1410,11 +1416,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       max = Math.max(max, value);
     }
     plot.setLimits(0, x[x.length - 1] + exposureTime * 0.5, 0, max);
-    plot.setColor(Color.blue);
-    for (int i = 1; i < x.length; i++) {
-      plot.drawLine(x[i], y[i] - sd[i], x[i], y[i] + sd[i]);
+    if (settings.showMsdErrorBars) {
+      plot.setColor(Color.blue);
+      for (int i = 1; i < x.length; i++) {
+        plot.drawLine(x[i], y[i] - sd[i], x[i], y[i] + sd[i]);
+      }
+      plot.setColor(Color.black);
     }
-    plot.setColor(Color.red);
     display(title, plot);
     return plot;
   }

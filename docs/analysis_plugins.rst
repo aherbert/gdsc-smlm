@@ -1197,6 +1197,9 @@ When all the datasets have been traced the plugin presents a second dialog to co
    * - Show histograms
      - Show histograms of the trace data. If selected a second dialog is presented allowing the histograms to be chosen and the number of histogram bins to be configured.
 
+   * - Show MSD error bars
+     - Show error bars on the MSD plot.
+
    * - Title
      - A title to add to the results table.
 
