@@ -3368,7 +3368,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Note: If ss2 = 0 then f-statistic is +infinity and the cumulative probability is NaN
       // and the p-value will be accepted
       final double fStatistic = MathUtils.div0(num, denom);
-      pValue = 1.0 - distribution.cumulativeProbability(fStatistic);
+      // Do not use survival probability as tiny p-values are effectively zero, but create
+      // a noisier display output than showing 0.
+      pValue = 1 - distribution.cumulativeProbability(fStatistic);
 
       // // Debug
       // if (
