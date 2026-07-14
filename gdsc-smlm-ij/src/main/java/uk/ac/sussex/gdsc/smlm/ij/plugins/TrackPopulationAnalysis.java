@@ -175,7 +175,7 @@ public class TrackPopulationAnalysis implements PlugIn {
   /** The minimum diffusion coefficient during fitting. */
   static final double MIN_D = Double.MIN_NORMAL;
   /** The minimum sigma during fitting. */
-  static final double MIN_SIGMA = Double.MIN_NORMAL;
+  static final double MIN_SIGMA = Math.sqrt(Double.MIN_NORMAL);
   /** The minimum alpha during fitting. */
   static final double MIN_ALPHA = Math.ulp(1.0);
 
