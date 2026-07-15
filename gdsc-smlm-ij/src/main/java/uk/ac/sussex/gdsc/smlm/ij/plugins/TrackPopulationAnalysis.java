@@ -204,6 +204,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     double minWeight;
     boolean simpleAlpha;
     boolean useT1Fraction;
+    boolean unweightedMsdFit;
     double minAlpha;
     double maxAlpha;
     double significance;
@@ -259,6 +260,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.minWeight = source.minWeight;
       this.simpleAlpha = source.simpleAlpha;
       this.useT1Fraction = source.useT1Fraction;
+      this.unweightedMsdFit = source.unweightedMsdFit;
       this.minAlpha = source.minAlpha;
       this.maxAlpha = source.maxAlpha;
       this.significance = source.significance;
@@ -872,6 +874,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       gd.addMessage("Track " + trackData.id + " Anomalous Exponent View");
       gd.addSlider("Data window", 1, trackData.data.length, 1);
       gd.addCheckbox("Show MSD over time", settings.showMsdOverT);
+      gd.addCheckbox("Unweighted_msd_fit", settings.unweightedMsdFit);
       if (extraOptions) {
         gd.addCheckbox("Use_t1_fraction", settings.useT1Fraction);
       }
@@ -879,6 +882,8 @@ public class TrackPopulationAnalysis implements PlugIn {
         // Read the frame
         final int frame = (int) egd.getNextNumber();
         settings.showMsdOverT = egd.getNextBoolean();
+        settings.unweightedMsdFit = egd.getNextBoolean();
+        msdFitter.createWeights(settings.unweightedMsdFit);
         if (extraOptions) {
           msdFitter.useT1Fraction = settings.useT1Fraction = egd.getNextBoolean();
         }
@@ -1081,11 +1086,13 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Configure options
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
       gd.addCheckbox("Show MSD over time", settings.showMsdOverT);
+      gd.addCheckbox("Unweighted_msd_fit", settings.unweightedMsdFit);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
       }
       settings.showMsdOverT = gd.getNextBoolean();
+      settings.unweightedMsdFit = gd.getNextBoolean();
 
       final Int2ObjectOpenHashMap<SumOfSquaredDeviations[]> msdMap = getMsdMap(data);
       final WindowOrganiser wo = new WindowOrganiser();
@@ -2387,6 +2394,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     gd.addNumericField("Fit_significance", settings.significance, -2);
     gd.addNumericField("Min_alpha", settings.minAlpha, -3);
     gd.addNumericField("Max_alpha", settings.maxAlpha, -3);
+    gd.addCheckbox("Unweighted_msd_fit", settings.unweightedMsdFit);
     if (!hasCategory) {
       gd.addMessage("Multi-variate Gaussian mixture Expectation-Maximisation");
       gd.addCheckbox("Ignore_alpha", settings.ignoreAlpha);
@@ -2417,6 +2425,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     settings.significance = gd.getNextNumber();
     settings.minAlpha = gd.getNextNumber();
     settings.maxAlpha = gd.getNextNumber();
+    settings.unweightedMsdFit = gd.getNextBoolean();
     if (!hasCategory) {
       settings.ignoreAlpha = gd.getNextBoolean();
       settings.maxComponents = (int) gd.getNextNumber();
@@ -3065,7 +3074,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     final LevenbergMarquardtOptimizer optimizer;
     final RealVector observed;
-    final RealMatrix weightMatrix;
+    RealMatrix weightMatrix;
     final ConvergenceChecker<Evaluation> checker;
 
     // Linear model for Brownian motion
@@ -3092,8 +3101,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      */
     final SimpleRegression reg2;
     boolean useT1Fraction;
-    final int denominatorDegreesOfFreedom;
-    final FDistribution distribution;
+    boolean unweightedAlpha;
+    FDistribution distribution;
 
     double[] x;
     double[] y;
@@ -3122,8 +3131,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       s = new double[wm1];
       optimizer = new LevenbergMarquardtOptimizer();
       observed = new ArrayRealVector(s, false);
-      final double[] weight = SimpleArrayUtils.newArray(wm1, wm1, -1.0);
-      weightMatrix = new DiagonalMatrix(weight, false);
+      createWeights(settings.unweightedMsdFit);
       checker = (iteration, previous,
           current) -> DoubleEquality.relativeError(previous.getCost(), current.getCost()) < 1e-6;
 
@@ -3167,12 +3175,20 @@ public class TrackPopulationAnalysis implements PlugIn {
       // For linear fit estimation and simple alpha coefficient fit estimation
       reg = new SimpleRegression(true);
       reg2 = new SimpleRegression(true);
+      useT1Fraction = settings.useT1Fraction;
+    }
+
+    void createWeights(boolean unweightedAlpha) {
+      this.unweightedAlpha = unweightedAlpha;
+      final double[] weight = unweightedAlpha ? SimpleArrayUtils.newDoubleArray(wm1, 1.0)
+          : SimpleArrayUtils.newArray(wm1, wm1, -1.0);
+      weightMatrix = new DiagonalMatrix(weight, false);
+
       // For significance test of the least squares fit.
       // numeratorDegreesOfFreedom = numberOfParameters2 - numberOfParameters1
       // denominatorDegreesOfFreedom = numberOfPoints - numberOfParameters2
-      denominatorDegreesOfFreedom = (int) MathUtils.sum(weight) - 3;
+      final double denominatorDegreesOfFreedom = MathUtils.sum(weight) - 3;
       distribution = FDistribution.of(1, denominatorDegreesOfFreedom);
-      useT1Fraction = settings.useT1Fraction;
     }
 
     /**
@@ -3209,7 +3225,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         reg.addData(t, s[i]);
         final double logT = Math.log(t);
         reg2.addData(logT, Math.log(s[i]));
-        weights[i] = msds[i].getN();
+        weights[i] = unweightedAlpha ? 1 : msds[i].getN();
         ssy += msds[i].getSumOfSquaredDeviations();
       }
       if (useT1Fraction) {
@@ -3219,7 +3235,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       final RealMatrix weightMatrix = new DiagonalMatrix(weights, false);
       final int denominatorDegreesOfFreedom = (int) MathUtils.sum(weights) - 3;
       final FDistribution distribution = FDistribution.of(1, denominatorDegreesOfFreedom);
-      fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
+      fit(weightMatrix, ssy, distribution);
     }
 
     /**
@@ -3257,9 +3273,14 @@ public class TrackPopulationAnalysis implements PlugIn {
         for (int i = end - m; i >= k; i--) {
           final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
           msd.add(d);
-          reg.addData(t, d);
+          if (!unweightedAlpha) {
+            reg.addData(t, d);
+          }
         }
         s[m - 1] = msd.getMean();
+        if (unweightedAlpha) {
+          reg.addData(t, s[m - 1]);
+        }
         final double logT = Math.log(t);
         reg2.addData(logT, Math.log(msd.getMean()));
         ssy += msd.getSumOfSquaredDeviations();
@@ -3277,7 +3298,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // System.out.println(Math.exp(reg2.getIntercept()));
 
       if (!regressionOnly) {
-        fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
+        fit(weightMatrix, ssy, distribution);
       }
     }
 
@@ -3294,11 +3315,9 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param weightMatrix the weight matrix
      * @param ssy the sum-of-squared deviations of all data points y (jump distances) from the mean
      *        squared distance (msd) for each jump interval
-     * @param denominatorDegreesOfFreedom the denominator degrees of freedom
      * @param distribution the distribution
      */
-    private void fit(RealMatrix weightMatrix, double ssy, double denominatorDegreesOfFreedom,
-        FDistribution distribution) {
+    private void fit(RealMatrix weightMatrix, double ssy, FDistribution distribution) {
       final int maxEvaluations = Integer.MAX_VALUE;
       final int maxIterations = 3000;
       final boolean lazyEvaluation = false;
@@ -3364,7 +3383,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       // n is the number of MSD observations
       // Thus we adjust using the sum (yi - u)^2 for each MSD.
 
-      final double denom = (ssy + rss2) / denominatorDegreesOfFreedom;
+      final double denom =
+          (unweightedAlpha ? rss2 : (ssy + rss2)) / distribution.getDenominatorDegreesOfFreedom();
       // Note: If ss2 = 0 then f-statistic is +infinity and the cumulative probability is NaN
       // and the p-value will be accepted
       final double fStatistic = MathUtils.div0(num, denom);

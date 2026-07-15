@@ -1844,6 +1844,9 @@ The following analysis parameters can be configured:
    * - Max alpha
      - The maximum anomalous diffusion coefficient alpha to allow during fitting.
 
+   * - Unweighted MSD fit
+     - Set to **true** to perform an unweighted fit of the mean jump distances. The default weights each mean by the number of observations.
+
    * - Ignore alpha
      - Set to **true** to ignore the anomalous diffusion coefficient alpha in the multivariate Gaussian. Use this setting when the populations are expected to follow standard Brownian diffusion or fitting of the alpha produces many insignificant fits.
 
