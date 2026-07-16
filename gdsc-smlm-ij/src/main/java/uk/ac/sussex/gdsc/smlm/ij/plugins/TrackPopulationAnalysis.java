@@ -3339,7 +3339,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       positiveSlope = slope > 4 * MIN_D;
       if (positiveSlope) {
         start1.setEntry(0, slope / 4);
-        start1.setEntry(1, Math.sqrt(Math.max(0, reg.getIntercept() + slope / 3) / 4));
+        start1.setEntry(1, Math.sqrt((reg.getIntercept() + slope / 3) / 4));
       } else {
         // Do not allow negative slope. Use a flat line and
         // precision is derived from the mean of the MSD.
@@ -3349,6 +3349,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         start1.setEntry(0, MIN_D);
         start1.setEntry(1, Math.sqrt((MathUtils.sum(s) / wm1) / 4));
       }
+      paramValidator1.validate(start1);
       final LeastSquaresProblem problem1 = LeastSquaresFactory.create(model1, observed, start1,
           weightMatrix, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator1);
       lvmSolution1 = optimizer.optimize(problem1);
@@ -3358,6 +3359,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       start2.setEntry(0, fit1.getEntry(0));
       start2.setEntry(1, fit1.getEntry(1));
       start2.setEntry(2, 1.0);
+      paramValidator2.validate(start2);
       final LeastSquaresProblem problem2 = LeastSquaresFactory.create(model2, observed, start2,
           weightMatrix, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator2);
       lvmSolution2 = optimizer.optimize(problem2);
