@@ -3572,7 +3572,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // e(a) = t^a
       // e'(a) = t^a * log(t)
       // f(a) = 4D / (a+2)(a+1)
-      // f'(a) = -4D / (a+2)(a+1)(a+2) -4 / (a+2)(a+1)(a+1)
+      // f'(a) = -4D / (a+2)(a+1)(a+2) -4D / (a+2)(a+1)(a+1)
       // g(a) = (n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)
       // g'(a) = (n+1)^(a+2)*log(n+1) + (n-1)^(a+2)*log(n-1) - 2n^(a+2)*log(n)
       // y = e(a) * f(a) * g(a) - 2 * e(a) * f(a)
