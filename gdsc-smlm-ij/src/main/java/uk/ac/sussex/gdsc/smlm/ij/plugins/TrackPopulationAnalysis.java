@@ -1000,10 +1000,8 @@ public class TrackPopulationAnalysis implements PlugIn {
           final double y2 = p2.getYPosition();
           final double x3 = p3.getXPosition();
           final double y3 = p3.getYPosition();
-          DoubleArrayList list = angleMap.get(component[i]);
-          if (list == null) {
-            angleMap.put(component[i], list = new DoubleArrayList());
-          }
+          final DoubleArrayList list = angleMap.computeIfAbsent(component[i],
+              (java.util.function.IntFunction<DoubleArrayList>) c -> new DoubleArrayList());
           // Turn angle between vector p1 -> p2 and p2 -> p3.
           // An angle of 0 is the same direction. 0.5 is a reverse.
           list.add(clockwiseTurns(angle(x1, y1, x2, y2), angle(x2, y2, x3, y3)));
