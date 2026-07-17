@@ -1321,33 +1321,39 @@ public class TrackPopulationAnalysis implements PlugIn {
           plot.getPlot().addLabel(0, 0, label);
           plot2.addLabel(0, 0, label);
 
-          // Create the exponential CDF
-          final double meanT = mean;
-          final DoubleUnaryOperator cdf = x -> 1 - Math.exp(-x / meanT);
-
-          // Show exponential on histogram:
-          // y = 1/T exp(-x/T)
-          // This must be rescaled by the number of observations. This does not work as the
-          // histogram is a poor representation of the PMF. So instead we use the CDF to compute
-          // the expected number of observations in the range of each bin.
           final double[] x = plot.getPlotXValues();
-          final double dx2 = (x[1] - x[0]) / 2;
-          double[] y = Arrays.stream(x)
-              .map(xi -> total * (cdf.applyAsDouble(xi + dx2) - cdf.applyAsDouble(xi - dx2)))
-              .toArray();
-          plot.getPlot().setColor(Color.red);
-          plot.getPlot().addPoints(x, y, Plot.LINE);
-          plot.getPlot().updateImage();
+          if (x.length > 1) {
+            // Create the exponential CDF
+            final double meanT = mean;
+            final DoubleUnaryOperator cdf = xx -> 1 - Math.exp(-xx / meanT);
 
-          // Show exponential on cumulative histogram
-          // y = 1 - exp(-x/T)
-          final double x0 = h[0][0];
-          final double dxx = (h[0][h[0].length - 1] - x0) / 100;
-          final double[] xx =
-              IntStream.rangeClosed(0, 100).mapToDouble(i -> x0 + i * dxx).toArray();
-          y = Arrays.stream(xx).map(cdf).toArray();
-          plot2.setColor(Color.red);
-          plot2.addPoints(xx, y, Plot.LINE);
+            // Show exponential on histogram:
+            // y = 1/T exp(-x/T)
+            // This must be rescaled by the number of observations. This does not work as the
+            // histogram is a poor representation of the PMF. So instead we use the CDF to compute
+            // the expected number of observations in the range of each bin.
+            final double dx2 = (x[1] - x[0]) / 2;
+            double[] y = Arrays.stream(x)
+                .map(xi -> total * (cdf.applyAsDouble(xi + dx2) - cdf.applyAsDouble(xi - dx2)))
+                .toArray();
+            plot.getPlot().setColor(Color.red);
+            plot.getPlot().addPoints(x, y, Plot.LINE);
+            plot.getPlot().updateImage();
+
+            // Show exponential on cumulative histogram
+            // y = 1 - exp(-x/T)
+            final double x0 = h[0][0];
+            final double dxx = (h[0][h[0].length - 1] - x0) / 100;
+            final double[] xx =
+                IntStream.rangeClosed(0, 100).mapToDouble(i -> x0 + i * dxx).toArray();
+            y = Arrays.stream(xx).map(cdf).toArray();
+            plot2.setColor(Color.red);
+            plot2.addPoints(xx, y, Plot.LINE);
+          } else {
+            // Single point histogram
+            plot.getPlot().setLimits(x[0] - deltaT * 0.5, x[0] + deltaT * 0.5, 0, 1.05);
+            plot2.setLimits(x[0] - deltaT * 0.5, x[0] + deltaT * 0.5, 0, 1.05);
+          }
         }
 
         ImageJUtils.display(title, plot2, wo);
