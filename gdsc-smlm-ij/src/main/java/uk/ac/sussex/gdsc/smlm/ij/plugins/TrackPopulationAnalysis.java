@@ -2087,24 +2087,24 @@ public class TrackPopulationAnalysis implements PlugIn {
     wo.tile();
 
     // The component for each data point
-    int[] component;
+    final int[] component = new int[data.length];
     // The number of components
-    int numComponents;
+    int numComponents = 1;
 
     // Data used to fit the Gaussian mixture model
-    double[][] fitData;
+    double[][] fitData = null;
     // The fitted model
-    MixtureMultivariateGaussianDistribution model;
+    MixtureMultivariateGaussianDistribution model = null;
 
     if (hasCategory) {
       // Use the category as the component.
-      // No fit data and no output model
-      fitData = null;
-      model = null;
+      // No fit data and no output model.
 
       // The component is stored at the end of the raw track data.
       final int end = data[0].length - 1;
-      component = Arrays.stream(data).mapToInt(d -> (int) d[end]).toArray();
+      for (int i = 0; i < data.length; i++) {
+        component[i] = (int) data[i][end];
+      }
       numComponents = MathUtils.max(component) + 1;
 
       // In the EM algorithm the probability of each data point is computed and normalised to
@@ -2118,45 +2118,61 @@ public class TrackPopulationAnalysis implements PlugIn {
       createModelTable(Arrays.stream(data).map(d -> Arrays.copyOf(d, end)).toArray(double[][]::new),
           weights, component);
     } else {
-      // Multivariate Gaussian mixture EM
+      if (settings.maxComponents > 1) {
+        // Multivariate Gaussian mixture EM
 
-      // Provide option to not use the anomalous exponent in the population mix.
-      int sortDimension = SORT_DIMENSION;
-      if (settings.ignoreAlpha) {
-        // Remove index 0. This shifts the sort dimension.
-        sortDimension--;
-        fitData = Arrays.stream(data).map(d -> Arrays.copyOfRange(d, 1, d.length))
-            .toArray(double[][]::new);
-      } else {
-        fitData = SimpleArrayUtils.deepCopy(data);
+        // Provide option to not use the anomalous exponent in the population mix.
+        int sortDimension = SORT_DIMENSION;
+        if (settings.ignoreAlpha) {
+          // Remove index 0. This shifts the sort dimension.
+          sortDimension--;
+          fitData = Arrays.stream(data).map(d -> Arrays.copyOfRange(d, 1, d.length))
+              .toArray(double[][]::new);
+        } else {
+          fitData = SimpleArrayUtils.deepCopy(data);
+        }
+
+        final MultivariateGaussianMixtureExpectationMaximization mixed =
+            fitGaussianMixture(fitData, sortDimension);
+
+        if (mixed != null) {
+          model = sortComponents(mixed.getFittedModel(), sortDimension);
+
+          // For the best model, assign to the most likely population.
+          assignData(fitData, model, component);
+
+          // Table of the final model using the original data (i.e. not normalised)
+          final double[] weights = model.getWeights();
+          numComponents = weights.length;
+          createModelTable(data, weights, component);
+        } else {
+          final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+          gd.addHelp(HelpUrls.getUrl("track-population-analysis"));
+          gd.addMessage("Failed to fit a mixture model.\n \nUse a single population?");
+          gd.enableYesNoCancel();
+          gd.hideCancelButton();
+          gd.showDialog();
+          if (!gd.wasOKed()) {
+            return;
+          }
+        }
       }
 
-      final MultivariateGaussianMixtureExpectationMaximization mixed =
-          fitGaussianMixture(fitData, sortDimension);
-
-      if (mixed == null) {
-        IJ.error(TITLE, "Failed to fit a mixture model");
-        return;
+      // Option to show data with 1 population only
+      if (numComponents == 1) {
+        final double[] weights = {1};
+        createModelTable(data, weights, component);
       }
-
-      model = sortComponents(mixed.getFittedModel(), sortDimension);
-
-      // For the best model, assign to the most likely population.
-      component = assignData(fitData, model);
-
-      // Table of the final model using the original data (i.e. not normalised)
-      final double[] weights = model.getWeights();
-      numComponents = weights.length;
-      createModelTable(data, weights, component);
     }
 
     // Output coloured histograms of the populations.
     final LUT lut = LutHelper.createLut(settings.lutIndex);
     IntFunction<Color> colourMap;
+    final int lutMax = numComponents - 1;
     if (LutHelper.getColour(lut, 0).equals(Color.BLACK)) {
-      colourMap = i -> LutHelper.getNonZeroColour(lut, i, 0, numComponents - 1);
+      colourMap = i -> LutHelper.getNonZeroColour(lut, i, 0, lutMax);
     } else {
-      colourMap = i -> LutHelper.getColour(lut, i, 0, numComponents - 1);
+      colourMap = i -> LutHelper.getColour(lut, i, 0, lutMax);
     }
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
       // Extract the data for each component
@@ -2207,9 +2223,14 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param component the component
    */
   private static void createModelTable(double[][] data, double[] weights, int[] component) {
-    final MixtureMultivariateGaussianDistribution model =
-        MultivariateGaussianMixtureExpectationMaximization.createMixed(data, component);
-    final MultivariateGaussianDistribution[] distributions = model.getDistributions();
+    final MultivariateGaussianDistribution[] distributions;
+    if (weights.length == 1) {
+      distributions = new MultivariateGaussianDistribution[] {
+          MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data)};
+    } else {
+      distributions = MultivariateGaussianMixtureExpectationMaximization
+          .createMixed(data, component).getDistributions();
+    }
 
     // Get the fraction of each component
     final int[] count = new int[MathUtils.max(component) + 1];
@@ -2398,7 +2419,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     if (!hasCategory) {
       gd.addMessage("Multi-variate Gaussian mixture Expectation-Maximisation");
       gd.addCheckbox("Ignore_alpha", settings.ignoreAlpha);
-      gd.addSlider("Max_components", 2, 10, settings.maxComponents);
+      gd.addSlider("Max_components", 1, 10, settings.maxComponents);
       gd.addSlider("Min_weight", 0.01, 1, settings.minWeight);
       gd.addNumericField("Max_iterations", settings.maxIterations, 0);
       gd.addNumericField("Relative_error", settings.relativeError, -1);
@@ -2451,7 +2472,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       ParameterUtils.isEqualOrAbove("Window", settings.window, 5);
       ParameterUtils.isEqualOrAbove("Min track length", settings.minTrackLength, 2);
       if (!hasCategory) {
-        ParameterUtils.isEqualOrAbove("Max components", settings.maxComponents, 2);
+        ParameterUtils.isEqualOrAbove("Max components", settings.maxComponents, 1);
         ParameterUtils.isPositive("Min weight", settings.minWeight);
         ParameterUtils.isAboveZero("Max iterations", settings.maxIterations);
         ParameterUtils.isAboveZero("Maximum N", settings.relativeError);
@@ -3011,13 +3032,14 @@ public class TrackPopulationAnalysis implements PlugIn {
    *
    * @param data the data
    * @param model the model
+   * @param comp the component
    * @return the assignments
    */
-  private static int[] assignData(double[][] data, MixtureMultivariateGaussianDistribution model) {
+  private static void assignData(double[][] data, MixtureMultivariateGaussianDistribution model,
+      int[] comp) {
     final double[] weights = model.getWeights();
     final MultivariateGaussianDistribution[] distributions = model.getDistributions();
     // All initialised as component 0
-    final int[] comp = new int[data.length];
     for (int i = 0; i < comp.length; i++) {
       // Assign using the highest probability.
       final double[] x = data[i];
@@ -3050,7 +3072,6 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
     }
     ImageJUtils.log("Re-labelled isolated assignments: %d / %d", n, comp.length);
-    return comp;
   }
 
   /**

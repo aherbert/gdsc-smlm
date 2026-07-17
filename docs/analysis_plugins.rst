@@ -1809,6 +1809,8 @@ The features of each point are modelled as a dimension in a multi-variate Gaussi
 
 Fitting the model using the EM algorithm requires an initial seed model. Convergence may not be possible from a given seed and the result may not achieve the maximum likelihood. The plugin provides the option to configure the random seed, the number of initial models and the convergence criteria for the algorithm. The results of each fit can be logged to the ``ImageJ`` log window; the best model is used for analysis.
 
+It is possible to skip fitting a mixture model by setting the ``Max components`` to 1. The results will be shown for a single multi-variate Gaussian distribution.
+
 Parameters
 ~~~~~~~~~~
 
@@ -1851,7 +1853,7 @@ The following analysis parameters can be configured:
      - Set to **true** to ignore the anomalous diffusion coefficient alpha in the multivariate Gaussian. Use this setting when the populations are expected to follow standard Brownian diffusion or fitting of the alpha produces many insignificant fits.
 
    * - Max components
-     - The maximum number of components in the multivariate Gaussian mixture. Fitting will incrementally increase the number of components until additions do not significantly increase the likelihood score of the population.
+     - The maximum number of components in the multivariate Gaussian mixture. Fitting will incrementally increase the number of components until additions do not significantly increase the likelihood score of the population. This can be set to 1 to use a single multivariate Gaussian.
 
    * - Min weight
      - The minimum weight for a component in the multivariate Gaussian mixture. If the Expectation-Maximisation algorithm generates a mixture with a component weight less than this fraction then the mixture will be rejected.
@@ -1880,7 +1882,7 @@ The following analysis parameters can be configured:
 Results
 ~~~~~~~
 
-The plugin will extract all the contiguous tracks from all the input datasets that satisfy the length criteria. The number of tracks and their average length are recorded to the ``ImageJ`` log window. For each track the diffusion features are computed. The count of insignificant anomalous diffusion coefficients is recorded in the ``ImageJ`` log window. This can be used to assess if the alpha coefficient should be ignored when fitting a mixture multivariate Gaussian model to the data. For reference an unmixed (1 component) model is created and the log-likelihood recorded. The number of components is increased up to the ``Max components`` limit until either the Expectation-Maximisation algorithm fails to converge, the new model is not significant or the mixture contains a fraction below the configured ``Min weight`` level. At each increase in number of components the log-likelihood of the model is recorded to the ``ImageJ`` log window.
+The plugin will extract all the contiguous tracks from all the input datasets that satisfy the length criteria. The number of tracks and their average length are recorded to the ``ImageJ`` log window. For each track the diffusion features are computed. The count of insignificant anomalous diffusion coefficients is recorded in the ``ImageJ`` log window. This can be used to assess if the alpha coefficient should be ignored when fitting a mixture multivariate Gaussian model to the data. For reference an unmixed (1 component) model is created and the log-likelihood recorded. The number of components is increased up to the ``Max components`` limit until either the Expectation-Maximisation algorithm fails to converge, the new model is not significant or the mixture contains a fraction below the configured ``Min weight`` level. At each increase in number of components the log-likelihood of the model is recorded to the ``ImageJ`` log window. If no multi-component models can be fit an option is provided to show the results using the 1 component model.
 
 The model is used to classify each data point into a component. The data point is assigned to the component with the highest weighted probability from the mixture. A smoothing window of size 3 is used on the initial assignments to eliminate isolated assignments. If an assignment's two immediate neighbours are the same class and different from the assignment then the point is reassigned using the neighbour class. The number of re-labelled assignments is reported to the ``ImageJ`` log window.
 
