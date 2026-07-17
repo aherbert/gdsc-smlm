@@ -1240,7 +1240,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     /**
      * For each component extract a histogram of the length of time a molecule is in each state.
      *
-     * <p>Fit the combined MSD curve with a Brownian and FBM model.
+     * <p>Fit the a residence time model.
      */
     private void doAnalysisResidenceTime() {
       final List<TrackData> data = getMultiSelectedDataOrAll();
