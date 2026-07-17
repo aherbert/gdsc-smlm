@@ -459,6 +459,24 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       if (settings.displayTraceSize) {
         final StoredDataStatistics sizes = calculateTraceSizes(traces);
         showHistogram(sizes, "Trace size", true);
+
+        // Survival function of trace size
+        final double[][] h = MathUtils.cumulativeHistogram(sizes.getValues(), false);
+        final double[] hh = h[1];
+        // Count remaining at each observed bin
+        for (int i = 0, remaining = sizes.size(), prev = 0; i < hh.length; i++) {
+          // Count of current bin
+          final int c = (int) hh[i] - prev;
+          prev = (int) hh[i];
+          // The remaining count including this bin is stored
+          hh[i] = remaining;
+          // Update the number remaining
+          remaining -= c;
+        }
+        final String title = TITLE + " Trace Size SF";
+        final Plot plot = new Plot(title, "size", "Frequency");
+        plot.addPoints(h[0], hh, Plot.LINE);
+        display(title, plot);
       }
 
       // Plot the per-trace histogram of MSD and D
