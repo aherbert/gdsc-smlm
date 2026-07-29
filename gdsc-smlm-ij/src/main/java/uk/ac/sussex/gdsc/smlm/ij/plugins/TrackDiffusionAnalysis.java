@@ -1104,9 +1104,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         } else {
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
-              solution.getValue(),
-              MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(), numberOfPoints,
-                  start.length),
+              solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
+                  solution.getValue(), numberOfPoints, start.length),
               optimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
@@ -1865,7 +1864,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   /**
-   * Function to evaluate the two-state diffusion model. Creates a binned PDF for the model.
+   * Function to evaluate the three-state diffusion model. Creates a binned PDF for the model.
    * Evaluate the sum-of-squares of the observed PDF, the observed CDF, or the log-likelihood of the
    * observed counts.
    *
@@ -2064,6 +2063,227 @@ public class TrackDiffusionAnalysis implements PlugIn {
         final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
             + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
             + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3);
+        sum += last + 4 * x + y;
+        last = y;
+      }
+      final double inverseSum = 1 / sum;
+      for (int i = 0; i < p.length; i++) {
+        p[i] *= inverseSum;
+      }
+      return p;
+    }
+  }
+
+  /**
+   * Function to evaluate the four-state diffusion model. Creates a binned PDF for the model.
+   * Evaluate the sum-of-squares of the observed PDF, the observed CDF, or the log-likelihood of the
+   * observed counts.
+   *
+   * <p>This function is slow and can use an {@link ExecutorService} for parallel evaluation.
+   */
+  static class FourStateFunction extends ThreeStateFunction {
+
+    FourStateFunction(double dt, double dz, double a, double b, double precision, double dr,
+        float[][] df, boolean isCdf, ExecutorService executor) {
+      super(dt, dz, a, b, precision, dr, df, isCdf, executor);
+    }
+
+    FourStateFunction(double dt, double dz, double a, double b, double precision, double dr,
+        int[][] counts, ExecutorService executor) {
+      super(dt, dz, a, b, precision, dr, counts, executor);
+    }
+
+    FourStateFunction(double dt, double dz, double a, double b, double precision, double dr, int n,
+        ExecutorService executor) {
+      super(dt, dz, a, b, precision, dr, n, executor);
+    }
+
+    double[][] pdf(int maxT, double f1, double d1, double f2, double d2, double f3, double d3,
+        double f4, double d4, double sigma) {
+      final List<Future<double[]>> futures = new LocalList<>(maxT);
+      for (int n = 0; n < maxT; n++) {
+        final int time = n;
+        futures.add(executor.submit(() -> computePdf(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time)));
+      }
+
+      // Finish processing data
+      final double[][] p = new double[maxT][];
+      int n = 0;
+      for (final Future<double[]> f : futures) {
+        try {
+          p[n++] = f.get();
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return p;
+    }
+
+    double sumOfSquares(double[] point) {
+      final double f1 = point[0];
+      final double f2 = point[1];
+      final double f3 = point[2];
+      final double d1 = point[3];
+      final double d2 = point[4];
+      final double d3 = point[5];
+      final double d4 = point[6];
+      final double sigma = point.length > 7 ? point[7] : precision;
+      final double sum = f1 + f2 + f3;
+      if (sum >= 1) {
+        // Note if f4=0 then we call the ThreeStateFunction and
+        // penalise f1+f2+f3 > 1
+        final double[] a = {f1 / sum, f2 / sum, d1, d2, d3, sigma};
+        return super.sumOfSquares(a) + ssPenalty(f1, f2, f3);
+      }
+      final double f4 = 1 - sum;
+
+      final List<Future<Double>> futures = new LocalList<>(df.length);
+      for (int n = df.length; --n >= 0;) {
+        final int time = n;
+        futures.add(executor.submit(() -> computeSS(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time)));
+      }
+
+      // Finish processing data
+      double ss = 0;
+      for (final Future<Double> f : futures) {
+        try {
+          ss += f.get();
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return ss;
+    }
+
+    private double computeSS(double f1, double d1, double f2, double d2, double f3, double d3,
+        double f4, double d4, double sigma, int time) {
+      final double[] p = computePdf(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time);
+      final float[] obs = df[time];
+      double ss = 0;
+      if (isCdf) {
+        double s = 0;
+        for (int i = 0; i < obs.length; i++) {
+          s += p[i];
+          final double dp = s - obs[i];
+          ss += dp * dp;
+        }
+      } else {
+        for (int i = 0; i < obs.length; i++) {
+          final double dp = p[i] - obs[i];
+          ss += dp * dp;
+        }
+      }
+      return ss;
+    }
+
+    double ssPenalty(double f1, double f2, double f3) {
+      if (f1 + f2 + f3 > 1) {
+        return (f1 + f2 + f3 - 1) * n;
+      }
+      return 0;
+    }
+
+    double logLikelihood(double[] point) {
+      final double f1 = point[0];
+      final double f2 = point[1];
+      final double f3 = point[2];
+      final double d1 = point[3];
+      final double d2 = point[4];
+      final double d3 = point[5];
+      final double d4 = point[6];
+      final double sigma = point.length > 7 ? point[7] : precision;
+      final double sum = f1 + f2 + f3;
+      if (sum >= 1) {
+        // Note if f4=0 then we call the ThreeStateFunction and
+        // penalise f1+f2+f3 > 1
+        final double[] a = {f1 / sum, f2 / sum, d1, d2, d3, sigma};
+        return super.logLikelihood(a) + llPenalty(f1, f2, f3);
+      }
+      final double f4 = 1 - sum;
+
+      final List<Future<Double>> futures = new LocalList<>(counts.length);
+      for (int n = counts.length; --n >= 0;) {
+        final int time = n;
+        futures.add(executor.submit(() -> computeLL(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time)));
+      }
+
+      // Finish processing data
+      double ll = 0;
+      for (final Future<Double> f : futures) {
+        try {
+          ll += f.get();
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return ll;
+    }
+
+    private double computeLL(double f1, double d1, double f2, double d2, double f3, double d3,
+        double f4, double d4, double sigma, int time) {
+      final double[] p = computePdf(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time);
+      final int[] obs = counts[time];
+      double ll = 0;
+      for (int i = 0; i < obs.length; i++) {
+        ll += obs[i] * Math.log(p[i]);
+      }
+      return ll * weights[time];
+    }
+
+    double llPenalty(double f1, double f2, double f3) {
+      if (f1 + f2 + f3 > 1) {
+        return (f1 + f2 + f3 - 1) * n * Math.log(0.01);
+      }
+      return 0;
+    }
+
+    private double[] computePdf(double f1, double d1, double f2, double d2, double f3, double d3,
+        double f4, double d4, double sigma, int time) {
+      final double deltaT = dt * (time + 1);
+      // Use corrected depth-of-field
+      final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
+      final double p3 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d3) + b, d3);
+      final double p4 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d4) + b, d4);
+      final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
+      final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
+      final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
+      final double denom4 = 1.0 / (4 * (d4 * deltaT + sigma * sigma));
+      final double[] p = new double[n];
+      // We have 2n+1 distances r for n observations.
+      // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
+      double sum = 0;
+      // i=0 : pdf(r=0) = 0
+      double last = 0;
+      double r = 0;
+      int j = 0;
+      for (int i = 0; i < p.length; i++) {
+        r = ++j * dr;
+        final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3)
+            + p4 * f4 * (r * 2 * denom4) * Math.exp(-r * r * denom4);
+        r = ++j * dr;
+        final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3)
+            + p4 * f4 * (r * 2 * denom4) * Math.exp(-r * r * denom4);
+        p[i] = last + 4 * x + y;
+        sum += p[i];
+        last = y;
+      }
+      // Continue the integration until terms are insignificant
+      final double error = this.termError;
+      while (last / sum > error) {
+        r = ++j * dr;
+        final double x = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3)
+            + p4 * f4 * (r * 2 * denom4) * Math.exp(-r * r * denom4);
+        r = ++j * dr;
+        final double y = f1 * (r * 2 * denom1) * Math.exp(-r * r * denom1)
+            + p2 * f2 * (r * 2 * denom2) * Math.exp(-r * r * denom2)
+            + p3 * f3 * (r * 2 * denom3) * Math.exp(-r * r * denom3)
+            + p4 * f4 * (r * 2 * denom4) * Math.exp(-r * r * denom4);
         sum += last + 4 * x + y;
         last = y;
       }
