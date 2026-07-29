@@ -240,10 +240,16 @@ class JumpDistanceAnalysisTest {
 
   private void assertWeightedMixedJumpDistanceFunction(RandomSeed seed, int[] counts) {
     final UniformRandomProvider rg = RngFactory.create(seed.get());
-    final double[] estimatedD = {1, 0.5};
-    final double[] fraction = {0.7, 0.3};
+    double[] estimatedD;
+    double[] fraction;
+    double[] x1;
+    // Random sampling can create a zero fraction so check after data creation
+    do {
+      estimatedD = new double[] {1, 0.5};
+      fraction = new double[] {0.7, 0.3};
+      x1 = createData(rg, counts.length, estimatedD, fraction);
+    } while (Arrays.stream(fraction).anyMatch(x -> x == 0));
     final int n = estimatedD.length;
-    final double[] x1 = createData(rg, counts.length, estimatedD, fraction);
     final double[] x2 = duplicateJumps(x1, counts);
     final MixedJumpDistanceFunction f1 = new MixedJumpDistanceFunction(x1, estimatedD[0], n);
     final WeightedMixedJumpDistanceFunction f2 =
