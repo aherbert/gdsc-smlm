@@ -526,7 +526,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("Max_D", settings.getMaxD(), 3, 6, "um^2/s");
 
     gd.addCheckbox("Fit_precision", settings.getFitPrecision());
-    gd.addCheckbox("Fit_three_state", settings.getFitThreeState());
+    gd.addChoice("Max_states", new String[] {"2", "3"}, settings.getMaxStates() - 2);
     gd.addNumericField("Significance_level", settings.getSignificanceLevel(), -3);
 
     gd.addCheckbox("Show_CDF", settings.getShowCdf());
@@ -557,7 +557,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.setMaxD(gd.getNextNumber());
 
     settings.setFitPrecision(gd.getNextBoolean());
-    settings.setFitThreeState(gd.getNextBoolean());
+    settings.setMaxStates(2 + gd.getNextChoiceIndex());
     settings.setSignificanceLevel(gd.getNextNumber());
 
     settings.setShowCdf(gd.getNextBoolean());
@@ -992,7 +992,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private PointValuePair fitThreeStateDistances(int[][] counts, float[][] df,
       ExecutorService executor, int mode) {
-    if (!settings.getFitThreeState()) {
+    if (settings.getMaxStates() < 3) {
       return null;
     }
 

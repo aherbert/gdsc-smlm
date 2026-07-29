@@ -304,6 +304,7 @@ message TrackDiffusionAnalysisSettings {
   string detector_curve_filename = 32;
   bool allow_restarts = 33;
   int32 optimiser_mode = 34;
+  int32 max_states = 35;
 }
 
 // Contains the settings for the events in the OPTICS GUI

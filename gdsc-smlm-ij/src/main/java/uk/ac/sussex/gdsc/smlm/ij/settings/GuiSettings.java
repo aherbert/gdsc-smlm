@@ -292,6 +292,7 @@ public final class GuiSettings {
       builder.setFitMode(1);
       builder.setCdfBinWidth(0.001);
       builder.setPlotMaxR(1);
+      builder.setMaxStates(2);
       // CMA-ES
       builder.setOptimiserMode(1);
       INSTANCE = builder.build();

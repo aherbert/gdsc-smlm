@@ -1541,8 +1541,8 @@ The following parameters can be set:
    * - Fit precision
      - If ``true`` then the precision is a fitted parameter, otherwise it is fixed at the provided value.
 
-   * - Fit three state
-     - If ``true`` then the three-state model is fitted in addition to the two-state model. A log-likelihood ratio test is performed to choose the best model.
+   * - Max states
+     - The maximum number of states to fit. A log-likelihood ratio test is performed to choose the best model.
 
    * - Significance level
      - The significance level for the log-likelihood ratio test.
