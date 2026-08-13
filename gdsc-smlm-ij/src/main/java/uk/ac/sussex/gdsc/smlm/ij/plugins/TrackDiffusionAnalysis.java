@@ -37,6 +37,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.TextField;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -926,7 +927,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
             optimizer.optimize(args.toArray(new OptimizationData[args.size()]));
         args.pop();
 
-        final double[] r = createTwoStateResult(solution.getPointRef());
+        final double[] r = createResult(solution.getPointRef());
         final String params = String.format("f=[%.3f, %.3f] D=[%.3f, %.3f] s=%.1f", r[0], r[2],
             r[1], r[3], (r.length > 4 ? r[4] : precision) * 1e3);
 
@@ -965,29 +966,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      result = new PointValuePair(createTwoStateResult(result.getPointRef()), result.getValue());
+      result = new PointValuePair(createResult(result.getPointRef()), result.getValue());
     }
 
     return result;
-  }
-
-  private static double[] createTwoStateResult(double[] a) {
-    // Computed as [f1, d1, d2 [, sigma]]
-    // Return as [f1, d1, f2, d2 [, sigma]]
-    final double[] r = new double[a.length + 1];
-    System.arraycopy(a, 0, r, 0, 2);
-    r[2] = 1 - r[0];
-    System.arraycopy(a, 2, r, 3, a.length - 2);
-    // Sort (in event that the free fraction is slower than the bound)
-    if (r[3] < r[1]) {
-      final double f = r[0];
-      final double d = r[1];
-      r[0] = r[2];
-      r[1] = r[3];
-      r[2] = f;
-      r[3] = d;
-    }
-    return r;
   }
 
   private PointValuePair fitThreeStateDistances(int[][] counts, float[][] df,
@@ -1087,7 +1069,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           solution = new PointValuePair(a, solution.getValue() - penalty);
         }
 
-        final double[] r = createThreeStateResult(solution.getPointRef());
+        final double[] r = createResult(solution.getPointRef());
         final String params = String.format("f=[%.3f, %.3f, %.3f] D=[%.3f, %.3f, %.3f] s=%.1f",
             r[0], r[2], r[4], r[1], r[3], r[5], (r.length > 6 ? r[6] : precision) * 1e3);
 
@@ -1125,62 +1107,47 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      result = new PointValuePair(createThreeStateResult(result.getPointRef()), result.getValue());
+      result = new PointValuePair(createResult(result.getPointRef()), result.getValue());
     }
 
     return result;
   }
 
-  private static double[] createThreeStateResult(double[] a) {
-    // Computed as [f1, f2, d1, d2, d3 [, sigma]]
-    // Return as [f1, d1, f2, d2, f3, d3 [, sigma]]
-    final double[] r = new double[a.length + 1];
-    r[0] = a[0];
-    r[1] = a[2];
-    r[2] = a[1];
-    r[3] = a[3];
-    r[5] = a[4];
-    // f3 = 1 - f1 + f2
-    // The function effectively normalises f1+f2 > 1 as it divides by the
-    // sum of the computed probability p = f1*p1 + f2*p2.
-    final double sum = r[0] + r[2];
-    if (sum > 1) {
-      // f3 = 0; normalise f1+f2
-      r[0] /= sum;
-      r[2] /= sum;
-    } else {
-      r[4] = 1 - sum;
+  /**
+   * Creates the result. The parameter for the last fraction is assumed to be 1 minus the sum of the
+   * other fractions, e.g. f3 = 1 - f1 - f2.
+   *
+   * @param a the fitted parameters [f1, f2, ..., d1, d2, d3, ...[, sigma]
+   * @return the result [f1, d1, f2, d2, ...[, sigma]
+   */
+  private static double[] createResult(double[] a) {
+    final int nStates = (a.length + 1) >>> 1;
+    final int fStates = nStates - 1;
+    // Extract F and D.
+    // Note that the last F is missing and will be corrected later.
+    final double[][] data = new double[nStates][];
+    for (int i = 0; i < nStates; i++) {
+      data[i] = new double[] {a[i], a[i + fStates]};
     }
-    // Optional sigma
-    if (a.length > 5) {
-      r[6] = a[5];
-    }
-    // Sort (in event that the free fraction is slower than the bound)
-    double f;
-    double d;
-    if (r[3] < r[1]) {
-      f = r[0];
-      d = r[1];
-      r[0] = r[2];
-      r[1] = r[3];
-      r[2] = f;
-      r[3] = d;
-    }
-    if (r[5] < r[3]) {
-      f = r[2];
-      d = r[3];
-      r[2] = r[4];
-      r[3] = r[5];
-      r[4] = f;
-      r[5] = d;
-      if (r[3] < r[1]) {
-        f = r[0];
-        d = r[1];
-        r[0] = r[2];
-        r[1] = r[3];
-        r[2] = f;
-        r[3] = d;
+    // Compute the last F (and normalise the others)
+    final double sumF = Arrays.stream(a).limit(fStates).sum();
+    if (sumF > 1) {
+      data[fStates][0] = 0;
+      for (int i = 0; i < fStates; i++) {
+        data[i][0] /= sumF;
       }
+    } else {
+      data[fStates][0] = 1 - sumF;
+    }
+    // Order by diffusion coefficient
+    Arrays.sort(data, Comparator.comparingDouble(x -> x[1]));
+    // Return final array
+    final double[] r = new double[a.length + 1];
+    // Copy sigma (over-written by last D if sigma is not present in a)
+    r[a.length] = a[a.length - 1];
+    for (int i = 0; i < nStates; i++) {
+      r[i << 1] = data[i][0];
+      r[(i << 1) + 1] = data[i][1];
     }
     return r;
   }
@@ -1908,6 +1875,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return p;
     }
 
+    @Override
     double sumOfSquares(double[] point) {
       final double f1 = point[0];
       final double f2 = point[1];
@@ -1970,6 +1938,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return 0;
     }
 
+    @Override
     double logLikelihood(double[] point) {
       final double f1 = point[0];
       final double f2 = point[1];
@@ -2119,6 +2088,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return p;
     }
 
+    @Override
     double sumOfSquares(double[] point) {
       final double f1 = point[0];
       final double f2 = point[1];
@@ -2183,6 +2153,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       return 0;
     }
 
+    @Override
     double logLikelihood(double[] point) {
       final double f1 = point[0];
       final double f2 = point[1];
