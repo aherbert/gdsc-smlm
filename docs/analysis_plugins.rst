@@ -1481,6 +1481,8 @@ The steady-state model for a 3-state population with bound fraction :math:`F_1`,
     &+ (1 - F_1 - F_2) \mathit{P}(\Delta t, \Delta z_{\text{corr}}, D_3) \frac{r}{2(D_3 \Delta t + \sigma^2)} e^{-\frac{r^2}{4(D_3 \Delta t + \sigma^2)}}
     \end{aligned}
 
+Likewise a steady-state model for a 4-state population adds an explicit coefficient :math:`F_3` and an additional diffusion coefficient :math:`D_4`. The fourth fraction is :math:`F_4 = 1 - F_1 - F_2 - F_3`.
+
 The probability model can be fit using the observed distances from tracks using different time delays, for example delays of 1 to 5 frames. The observations can be fit against a numerical integration of the probabilty model over suitable bin sizes using either maximum likelihood estimation (MLE) or least squares fitting.
 
 If the number of observed distances is low then fitting may be unreliable. A simulation can be performed to generate data for a set number of molecules. This can be used to determine how many tracks are required for a reliable fit to an expected population with specified diffusion coefficients.
@@ -1563,9 +1565,9 @@ The analysis will record progress to the ``ImageJ`` log window:
 
 - The total number of distances for each time delay.
 - The fit result for each repeat.
-- The result of the significance test comparing the two-state and three-state model.
+- The result of the significance test comparing the two-state, three-state model and four-state models.
 
-Note that the choice of the three-state model should also consider the biological rational for the fitted parameters. For example a population fraction may be too small; the diffusion coefficients for the two mobile populations are effectively the same; or a diffusion coefficient is too fast.
+Note that the choice of the three- or four-state model should also consider the biological rational for the fitted parameters. For example a population fraction may be too small; the diffusion coefficients for the two mobile populations are effectively the same; or a diffusion coefficient is too fast.
 
 The observed PDF and the fit are plotted for each time delay (:numref:`Figure %s <fig_track_diffusion_analysis_pdf>`). This may optionally be separated into a plot for each time delay.
 
@@ -1680,6 +1682,9 @@ The following parameters can be set:
    * - F2
      - The fraction of the population with diffusion coefficient D2. If set to zero then F2 = 1 - F1 for a two-state simulation. If above zero then F3 = 1 - F1 - F2 for a three-state simulation.
 
+   * - F3
+     - The fraction of the population with diffusion coefficient D3. If set to zero then F3 = 1 - F1 - F2 for a three-state simulation. If above zero then F4 = 1 - F1 - F2 - F3 for a four-state simulation.
+
    * - D1
      - The diffusion coefficient for the first class of molecules.
 
@@ -1688,6 +1693,9 @@ The following parameters can be set:
 
    * - D3
      - The diffusion coefficient for the third class of molecules.
+
+   * - D4
+     - The diffusion coefficient for the fourth class of molecules.
 
 
 The simulation allows experimenting with the number of samples required to obtain satisfactory results for the fitting of observed diffusion distance distributions.

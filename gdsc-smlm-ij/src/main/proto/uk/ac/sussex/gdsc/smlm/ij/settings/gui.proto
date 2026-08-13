@@ -305,6 +305,8 @@ message TrackDiffusionAnalysisSettings {
   bool allow_restarts = 33;
   int32 optimiser_mode = 34;
   int32 max_states = 35;
+  double f3 = 36;
+  double d4 = 37;
 }
 
 // Contains the settings for the events in the OPTICS GUI

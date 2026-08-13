@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoublePredicate;
+import java.util.function.ToDoubleFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -217,12 +218,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
         final double[] fit = result.getPointRef();
         double d;
         double sigma;
-        if (fit.length < 6) {
-          d = fit[3];
-          sigma = fit.length > 4 ? fit[4] : settings.getPrecision();
+        // A precision value creates an odd length array
+        if ((fit.length & 0x1) == 1) {
+          d = fit[fit.length - 2];
+          sigma = fit[fit.length - 1];
         } else {
-          d = fit[5];
-          sigma = fit.length > 6 ? fit[6] : settings.getPrecision();
+          d = fit[fit.length - 1];
+          sigma = settings.getPrecision() / 1000;
         }
         checkTraceSettings(distances[0][distances[0].length - 1], d, sigma, gapCounts);
       }
@@ -259,7 +261,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       // Sample populations
       final double p1 = settings.getF1();
-      final double p2 = settings.getF2() > 0 ? p1 + settings.getF2() : 1;
+      final double p2;
+      final double p3;
+      if (settings.getF2() > 0) {
+        // 3-state
+        p2 = p1 + settings.getF2();
+        // Possible 4-state
+        p3 = settings.getF3() > 0 ? p2 + settings.getF3() : 1;
+      } else {
+        // 2-state
+        p2 = 1;
+        p3 = 1;
+      }
 
       // Precision in um (used for the units of the tracks)
       final double precision = settings.getPrecision() / 1000;
@@ -268,7 +281,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       // Each track is scaled using the diffusion coefficient and the molecule tested if
       // it remains in the depth-of-field.
 
-      final double[] sampleD = {settings.getD1(), settings.getD2(), settings.getD3()};
+      final double[] sampleD =
+          {settings.getD1(), settings.getD2(), settings.getD3(), settings.getD4()};
       // Create the Gaussian step for each diffusion coefficient
       final double[] step = Arrays.stream(sampleD).map(
           // Std.dev of Gaussian for the step size: sqrt(2D * dt)
@@ -318,8 +332,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
               d = step[0];
             } else if (p < p2) {
               d = step[1];
-            } else {
+            } else if (p < p3) {
               d = step[2];
+            } else {
+              d = step[3];
             }
             // Simulate the track from the origin within the depth of field
             int id = -1;
@@ -424,9 +440,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
     gd.addNumericField("F1", settings.getF1(), 3);
     gd.addNumericField("F2", settings.getF2(), 3);
+    gd.addNumericField("F3", settings.getF3(), 3);
     gd.addNumericField("D1", settings.getD1(), 3, 6, "um^2/s");
     gd.addNumericField("D2", settings.getD2(), 3, 6, "um^2/s");
     gd.addNumericField("D3", settings.getD3(), 3, 6, "um^2/s");
+    gd.addNumericField("D4", settings.getD4(), 3, 6, "um^2/s");
 
     gd.addHelp(HelpUrls.getUrl("diffusion-depth-of-field"));
     gd.showDialog();
@@ -448,9 +466,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.setPrecision(gd.getNextNumber());
     settings.setF1(gd.getNextNumber());
     settings.setF2(gd.getNextNumber());
+    settings.setF3(gd.getNextNumber());
     settings.setD1(gd.getNextNumber());
     settings.setD2(gd.getNextNumber());
     settings.setD3(gd.getNextNumber());
+    settings.setD4(gd.getNextNumber());
 
     SettingsManager.writeSettings(settings.build());
 
@@ -466,11 +486,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ParameterUtils.isPositive("Precision", settings.getPrecision());
       ParameterUtils.isAboveZero("F1", settings.getF1());
       ParameterUtils.isPositive("F2", settings.getF2());
+      ParameterUtils.isPositive("F3", settings.getF3());
       ParameterUtils.isPositive("D1", settings.getD1());
       ParameterUtils.isPositive("D2", settings.getD2());
       ParameterUtils.isPositive("D3", settings.getD3());
+      ParameterUtils.isPositive("D4", settings.getD4());
 
-      ParameterUtils.isBelow("F1 + F2", settings.getF1() + settings.getF2(), 1);
+      if (settings.getF3() > 0) {
+        // Better error message for 4-state model
+        ParameterUtils.isBelow("F1 + F2 + F3",
+            settings.getF1() + settings.getF2() + settings.getF3(), 1);
+      } else {
+        // 2/3-state model (F2 can be zero)
+        ParameterUtils.isBelow("F1 + F2", settings.getF1() + settings.getF2(), 1);
+      }
 
       if (settings.getAllowRestarts()) {
         ParameterUtils.isAboveZero("Half-life with restarts", settings.getHalfLife());
@@ -527,7 +556,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("Max_D", settings.getMaxD(), 3, 6, "um^2/s");
 
     gd.addCheckbox("Fit_precision", settings.getFitPrecision());
-    gd.addChoice("Max_states", new String[] {"2", "3"}, settings.getMaxStates() - 2);
+    gd.addChoice("Max_states", new String[] {"2", "3", "4"}, settings.getMaxStates() - 2);
     gd.addNumericField("Significance_level", settings.getSignificanceLevel(), -3);
 
     gd.addCheckbox("Show_CDF", settings.getShowCdf());
@@ -812,6 +841,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     if (result2 == null) {
       return null;
     }
+    PointValuePair best = result2;
     addToResultTable(result2);
     final PointValuePair result3 = fitThreeStateDistances(counts, df, executor, mode);
     if (result3 != null) {
@@ -828,7 +858,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         LoggerUtils.log(logger, Level.INFO, "Two-state -> three-state : BIC = %s -> %s (Reject=%b)",
             bic2, bic3, reject);
         if (!reject) {
-          return result3;
+          best = result3;
         }
       } else {
         // Select best fit using log-likelihood ratio test
@@ -844,7 +874,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
               "Two-state -> three-state : LL = %s -> %s, LLR = %s, q-value = %s (Reject=%b)", ll2,
               ll3, MathUtils.rounded(llr, 4), MathUtils.rounded(q, 4), reject);
           if (!reject) {
-            return result3;
+            best = result3;
           }
         } else {
           LoggerUtils.log(logger, Level.INFO,
@@ -853,7 +883,50 @@ public class TrackDiffusionAnalysis implements PlugIn {
         }
       }
     }
-    return result2;
+    // Only fit 4-state if 3-state was successful
+    if (best == result3) {
+      final PointValuePair result4 = fitFourStateDistances(counts, df, executor, mode);
+      if (result4 != null) {
+        addToResultTable(result4);
+
+        if (mode != MODE_PDF_MLE) {
+          // Select best fit using BIC
+          final int numberOfPoints = df[0].length * df.length;
+          final double bic3 = MathUtils.getDeltaBayesianInformationCriterion(result3.getValue(),
+              numberOfPoints, result3.getPointRef().length - 1);
+          final double bic4 = MathUtils.getDeltaBayesianInformationCriterion(result4.getValue(),
+              numberOfPoints, result4.getPointRef().length - 1);
+          final boolean reject = bic4 >= bic3;
+          LoggerUtils.log(logger, Level.INFO,
+              "Three-state -> four-state : BIC = %s -> %s (Reject=%b)", bic3, bic4, reject);
+          if (!reject) {
+            best = result4;
+          }
+        } else {
+          // Select best fit using log-likelihood ratio test
+          final double ll3 = result3.getValue();
+          final double ll4 = result4.getValue();
+          final double llr = 2 * (ll4 - ll3);
+          if (llr >= 0) {
+            // The difference in the number of fitted parameters will be 2:
+            // i.e. 1 extra diffusion coefficient and population fraction
+            final double q = ChiSquaredDistributionTable.computeQValue(llr, 2);
+            final boolean reject = q > settings.getSignificanceLevel();
+            LoggerUtils.log(logger, Level.INFO,
+                "Three-state -> four-state : LL = %s -> %s, LLR = %s, q-value = %s (Reject=%b)",
+                ll3, ll4, MathUtils.rounded(llr, 4), MathUtils.rounded(q, 4), reject);
+            if (!reject) {
+              best = result4;
+            }
+          } else {
+            LoggerUtils.log(logger, Level.INFO,
+                "Three-state -> four-state : LL = %s -> %s, LLR = %s : No improvement", ll3, ll4,
+                MathUtils.rounded(llr, 4));
+          }
+        }
+      }
+    }
+    return best;
   }
 
   private PointValuePair fitTwoStateDistances(int[][] counts, float[][] df,
@@ -989,7 +1062,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     PointValuePair result = null;
 
     final LocalList<OptimizationData> args = new LocalList<>();
-    // CMA-ES can take 30 N to 30 N^2 evaluations for N parameters
+    // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
     args.add(new MaxEval(20000));
 
     // fit: f1, f2, d1, d2, d3, sigma
@@ -1005,7 +1078,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       args.add(new ObjectiveFunction(fun::logLikelihood));
       args.add(GoalType.MAXIMIZE);
       numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
-      penaltyFunction = fun::ssPenalty;
+      penaltyFunction = fun::llPenalty;
     } else {
       final boolean isCdf = mode == MODE_CDF;
       final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
@@ -1015,7 +1088,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       args.add(GoalType.MINIMIZE);
       best = Double.POSITIVE_INFINITY;
       numberOfPoints = df[0].length * df.length;
-      penaltyFunction = fun::llPenalty;
+      penaltyFunction = fun::ssPenalty;
     }
     final double minD = Math.min(0.1, settings.getMinD());
     args.add(new SimpleBounds(addPrecision(new double[] {0, 0, 0.0, minD, minD}, 0), addPrecision(
@@ -1065,7 +1138,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
         // Remove this from the final result.
         final double[] a = solution.getPointRef();
         final double penalty = penaltyFunction.applyAsDouble(a[0], a[1]);
-        if (penalty > 0) {
+        if (penalty != 0) {
           solution = new PointValuePair(a, solution.getValue() - penalty);
         }
 
@@ -1086,6 +1159,153 @@ public class TrackDiffusionAnalysis implements PlugIn {
         } else {
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
+              solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
+                  solution.getValue(), numberOfPoints, start.length),
+              optimizer.getEvaluations());
+          if (solution.getValue() < best) {
+            best = solution.getValue();
+            result = solution;
+          }
+        }
+      } catch (final TooManyEvaluationsException ex) {
+        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed : Too many evaluation (%d)", n,
+            optimizer.getEvaluations());
+      } catch (final TooManyIterationsException ex) {
+        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed : Too many iterations (%d)", n,
+            optimizer.getIterations());
+      } catch (final ConvergenceException ex) {
+        LoggerUtils.log(logger, Level.INFO, "Optimiser[%d] failed to fit : %s", n, ex.getMessage());
+      }
+      ticker.tick();
+    }
+
+    if (result != null) {
+      result = new PointValuePair(createResult(result.getPointRef()), result.getValue());
+    }
+
+    return result;
+  }
+
+  private PointValuePair fitFourStateDistances(int[][] counts, float[][] df,
+      ExecutorService executor, int mode) {
+    if (settings.getMaxStates() < 4) {
+      return null;
+    }
+
+    IJ.showStatus("Fitting four-state model...");
+
+    final double dt = exposureTime;
+    final double dz = settings.getDepthOfField() / 1000;
+    final double precision = settings.getPrecision() / 1000;
+    final UniformRandomProvider rng = UniformRandomProviders.create();
+
+    double best = Double.NEGATIVE_INFINITY;
+    PointValuePair result = null;
+
+    final LocalList<OptimizationData> args = new LocalList<>();
+    // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
+    args.add(new MaxEval(40000));
+
+    // fit: f1, f2, f3, d1, d2, d3, d3, sigma
+    // Note that f4 = 1 - f1 - f2 - f3.
+    // However the optimiser does not support compound constraints (f1+f2+f3<=1)
+    // so any sum above 1 is penalised in the cost function.
+    // Hold a reference to the function to allow the penalty term to be computed.
+    ToDoubleFunction<double[]> penaltyFunction;
+    final int numberOfPoints;
+    if (mode == MODE_PDF_MLE) {
+      final FourStateFunction fun = new FourStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, settings.getBinWidth(), counts, executor);
+      args.add(new ObjectiveFunction(fun::logLikelihood));
+      args.add(GoalType.MAXIMIZE);
+      numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
+      penaltyFunction = x -> fun.llPenalty(x[0], x[1], x[2]);
+    } else {
+      final boolean isCdf = mode == MODE_CDF;
+      final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
+      final FourStateFunction fun = new FourStateFunction(dt, dz, settings.getA(), settings.getB(),
+          precision, binWidth, df, isCdf, executor);
+      args.add(new ObjectiveFunction(fun::sumOfSquares));
+      args.add(GoalType.MINIMIZE);
+      best = Double.POSITIVE_INFINITY;
+      numberOfPoints = df[0].length * df.length;
+      penaltyFunction = x -> fun.ssPenalty(x[0], x[1], x[2]);
+    }
+    final double minD = Math.min(0.1, settings.getMinD());
+    args.add(new SimpleBounds(addPrecision(new double[] {0, 0, 0, 0.0, minD, minD, minD}, 0),
+        addPrecision(new double[] {1, 1, 1, 0.1, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+            Double.POSITIVE_INFINITY}, 0.1)));
+
+    MultivariateOptimizer optimizer;
+    if (settings.getOptimiserMode() == OPT_MODE_CMAES) {
+      optimizer = createCmaesOptimizer(rng);
+      // The sigma determines the search range for the variables.
+      // It should be 1/3 of the initial search region.
+      args.add(new CMAESOptimizer.Sigma(
+          addPrecision(new double[] {0.1, 0.1, 0.1, 0.01, 0.3, 0.3, 0.3}, 0.001)));
+      args.add(new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(8)))));
+    } else if (settings.getOptimiserMode() == OPT_MODE_BOBYQA) {
+      optimizer = createBobyqaOptimizer(8);
+    } else {
+      optimizer = createCustomPowellOptimizer();
+      args.add(new CustomPowellOptimizer.BasisStep(
+          addPrecision(new double[] {0.1, 0.1, 0.1, 0.01, 0.3, 0.3, 0.3}, 0.001)));
+    }
+
+    final Ticker ticker = ImageJUtils.createTicker(settings.getRepeats(), 1);
+    final double range = settings.getMaxD() - settings.getMinD();
+    for (int n = 1; n <= settings.getRepeats(); n++) {
+      try {
+        // Guess in range
+        final double[] start = addPrecision(new double[] {
+            // f1
+            rng.nextDouble(0.1, 0.3),
+            // f2
+            rng.nextDouble(0.1, 0.3),
+            // f3
+            rng.nextDouble(0.1, 0.3),
+            // d1
+            rng.nextDouble(0.1),
+            // d2
+            rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 5),
+            // d3
+            rng.nextDouble(settings.getMinD() + range * 2 / 5, settings.getMaxD() - range * 2 / 5),
+            // d4
+            rng.nextDouble(settings.getMaxD() - range / 5, settings.getMaxD())},
+            // precision
+            precision * rng.nextDouble(0.9, 1.1));
+
+        args.push(new InitialGuess(start));
+        PointValuePair solution =
+            optimizer.optimize(args.toArray(new OptimizationData[args.size()]));
+        args.pop();
+
+        // Note: If f1+f2+f3 > 1 then the value will include the penalty term.
+        // Remove this from the final result.
+        final double[] a = solution.getPointRef();
+        final double penalty = penaltyFunction.applyAsDouble(a);
+        if (penalty != 0) {
+          solution = new PointValuePair(a, solution.getValue() - penalty);
+        }
+
+        final double[] r = createResult(solution.getPointRef());
+        final String params =
+            String.format("f=[%.3f, %.3f, %.3f, %.3f] D=[%.3f, %.3f, %.3f, %.3f] s=%.1f", r[0],
+                r[2], r[4], r[6], r[1], r[3], r[5], r[7], (r.length > 8 ? r[8] : precision) * 1e3);
+
+        if (mode == MODE_PDF_MLE) {
+          LoggerUtils.log(logger, Level.INFO,
+              "Four-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
+              solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
+                  numberOfPoints, start.length),
+              optimizer.getEvaluations());
+          if (solution.getValue() > best) {
+            best = solution.getValue();
+            result = solution;
+          }
+        } else {
+          LoggerUtils.log(logger, Level.INFO,
+              "Four-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
               solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
                   solution.getValue(), numberOfPoints, start.length),
               optimizer.getEvaluations());
@@ -1371,10 +1591,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
         msg = "Possible truncation of observed";
       }
       LoggerUtils.log(logger, level,
-          "%s distances (gap=%d; %s) for max D: cdf(r=%s, D=%s, s=%s, t=%s)=%s", msg, i + 1,
-          MathUtils.rounded((double) gapCounts.getInt(i) / sum), MathUtils.rounded(r),
-          MathUtils.rounded(d), MathUtils.rounded(sigma), MathUtils.rounded(t),
-          MathUtils.rounded(p));
+          "%s distances (gap=%d; %.2f%%) for max D: cdf(r=%s, D=%s, s=%s, t=%s)=%s", msg, i + 1,
+          100.0 * gapCounts.getInt(i) / sum, MathUtils.rounded(r), MathUtils.rounded(d),
+          MathUtils.rounded(sigma), MathUtils.rounded(t), MathUtils.rounded(p));
     }
   }
 
@@ -1503,15 +1722,26 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double f2 = fit[2];
     final double d2 = fit[3];
     if (fit.length < 6) {
+      // 2-state
       final double sigma = fit.length > 4 ? fit[4] : precision;
       p = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
           r.length, executor).pdf(pdf.length, f1, d1, f2, d2, sigma);
-    } else {
+    } else if (fit.length < 8) {
+      // 3-state
       final double f3 = fit[4];
       final double d3 = fit[5];
       final double sigma = fit.length > 6 ? fit[6] : precision;
       p = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
           r.length, executor).pdf(pdf.length, f1, d1, f2, d2, f3, d3, sigma);
+    } else {
+      // 4-state
+      final double f3 = fit[4];
+      final double d3 = fit[5];
+      final double f4 = fit[6];
+      final double d4 = fit[7];
+      final double sigma = fit.length > 8 ? fit[8] : precision;
+      p = new FourStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
+          r.length, executor).pdf(pdf.length, f1, d1, f2, d2, f3, d3, f4, d4, sigma);
     }
 
     for (int i = 0; i < pdf.length; i++) {
