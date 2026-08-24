@@ -844,7 +844,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
     Pair<PointValuePair, Double> best = result2;
     addToResultTable(result2);
-    final Pair<PointValuePair, Double> result3 = fitThreeStateDistances(counts, df, executor, mode);
+    final Pair<PointValuePair, Double> result3 =
+        fitThreeStateDistances(counts, df, executor, mode, result2.left().getPointRef());
     if (result3 != null) {
       addToResultTable(result3);
 
@@ -884,7 +885,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     // Only fit 4-state if 3-state was successful
     if (best == result3) {
       final Pair<PointValuePair, Double> result4 =
-          fitFourStateDistances(counts, df, executor, mode);
+          fitFourStateDistances(counts, df, executor, mode, result3.left().getPointRef());
       if (result4 != null) {
         addToResultTable(result4);
 
@@ -1044,7 +1045,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private Pair<PointValuePair, Double> fitThreeStateDistances(int[][] counts, float[][] df,
-      ExecutorService executor, int mode) {
+      ExecutorService executor, int mode, double[] fit2) {
     if (settings.getMaxStates() < 3) {
       return null;
     }
@@ -1112,20 +1113,38 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double range = settings.getMaxD() - settings.getMinD();
     for (int n = 1; n <= settings.getRepeats(); n++) {
       try {
-        // Guess in range
-        final double[] start = addPrecision(new double[] {
-            // f1
-            rng.nextDouble(0.1, 0.4),
-            // f2
-            rng.nextDouble(0.1, 0.4),
-            // d1
-            rng.nextDouble(0.1),
-            // d2
-            rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 3),
-            // d3
-            rng.nextDouble(settings.getMaxD() - range / 3, settings.getMaxD())},
-            // precision
-            precision * rng.nextDouble(0.9, 1.1));
+        final double[] start;
+        if (n == 1) {
+          // Guess from 2-state fit. Scale down results and add a faster population.
+          start = addPrecision(new double[] {
+              // f1
+              fit2[0] * 0.67,
+              // f2
+              fit2[2] * 0.67,
+              // d1
+              fit2[1] * 0.9,
+              // d2
+              fit2[3] * 0.9,
+              // d3
+              fit2[3] * 1.5},
+              // precision
+              fit2[fit2.length - 1]);
+        } else {
+          // Guess in range
+          start = addPrecision(new double[] {
+              // f1
+              rng.nextDouble(0.1, 0.4),
+              // f2
+              rng.nextDouble(0.1, 0.4),
+              // d1
+              rng.nextDouble(0.1),
+              // d2
+              rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 3),
+              // d3
+              rng.nextDouble(settings.getMaxD() - range / 3, settings.getMaxD())},
+              // precision
+              precision * rng.nextDouble(0.9, 1.1));
+        }
 
         args.push(new InitialGuess(start));
         PointValuePair solution =
@@ -1187,7 +1206,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private Pair<PointValuePair, Double> fitFourStateDistances(int[][] counts, float[][] df,
-      ExecutorService executor, int mode) {
+      ExecutorService executor, int mode, double[] fit3) {
     if (settings.getMaxStates() < 4) {
       return null;
     }
@@ -1256,24 +1275,47 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double range = settings.getMaxD() - settings.getMinD();
     for (int n = 1; n <= settings.getRepeats(); n++) {
       try {
-        // Guess in range
-        final double[] start = addPrecision(new double[] {
-            // f1
-            rng.nextDouble(0.1, 0.3),
-            // f2
-            rng.nextDouble(0.1, 0.3),
-            // f3
-            rng.nextDouble(0.1, 0.3),
-            // d1
-            rng.nextDouble(0.1),
-            // d2
-            rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 5),
-            // d3
-            rng.nextDouble(settings.getMinD() + range * 2 / 5, settings.getMaxD() - range * 2 / 5),
-            // d4
-            rng.nextDouble(settings.getMaxD() - range / 5, settings.getMaxD())},
-            // precision
-            precision * rng.nextDouble(0.9, 1.1));
+        final double[] start;
+        if (n == 1) {
+          // Guess from 3-state fit. Scale down results and add a faster population.
+          start = addPrecision(new double[] {
+              // f1
+              fit3[0] * 0.75,
+              // f2
+              fit3[2] * 0.75,
+              // f3
+              fit3[4] * 0.75,
+              // d1
+              fit3[1] * 0.9,
+              // d2
+              fit3[3] * 0.9,
+              // d3
+              fit3[5] * 0.9,
+              // d4
+              fit3[5] * 1.5},
+              // precision
+              fit3[fit3.length - 1]);
+        } else {
+          // Guess in range
+          start = addPrecision(new double[] {
+              // f1
+              rng.nextDouble(0.1, 0.3),
+              // f2
+              rng.nextDouble(0.1, 0.3),
+              // f3
+              rng.nextDouble(0.1, 0.3),
+              // d1
+              rng.nextDouble(0.1),
+              // d2
+              rng.nextDouble(settings.getMinD(), settings.getMinD() + range / 5),
+              // d3
+              rng.nextDouble(settings.getMinD() + range * 2 / 5,
+                  settings.getMaxD() - range * 2 / 5),
+              // d4
+              rng.nextDouble(settings.getMaxD() - range / 5, settings.getMaxD())},
+              // precision
+              precision * rng.nextDouble(0.9, 1.1));
+        }
 
         args.push(new InitialGuess(start));
         PointValuePair solution =
