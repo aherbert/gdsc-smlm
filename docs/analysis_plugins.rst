@@ -1632,6 +1632,9 @@ A summary table is shown containing the model parameters. The following columns 
    * - Value
      - The fit value, either the sum-of-squares or the log-likelihood.
 
+   * - BIC
+     - The Bayesian Information Criterion. Used to compare fit results with a different number of states when all other fit settings are equal, e.g. 2-state verses 3-state model.
+
 Simulation
 ~~~~~~~~~~
 

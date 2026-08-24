@@ -31,6 +31,7 @@ import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
@@ -837,23 +838,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private PointValuePair fitDistances(int[][] counts, float[][] df, ExecutorService executor,
       int mode) {
-    final PointValuePair result2 = fitTwoStateDistances(counts, df, executor, mode);
+    final Pair<PointValuePair, Double> result2 = fitTwoStateDistances(counts, df, executor, mode);
     if (result2 == null) {
       return null;
     }
-    PointValuePair best = result2;
+    Pair<PointValuePair, Double> best = result2;
     addToResultTable(result2);
-    final PointValuePair result3 = fitThreeStateDistances(counts, df, executor, mode);
+    final Pair<PointValuePair, Double> result3 = fitThreeStateDistances(counts, df, executor, mode);
     if (result3 != null) {
       addToResultTable(result3);
 
       if (mode != MODE_PDF_MLE) {
         // Select best fit using BIC
-        final int numberOfPoints = df[0].length * df.length;
-        final double bic2 = MathUtils.getDeltaBayesianInformationCriterion(result2.getValue(),
-            numberOfPoints, result2.getPointRef().length - 1);
-        final double bic3 = MathUtils.getDeltaBayesianInformationCriterion(result3.getValue(),
-            numberOfPoints, result3.getPointRef().length - 1);
+        final double bic2 = result2.right();
+        final double bic3 = result3.right();
         final boolean reject = bic3 >= bic2;
         LoggerUtils.log(logger, Level.INFO, "Two-state -> three-state : BIC = %s -> %s (Reject=%b)",
             bic2, bic3, reject);
@@ -862,8 +860,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
         }
       } else {
         // Select best fit using log-likelihood ratio test
-        final double ll2 = result2.getValue();
-        final double ll3 = result3.getValue();
+        final double ll2 = result2.left().getValue();
+        final double ll3 = result3.left().getValue();
         final double llr = 2 * (ll3 - ll2);
         if (llr >= 0) {
           // The difference in the number of fitted parameters will be 2:
@@ -885,17 +883,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
     // Only fit 4-state if 3-state was successful
     if (best == result3) {
-      final PointValuePair result4 = fitFourStateDistances(counts, df, executor, mode);
+      final Pair<PointValuePair, Double> result4 =
+          fitFourStateDistances(counts, df, executor, mode);
       if (result4 != null) {
         addToResultTable(result4);
 
         if (mode != MODE_PDF_MLE) {
           // Select best fit using BIC
-          final int numberOfPoints = df[0].length * df.length;
-          final double bic3 = MathUtils.getDeltaBayesianInformationCriterion(result3.getValue(),
-              numberOfPoints, result3.getPointRef().length - 1);
-          final double bic4 = MathUtils.getDeltaBayesianInformationCriterion(result4.getValue(),
-              numberOfPoints, result4.getPointRef().length - 1);
+          final double bic3 = result3.right();
+          final double bic4 = result4.right();
           final boolean reject = bic4 >= bic3;
           LoggerUtils.log(logger, Level.INFO,
               "Three-state -> four-state : BIC = %s -> %s (Reject=%b)", bic3, bic4, reject);
@@ -904,8 +900,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
           }
         } else {
           // Select best fit using log-likelihood ratio test
-          final double ll3 = result3.getValue();
-          final double ll4 = result4.getValue();
+          final double ll3 = result3.left().getValue();
+          final double ll4 = result4.left().getValue();
           final double llr = 2 * (ll4 - ll3);
           if (llr >= 0) {
             // The difference in the number of fitted parameters will be 2:
@@ -926,10 +922,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
         }
       }
     }
-    return best;
+    return best.left();
   }
 
-  private PointValuePair fitTwoStateDistances(int[][] counts, float[][] df,
+  private Pair<PointValuePair, Double> fitTwoStateDistances(int[][] counts, float[][] df,
       ExecutorService executor, int mode) {
     IJ.showStatus("Fitting two-state model...");
 
@@ -939,7 +935,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
     double best = Double.NEGATIVE_INFINITY;
-    PointValuePair result = null;
+    Pair<PointValuePair, Double> result = null;
 
     final LocalList<OptimizationData> args = new LocalList<>();
     // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
@@ -1005,24 +1001,24 @@ public class TrackDiffusionAnalysis implements PlugIn {
             r[1], r[3], (r.length > 4 ? r[4] : precision) * 1e3);
 
         if (mode == MODE_PDF_MLE) {
+          final double bic = MathUtils.getBayesianInformationCriterion(solution.getValue(),
+              numberOfPoints, start.length);
           LoggerUtils.log(logger, Level.INFO,
               "Two-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
-              solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
-                  numberOfPoints, start.length),
-              optimizer.getEvaluations());
+              solution.getValue(), bic, optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
-            result = solution;
+            result = Pair.of(solution, bic);
           }
         } else {
+          final double bic = MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(),
+              numberOfPoints, start.length);
           LoggerUtils.log(logger, Level.INFO,
               "Two-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
-              solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
-                  solution.getValue(), numberOfPoints, start.length),
-              optimizer.getEvaluations());
+              solution.getValue(), bic, optimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
-            result = solution;
+            result = Pair.of(solution, bic);
           }
         }
       } catch (final TooManyEvaluationsException ex) {
@@ -1039,13 +1035,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      result = new PointValuePair(createResult(result.getPointRef()), result.getValue());
+      result = Pair.of(
+          new PointValuePair(createResult(result.left().getPointRef()), result.left().getValue()),
+          result.right());
     }
 
     return result;
   }
 
-  private PointValuePair fitThreeStateDistances(int[][] counts, float[][] df,
+  private Pair<PointValuePair, Double> fitThreeStateDistances(int[][] counts, float[][] df,
       ExecutorService executor, int mode) {
     if (settings.getMaxStates() < 3) {
       return null;
@@ -1059,7 +1057,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
     double best = Double.NEGATIVE_INFINITY;
-    PointValuePair result = null;
+    Pair<PointValuePair, Double> result = null;
 
     final LocalList<OptimizationData> args = new LocalList<>();
     // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
@@ -1147,24 +1145,24 @@ public class TrackDiffusionAnalysis implements PlugIn {
             r[0], r[2], r[4], r[1], r[3], r[5], (r.length > 6 ? r[6] : precision) * 1e3);
 
         if (mode == MODE_PDF_MLE) {
+          final double bic = MathUtils.getBayesianInformationCriterion(solution.getValue(),
+              numberOfPoints, start.length);
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
-              solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
-                  numberOfPoints, start.length),
-              optimizer.getEvaluations());
+              solution.getValue(), bic, optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
-            result = solution;
+            result = Pair.of(solution, bic);
           }
         } else {
+          final double bic = MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(),
+              numberOfPoints, start.length);
           LoggerUtils.log(logger, Level.INFO,
               "Three-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
-              solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
-                  solution.getValue(), numberOfPoints, start.length),
-              optimizer.getEvaluations());
+              solution.getValue(), bic, optimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
-            result = solution;
+            result = Pair.of(solution, bic);
           }
         }
       } catch (final TooManyEvaluationsException ex) {
@@ -1180,13 +1178,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      result = new PointValuePair(createResult(result.getPointRef()), result.getValue());
+      result = Pair.of(
+          new PointValuePair(createResult(result.left().getPointRef()), result.left().getValue()),
+          result.right());
     }
 
     return result;
   }
 
-  private PointValuePair fitFourStateDistances(int[][] counts, float[][] df,
+  private Pair<PointValuePair, Double> fitFourStateDistances(int[][] counts, float[][] df,
       ExecutorService executor, int mode) {
     if (settings.getMaxStates() < 4) {
       return null;
@@ -1200,7 +1200,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final UniformRandomProvider rng = UniformRandomProviders.create();
 
     double best = Double.NEGATIVE_INFINITY;
-    PointValuePair result = null;
+    Pair<PointValuePair, Double> result = null;
 
     final LocalList<OptimizationData> args = new LocalList<>();
     // CMA-ES can take 30 N to 300 N^2 evaluations for N parameters
@@ -1294,24 +1294,24 @@ public class TrackDiffusionAnalysis implements PlugIn {
                 r[2], r[4], r[6], r[1], r[3], r[5], r[7], (r.length > 8 ? r[8] : precision) * 1e3);
 
         if (mode == MODE_PDF_MLE) {
+          final double bic = MathUtils.getBayesianInformationCriterion(solution.getValue(),
+              numberOfPoints, start.length);
           LoggerUtils.log(logger, Level.INFO,
               "Four-state fit [%d] %s: MLE = %s, BIC = %s (%d evaluations)", n, params,
-              solution.getValue(), MathUtils.getBayesianInformationCriterion(solution.getValue(),
-                  numberOfPoints, start.length),
-              optimizer.getEvaluations());
+              solution.getValue(), bic, optimizer.getEvaluations());
           if (solution.getValue() > best) {
             best = solution.getValue();
-            result = solution;
+            result = Pair.of(solution, bic);
           }
         } else {
+          final double bic = MathUtils.getDeltaBayesianInformationCriterion(solution.getValue(),
+              numberOfPoints, start.length);
           LoggerUtils.log(logger, Level.INFO,
               "Four-state fit [%d] %s: SS = %s, delta BIC = %s (%d evaluations)", n, params,
-              solution.getValue(), MathUtils.getDeltaBayesianInformationCriterion(
-                  solution.getValue(), numberOfPoints, start.length),
-              optimizer.getEvaluations());
+              solution.getValue(), bic, optimizer.getEvaluations());
           if (solution.getValue() < best) {
             best = solution.getValue();
-            result = solution;
+            result = Pair.of(solution, bic);
           }
         }
       } catch (final TooManyEvaluationsException ex) {
@@ -1327,7 +1327,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     if (result != null) {
-      result = new PointValuePair(createResult(result.getPointRef()), result.getValue());
+      result = Pair.of(
+          new PointValuePair(createResult(result.left().getPointRef()), result.left().getValue()),
+          result.right());
     }
 
     return result;
@@ -1414,7 +1416,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return a;
   }
 
-  private void addToResultTable(PointValuePair result) {
+  private void addToResultTable(Pair<PointValuePair, Double> result) {
     createTable().append(addResult(result));
   }
 
@@ -1425,13 +1427,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private String createHeader() {
-    return Arrays
-        .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "max t", "offsets", "a", "b",
-            "optimiser", "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value"})
+    return Arrays.stream(
+        new String[] {"Dataset", "dz (nm)", "dt (ms)", "max t", "offsets", "a", "b", "optimiser",
+            "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value", "BIC"})
         .collect(Collectors.joining("\t"));
   }
 
-  private String addResult(PointValuePair result) {
+  private String addResult(Pair<PointValuePair, Double> result) {
     final StringBuilder sb = new StringBuilder();
     sb.append(settings.getSelected(0));
     if (settings.getSelectedCount() > 1) {
@@ -1452,7 +1454,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       ;
     //@formatter:on
     if (result != null) {
-      final double[] fit = result.getPointRef();
+      final PointValuePair fitResult = result.left();
+      final double[] fit = fitResult.getPointRef();
       final int n = fit.length / 2;
       final String f = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i]))
           .collect(Collectors.joining(", "));
@@ -1460,7 +1463,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
           .collect(Collectors.joining(", "));
       final double precision = (fit.length & 1) == 1 ? fit[2 * n] * 1e3 : settings.getPrecision();
       sb.append('\t').append(f).append('\t').append(d).append('\t')
-          .append(MathUtils.rounded(precision)).append('\t').append(result.getValue());
+          .append(MathUtils.rounded(precision)).append('\t').append(fitResult.getValue())
+          .append('\t').append(result.right().doubleValue());
     }
     return sb.toString();
   }
