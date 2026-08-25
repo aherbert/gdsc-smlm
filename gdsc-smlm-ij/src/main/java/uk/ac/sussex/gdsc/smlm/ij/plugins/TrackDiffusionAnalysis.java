@@ -1464,7 +1464,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private TextWindow createTable() {
     return ImageJUtils.refresh(TABLE_REF, () -> {
-      return new TextWindow(TITLE + " Analysis", createHeader(), "", 1500, 300);
+      return new TextWindow(TITLE + " Results", createHeader(), "", 1500, 300);
     });
   }
 
