@@ -1500,9 +1500,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double[] fit = fitResult.getPointRef();
       final int n = fit.length / 2;
       final String f = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i]))
-          .collect(Collectors.joining(", "));
+          .collect(Collectors.joining("; "));
       final String d = IntStream.range(0, n).mapToObj(i -> MathUtils.rounded(fit[2 * i + 1]))
-          .collect(Collectors.joining(", "));
+          .collect(Collectors.joining("; "));
       final double precision = (fit.length & 1) == 1 ? fit[2 * n] * 1e3 : settings.getPrecision();
       sb.append('\t').append(f).append('\t').append(d).append('\t')
           .append(MathUtils.rounded(precision)).append('\t').append(fitResult.getValue())
