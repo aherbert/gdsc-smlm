@@ -2673,6 +2673,7 @@ public class TrackPopulationAnalysis implements PlugIn {
             final double alpha = msdFitter.lvmSolution2.getPoint().getEntry(2);
             values[0] = alpha;
             if (msdFitter.pValue > significance) {
+              // Insignificant
               fitIndex++;
             }
             fitResult[fitIndex]++;
