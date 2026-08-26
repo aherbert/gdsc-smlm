@@ -102,6 +102,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
+import org.apache.commons.statistics.descriptive.Mean;
 import org.apache.commons.statistics.distribution.FDistribution;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
@@ -119,7 +120,6 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.math.Mean;
 import uk.ac.sussex.gdsc.core.math.SumOfSquaredDeviations;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -2551,16 +2551,13 @@ public class TrackPopulationAnalysis implements PlugIn {
       final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
       try {
         pp.getPrecision();
-        final Mean mean = new Mean();
-        for (final double p : pp.precisions) {
-          mean.add(p);
-        }
+        final double mean = Mean.of(pp.precisions).getAsDouble();
         // 2nDt = MSD (n = number of dimensions)
         // D = MSD / 2nt
         final CalibrationReader reader = results.getCalibrationReader();
         final double t = reader.getExposureTime() / 1000.0;
         // Assume computed in nm. Convert to um.
-        final double x = mean.getMean() / 1000;
+        final double x = mean * 1e-3;
         final double d = x * x / (2 * t);
         TextUtils.formatTo(sb, ", precision=%s nm, D limit=%s um^2/s",
             MathUtils.rounded(x * 1000, 4), MathUtils.rounded(d, 4));
