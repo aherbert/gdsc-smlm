@@ -268,6 +268,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     ImageJUtils.log(TITLE + "...");
 
+    // Record trace settings
+    ImageJUtils.log(appendClusteringSettings(new StringBuilder(512)).append("; Minimum length=")
+        .append(clusteringSettings.getMinimumTraceLength()).append("; Ignore ends=")
+        .append(clusteringSettings.getTruncate()).toString());
+
     // - Trace each single dataset (and store in memory)
     // - Combine trace results held in memory
     final Trace[] traces = getTraces(allResults);
@@ -860,11 +865,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       }
     }
 
-    ImageJUtils.log(
-        "Filtered results '%s' : %s split and filtered to %d using "
-            + "minimum length %d (Ignore ends = %b)",
-        name, TextUtils.pleural(traces.length, "trace"), list.size(), minimumTraceLength,
-        ignoreEnds);
+    ImageJUtils.log("Filtered results '%s' : %s split and filtered to %d", name,
+        TextUtils.pleural(traces.length, "trace"), list.size());
     return list.toArray(new Trace[0]);
   }
 
