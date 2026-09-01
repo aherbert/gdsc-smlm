@@ -818,7 +818,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     final int[] sizes = Arrays.stream(sortedDistances).mapToInt(x -> x.length).toArray();
     LoggerUtils.log(logger, Level.INFO, "Distance counts: %s", Arrays.toString(sizes));
-
+    final double[] maxDistance = Arrays.stream(sortedDistances)
+        .mapToDouble(x -> MathUtils.maxDefault(0, x)).toArray();
+    LoggerUtils.log(logger, Level.INFO, "Max distances: %s", Arrays.toString(maxDistance));
 
     // Record the gap lengths
     final int end = SimpleArrayUtils.findLastIndex(gap, v -> v != 0);
