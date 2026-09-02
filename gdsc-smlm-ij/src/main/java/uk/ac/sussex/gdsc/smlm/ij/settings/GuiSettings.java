@@ -290,7 +290,6 @@ public final class GuiSettings {
       builder.setD3(5);
       builder.setSignificanceLevel(0.05);
       builder.setFitMode(1);
-      builder.setFitTruncatedPdf(true);
       builder.setCdfBinWidth(0.001);
       builder.setPlotMaxR(1);
       builder.setMaxStates(2);

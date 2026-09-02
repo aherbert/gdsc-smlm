@@ -129,6 +129,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private static final int MODE_CDF = 1;
   private static final int MODE_PDF_MLE = 2;
   private static final String[] FIT_MODES = {"PDF", "CDF", "PDF_MLE"};
+  private static final String[] TRUNCATED_MODES = {"Full", "Truncate", "Ignore"};
   private static final String[] OPTIMISER_MODES = {"Powell", "CMA-ES", "BOBYQA"};
   private static final int OPT_MODE_CMAES = 1;
   private static final int OPT_MODE_BOBYQA = 2;
@@ -535,7 +536,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
 
     gd.addChoice("Fit_mode", FIT_MODES, settings.getFitMode());
-    gd.addCheckbox("Fit_truncated", settings.getFitTruncatedPdf());
+    gd.addChoice("Truncated_mode", TRUNCATED_MODES, settings.getTruncatedMode());
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
     gd.addNumericField("CDF_bin_width", settings.getCdfBinWidth(), -3);
 
@@ -584,7 +585,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.setPrecision(gd.getNextNumber());
 
     settings.setFitMode(gd.getNextChoiceIndex());
-    settings.setFitTruncatedPdf(gd.getNextBoolean());
+    settings.setTruncatedMode(gd.getNextChoiceIndex());
     settings.setBinWidth(gd.getNextNumber());
     settings.setCdfBinWidth(gd.getNextNumber());
 
@@ -1516,7 +1517,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       .append(settings.getMaxT()).append('\t')
       .append(settings.getOffsets()).append('\t')
       .append(FIT_MODES[settings.getFitMode()]).append('\t')
-      .append(settings.getFitTruncatedPdf()).append('\t')
+      .append(TRUNCATED_MODES[settings.getTruncatedMode()]).append('\t')
       .append(MathUtils.rounded(settings.getBinWidth())).append('\t')
       .append(MathUtils.rounded(settings.getCdfBinWidth())).append('\t')
       .append(MathUtils.rounded(settings.getA())).append('\t')
@@ -1616,7 +1617,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double maxP = MathUtils.max(pdf[i]);
       final float endP = pdf[i][counts[i].length - 1];
       if (endP / maxP > 1e-3) {
-        if (settings.getFitTruncatedPdf()) {
+        // TODO: Fix this for ignore mode
+        if (settings.getTruncatedMode() == 1) {
           truncated[i] = true;
           pdf[i] = Arrays.copyOf(pdf[i], counts[i].length);
         }

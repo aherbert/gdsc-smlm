@@ -1517,7 +1517,7 @@ The following parameters can be set:
      - The mode used for fitting.
 
    * - Fit truncated
-     - If ``true`` the model PDF maximum distance will be truncated to the observed PDF. This is only performed when the final probability in the observed PDF for a time step is above a threshold. Truncation of the PDF is reported to the ``ImageJ`` log window.
+     - The mode used for fitting a truncated observed PDF. This is only used when the final probability in the observed PDF for a time step is above a threshold. Truncation of the PDF is reported to the ``ImageJ`` log window. The model PDF can use the full PDF; truncate the model to the observed PDF; or ignore the PDF when fitting.
 
    * - Bin width
      - The bin width for the histogram counts used to create the observed PDF. Used for plot display and optional fitting.
@@ -1609,7 +1609,7 @@ A summary table is shown containing the model parameters. The following columns 
      - The mode used for fitting.
 
    * - Truncated
-     - If ``true`` the model PDF maximum distance will be truncated to the observed PDF.
+     - The mode used for truncation in the observed PDF.
 
    * - Bin width
      - The bin width for the histogram counts used to create the observed PDF.
