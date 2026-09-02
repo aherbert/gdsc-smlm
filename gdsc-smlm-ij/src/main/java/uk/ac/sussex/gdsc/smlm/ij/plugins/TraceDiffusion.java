@@ -96,7 +96,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
  */
 public class TraceDiffusion implements PlugIn, CurveLogger {
-  private static final String TITLE = "Trace Diffusion";
+  static final String TITLE = "Trace Diffusion";
 
   private static final AtomicReference<TextWindow> SUMMARY_TABLE_REF = new AtomicReference<>();
 
@@ -266,16 +266,16 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       return;
     }
 
-    ImageJUtils.log(TITLE + "...");
-
     // Record trace settings
-    ImageJUtils.log(appendClusteringSettings(new StringBuilder(512)).append("; Minimum length=")
-        .append(clusteringSettings.getMinimumTraceLength()).append("; Ignore ends=")
-        .append(clusteringSettings.getTruncate()).toString());
+    final String traceSettings =
+        appendClusteringSettings(new StringBuilder(512).append(TITLE).append(": "))
+            .append("; Minimum length=").append(clusteringSettings.getMinimumTraceLength())
+            .append("; Ignore ends=").append(clusteringSettings.getTruncate()).toString();
+    ImageJUtils.log(traceSettings);
 
     // - Trace each single dataset (and store in memory)
     // - Combine trace results held in memory
-    final Trace[] traces = getTraces(allResults);
+    final Trace[] traces = getTraces(allResults, traceSettings);
 
     // -=-=-
     // Analyse the traces
@@ -870,11 +870,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     return list.toArray(new Trace[0]);
   }
 
-  private String createSettingsComment() {
-    return String.format("Molecule tracing : distance-threshold = %f nm",
-        clusteringSettings.getDistanceThreshold());
-  }
-
   private void summarise(Trace[] traces, double[] fitMsdResult, int n, double[][] jdParams) {
     IJ.showStatus("Calculating summary ...");
 
@@ -1218,7 +1213,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         .setDisableIntensityModel(clusteringSettings.getDisableIntensityModel()).build();
   }
 
-  private Trace[] getTraces(List<MemoryPeakResults> allResults) {
+  private Trace[] getTraces(List<MemoryPeakResults> allResults, String traceSettings) {
     this.results = allResults.get(0);
 
     // Results should be checked for calibration by this point
@@ -1239,14 +1234,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
       // --- Save results ---
       if (traces.length != 0) {
-        // Save the traces to memory
-        TraceMolecules.saveResults(r, traces, "Tracks");
+        // Save the traces to memory.
+        // This removes any configuration on the fitting copied from the source results.
+        TraceMolecules.saveResults(r, traces, "Tracks").setConfiguration(traceSettings);
 
         if (clusteringSettings.getSaveTraces()) {
           // Sort traces by time to assist the results source in extracting frames sequentially.
           // Do this before saving to assist in debugging using the saved traces file.
           TraceMolecules.sortByTime(traces);
-          final String newFilename = TraceMolecules.saveTraces(r, traces, createSettingsComment(),
+          final String newFilename = TraceMolecules.saveTraces(r, traces, traceSettings,
               settings.tracesFilename, additionalDatasets);
           // Only keep the main filename in memory
           if (additionalDatasets == 0) {
@@ -1265,6 +1261,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           TraceManager.toPeakResults(all, results.getCalibration(), true);
       tracedResults.copySettings(results);
       tracedResults.setName(createCombinedName() + " Tracks");
+      // This removes any configuration on the fitting copied from the source results.
+      tracedResults.setConfiguration(traceSettings);
       MemoryPeakResults.addResults(tracedResults);
     }
 
