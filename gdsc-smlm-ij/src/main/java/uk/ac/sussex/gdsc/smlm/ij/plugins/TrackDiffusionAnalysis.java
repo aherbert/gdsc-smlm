@@ -40,6 +40,7 @@ import java.awt.TextField;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -135,6 +136,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   /** The exposure time in seconds. */
   private double exposureTime;
   private Logger logger;
+  private String traceSettings;
 
   /** The plugin settings. */
   private TrackDiffusionAnalysisSettings.Builder settings;
@@ -192,6 +194,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     logger = ImageJPluginLoggerHelper.getLogger(getClass());
+
+    getTraceSettings(allResults);
 
     final IntArrayList gapCounts = new IntArrayList();
     final float[][] distances = getDistances(allResults, gapCounts);
@@ -818,8 +822,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     final int[] sizes = Arrays.stream(sortedDistances).mapToInt(x -> x.length).toArray();
     LoggerUtils.log(logger, Level.INFO, "Distance counts: %s", Arrays.toString(sizes));
-    final double[] maxDistance = Arrays.stream(sortedDistances)
-        .mapToDouble(x -> MathUtils.maxDefault(0, x)).toArray();
+    final double[] maxDistance =
+        Arrays.stream(sortedDistances).mapToDouble(x -> MathUtils.maxDefault(0, x)).toArray();
     LoggerUtils.log(logger, Level.INFO, "Max distances: %s", Arrays.toString(maxDistance));
 
     // Record the gap lengths
@@ -836,6 +840,18 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
 
     return sortedDistances;
+  }
+
+  private void getTraceSettings(List<MemoryPeakResults> allResults) {
+    // Look for the trace settings added to the configuration
+    final String prefix = TraceDiffusion.TITLE + ": ";
+    final Set<String> traceSettings = allResults.stream().map(x -> x.getConfiguration())
+        .filter(x -> x != null && x.startsWith(prefix)).collect(Collectors.toSet());
+    if (traceSettings.size() > 1) {
+      logger.warning(TITLE + ": Multiple trace settings in the selected results");
+    } else if (traceSettings.size() == 1) {
+      this.traceSettings = traceSettings.iterator().next().substring(prefix.length());
+    }
   }
 
   private PointValuePair fitDistances(int[][] counts, float[][] df, ExecutorService executor,
@@ -1478,10 +1494,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private String addResult(Pair<PointValuePair, Double> result) {
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(1024);
     sb.append(settings.getSelected(0));
     if (settings.getSelectedCount() > 1) {
       sb.append(" + ").append(TextUtils.pleural(settings.getSelectedCount() - 1, "other"));
+    }
+    if (traceSettings != null) {
+      // Append trace settings if recognised
+      sb.append("; ").append(traceSettings);
     }
     sb.append('\t');
     //@formatter:off
