@@ -172,6 +172,8 @@ public abstract class AbstractPeakResults implements PeakResults {
     return configuration;
   }
 
+  // TODO: Support List<String> notes
+
   /**
    * Gets the name of the results set (or the source if empty).
    *
