@@ -128,6 +128,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private static final String TITLE = "Track Diffusion Analysis";
   private static final int MODE_CDF = 1;
   private static final int MODE_PDF_MLE = 2;
+  private static final String[] FIT_MODES = {"PDF", "CDF", "PDF_MLE"};
   private static final String[] OPTIMISER_MODES = {"Powell", "CMA-ES", "BOBYQA"};
   private static final int OPT_MODE_CMAES = 1;
   private static final int OPT_MODE_BOBYQA = 2;
@@ -533,7 +534,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addSlider("Offsets", 0, 5, settings.getOffsets());
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
 
-    gd.addChoice("Fit_mode", new String[] {"PDF", "CDF", "PDF_MLE"}, settings.getFitMode());
+    gd.addChoice("Fit_mode", FIT_MODES, settings.getFitMode());
     gd.addCheckbox("Fit_truncated", settings.getFitTruncatedPdf());
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
     gd.addNumericField("CDF_bin_width", settings.getCdfBinWidth(), -3);
@@ -1491,9 +1492,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
   }
 
   private String createHeader() {
-    return Arrays.stream(
-        new String[] {"Dataset", "dz (nm)", "dt (ms)", "max t", "offsets", "a", "b", "optimiser",
-            "repeats", "min D", "max D", "F", "D (um^2/s)", "sigma (nm)", "Value", "BIC"})
+    return Arrays
+        .stream(new String[] {"Dataset", "dz (nm)", "dt (ms)", "max t", "offsets", "Mode",
+            "Truncated", "PDF width", "CDF width", "a", "b", "optimiser", "repeats", "min D",
+            "max D", "F", "D (um^2/s)", "sigma (nm)", "Value", "BIC"})
         .collect(Collectors.joining("\t"));
   }
 
@@ -1513,6 +1515,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
       .append(MathUtils.rounded(exposureTime * 1e3)).append('\t')
       .append(settings.getMaxT()).append('\t')
       .append(settings.getOffsets()).append('\t')
+      .append(FIT_MODES[settings.getFitMode()]).append('\t')
+      .append(settings.getFitTruncatedPdf()).append('\t')
+      .append(MathUtils.rounded(settings.getBinWidth())).append('\t')
+      .append(MathUtils.rounded(settings.getCdfBinWidth())).append('\t')
       .append(MathUtils.rounded(settings.getA())).append('\t')
       .append(MathUtils.rounded(settings.getB())).append('\t')
       .append(getOptimiserMode(settings.getOptimiserMode())).append('\t')

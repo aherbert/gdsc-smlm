@@ -1605,6 +1605,18 @@ A summary table is shown containing the model parameters. The following columns 
    * - Offsets
      - The number of offsets to use for the origin of the track.
 
+   * - Mode
+     - The mode used for fitting.
+
+   * - Truncated
+     - If ``true`` the model PDF maximum distance will be truncated to the observed PDF.
+
+   * - Bin width
+     - The bin width for the histogram counts used to create the observed PDF.
+
+   * - CDF width
+     - The bin width for the histogram counts used to create the observed CDF.
+
    * - A
      - The depth-of-field correction coefficient a.
 
