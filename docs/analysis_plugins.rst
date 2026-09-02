@@ -1516,6 +1516,9 @@ The following parameters can be set:
    * - Fit mode
      - The mode used for fitting.
 
+   * - Fit truncated
+     - If ``true`` the model PDF maximum distance will be truncated to the observed PDF. This is only performed when the final probability in the observed PDF for a time step is above a threshold. Truncation of the PDF is reported to the ``ImageJ`` log window.
+
    * - Bin width
      - The bin width for the histogram counts used to create the observed PDF. Used for plot display and optional fitting.
 

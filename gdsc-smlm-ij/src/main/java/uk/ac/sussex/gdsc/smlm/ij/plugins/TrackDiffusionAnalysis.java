@@ -76,6 +76,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.simple.RandomSource;
+import org.apache.commons.statistics.descriptive.IntMean;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -201,13 +202,14 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final float[][] distances = getDistances(allResults, gapCounts);
     // Create counts and PDF for plotting/fitting; and optionally CDF for fitting only
     final int[][] counts = createCounts(distances, (float) settings.getBinWidth());
-    final float[][] pdf = createPdf(counts);
+    final boolean[] truncated = new boolean[distances.length];
+    final float[][] pdf = createPdf(counts, truncated);
     float[][] df = pdf;
     float[][] cdf = null;
     // Note: The CDF is binned for plot display as showing all distances is slow and
     // the plot resolution cannot show all distances.
     if (settings.getShowCdf() || settings.getFitMode() == MODE_CDF) {
-      cdf = createCdf(createCounts(distances, (float) settings.getCdfBinWidth()));
+      cdf = createCdf(createCounts(distances, (float) settings.getCdfBinWidth()), truncated);
       // Fit the CDF as the distribution function
       if (settings.getFitMode() == MODE_CDF) {
         df = cdf;
@@ -218,7 +220,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
     try {
-      final PointValuePair result = fitDistances(counts, df, executor, settings.getFitMode());
+      final PointValuePair result = fitDistances(counts, df, executor);
       if (result != null) {
         final double[] fit = result.getPointRef();
         double d;
@@ -532,6 +534,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     gd.addNumericField("Precision", settings.getPrecision(), 1, 6, "nm");
 
     gd.addChoice("Fit_mode", new String[] {"PDF", "CDF", "PDF_MLE"}, settings.getFitMode());
+    gd.addCheckbox("Fit_truncated", settings.getFitTruncatedPdf());
     gd.addNumericField("Bin_width", settings.getBinWidth(), -3);
     gd.addNumericField("CDF_bin_width", settings.getCdfBinWidth(), -3);
 
@@ -580,6 +583,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     settings.setPrecision(gd.getNextNumber());
 
     settings.setFitMode(gd.getNextChoiceIndex());
+    settings.setFitTruncatedPdf(gd.getNextBoolean());
     settings.setBinWidth(gd.getNextNumber());
     settings.setCdfBinWidth(gd.getNextNumber());
 
@@ -854,8 +858,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
   }
 
-  private PointValuePair fitDistances(int[][] counts, float[][] df, ExecutorService executor,
-      int mode) {
+  private PointValuePair fitDistances(int[][] counts, float[][] df, ExecutorService executor) {
+    final int mode = settings.getFitMode();
     final Pair<PointValuePair, Double> result2 = fitTwoStateDistances(counts, df, executor, mode);
     if (result2 == null) {
       return null;
@@ -967,7 +971,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       args.add(new ObjectiveFunction(new TwoStateFunction(dt, dz, settings.getA(), settings.getB(),
           precision, settings.getBinWidth(), counts, executor)::logLikelihood));
       args.add(GoalType.MAXIMIZE);
-      numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
+      numberOfPoints = Arrays.stream(counts).mapToInt(x -> (int) MathUtils.sum(x)).sum();
     } else {
       final boolean isCdf = mode == MODE_CDF;
       final double binWidth = mode == MODE_CDF ? settings.getCdfBinWidth() : settings.getBinWidth();
@@ -975,7 +979,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           precision, binWidth, df, isCdf, executor)::sumOfSquares));
       args.add(GoalType.MINIMIZE);
       best = Double.POSITIVE_INFINITY;
-      numberOfPoints = df[0].length * df.length;
+      numberOfPoints = Arrays.stream(df).mapToInt(x -> x.length).sum();
     }
     final double minD = Math.min(0.1, settings.getMinD());
     args.add(new SimpleBounds(addPrecision(new double[] {0, 0.0, minD}, 0),
@@ -1094,7 +1098,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           settings.getB(), precision, settings.getBinWidth(), counts, executor);
       args.add(new ObjectiveFunction(fun::logLikelihood));
       args.add(GoalType.MAXIMIZE);
-      numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
+      numberOfPoints = Arrays.stream(counts).mapToInt(x -> (int) MathUtils.sum(x)).sum();
       penaltyFunction = fun::llPenalty;
     } else {
       final boolean isCdf = mode == MODE_CDF;
@@ -1104,7 +1108,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       args.add(new ObjectiveFunction(fun::sumOfSquares));
       args.add(GoalType.MINIMIZE);
       best = Double.POSITIVE_INFINITY;
-      numberOfPoints = df[0].length * df.length;
+      numberOfPoints = Arrays.stream(df).mapToInt(x -> x.length).sum();
       penaltyFunction = fun::ssPenalty;
     }
     final double minD = Math.min(0.1, settings.getMinD());
@@ -1255,7 +1259,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
           precision, settings.getBinWidth(), counts, executor);
       args.add(new ObjectiveFunction(fun::logLikelihood));
       args.add(GoalType.MAXIMIZE);
-      numberOfPoints = (int) (counts[0].length * MathUtils.sum(counts[0]));
+      numberOfPoints = Arrays.stream(counts).mapToInt(x -> (int) MathUtils.sum(x)).sum();
       penaltyFunction = x -> fun.llPenalty(x[0], x[1], x[2]);
     } else {
       final boolean isCdf = mode == MODE_CDF;
@@ -1265,7 +1269,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       args.add(new ObjectiveFunction(fun::sumOfSquares));
       args.add(GoalType.MINIMIZE);
       best = Double.POSITIVE_INFINITY;
-      numberOfPoints = df[0].length * df.length;
+      numberOfPoints = Arrays.stream(df).mapToInt(x -> x.length).sum();
       penaltyFunction = x -> fun.ssPenalty(x[0], x[1], x[2]);
     }
     final double minD = Math.min(0.1, settings.getMinD());
@@ -1583,11 +1587,12 @@ public class TrackDiffusionAnalysis implements PlugIn {
     return counts.toIntArray();
   }
 
-  private float[][] createPdf(int[][] counts) {
+  private float[][] createPdf(int[][] counts, boolean[] truncated) {
     IJ.showStatus("Creating PDF...");
 
     // Zero pad to max length
     final int n = Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt();
+
     final float[][] pdf = new float[counts.length][];
     for (int i = 0; i < counts.length; i++) {
       final int[] x = counts[i];
@@ -1599,36 +1604,44 @@ public class TrackDiffusionAnalysis implements PlugIn {
       pdf[i] = p;
     }
 
-    // Check the t=1 PDF is not truncated
-    final double maxP = MathUtils.max(pdf[0]);
-    final float endP = pdf[0][counts[0].length - 1];
-    if (endP / maxP > 1e-3) {
-      logger.warning(() -> String.format(
-          "Possible truncation of observed distances: pdf(r=%s, dt=%s ms)=%s (fraction of max %s)",
-          MathUtils.rounded(settings.getBinWidth() * counts[0].length),
-          MathUtils.rounded(exposureTime * 1e3), MathUtils.rounded(endP),
-          MathUtils.rounded(endP / maxP)));
+    // Check the PDF is not truncated. Save the distance limit.
+    for (int j = 0; j < pdf.length; j++) {
+      final int i = j;
+      final double maxP = MathUtils.max(pdf[i]);
+      final float endP = pdf[i][counts[i].length - 1];
+      if (endP / maxP > 1e-3) {
+        if (settings.getFitTruncatedPdf()) {
+          truncated[i] = true;
+          pdf[i] = Arrays.copyOf(pdf[i], counts[i].length);
+        }
+        logger.warning(() -> String.format(
+            "Possible truncation of observed distances: pdf(r=%s, dt=%s ms)=%s (fraction of max %s)",
+            MathUtils.rounded(settings.getBinWidth() * counts[i].length),
+            MathUtils.rounded(exposureTime * 1e3 * (i + 1)), MathUtils.rounded(endP),
+            MathUtils.rounded(endP / maxP)));
+      }
     }
 
     return pdf;
   }
 
-  private float[][] createCdf(int[][] counts) {
+  private float[][] createCdf(int[][] counts, boolean[] truncated) {
     IJ.showStatus("Creating CDF...");
 
     // Zero pad to max length
     final int n = Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt();
+
     final float[][] cdf = new float[counts.length][];
     for (int i = 0; i < counts.length; i++) {
       final int[] x = counts[i];
       final double w = 1.0 / MathUtils.sum(x);
-      final float[] p = new float[n];
+      final float[] p = new float[truncated[i] ? x.length : n];
       long c = 0;
       for (int j = 0; j < x.length; j++) {
         c += x[j];
         p[j] = (float) (c * w);
       }
-      for (int j = x.length; j < n; j++) {
+      for (int j = x.length; j < p.length; j++) {
         p[j] = 1;
       }
       cdf[i] = p;
@@ -1690,11 +1703,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
         Arrays.fill(cdfPlot, cdfPlot[0]);
       }
       final float binWidth = (float) settings.getCdfBinWidth();
-      final float[] r = SimpleArrayUtils.newArray(cdf[0].length + 1, 0, binWidth);
+      final int n = Arrays.stream(cdf).mapToInt(x -> x.length).max().getAsInt();
+      final float[] r = SimpleArrayUtils.newArray(n + 1, 0, binWidth);
       for (int i = 0; i < cdf.length; i++) {
         // Add a zero at r=0
         final float[] y = new float[r.length];
-        System.arraycopy(cdf[i], 0, y, 1, y.length - 1);
+        System.arraycopy(cdf[i], 0, y, 1, cdf[i].length);
+        Arrays.fill(y, 1 + cdf[i].length, y.length, 1);
         cdfPlot[i].setColor(LutHelper.getColour(lut, cdf.length - i, 1, cdf.length));
         cdfPlot[i].addPoints(r, y, Plot.LINE);
         cdfPlot[i].setColor(Color.black);
@@ -1734,10 +1749,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
       Arrays.fill(pdfPlot, pdfPlot[0]);
     }
     float binWidth = (float) settings.getBinWidth();
-    float[] r = SimpleArrayUtils.newArray(pdf[0].length, binWidth / 2, binWidth);
+    final int n = Arrays.stream(pdf).mapToInt(x -> x.length).max().getAsInt();
+    float[] r = SimpleArrayUtils.newArray(n, binWidth / 2, binWidth);
     float maxP = 0;
     for (int i = 0; i < pdf.length; i++) {
-      final float[] y = pdf[i];
+      final float[] y = Arrays.copyOf(pdf[i], n);
       pdfPlot[i].setColor(LutHelper.getColour(lut, pdf.length - i, 1, pdf.length));
       maxP = MathUtils.maxDefault(maxP, y);
       pdfPlot[i].addPoints(r, y, Plot.BAR);
@@ -1778,7 +1794,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       binWidth = (float) settings.getCdfBinWidth();
     }
     final float scale = (float) (settings.getBinWidth() / binWidth);
-    r = SimpleArrayUtils.newArray((int) Math.ceil(scale * pdf[0].length), binWidth / 2, binWidth);
+    r = SimpleArrayUtils.newArray((int) Math.ceil(scale * n), binWidth / 2, binWidth);
 
     final double dt = exposureTime;
     final double dz = settings.getDepthOfField() / 1000;
@@ -1789,18 +1805,20 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final double d1 = fit[1];
     final double f2 = fit[2];
     final double d2 = fit[3];
+    final int[] lengths =
+        Arrays.stream(pdf).mapToInt(x -> (int) Math.ceil(scale * x.length)).toArray();
     if (fit.length < 6) {
       // 2-state
       final double sigma = fit.length > 4 ? fit[4] : precision;
       p = new TwoStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
-          r.length, executor).pdf(pdf.length, f1, d1, f2, d2, sigma);
+          lengths, executor).pdf(pdf.length, f1, d1, f2, d2, sigma);
     } else if (fit.length < 8) {
       // 3-state
       final double f3 = fit[4];
       final double d3 = fit[5];
       final double sigma = fit.length > 6 ? fit[6] : precision;
       p = new ThreeStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
-          r.length, executor).pdf(pdf.length, f1, d1, f2, d2, f3, d3, sigma);
+          lengths, executor).pdf(pdf.length, f1, d1, f2, d2, f3, d3, sigma);
     } else {
       // 4-state
       final double f3 = fit[4];
@@ -1809,7 +1827,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double d4 = fit[7];
       final double sigma = fit.length > 8 ? fit[8] : precision;
       p = new FourStateFunction(dt, dz, settings.getA(), settings.getB(), precision, binWidth,
-          r.length, executor).pdf(pdf.length, f1, d1, f2, d2, f3, d3, f4, d4, sigma);
+          lengths, executor).pdf(pdf.length, f1, d1, f2, d2, f3, d3, f4, d4, sigma);
     }
 
     for (int i = 0; i < pdf.length; i++) {
@@ -1820,7 +1838,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       // reduced bin width so the plots align.
       float[] yy = SimpleArrayUtils.toFloat(pi);
       SimpleArrayUtils.apply(yy, v -> v * scale);
-      pdfPlot[i].addPoints(r, yy, Plot.LINE);
+      pdfPlot[i].addPoints(Arrays.copyOf(r, yy.length), yy, Plot.LINE);
 
       // Cumulative sum
       if (cdfPlot == null) {
@@ -1828,18 +1846,19 @@ public class TrackDiffusionAnalysis implements PlugIn {
       }
       cdfPlot[i].setColor(LutHelper.getColour(lut, cdf.length - i, 1, cdf.length));
       double sum = 0;
-      yy = yy.clone();
-      for (int j = 0; j < yy.length; j++) {
+      yy = Arrays.copyOf(yy, r.length);
+      for (int j = 0; j < pi.length; j++) {
         sum += pi[j];
         yy[j] = (float) sum;
       }
+      Arrays.fill(yy, pi.length, yy.length, 1);
       cdfPlot[i].addPoints(r, yy, Plot.DOT);
     }
   }
 
   /**
    * Creates the weights for each time delay. These are used to evenly balance the different number
-   * of observations for each time delay. The weight for is maxN / N where N is the number of
+   * of observations for each time delay. The weight is meanN / N where N is the number of
    * observations for the time delay.
    *
    * @param counts the observed counts
@@ -1847,8 +1866,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
    */
   private static double[] createWeights(int[][] counts) {
     final int[] sizes = Arrays.stream(counts).mapToInt(x -> (int) MathUtils.sum(x)).toArray();
-    final double maxSize = MathUtils.max(sizes);
-    return Arrays.stream(sizes).mapToDouble(size -> maxSize / size).toArray();
+    final double meanSize = IntMean.of(sizes).getAsDouble();
+    return Arrays.stream(sizes).mapToDouble(size -> meanSize / size).toArray();
   }
 
   // Implementation Note:
@@ -1895,7 +1914,11 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double b;
     double precision;
     double dr;
-    int n;
+    /**
+     * Number of distances for the time. Either the same for each time point, or can be smaller if
+     * the PDF was truncated (typically at short time delta due to a distance limit in tracing).
+     */
+    int[] n;
     float[][] df;
     boolean isCdf;
     int[][] counts;
@@ -1932,7 +1955,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     BaseFunction(double dt, double dz, double a, double b, double precision, double dr,
         float[][] df, boolean isCdf, ExecutorService executor) {
-      this(dt, dz, a, b, precision, dr, Arrays.stream(df).mapToInt(x -> x.length).max().getAsInt(),
+      this(dt, dz, a, b, precision, dr, Arrays.stream(df).mapToInt(x -> x.length).toArray(),
           executor);
       this.df = df;
       this.isCdf = isCdf;
@@ -1940,13 +1963,13 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     BaseFunction(double dt, double dz, double a, double b, double precision, double dr,
         int[][] counts, ExecutorService executor) {
-      this(dt, dz, a, b, precision, dr,
-          Arrays.stream(counts).mapToInt(x -> x.length).max().getAsInt(), executor);
+      this(dt, dz, a, b, precision, dr, Arrays.stream(counts).mapToInt(x -> x.length).toArray(),
+          executor);
       this.counts = counts;
       weights = createWeights(counts);
     }
 
-    BaseFunction(double dt, double dz, double a, double b, double precision, double dr, int n,
+    BaseFunction(double dt, double dz, double a, double b, double precision, double dr, int[] n,
         ExecutorService executor) {
       this.dt = dt;
       this.dz = dz;
@@ -1977,7 +2000,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       super(dt, dz, a, b, precision, dr, counts, executor);
     }
 
-    TwoStateFunction(double dt, double dz, double a, double b, double precision, double dr, int n,
+    TwoStateFunction(double dt, double dz, double a, double b, double precision, double dr, int[] n,
         ExecutorService executor) {
       super(dt, dz, a, b, precision, dr, n, executor);
     }
@@ -2089,7 +2112,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double p2 = DiffusionAnalysis.remaining(deltaT, dz + a * Math.sqrt(d2) + b, d2);
       final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
       final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
-      final double[] p = new double[n];
+      final double[] p = new double[n[time]];
       // We have 2n+1 distances r for n observations.
       // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
       double sum = 0;
@@ -2147,8 +2170,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       super(dt, dz, a, b, precision, dr, counts, executor);
     }
 
-    ThreeStateFunction(double dt, double dz, double a, double b, double precision, double dr, int n,
-        ExecutorService executor) {
+    ThreeStateFunction(double dt, double dz, double a, double b, double precision, double dr,
+        int[] n, ExecutorService executor) {
       super(dt, dz, a, b, precision, dr, n, executor);
     }
 
@@ -2231,7 +2254,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     double ssPenalty(double f1, double f2) {
       if (f1 + f2 > 1) {
-        return (f1 + f2 - 1) * n;
+        return (f1 + f2 - 1) * n[n.length - 1];
       }
       return 0;
     }
@@ -2284,7 +2307,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     double llPenalty(double f1, double f2) {
       if (f1 + f2 > 1) {
-        return (f1 + f2 - 1) * n * Math.log(0.01);
+        return (f1 + f2 - 1) * n[n.length - 1] * Math.log(0.01);
       }
       return 0;
     }
@@ -2298,7 +2321,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double denom1 = 1.0 / (4 * (d1 * deltaT + sigma * sigma));
       final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
       final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
-      final double[] p = new double[n];
+      final double[] p = new double[n[time]];
       // We have 2n+1 distances r for n observations.
       // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
       double sum = 0;
@@ -2360,8 +2383,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
       super(dt, dz, a, b, precision, dr, counts, executor);
     }
 
-    FourStateFunction(double dt, double dz, double a, double b, double precision, double dr, int n,
-        ExecutorService executor) {
+    FourStateFunction(double dt, double dz, double a, double b, double precision, double dr,
+        int[] n, ExecutorService executor) {
       super(dt, dz, a, b, precision, dr, n, executor);
     }
 
@@ -2446,7 +2469,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     double ssPenalty(double f1, double f2, double f3) {
       if (f1 + f2 + f3 > 1) {
-        return (f1 + f2 + f3 - 1) * n;
+        return (f1 + f2 + f3 - 1) * n[n.length - 1];
       }
       return 0;
     }
@@ -2501,7 +2524,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
     double llPenalty(double f1, double f2, double f3) {
       if (f1 + f2 + f3 > 1) {
-        return (f1 + f2 + f3 - 1) * n * Math.log(0.01);
+        return (f1 + f2 + f3 - 1) * n[n.length - 1] * Math.log(0.01);
       }
       return 0;
     }
@@ -2517,7 +2540,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double denom2 = 1.0 / (4 * (d2 * deltaT + sigma * sigma));
       final double denom3 = 1.0 / (4 * (d3 * deltaT + sigma * sigma));
       final double denom4 = 1.0 / (4 * (d4 * deltaT + sigma * sigma));
-      final double[] p = new double[n];
+      final double[] p = new double[n[time]];
       // We have 2n+1 distances r for n observations.
       // Integrate using Simpson's rule: f(a) + 4*f((a+b)/2) + f(b)
       double sum = 0;

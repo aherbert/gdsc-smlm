@@ -307,6 +307,7 @@ message TrackDiffusionAnalysisSettings {
   int32 max_states = 35;
   double f3 = 36;
   double d4 = 37;
+  bool fit_truncated_pdf = 38;
 }
 
 // Contains the settings for the events in the OPTICS GUI
