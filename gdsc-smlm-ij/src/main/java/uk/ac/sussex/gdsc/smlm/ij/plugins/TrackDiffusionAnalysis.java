@@ -1690,8 +1690,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
     final long sum = MathUtils.sum(gapCounts.toIntArray());
     for (int i = 0; i < gapCounts.size(); i++) {
       final double t = (i + 1) * exposureTime;
-      // cdf(r^2) = 1 - exp(-r^2 / 4dt+s^2)
-      final double p = -Math.expm1(-r * r / (4 * d * t + sigma * sigma));
+      // cdf(r^2) = 1 - exp(-r^2 / (4dt+4s^2))
+      final double p = -Math.expm1(-0.25 * r * r / (d * t + sigma * sigma));
       Level level = Level.INFO;
       String msg = "Observed";
       if (p < 0.95) {
