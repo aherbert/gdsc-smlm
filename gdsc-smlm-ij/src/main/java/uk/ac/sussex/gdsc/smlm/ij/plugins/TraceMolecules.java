@@ -633,7 +633,7 @@ public class TraceMolecules implements PlugIn {
    * @param sourceResults the source results
    * @param traces the traces
    * @param name the name
-   * @param settingsComment the settings comment
+   * @param settingsComment the settings comment (or null to ignore)
    * @return the memory peak results
    */
   static MemoryPeakResults saveResults(MemoryPeakResults sourceResults, Trace[] traces, String name,
@@ -641,7 +641,9 @@ public class TraceMolecules implements PlugIn {
     final MemoryPeakResults tracedResults =
         TraceManager.convertToPeakResults(sourceResults, traces);
     tracedResults.setName(sourceResults.getName() + " " + name);
-    tracedResults.setConfiguration(settingsComment);
+    if (settingsComment != null) {
+      tracedResults.setConfiguration(settingsComment);
+    }
     MemoryPeakResults.addResults(tracedResults);
     return tracedResults;
   }

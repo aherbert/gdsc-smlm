@@ -1704,7 +1704,7 @@ public class Optics implements PlugIn {
         results.forEach((PeakResultProcedure) result -> {
           traces[clusters[counter.getAndIncrement()]].add(result);
         });
-        TraceMolecules.saveResults(results, traces, pluginTitle);
+        TraceMolecules.saveResults(results, traces, pluginTitle, null);
       }
 
       // We have not created anything new so return the current object
