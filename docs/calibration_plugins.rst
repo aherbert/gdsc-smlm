@@ -1630,7 +1630,7 @@ The simulated fraction remaining is plotted using lines with the fitted probabil
 
     Depth of field simulation plot
 
-    Simulated fraction remaining in red lines; fitted probability in blue points.
+    Simulated fraction remaining in blue points; fitted probability in red lines.
 
 Fitting results are output to a summary table:
 

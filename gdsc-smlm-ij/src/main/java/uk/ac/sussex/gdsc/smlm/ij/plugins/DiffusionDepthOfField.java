@@ -597,26 +597,32 @@ public class DiffusionDepthOfField implements PlugIn {
    */
   private void plotRemaining(final double[][] probability, double[][] fitted) {
     final double dt = settings.exposureTime / 1000;
-    final int maxT = settings.maxT;
+    final int n = probability[0].length;
+    final int m = fitted[0].length;
 
     // Plot the observed distribution.
     // For each D add a line for all time steps
-    final float[] time = SimpleArrayUtils.newArray(maxT, 1.0f, 1.0f);
+    final float[] time = SimpleArrayUtils.newArray(n, 1.0f, 1.0f);
     SimpleArrayUtils.apply(time, x -> (float) (x * dt));
     final String title = TITLE + " probability";
     final Plot plot = new Plot(title, "Time (seconds)", "Probability");
-    LUT lut = LutHelper.createLut(LutColour.RED);
+    LUT lut = LutHelper.createLut(LutColour.BLUE);
     for (int i = 0; i < probability.length; i++) {
       plot.setColor(LutHelper.getColour(lut, 2 * (i + 1), 1, 2 * probability.length));
-      plot.addPoints(time, SimpleArrayUtils.toFloat(probability[i]), Plot.LINE);
+      plot.addPoints(time, SimpleArrayUtils.toFloat(probability[i]), Plot.CIRCLE);
     }
-    lut = LutHelper.createLut(LutColour.BLUE);
+    // Compute the scale
+    double scale = dt * n / m;
+    final float[] time2 = SimpleArrayUtils.newArray(m, 1.0f, 1.0f);
+    SimpleArrayUtils.apply(time2, x -> (float) (x * scale));
+
+    lut = LutHelper.createLut(LutColour.RED);
     for (int i = 0; i < fitted.length; i++) {
       plot.setColor(LutHelper.getColour(lut, 2 * (i + 1), 1, 2 * fitted.length));
-      plot.addPoints(time, SimpleArrayUtils.toFloat(fitted[i]), Plot.CIRCLE);
+      plot.addPoints(time2, SimpleArrayUtils.toFloat(fitted[i]), Plot.LINE);
     }
     plot.setColor(Color.black);
-    plot.setLimits(dt * 0.5, dt * maxT + dt * 0.5, 0, 1);
+    plot.setLimits(dt * 0.5 * n / m, dt * n + dt * 0.5, 0, 1);
 
     ImageJUtils.display(title, plot);
   }
@@ -804,13 +810,16 @@ public class DiffusionDepthOfField implements PlugIn {
   }
 
   private double[][] createProbability(double[] ab) {
-    final double dt = settings.exposureTime / 1000;
+    // Increase resolution
+    final int scale = 8;
+
+    final double dt = settings.exposureTime / (1000 * scale);
     final double dz = settings.depthOfField / 1000;
     final double[] diffusionCoefficients = createDiffusionCoefficients();
 
     final double a = ab[0];
     final double b = ab[1];
-    final double[][] probability = new double[diffusionCoefficients.length][settings.maxT];
+    final double[][] probability = new double[diffusionCoefficients.length][settings.maxT * scale];
 
     for (int i = 0; i < probability.length; i++) {
       final double d = diffusionCoefficients[i];
