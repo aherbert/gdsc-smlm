@@ -863,13 +863,12 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
   private void getTraceSettings(List<MemoryPeakResults> allResults) {
     // Look for the trace settings added to the configuration
-    final String prefix = TraceDiffusion.TITLE + ": ";
     final Set<String> traceSettings = allResults.stream().map(x -> x.getConfiguration())
-        .filter(x -> x != null && x.startsWith(prefix)).collect(Collectors.toSet());
+        .filter(x -> x != null && x.contains("Trace ")).collect(Collectors.toSet());
     if (traceSettings.size() > 1) {
       logger.warning(TITLE + ": Multiple trace settings in the selected results");
     } else if (traceSettings.size() == 1) {
-      this.traceSettings = traceSettings.iterator().next().substring(prefix.length());
+      this.traceSettings = traceSettings.iterator().next();
     }
   }
 
