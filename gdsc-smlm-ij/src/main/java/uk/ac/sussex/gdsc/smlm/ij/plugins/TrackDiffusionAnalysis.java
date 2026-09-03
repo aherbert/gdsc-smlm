@@ -136,6 +136,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private static final String[] OPTIMISER_MODES = {"Powell", "CMA-ES", "BOBYQA"};
   private static final int OPT_MODE_CMAES = 1;
   private static final int OPT_MODE_BOBYQA = 2;
+  private static final double MAX_D = 25;
 
   private static final AtomicReference<TextWindow> TABLE_REF = new AtomicReference<>();
 
@@ -997,7 +998,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
     final double minD = Math.min(0.1, settings.getMinD());
     args.add(new SimpleBounds(addPrecision(new double[] {0, 0.0, minD}, 0),
-        addPrecision(new double[] {1, 0.1, Double.POSITIVE_INFINITY}, 0.1)));
+        addPrecision(new double[] {1, 0.1, MAX_D}, 0.1)));
 
     MultivariateOptimizer optimizer;
     if (settings.getOptimiserMode() == OPT_MODE_CMAES) {
@@ -1127,7 +1128,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
     final double minD = Math.min(0.1, settings.getMinD());
     args.add(new SimpleBounds(addPrecision(new double[] {0, 0, 0.0, minD, minD}, 0), addPrecision(
-        new double[] {1, 1, 0.1, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY}, 0.1)));
+        new double[] {1, 1, 0.1, MAX_D, MAX_D}, 0.1)));
 
     MultivariateOptimizer optimizer;
     if (settings.getOptimiserMode() == OPT_MODE_CMAES) {
@@ -1288,8 +1289,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
     }
     final double minD = Math.min(0.1, settings.getMinD());
     args.add(new SimpleBounds(addPrecision(new double[] {0, 0, 0, 0.0, minD, minD, minD}, 0),
-        addPrecision(new double[] {1, 1, 1, 0.1, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
-            Double.POSITIVE_INFINITY}, 0.1)));
+        addPrecision(new double[] {1, 1, 1, 0.1, MAX_D, MAX_D, MAX_D}, 0.1)));
 
     MultivariateOptimizer optimizer;
     if (settings.getOptimiserMode() == OPT_MODE_CMAES) {
