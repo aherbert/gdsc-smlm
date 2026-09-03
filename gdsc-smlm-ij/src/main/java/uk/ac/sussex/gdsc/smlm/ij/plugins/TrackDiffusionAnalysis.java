@@ -128,6 +128,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private static final String TITLE = "Track Diffusion Analysis";
   private static final int MODE_CDF = 1;
   private static final int MODE_PDF_MLE = 2;
+  private static final int MODE_FULL = 0;
   private static final int MODE_TRUNCATED = 1;
   private static final int MODE_IGNORE = 2;
   private static final String[] FIT_MODES = {"PDF", "CDF", "PDF_MLE"};
@@ -220,7 +221,7 @@ public class TrackDiffusionAnalysis implements PlugIn {
       }
     }
 
-    if (settings.getTruncatedMode() == MODE_TRUNCATED) {
+    if (settings.getTruncatedMode() == MODE_IGNORE) {
       for (int i = 0; i < counts.length; i++) {
         if (truncated[i]) {
           counts[i] = new int[0];
@@ -1628,9 +1629,22 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double maxP = MathUtils.max(pdf[i]);
       final float endP = pdf[i][counts[i].length - 1];
       if (endP / maxP > 1e-3) {
-        if (settings.getTruncatedMode() == MODE_TRUNCATED) {
+        logger.warning(() -> String.format(
+            "Possible truncation of observed distances: pdf(r=%s, dt=%s ms)=%s (fraction of max %s)",
+            MathUtils.rounded(settings.getBinWidth() * counts[i].length),
+            MathUtils.rounded(exposureTime * 1e3 * (i + 1)), MathUtils.rounded(endP),
+            MathUtils.rounded(endP / maxP)));
+        // Mark truncated data for special processing
+        if (settings.getTruncatedMode() != MODE_FULL) {
           truncated[i] = true;
-          pdf[i] = Arrays.copyOf(pdf[i], counts[i].length);
+          // Only truncate the length for truncated mode. The shorter length
+          // set a limit for the model PDF integration.
+          // In IGNORE mode the data is removed before fitting but the
+          // full length allows the plot of the PDF to show the full function
+          // rather than the truncated model PDF.
+          if (settings.getTruncatedMode() == MODE_TRUNCATED) {
+            pdf[i] = Arrays.copyOf(pdf[i], counts[i].length);
+          }
         }
       }
     }
