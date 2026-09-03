@@ -414,6 +414,8 @@ public class TraceMolecules implements PlugIn {
     final HashMap<CalibrationKey, List<Pair<MemoryPeakResults, Trace[]>>> analysisResults =
         new HashMap<>();
 
+    final String settingsComment = createSettingsComment(mode);
+
     for (int i = 0; i < allResults.size(); i++) {
       final MemoryPeakResults results = allResults.get(i);
       if (allResults.size() > 1) {
@@ -496,21 +498,21 @@ public class TraceMolecules implements PlugIn {
 
       String outputName = mode.getName();
       outputName += (outputName.endsWith("e") ? "" : "e") + "d";
-      saveResults(results, traces, outputName);
+      saveResults(results, traces, outputName, settingsComment);
 
       // Optional save of other datasets
       if (pluginSettings.saveDerivedDatasets) {
         // Save singles + single localisations in a trace
-        saveCentroidResults(results, getSingles(traces), outputName + " Singles");
+        saveCentroidResults(results, getSingles(traces), outputName + " Singles", settingsComment);
         final Trace[] multiTraces = getTraces(traces);
-        saveResults(results, multiTraces, outputName + " Multi");
+        saveResults(results, multiTraces, outputName + " Multi", settingsComment);
 
         // Save centroids
         outputName += " Centroids";
-        saveCentroidResults(results, traces, outputName);
+        saveCentroidResults(results, traces, outputName, settingsComment);
 
         // Save traces separately
-        saveCentroidResults(results, multiTraces, outputName + " Multi");
+        saveCentroidResults(results, multiTraces, outputName + " Multi", settingsComment);
       }
 
       // Sort traces by time to assist the results source in extracting frames sequentially.
@@ -518,7 +520,7 @@ public class TraceMolecules implements PlugIn {
       sortByTime(traces);
 
       if (!multiMode && settings.getSaveTraces()) {
-        saveTracesToFile(results, traces);
+        saveTracesToFile(results, traces, settingsComment);
       }
 
       summarise(results.getName(), mode, createSummaryTable(), traces, totalFiltered,
@@ -529,7 +531,7 @@ public class TraceMolecules implements PlugIn {
     }
     if (allResults.size() > 1) {
       IJ.showProgress(-1);
-      saveCombinedDatasets(mode, analysisResults);
+      saveCombinedDatasets(mode, analysisResults, settingsComment);
       IJ.showStatus(pluginTitle + " finished " + allResults.size() + " datasets");
     }
   }
@@ -631,22 +633,25 @@ public class TraceMolecules implements PlugIn {
    * @param sourceResults the source results
    * @param traces the traces
    * @param name the name
+   * @param settingsComment the settings comment
    * @return the memory peak results
    */
-  static MemoryPeakResults saveResults(MemoryPeakResults sourceResults, Trace[] traces,
-      String name) {
+  static MemoryPeakResults saveResults(MemoryPeakResults sourceResults, Trace[] traces, String name,
+      String settingsComment) {
     final MemoryPeakResults tracedResults =
         TraceManager.convertToPeakResults(sourceResults, traces);
     tracedResults.setName(sourceResults.getName() + " " + name);
+    tracedResults.setConfiguration(settingsComment);
     MemoryPeakResults.addResults(tracedResults);
     return tracedResults;
   }
 
   private static MemoryPeakResults saveCentroidResults(MemoryPeakResults sourceResults,
-      Trace[] traces, String name) {
+      Trace[] traces, String name, String settingsComment) {
     final MemoryPeakResults tracedResults =
         TraceManager.convertToCentroidPeakResults(sourceResults, traces);
     tracedResults.setName(sourceResults.getName() + " " + name);
+    tracedResults.setConfiguration(settingsComment);
     MemoryPeakResults.addResults(tracedResults);
     return tracedResults;
   }
@@ -671,9 +676,9 @@ public class TraceMolecules implements PlugIn {
     return result.toArray(new Trace[0]);
   }
 
-  private void saveTracesToFile(MemoryPeakResults results, Trace[] traces) {
+  private void saveTracesToFile(MemoryPeakResults results, Trace[] traces, String settingsComment) {
     pluginSettings.filename =
-        saveTraces(results, traces, createSettingsComment(), pluginSettings.filename, 0);
+        saveTraces(results, traces, settingsComment, pluginSettings.filename, 0);
   }
 
   /**
@@ -727,10 +732,44 @@ public class TraceMolecules implements PlugIn {
     return filename;
   }
 
-  private String createSettingsComment() {
-    return String.format(
-        "Molecule tracing : distance-threshold = %f nm : time-threshold = %f s (%d frames)",
-        settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames());
+  private String createSettingsComment(AnalysisMode mode) {
+    StringBuilder sb = new StringBuilder(1024).append(pluginTitle).append(": ");
+    if (mode == AnalysisMode.DYNAMIC_TRACE) {
+      sb.append("Dynamic MTT : D=")
+          .append(MathUtils.rounded(settings.getDiffusionCoefficentMaximum(), 3)).append("um^2/s");
+      if (!settings.getDisableLocalDiffusionModel() || !settings.getDisableIntensityModel()) {
+        sb.append(", window=").append(settings.getTemporalWindow());
+      }
+      if (!settings.getDisableLocalDiffusionModel()) {
+        sb.append(", wLocal=").append(MathUtils.rounded(settings.getLocalDiffusionWeight(), 2));
+      }
+      if (!settings.getDisableIntensityModel()) {
+        sb.append(", wOn=").append(MathUtils.rounded(settings.getOnIntensityWeight(), 2));
+      }
+      sb.append(", decay=").append(MathUtils.rounded(settings.getDisappearanceDecayFactor(), 2));
+    } else if (mode == AnalysisMode.CLUSTER) {
+      sb.append("Clustering : ").append(settings.getClusteringAlgorithm()).append(' ')
+          .append(MathUtils.rounded(settings.getDistanceThreshold(), 3)).append("nm").append(", ")
+          .append(settings.getTimeThreshold()).append(' ').append(settings.getTimeUnit());
+      if (settings.getPulseInterval() > 0) {
+        sb.append(", pulse=").append(settings.getPulseInterval()).append(" split=")
+            .append(settings.getSplitPulses());
+      }
+    } else {
+      sb.append("Tracing : ").append(getTraceMode(settings.getTraceMode())).append(' ')
+          .append(MathUtils.rounded(settings.getDistanceThreshold(), 3)).append("nm");
+      if (settings.getDistanceExclusion() > settings.getDistanceThreshold()) {
+        sb.append(" (ex. ").append(MathUtils.rounded(settings.getDistanceExclusion(), 3))
+            .append("nm)");
+      }
+      sb.append(", ").append(settings.getTimeThreshold()).append(' ')
+          .append(settings.getTimeUnit());
+      if (settings.getPulseInterval() > 0 && settings.getPulseWindow() > 0) {
+        sb.append(", pulse=").append(settings.getPulseInterval()).append(" window=")
+            .append(settings.getPulseWindow()).append(" split=").append(settings.getSplitPulses());
+      }
+    }
+    return sb.toString();
   }
 
   /**
@@ -1981,7 +2020,8 @@ public class TraceMolecules implements PlugIn {
   }
 
   private void saveCombinedDatasets(AnalysisMode mode,
-      final HashMap<CalibrationKey, List<Pair<MemoryPeakResults, Trace[]>>> analysisResults) {
+      final HashMap<CalibrationKey, List<Pair<MemoryPeakResults, Trace[]>>> analysisResults,
+      String settingsComment) {
     if (pluginSettings.disableCombinedDataset) {
       return;
     }
@@ -1999,6 +2039,7 @@ public class TraceMolecules implements PlugIn {
         r.setCalibration(createCombinedCalibration(r, results));
         r.setPsf(results.stream().map(MemoryPeakResults::getPsf)
             .reduce((a, b) -> Objects.equals(a, b) ? a : null).orElse(null));
+        r.setConfiguration(settingsComment);
         MemoryPeakResults.addResults(r);
       }
     });

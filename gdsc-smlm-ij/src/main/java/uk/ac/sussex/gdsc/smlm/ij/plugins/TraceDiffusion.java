@@ -1236,7 +1236,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       if (traces.length != 0) {
         // Save the traces to memory.
         // This removes any configuration on the fitting copied from the source results.
-        TraceMolecules.saveResults(r, traces, "Tracks").setConfiguration(traceSettings);
+        TraceMolecules.saveResults(r, traces, "Tracks", traceSettings);
 
         if (clusteringSettings.getSaveTraces()) {
           // Sort traces by time to assist the results source in extracting frames sequentially.
