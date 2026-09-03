@@ -2021,6 +2021,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
     double[][] pdf(int maxT, double f1, double d1, double f2, double d2, double sigma) {
       final List<Future<double[]>> futures = new LocalList<>(maxT);
       for (int n = 0; n < maxT; n++) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computePdf(f1, d1, f2, d2, sigma, time)));
       }
@@ -2047,6 +2050,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final List<Future<Double>> futures = new LocalList<>(df.length);
       for (int n = df.length; --n >= 0;) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computeSS(f1, d1, f2, d2, sigma, time)));
       }
@@ -2092,6 +2098,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final List<Future<Double>> futures = new LocalList<>(counts.length);
       for (int n = counts.length; --n >= 0;) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computeLL(f1, d1, f2, d2, sigma, time)));
       }
@@ -2192,6 +2201,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
         double sigma) {
       final List<Future<double[]>> futures = new LocalList<>(maxT);
       for (int n = 0; n < maxT; n++) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computePdf(f1, d1, f2, d2, f3, d3, sigma, time)));
       }
@@ -2228,6 +2240,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final List<Future<Double>> futures = new LocalList<>(df.length);
       for (int n = df.length; --n >= 0;) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computeSS(f1, d1, f2, d2, f3, d3, sigma, time)));
       }
@@ -2291,6 +2306,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final List<Future<Double>> futures = new LocalList<>(counts.length);
       for (int n = counts.length; --n >= 0;) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computeLL(f1, d1, f2, d2, f3, d3, sigma, time)));
       }
@@ -2405,6 +2423,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
         double f4, double d4, double sigma) {
       final List<Future<double[]>> futures = new LocalList<>(maxT);
       for (int n = 0; n < maxT; n++) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computePdf(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time)));
       }
@@ -2443,6 +2464,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final List<Future<Double>> futures = new LocalList<>(df.length);
       for (int n = df.length; --n >= 0;) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computeSS(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time)));
       }
@@ -2508,6 +2532,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
 
       final List<Future<Double>> futures = new LocalList<>(counts.length);
       for (int n = counts.length; --n >= 0;) {
+        if (this.n[n] == 0) {
+          continue;
+        }
         final int time = n;
         futures.add(executor.submit(() -> computeLL(f1, d1, f2, d2, f3, d3, f4, d4, sigma, time)));
       }
