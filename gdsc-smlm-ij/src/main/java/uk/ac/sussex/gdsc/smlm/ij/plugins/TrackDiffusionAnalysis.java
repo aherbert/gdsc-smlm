@@ -128,6 +128,8 @@ public class TrackDiffusionAnalysis implements PlugIn {
   private static final String TITLE = "Track Diffusion Analysis";
   private static final int MODE_CDF = 1;
   private static final int MODE_PDF_MLE = 2;
+  private static final int MODE_TRUNCATED = 1;
+  private static final int MODE_IGNORE = 2;
   private static final String[] FIT_MODES = {"PDF", "CDF", "PDF_MLE"};
   private static final String[] TRUNCATED_MODES = {"Full", "Truncate", "Ignore"};
   private static final String[] OPTIMISER_MODES = {"Powell", "CMA-ES", "BOBYQA"};
@@ -215,6 +217,15 @@ public class TrackDiffusionAnalysis implements PlugIn {
       // Fit the CDF as the distribution function
       if (settings.getFitMode() == MODE_CDF) {
         df = cdf;
+      }
+    }
+
+    if (settings.getTruncatedMode() == MODE_TRUNCATED) {
+      for (int i = 0; i < counts.length; i++) {
+        if (truncated[i]) {
+          counts[i] = new int[0];
+          df[i] = new float[0];
+        }
       }
     }
 
@@ -1617,16 +1628,10 @@ public class TrackDiffusionAnalysis implements PlugIn {
       final double maxP = MathUtils.max(pdf[i]);
       final float endP = pdf[i][counts[i].length - 1];
       if (endP / maxP > 1e-3) {
-        // TODO: Fix this for ignore mode
-        if (settings.getTruncatedMode() == 1) {
+        if (settings.getTruncatedMode() == MODE_TRUNCATED) {
           truncated[i] = true;
           pdf[i] = Arrays.copyOf(pdf[i], counts[i].length);
         }
-        logger.warning(() -> String.format(
-            "Possible truncation of observed distances: pdf(r=%s, dt=%s ms)=%s (fraction of max %s)",
-            MathUtils.rounded(settings.getBinWidth() * counts[i].length),
-            MathUtils.rounded(exposureTime * 1e3 * (i + 1)), MathUtils.rounded(endP),
-            MathUtils.rounded(endP / maxP)));
       }
     }
 
