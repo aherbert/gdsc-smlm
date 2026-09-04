@@ -26,17 +26,23 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
 import ij.gui.ImageWindow;
+import ij.gui.Line;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.gui.Toolbar;
 import ij.plugin.PlugIn;
+import ij.plugin.tool.PlugInTool;
 import ij.process.ByteProcessor;
 import ij.process.LUT;
+import ij.text.TextPanel;
 import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -45,10 +51,12 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
@@ -59,6 +67,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
@@ -115,12 +124,16 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetLineRoi;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.math.SumOfSquaredDeviations;
+import uk.ac.sussex.gdsc.core.trees.DoubleDistanceFunctions;
+import uk.ac.sussex.gdsc.core.trees.IntDoubleKdTree;
+import uk.ac.sussex.gdsc.core.trees.KdTrees;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -304,7 +317,10 @@ public class TrackPopulationAnalysis implements PlugIn {
    * Class to hold data for each track.
    */
   private static class TrackData {
-    final int id;
+    private static AtomicLong NEXT_ID = new AtomicLong();
+
+    /** Unique ID within this JVM. Analysis can use this to uniquely identify results. */
+    final long id;
     final int[] component;
     final double[][] data;
     final double[][] fitData;
@@ -315,14 +331,13 @@ public class TrackPopulationAnalysis implements PlugIn {
     /**
      * Create an instance.
      *
-     * @param id the id
      * @param component the component
      * @param data the data
      * @param fitData the fit data (can be null if no fitting was done)
      * @param trace the trace
      */
-    TrackData(int id, int[] component, double[][] data, double[][] fitData, Trace trace) {
-      this.id = id;
+    TrackData(int[] component, double[][] data, double[][] fitData, Trace trace) {
+      this.id = NEXT_ID.incrementAndGet();
       this.component = component;
       this.data = data;
       this.fitData = fitData;
@@ -527,6 +542,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private JMenuItem analysisJumpAngles;
     private JMenuItem analysisFitJumpDistances;
     private JMenuItem analysisResidenceTime;
+    private JMenuItem analysisTrackLength;
     private JMenuItem optionsTrackData;
     /** The selected action. */
     transient Consumer<List<TrackData>> selectedAction;
@@ -612,6 +628,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       menu.add(
           analysisFitJumpDistances = add("Fit jump distances", KeyEvent.VK_D, "ctrl pressed D"));
       menu.add(analysisResidenceTime = add("Residence Time", KeyEvent.VK_R, "ctrl pressed R"));
+      menu.add(analysisTrackLength = add("Track Length", KeyEvent.VK_L, "ctrl pressed L"));
       return menu;
     }
 
@@ -645,6 +662,8 @@ public class TrackPopulationAnalysis implements PlugIn {
         action = this::doAnalysisFitJumpDistances;
       } else if (src == analysisResidenceTime) {
         action = this::doAnalysisResidenceTime;
+      } else if (src == analysisTrackLength) {
+        action = this::doAnalysisTrackLength;
       } else if (src == dataSave) {
         action = this::doDataSave;
       }
@@ -756,7 +775,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Do this last as all the plot are the same size and will tile nicely.
       if (settings.showTrackImage) {
         selectedAction = selectedAction.andThen(new TrackImage(distanceConverter,
-            settings.nmPerPixel, settings.minDisplaySize, colourMap, wo));
+            settings.nmPerPixel, deltaT, settings.minDisplaySize, colourMap, wo));
       }
 
       if (selectedAction != NoopAction.INSTANCE) {
@@ -1409,6 +1428,17 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     /**
+     * Install a track length tool.
+     */
+    private void doAnalysisTrackLength() {
+      // Install the track length tool.
+      // The tool only functions on an image with a 'Track Data' property.
+      Toolbar.addPlugInTool(TrackLengthTool.INSTANCE);
+      IJ.showStatus("Added " + TrackLengthTool.TOOL_TITLE + " Tool");
+      TrackLengthTool.INSTANCE.showOptionsDialog();
+    }
+
+    /**
      * Save the selected data to a new dataset.
      */
     private void doDataSave() {
@@ -1600,6 +1630,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private static final BasicStroke DASHED = new BasicStroke(1, BasicStroke.CAP_SQUARE,
         BasicStroke.JOIN_MITER, 10.0f, new float[] {3, 3}, 0.0f);
     final double nmPerPixel;
+    final double deltaT;
     final int minDisplaySize;
     final double scale;
     final IntFunction<Color> colourMap;
@@ -1610,13 +1641,15 @@ public class TrackPopulationAnalysis implements PlugIn {
      *
      * @param distanceConverter the distance converter to get the coordinates in micrometers
      * @param nmPerPixel the nm per pixel for the output track image
+     * @param deltaT the time step (delta T)
      * @param minDisplaySize the min display size for the image window (in pixels)
      * @param colourMap the colour map
      * @param wo the window organiser
      */
-    TrackImage(TypeConverter<DistanceUnit> distanceConverter, double nmPerPixel, int minDisplaySize,
-        IntFunction<Color> colourMap, WindowOrganiser wo) {
+    TrackImage(TypeConverter<DistanceUnit> distanceConverter, double nmPerPixel, double deltaT,
+        int minDisplaySize, IntFunction<Color> colourMap, WindowOrganiser wo) {
       this.nmPerPixel = nmPerPixel;
+      this.deltaT = deltaT;
       this.minDisplaySize = minDisplaySize;
       // Get the scale factor
       final double unitsToUm = distanceConverter.convert(1);
@@ -1635,14 +1668,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       final Trace trace = track.trace;
       final int length = track.component.length;
       final int points = trace.size();
-      final double[] x = new double[points];
-      final double[] y = new double[points];
+      final double[] xd = new double[points];
+      final double[] yd = new double[points];
       for (int i = 0; i < points; i++) {
-        x[i] = (float) (trace.get(i).getXPosition() * scale);
-        y[i] = (float) (trace.get(i).getYPosition() * scale);
+        xd[i] = trace.get(i).getXPosition() * scale;
+        yd[i] = trace.get(i).getYPosition() * scale;
       }
-      final double[] xlimits = MathUtils.limits(x);
-      final double[] ylimits = MathUtils.limits(y);
+      final double[] xlimits = MathUtils.limits(xd);
+      final double[] ylimits = MathUtils.limits(yd);
       // Add border
       final float border = 1;
       xlimits[0] = Math.floor(xlimits[0] - border);
@@ -1656,9 +1689,11 @@ public class TrackPopulationAnalysis implements PlugIn {
       bp.setValue(255);
       bp.fill();
       // Offset the coordinates
+      final float[] x = new float[xd.length];
+      final float[] y = new float[xd.length];
       for (int i = 0; i < points; i++) {
-        x[i] -= xlimits[0];
-        y[i] -= ylimits[0];
+        x[i] = (float) (xd[i] - xlimits[0]);
+        y[i] = (float) (yd[i] - ylimits[0]);
       }
       // Create a track overlay
       final Overlay overlay = new Overlay();
@@ -1670,8 +1705,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       final float[] xx = new float[x.length];
       final float[] yy = new float[x.length];
       for (int i = 0; i <= offset; i++) {
-        xx[n] = (float) x[i];
-        yy[n] = (float) y[i];
+        xx[n] = x[i];
+        yy[n] = y[i];
         n++;
       }
       Roi roi = createRoi(xx, yy, n, Color.LIGHT_GRAY);
@@ -1679,8 +1714,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       overlay.add(roi);
       n = 0;
       for (int i = offset + length - 1; i < points; i++) {
-        xx[n] = (float) x[i];
-        yy[n] = (float) y[i];
+        xx[n] = x[i];
+        yy[n] = y[i];
         n++;
       }
       roi = createRoi(xx, yy, n, Color.GRAY);
@@ -1695,20 +1730,20 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Add the classified points using the correct colour
       final int[] component = track.component;
       int current = component[0];
-      xx[0] = (float) x[offset];
-      yy[0] = (float) y[offset];
+      xx[0] = x[offset];
+      yy[0] = y[offset];
       n = 1;
       for (int i = 1; i < length; i++) {
         if (current != component[i]) {
           // Add ROI
           overlay.add(createRoi(xx, yy, n, current));
           current = component[i];
-          xx[0] = (float) x[i + offset - 1];
-          yy[0] = (float) y[i + offset - 1];
+          xx[0] = x[i + offset - 1];
+          yy[0] = y[i + offset - 1];
           n = 1;
         }
-        xx[n] = (float) x[i + offset];
-        yy[n] = (float) y[i + offset];
+        xx[n] = x[i + offset];
+        yy[n] = y[i + offset];
         n++;
       }
       // Add final ROI
@@ -1729,6 +1764,12 @@ public class TrackPopulationAnalysis implements PlugIn {
       for (int i = 9; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < minDisplaySize;) {
         iw.getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
       }
+
+      // Add data for the trace length tool
+      imp.setProperty(TrackLengthTool.TRACK_DATA, track);
+      imp.setProperty(TrackLengthTool.TRACK_COORDS, new float[][] {x, y});
+      imp.setProp(TrackLengthTool.TRACK_CAL_TIME, deltaT);
+      imp.setProp(TrackLengthTool.TRACK_CAL_DISTANCE, scale * nmPerPixel);
     }
 
     private Roi createRoi(float[] x, float[] y, int n, int current) {
@@ -1989,6 +2030,465 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
           .setLimitsToFit(true);
+    }
+  }
+
+  /**
+   * All the work for this plugin is done with the plugin tool. It handles mouse click events from
+   * an image.
+   */
+  private static class TrackLengthTool extends PlugInTool {
+    static final TrackLengthTool INSTANCE = new TrackLengthTool();
+    static final String TOOL_TITLE = "Track Length";
+    static final String TRACK_DATA = "Track Data";
+    static final String TRACK_COORDS = "Track Coords";
+    static final String TRACK_CAL_DISTANCE = "Track Distance";
+    static final String TRACK_CAL_TIME = "Track Time";
+    private static final String KEY_KNN = "gdsc.smlm.tracklength.knn";
+    private static final String KEY_MODE = "gdsc.smlm.tracklength.mode";
+
+    private static final AtomicReference<TextWindow> distancesWindow = new AtomicReference<>();
+
+    /** Cache of trees. Length must be a small power of 2 for a fast scan and slot replace. */
+    private static final Tree[] TREES = new Tree[8];
+    private static final AtomicInteger SLOT = new AtomicInteger();
+
+    private int knn = (int) Prefs.get(KEY_KNN, 5);
+    private final int mode = (int) Prefs.get(KEY_MODE, 0);
+
+    /** Flag set in mouse pressed and released in mouse released. */
+    AtomicInteger dragging = new AtomicInteger();
+
+    // Created in the MousePressed event
+    double ox;
+    double oy;
+    int origX;
+    int origY;
+    double[] origin;
+
+    private static class Tree {
+      long id;
+      IntDoubleKdTree tree;
+
+      Tree(long id, IntDoubleKdTree tree) {
+        this.id = id;
+        this.tree = tree;
+      }
+    }
+
+    @Override
+    public String getToolName() {
+      return TOOL_TITLE + " Tool";
+    }
+
+    @Override
+    public String getToolIcon() {
+      // A magenta line between a red and blue spot
+      return "Cf0fL32daCf00o1055C00foc855";
+    }
+
+    @Override
+    public synchronized void showOptionsDialog() {
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TOOL_TITLE + " Tool Options");
+      gd.addMessage("Click-and-drag on a track image to measure the track distance.");
+      if (!hasTrackImage()) {
+        gd.addMessage("Warning: Currently no track images are open.");
+      }
+      gd.addSlider("KNN", 1, 10, knn);
+      gd.addChoice("Mode", new String[] {"Time", "Distance"}, mode);
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return;
+      }
+      knn = (int) gd.getNextNumber();
+      Prefs.set(KEY_KNN, knn);
+      Prefs.set(KEY_MODE, mode);
+    }
+
+    private static boolean hasTrackImage() {
+      for (final int id : ImageJUtils.getIdList()) {
+        final ImagePlus imp = WindowManager.getImage(id);
+        if (imp != null && imp.getProperty(TRACK_DATA) instanceof TrackData) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // --------------
+    // Actions
+    // --------------
+
+    // Mouse press:
+    // - Find KNN
+    // - Check if the KNN are within a suitable time period
+    // - if not then allow anyway and log error?
+    // - Store press location
+
+    // Mouse drag
+    // - Draw a line ROI from the start location
+
+    // Mouse released
+    // - Find KNN
+    // - Check if the KNN are within a suitable time period
+    // - if not then allow anyway and log error?
+    // - Output Euclidian distance
+
+    // Mouse clicked with modifier key
+    // - Find Overlay components within the region and remove from Overlay and table
+
+    // --------------
+
+    @Override
+    public void mousePressed(ImagePlus imp, MouseEvent event) {
+      if (isRemoveEvent(event)) {
+        return;
+      }
+
+      final TrackData data = getTrackData(imp);
+      if (data == null) {
+        return;
+      }
+
+      // Mark this event as handled
+      event.consume();
+
+      // Ensure rapid mouse click / new options does not break things
+      synchronized (this) {
+        final ImageCanvas ic = imp.getCanvas();
+        ox = ic.offScreenXD(event.getX());
+        oy = ic.offScreenYD(event.getY());
+
+        // Analyse KNN to find start time and actual coords.
+        origin = getLocalisation(data, imp, ox, oy, true);
+
+        if (origin != null) {
+          // Store the actual pixel position so it is clear when the mouse has
+          // been dragged to a new position.
+          origX = event.getX();
+          origY = event.getY();
+          // Initiate dragging
+          dragging.set(1);
+        }
+      }
+    }
+
+    @Override
+    public void mouseDragged(ImagePlus imp, MouseEvent event) {
+      if (dragging.get() == 0) {
+        return;
+      }
+      event.consume();
+
+      // Ensure fields written in a synchronized block are read in a synchronized block
+      synchronized (this) {
+        // Only a drag if the mouse has moved position
+        if (origX != event.getX() || origY != event.getY()) {
+          final ImageCanvas ic = imp.getCanvas();
+          final double x = ic.offScreenXD(event.getX());
+          final double y = ic.offScreenYD(event.getY());
+          imp.setRoi(createLine(ox, oy, x, y, Color.YELLOW));
+          dragging.incrementAndGet();
+        }
+      }
+    }
+
+    @Override
+    public void mouseReleased(ImagePlus imp, MouseEvent event) {
+      if (dragging.get() == 0) {
+        return;
+      }
+
+      final TrackData data = getTrackData(imp);
+      if (data == null) {
+        return;
+      }
+
+      event.consume();
+
+      // Note: ImageJ bug
+      // ImageCanvas.activateOverlayRoi() may set the image ROI (if currently null)
+      // using the first ROI that contains a mouseReleased event if >250 milliseconds
+      // have elapsed from the mousePressed event. Nothing can currently be done to
+      // stop this since it ignores the consumed flag.
+
+      synchronized (this) {
+        // Halt dragging (set to zero) but check if a drag did occur
+        // (incremented in the mouseDragged method).
+        final boolean hasDragged = dragging.getAndSet(0) > 1;
+
+        final double[] line = null;
+        if (hasDragged) {
+          // Remove drag line
+          imp.killRoi();
+
+          final ImageCanvas ic = imp.getCanvas();
+          final double tx = ic.offScreenXD(event.getX());
+          final double ty = ic.offScreenYD(event.getY());
+
+          // Analyse KNN to find end time and actual coords.
+          final double[] end = getLocalisation(data, imp, tx, ty, false);
+
+          if (end != null) {
+            Overlay overlay = imp.getOverlay();
+            if (overlay == null) {
+              overlay = new Overlay();
+            }
+            overlay.add(createLine(ox, oy, tx, ty, Color.YELLOW));
+            imp.setOverlay(overlay);
+
+            addDistanceResult(imp, data, origin, end);
+          }
+        }
+      }
+    }
+
+    private static boolean isRemoveEvent(MouseEvent event) {
+      return event.isAltDown() || event.isShiftDown() || event.isControlDown();
+    }
+
+    private static TrackData getTrackData(ImagePlus imp) {
+      final Object o = imp.getProperty(TRACK_DATA);
+      return o instanceof TrackData ? (TrackData) o : null;
+    }
+
+    private static float[][] getTrackCoords(ImagePlus imp) {
+      final Object o = imp.getProperty(TRACK_COORDS);
+      return o instanceof float[][] ? (float[][]) o : null;
+    }
+
+    private static Roi createLine(double x1, double y1, double x2, double y2, Color color) {
+      final Line roi = new OffsetLineRoi(x1, y1, x2, y2);
+      roi.setStrokeColor(color);
+      return roi;
+    }
+
+    /**
+     * Gets the localisation from the track data. Searches the KNN around the search coordinates.
+     * Reports if the times for the localisations are very different. In distance mode the closest
+     * point is returned. In time mode the latest (start) or earliest (end) point is returned.
+     * Distance mode gives the closest raw distance to the user selection. Time mode gives the
+     * fastest distance to the user selection.
+     *
+     * @param data the track data
+     * @param coords the track coordinates in pixels
+     * @param x the search x
+     * @param y the search y
+     * @param start true if a start position, else it is an end position
+     * @return the localisation
+     */
+    private double[] getLocalisation(TrackData data, ImagePlus imp, double x, double y,
+        boolean start) {
+      final IntDoubleKdTree tree = getTree(data, imp);
+
+      // Search for close localisations
+      final Trace trace = data.trace;
+      final LocalList<PeakResult> localisations = new LocalList<>(knn);
+      // TODO - add debug mode to print out the matches
+      final String prefix = String.format("%s (%.2f,%.2f)", start ? "Start" : "End", x, y);
+      final double nmPerPx = imp.getCalibration().pixelWidth;
+      tree.nearestNeighbours(new double[] {x, y}, knn, true,
+          DoubleDistanceFunctions.SQUARED_EUCLIDEAN_2D, (i, d) -> {
+            final PeakResult r = trace.get(i);
+            ImageJUtils.log("%s t=%d d=%.3fnm", prefix, r.getFrame(), Math.sqrt(d) * nmPerPx);
+            localisations.add(r);
+          });
+      if (localisations.isEmpty()) {
+        return null;
+      }
+      localisations.reverse();
+
+      // Check the time range and report a bad cluster
+
+      // TODO: Return the result using the mode
+      final PeakResult r = localisations.get(0);
+      double t = r.getFrame();
+
+      // convert the raw units to nm/second
+      final double scale = imp.getNumericProp(TRACK_CAL_DISTANCE);
+      final double exposureTime = imp.getNumericProp(TRACK_CAL_TIME);
+      x *= scale;
+      y *= scale;
+      t *= exposureTime;
+      return new double[] {x, y, t};
+    }
+
+    /**
+     * Gets the tree for this track from the cache, or build a new one and cache it.
+     *
+     * @param data the data
+     * @param imp the image
+     * @return the tree
+     */
+    private static IntDoubleKdTree getTree(TrackData data, ImagePlus imp) {
+      // Check the cache
+      for (int i = 0; i < TREES.length; i++) {
+        final Tree t = TREES[i];
+        if (t != null && t.id == data.id) {
+          return t.tree;
+        }
+      }
+      final float[][] coords = getTrackCoords(imp);
+      final IntDoubleKdTree tree = KdTrees.newIntDoubleKdTree(2);
+      final float[] x = coords[0];
+      final float[] y = coords[1];
+      for (int i = x.length; --i >= 0;) {
+        tree.add(new double[] {x[i], y[i]}, i);
+      }
+      // Replace the oldest tree
+      TREES[SLOT.incrementAndGet() & (TREES.length - 1)] = new Tree(data.id, tree);
+      return tree;
+    }
+
+    private static String createDistancesHeader() {
+      final StringBuilder sb = new StringBuilder(512);
+      sb.append("Track ID\t");
+      sb.append("T1 (s)\tX1 (nm)\tY1 (nm)\t");
+      sb.append("T2 (s)\tX2 (nm)\tY2 (nm)\t");
+      sb.append("Distance (nm)\t");
+      sb.append("Angle\t");
+      sb.append("Time (s)\t");
+      sb.append("Speed (nm/s)");
+      return sb.toString();
+    }
+
+    private void addDistanceResult(ImagePlus imp, TrackData data, double[] start, double[] end) {
+      // Create the result window (if it is not available).
+      final TextWindow window = ImageJUtils.refresh(distancesWindow,
+          () -> new TextWindow(TITLE + " " + TOOL_TITLE, createDistancesHeader(), "", 700, 300));
+
+      if (start[2] > end[2]) {
+        final double[] tmp = start;
+        start = end;
+        end = tmp;
+      }
+      final double x1 = start[0];
+      final double y1 = start[1];
+      final double t1 = start[2];
+      final double x2 = end[0];
+      final double y2 = end[1];
+      final double t2 = end[2];
+
+      final StringBuilder sb = new StringBuilder();
+      sb.append(data.id);
+      sb.append('\t').append(MathUtils.rounded(t1));
+      sb.append('\t').append(MathUtils.rounded(x1));
+      sb.append('\t').append(MathUtils.rounded(y1));
+      sb.append('\t').append(MathUtils.rounded(t2));
+      sb.append('\t').append(MathUtils.rounded(x2));
+      sb.append('\t').append(MathUtils.rounded(y2));
+      final double dx = x2 - x1;
+      final double dy = y2 - y1;
+      final double distance = Math.sqrt(dx * dx + dy * dy);
+      sb.append('\t').append(MathUtils.rounded(distance));
+      sb.append('\t').append(MathUtils.rounded(Math.toDegrees(Math.atan2(dy, dx))));
+      sb.append('\t').append(MathUtils.rounded(t2 - t1));
+      sb.append('\t').append(MathUtils.rounded(distance / (t2 - t1)));
+
+      window.append(sb.toString());
+    }
+
+    @Override
+    public void mouseClicked(ImagePlus imp, MouseEvent event) {
+      if (!isRemoveEvent(event)) {
+        return;
+      }
+
+      final TrackData data = getTrackData(imp);
+      if (data == null) {
+        return;
+      }
+
+      // Mark this event as handled
+      event.consume();
+
+      // Ensure rapid mouse click / new options does not break things
+      synchronized (this) {
+        // Option to remove the result
+        final ImageCanvas ic = imp.getCanvas();
+        final int x = ic.offScreenX(event.getX());
+        final int y = ic.offScreenY(event.getY());
+
+        // Get the region bounds to search for maxima
+        final int searchRange = 2;
+        final Rectangle searchBounds =
+            new Rectangle(x - searchRange, y - searchRange, 2 * searchRange + 1,
+                2 * searchRange + 1).intersection(new Rectangle(imp.getWidth(), imp.getHeight()));
+        if (searchBounds.width == 0 || searchBounds.height == 0) {
+          return;
+        }
+
+        // Remove all the overlay components
+        Overlay overlay = imp.getOverlay();
+        if (overlay != null) {
+          final Roi[] rois = overlay.toArray();
+          overlay = new Overlay();
+          // Remove lines using start and end
+          for (int i = 0; i < rois.length; i++) {
+            final Roi roi = rois[i];
+            if (roi instanceof Line) {
+              final Line line = (Line) roi;
+              if (searchBounds.contains(line.x1d, line.y1d)
+                  || searchBounds.contains(line.x2d, line.y2d)) {
+                continue;
+              }
+            }
+            overlay.add(roi);
+          }
+          if (overlay.size() == 0) {
+            imp.setOverlay(null);
+          } else {
+            imp.setOverlay(overlay);
+          }
+
+          // Note:
+          // ImageCanvas.activateOverlayRoi() may set the image ROI using the first ROI
+          // that contains a mousePressed/mouseReleased event. Check if it should be removed.
+          final Roi impRoi = imp.getRoi();
+          if (impRoi != null && searchBounds.intersects(impRoi.getBounds())) {
+            imp.setRoi((Roi) null);
+          }
+        }
+
+        // Remove any distances from this image
+        final TextWindow window = distancesWindow.get();
+        if (window != null && window.isShowing()) {
+          final TextPanel tp = window.getTextPanel();
+          final ij.measure.Calibration cal = imp.getCalibration();
+
+          // Pattern match the table lines for the track ID
+          final String id = data.id + "\t";
+          final String title = imp.getTitle();
+          for (int i = 0; i < tp.getLineCount(); i++) {
+            final String line = tp.getLine(i);
+            if (!line.startsWith(id)) {
+              continue;
+            }
+
+            final String[] fields = line.split("\t");
+
+            try {
+              final double x1 = cal.getRawX(Double.parseDouble(fields[2]));
+              final double y1 = cal.getRawY(Double.parseDouble(fields[3]));
+              boolean clear = searchBounds.contains(x1, y1);
+              if (!clear) {
+                final double x2 = cal.getRawX(Double.parseDouble(fields[5]));
+                final double y2 = cal.getRawY(Double.parseDouble(fields[6]));
+                clear = searchBounds.contains(x2, y2);
+              }
+              if (clear) {
+                tp.setSelection(i, i);
+                tp.clearSelection();
+                // Since i will be incremented for the next line,
+                // decrement to check the current line again.
+                i--;
+              }
+            } catch (final NumberFormatException ex) {
+              // Ignore
+            }
+          }
+        }
+      }
     }
   }
 
@@ -2290,9 +2790,9 @@ public class TrackPopulationAnalysis implements PlugIn {
     int from = 0;
     for (int i = 0; i < lengths.length; i++) {
       final int to = from + lengths[i];
-      list.add(new TrackData(i, Arrays.copyOfRange(component, from, to),
-          Arrays.copyOfRange(data, from, to),
-          fitData == null ? null : Arrays.copyOfRange(fitData, from, to), tracks.get(i)));
+      list.add(
+          new TrackData(Arrays.copyOfRange(component, from, to), Arrays.copyOfRange(data, from, to),
+              fitData == null ? null : Arrays.copyOfRange(fitData, from, to), tracks.get(i)));
       from = to;
     }
 
