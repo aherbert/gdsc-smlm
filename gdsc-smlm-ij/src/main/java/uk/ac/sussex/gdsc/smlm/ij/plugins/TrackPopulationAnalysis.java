@@ -63,6 +63,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -2054,7 +2055,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private static final AtomicInteger SLOT = new AtomicInteger();
 
     private int knn = (int) Prefs.get(KEY_KNN, 5);
-    private final int mode = (int) Prefs.get(KEY_MODE, 0);
+    private int mode = (int) Prefs.get(KEY_MODE, 0);
 
     /** Flag set in mouse pressed and released in mouse released. */
     AtomicInteger dragging = new AtomicInteger();
@@ -2101,6 +2102,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         return;
       }
       knn = (int) gd.getNextNumber();
+      mode = gd.getNextChoiceIndex();
       Prefs.set(KEY_KNN, knn);
       Prefs.set(KEY_MODE, mode);
     }
@@ -2187,7 +2189,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           final ImageCanvas ic = imp.getCanvas();
           final double x = ic.offScreenXD(event.getX());
           final double y = ic.offScreenYD(event.getY());
-          imp.setRoi(createLine(ox, oy, x, y, Color.YELLOW));
+          imp.setRoi(createLine(ox, oy, x, y, Color.CYAN));
           dragging.incrementAndGet();
         }
       }
@@ -2234,7 +2236,7 @@ public class TrackPopulationAnalysis implements PlugIn {
             if (overlay == null) {
               overlay = new Overlay();
             }
-            overlay.add(createLine(ox, oy, tx, ty, Color.YELLOW));
+            overlay.add(createLine(ox, oy, tx, ty, Color.CYAN));
             imp.setOverlay(overlay);
 
             addDistanceResult(imp, data, origin, end);
@@ -2296,12 +2298,20 @@ public class TrackPopulationAnalysis implements PlugIn {
       if (localisations.isEmpty()) {
         return null;
       }
-      localisations.reverse();
 
       // Check the time range and report a bad cluster
 
-      // TODO: Return the result using the mode
-      final PeakResult r = localisations.get(0);
+      // Return the result using the mode
+      PeakResult r;
+      if (mode == 0) {
+        // Sort by time
+        localisations.sort( Comparator.comparingInt(PeakResult::getFrame));
+        if (!start) {
+          localisations.reverse();
+        }
+      }
+      // else mode==distance and they are already sorted descending
+      r = localisations.pop();
       double t = r.getFrame();
 
       // convert the raw units to nm/second
