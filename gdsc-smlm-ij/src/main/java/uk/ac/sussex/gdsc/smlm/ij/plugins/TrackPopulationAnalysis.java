@@ -2230,7 +2230,6 @@ public class TrackPopulationAnalysis implements PlugIn {
         // (incremented in the mouseDragged method).
         final boolean hasDragged = dragging.getAndSet(0) > 1;
 
-        final double[] line = null;
         if (hasDragged) {
           // Remove drag line
           imp.killRoi();
@@ -2292,6 +2291,13 @@ public class TrackPopulationAnalysis implements PlugIn {
      */
     private double[] getLocalisation(TrackData data, ImagePlus imp, double x, double y,
         boolean start) {
+      // TODO:
+      // Require the track coords used to build the tree.
+      // These should be used in the distance table.
+      // If we use the actual localisation position then we cannot remove
+      // lines from the table without knowing the offset.
+      // Can we get the offset from the image calibration?
+
       final IntDoubleKdTree tree = getTree(data, imp);
 
       // Search for close localisations
@@ -2317,22 +2323,25 @@ public class TrackPopulationAnalysis implements PlugIn {
       PeakResult r;
       if (mode == 0) {
         // Sort by time
-        localisations.sort( Comparator.comparingInt(PeakResult::getFrame));
+        localisations.sort(Comparator.comparingInt(PeakResult::getFrame));
         if (!start) {
           localisations.reverse();
         }
       }
       // else mode==distance and they are already sorted descending
       r = localisations.pop();
+      double lx = r.getXPosition();
+      double ly = r.getYPosition();
       double t = r.getFrame();
 
       // convert the raw units to nm/second
+      // TODO: scale should convert raw units to nm.
       final double scale = imp.getNumericProp(TRACK_CAL_DISTANCE);
       final double exposureTime = imp.getNumericProp(TRACK_CAL_TIME);
-      x *= scale;
-      y *= scale;
+      lx *= scale;
+      ly *= scale;
       t *= exposureTime;
-      return new double[] {x, y, t};
+      return new double[] {lx, ly, t};
     }
 
     /**
