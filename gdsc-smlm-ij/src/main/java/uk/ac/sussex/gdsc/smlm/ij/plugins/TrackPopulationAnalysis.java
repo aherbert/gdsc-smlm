@@ -1634,6 +1634,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final double nmPerPixel;
     final double deltaT;
     final int minDisplaySize;
+    final double unitsToNm;
     final double scale;
     final IntFunction<Color> colourMap;
     final WindowOrganiser wo;
@@ -1654,9 +1655,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.deltaT = deltaT;
       this.minDisplaySize = minDisplaySize;
       // Get the scale factor
-      final double unitsToUm = distanceConverter.convert(1);
       // Create a distance converter to convert the units to the desired nm per pixel
-      this.scale = unitsToUm * 1000 / nmPerPixel;
+      unitsToNm = distanceConverter.convert(1) * 1000;
+      this.scale = unitsToNm / nmPerPixel;
       this.colourMap = colourMap;
       this.wo = wo;
     }
@@ -1758,8 +1759,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       cal.pixelWidth = cal.pixelHeight = nmPerPixel;
       cal.setUnit("nm");
       // Use a pixel offset to output the correct coordinate values
-      cal.xOrigin = -xlimits[0] / nmPerPixel;
-      cal.yOrigin = -ylimits[0] / nmPerPixel;
+      cal.xOrigin = -xlimits[0];
+      cal.yOrigin = -ylimits[0];
       imp.setOverlay(overlay);
       // Zoom in
       final ImageWindow iw = imp.getWindow();
@@ -1771,7 +1772,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       imp.setProperty(TrackLengthTool.TRACK_DATA, track);
       imp.setProperty(TrackLengthTool.TRACK_COORDS, new float[][] {x, y});
       imp.setProp(TrackLengthTool.TRACK_CAL_TIME, deltaT);
-      imp.setProp(TrackLengthTool.TRACK_CAL_DISTANCE, scale * nmPerPixel);
+      imp.setProp(TrackLengthTool.TRACK_CAL_DISTANCE, unitsToNm);
     }
 
     private Roi createRoi(float[] x, float[] y, int n, int current) {
@@ -2287,7 +2288,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param x the search x
      * @param y the search y
      * @param start true if a start position, else it is an end position
-     * @return the localisation
+     * @return the localisation [x, y, t, id]
      */
     private double[] getLocalisation(TrackData data, ImagePlus imp, double x, double y,
         boolean start) {
@@ -2299,17 +2300,19 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Can we get the offset from the image calibration?
 
       final IntDoubleKdTree tree = getTree(data, imp);
+      final double scale = imp.getNumericProp(TRACK_CAL_DISTANCE);
 
       // Search for close localisations
       final Trace trace = data.trace;
       final LocalList<PeakResult> localisations = new LocalList<>(knn);
-      final String prefix = String.format("%s (%.2f,%.2f)", start ? "Start" : "End", x, y);
+      final String prefix = start ? "Start" : "End";
       final double nmPerPx = imp.getCalibration().pixelWidth;
       tree.nearestNeighbours(new double[] {x, y}, knn, true,
           DoubleDistanceFunctions.SQUARED_EUCLIDEAN_2D, (i, d) -> {
             final PeakResult r = trace.get(i);
             if (debug) {
-              ImageJUtils.log("%s t=%d d=%.3fnm", prefix, r.getFrame(), Math.sqrt(d) * nmPerPx);
+              ImageJUtils.log("%s (%.2f,%.2f) t=%d d=%.3fnm", prefix, r.getXPosition() * scale,
+                  r.getYPosition() * scale, r.getFrame(), Math.sqrt(d) * nmPerPx);
             }
             localisations.add(r);
           });
@@ -2335,8 +2338,6 @@ public class TrackPopulationAnalysis implements PlugIn {
       double t = r.getFrame();
 
       // convert the raw units to nm/second
-      // TODO: scale should convert raw units to nm.
-      final double scale = imp.getNumericProp(TRACK_CAL_DISTANCE);
       final double exposureTime = imp.getNumericProp(TRACK_CAL_TIME);
       lx *= scale;
       ly *= scale;
@@ -2489,7 +2490,6 @@ public class TrackPopulationAnalysis implements PlugIn {
 
           // Pattern match the table lines for the track ID
           final String id = data.id + "\t";
-          final String title = imp.getTitle();
           for (int i = 0; i < tp.getLineCount(); i++) {
             final String line = tp.getLine(i);
             if (!line.startsWith(id)) {
