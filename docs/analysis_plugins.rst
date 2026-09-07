@@ -1950,13 +1950,9 @@ Fitting of the jump distances for each component can be performed using ``Analys
 
 Note: The population model contains an average of the anomalous diffusion coefficients for each window in the population. These individual values are produced from fitting a low number of jumps, the windows may contain localisations in different component classes (e.g. a moving molecule transitioning to a fixed molecule) which invalidates the fitted model, and the FBM model may not be significant. In addition averages will use windows that overlap each other therefore using duplicate jumps. Thus average diffusion coefficients may not be comparable to the fit of the entire set of jump distances for each component.
 
-The residence times for the length of time spent in each component can be displayed using ``Analysis > Residence times``. This will create a histogram and observed cumulative distribution function of the residence times. The length of time for the component at the start and end of the track is ignored so that the data only contains lengths with a defined start and end. The data is thus generated only for tracks with at least 2 transitions between component states. The observations are fit assuming an exponential distribution where :math:`T_R` is the mean residence time:
+The residence times for the length of time spent in each component can be displayed using ``Analysis > Residence time``. This will create a histogram and observed cumulative distribution function of the residence times. The length of time for the component at the start and end of the track is ignored so that the data only contains lengths with a defined start and end. The data is thus generated only for tracks with at least 2 transitions between component states. The observations are fit assuming an exponential distribution where :math:`T_R` is the mean residence time:
 
-.. math::
-
-    P(t) = \frac{1}{T_R} \exp \left( \frac{-t}{T_R} \right)
-
-The histograms are overlaid with the fitted exponential function. Bootstrapping is used on the data to produce a 95% confidence interval for the mean residence time.
+The length of tracks can be measured using ``Analysis > Track length``. This will install a ``Track Length Tool`` in the ``ImageJ`` toolbar. When activated the tool can be used on the ``Track Image`` for the currently selected track. Click-and-drag to draw a line on the image. The tool will identify the nearest neighbours to the start and end points of the line. In ``Distance`` mode the closest neighbours will be chosen. In ``Time`` mode the closest start and end points in time are measured. The points and the distance are recorded in a track length result table. Lines can be removed from the ``Track Image`` by holding the ``Shift`` key to click on a line end point. This will remove it from the image and track length table. Options for the ``Track Length Tool`` can be set by double-clicking on the toolbar icon, or by using the ``Analysis > Track length`` menu option.
 
 
 .. index:: ! Residence Time Analysis

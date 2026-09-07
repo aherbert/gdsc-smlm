@@ -629,8 +629,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       menu.add(analysisJumpAngles = add("Jump angles", KeyEvent.VK_J, "ctrl pressed J"));
       menu.add(
           analysisFitJumpDistances = add("Fit jump distances", KeyEvent.VK_D, "ctrl pressed D"));
-      menu.add(analysisResidenceTime = add("Residence Time", KeyEvent.VK_R, "ctrl pressed R"));
-      menu.add(analysisTrackLength = add("Track Length", KeyEvent.VK_L, "ctrl pressed L"));
+      menu.add(analysisResidenceTime = add("Residence time", KeyEvent.VK_R, "ctrl pressed R"));
+      menu.add(analysisTrackLength = add("Track length", KeyEvent.VK_L, "ctrl pressed L"));
       return menu;
     }
 
