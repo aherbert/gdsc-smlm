@@ -38,6 +38,7 @@ import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.Toolbar;
+import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.plugin.tool.PlugInTool;
 import ij.process.ByteProcessor;
@@ -2047,6 +2048,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     static final String TRACK_CAL_TIME = "Track Time";
     private static final String KEY_KNN = "gdsc.smlm.tracklength.knn";
     private static final String KEY_MODE = "gdsc.smlm.tracklength.mode";
+    private static final String KEY_COLOR = "gdsc.smlm.tracklength.color";
+    private static final String KEY_DEBUG = "gdsc.smlm.tracklength.debug";
 
     private static final AtomicReference<TextWindow> distancesWindow = new AtomicReference<>();
 
@@ -2056,6 +2059,8 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     private int knn = (int) Prefs.get(KEY_KNN, 5);
     private int mode = (int) Prefs.get(KEY_MODE, 0);
+    private Color color = Colors.decode(Prefs.get(KEY_COLOR, ""), Color.CYAN);
+    private boolean debug = Prefs.get(KEY_DEBUG, 0) != 0;
 
     /** Flag set in mouse pressed and released in mouse released. */
     AtomicInteger dragging = new AtomicInteger();
@@ -2097,14 +2102,20 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       gd.addSlider("KNN", 1, 10, knn);
       gd.addChoice("Mode", new String[] {"Time", "Distance"}, mode);
+      gd.addColorField("Color", color);
+      gd.addCheckbox("Debug", debug);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
       }
       knn = (int) gd.getNextNumber();
       mode = gd.getNextChoiceIndex();
+      color = gd.getNextColor();
+      debug = gd.getNextBoolean();
       Prefs.set(KEY_KNN, knn);
       Prefs.set(KEY_MODE, mode);
+      Prefs.set(KEY_COLOR, Colors.colorToString(color));
+      Prefs.set(KEY_DEBUG, debug ? 1 : 0);
     }
 
     private static boolean hasTrackImage() {
@@ -2189,7 +2200,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           final ImageCanvas ic = imp.getCanvas();
           final double x = ic.offScreenXD(event.getX());
           final double y = ic.offScreenYD(event.getY());
-          imp.setRoi(createLine(ox, oy, x, y, Color.CYAN));
+          imp.setRoi(createLine(ox, oy, x, y, color));
           dragging.incrementAndGet();
         }
       }
@@ -2236,7 +2247,7 @@ public class TrackPopulationAnalysis implements PlugIn {
             if (overlay == null) {
               overlay = new Overlay();
             }
-            overlay.add(createLine(ox, oy, tx, ty, Color.CYAN));
+            overlay.add(createLine(ox, oy, tx, ty, color));
             imp.setOverlay(overlay);
 
             addDistanceResult(imp, data, origin, end);
@@ -2286,13 +2297,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Search for close localisations
       final Trace trace = data.trace;
       final LocalList<PeakResult> localisations = new LocalList<>(knn);
-      // TODO - add debug mode to print out the matches
       final String prefix = String.format("%s (%.2f,%.2f)", start ? "Start" : "End", x, y);
       final double nmPerPx = imp.getCalibration().pixelWidth;
       tree.nearestNeighbours(new double[] {x, y}, knn, true,
           DoubleDistanceFunctions.SQUARED_EUCLIDEAN_2D, (i, d) -> {
             final PeakResult r = trace.get(i);
-            ImageJUtils.log("%s t=%d d=%.3fnm", prefix, r.getFrame(), Math.sqrt(d) * nmPerPx);
+            if (debug) {
+              ImageJUtils.log("%s t=%d d=%.3fnm", prefix, r.getFrame(), Math.sqrt(d) * nmPerPx);
+            }
             localisations.add(r);
           });
       if (localisations.isEmpty()) {
