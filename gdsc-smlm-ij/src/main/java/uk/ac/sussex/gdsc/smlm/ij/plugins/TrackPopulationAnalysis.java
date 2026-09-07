@@ -2201,7 +2201,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           final ImageCanvas ic = imp.getCanvas();
           final double x = ic.offScreenXD(event.getX());
           final double y = ic.offScreenYD(event.getY());
-          imp.setRoi(createLine(ox, oy, x, y, color));
+          imp.setRoi(createLine(ox, oy, x, y, color, true));
           dragging.incrementAndGet();
         }
       }
@@ -2247,7 +2247,11 @@ public class TrackPopulationAnalysis implements PlugIn {
             if (overlay == null) {
               overlay = new Overlay();
             }
-            overlay.add(createLine(ox, oy, tx, ty, color));
+            // Line using localisation positions. To align with the track image
+            // PolygonRoi this should not use an offset line.
+            final ij.measure.Calibration cal = imp.getCalibration();
+            overlay.add(createLine(cal.getRawX(origin[0]), cal.getRawY(origin[1]),
+                cal.getRawX(end[0]), cal.getRawY(end[1]), color, false));
             imp.setOverlay(overlay);
 
             addDistanceResult(imp, data, origin, end);
@@ -2270,8 +2274,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       return o instanceof float[][] ? (float[][]) o : null;
     }
 
-    private static Roi createLine(double x1, double y1, double x2, double y2, Color color) {
-      final Line roi = new OffsetLineRoi(x1, y1, x2, y2);
+    private static Roi createLine(double x1, double y1, double x2, double y2, Color color,
+        boolean offset) {
+      final Line roi = offset ? new OffsetLineRoi(x1, y1, x2, y2) : new Line(x1, y1, x2, y2);
       roi.setStrokeColor(color);
       return roi;
     }
