@@ -321,7 +321,9 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static class TrackData {
     private static AtomicLong NEXT_ID = new AtomicLong();
 
-    /** Unique ID within this JVM. Analysis can use this to uniquely identify results. */
+    /** Unique ID within this JVM. Analysis can use this to uniquely identify results.
+     * Required if two instances of the analysis are open as trace IDs always start
+     * from 1 within each analysis. */
     final long id;
     final int[] component;
     final double[][] data;
@@ -344,6 +346,15 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.data = data;
       this.fitData = fitData;
       this.trace = trace;
+    }
+
+    /**
+     * Gets the trace id.
+     *
+     * @return the trace id
+     */
+    int getTraceId() {
+      return trace.getId();
     }
 
     /**
@@ -449,7 +460,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       final TrackData c = data.get(rowIndex);
       switch (columnIndex) {
         // @formatter:off
-        case 0: return c.id;
+        case 0: return c.getTraceId();
         case 1: return c.component.length;
         case 2: return c.getComponentCount();
         case 3: return c.getTransitionCount();
@@ -892,7 +903,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Show a dialog with the number of anomalous exponents
       final NonBlockingExtendedGenericDialog gd =
           new NonBlockingExtendedGenericDialog(TITLE + " Anomalous Exponent View");
-      gd.addMessage("Track " + trackData.id + " Anomalous Exponent View");
+      gd.addMessage("Track " + trackData.getTraceId() + " Anomalous Exponent View");
       gd.addSlider("Data window", 1, trackData.data.length, 1);
       gd.addCheckbox("Show MSD over time", settings.showMsdOverT);
       gd.addCheckbox("Unweighted_msd_fit", settings.unweightedMsdFit);
@@ -1769,10 +1780,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
 
       // Add data for the trace length tool
-      imp.setProperty(TrackLengthTool.TRACK_DATA, track);
-      imp.setProperty(TrackLengthTool.TRACK_COORDS, new float[][] {x, y});
-      imp.setProp(TrackLengthTool.TRACK_CAL_TIME, deltaT);
-      imp.setProp(TrackLengthTool.TRACK_CAL_DISTANCE, unitsToNm);
+      TrackLengthTool.addTrackData(imp, track, x, y, deltaT, unitsToNm);
     }
 
     private Roi createRoi(float[] x, float[] y, int n, int current) {
@@ -2043,10 +2051,10 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static class TrackLengthTool extends PlugInTool {
     static final TrackLengthTool INSTANCE = new TrackLengthTool();
     static final String TOOL_TITLE = "Track Length";
-    static final String TRACK_DATA = "Track Data";
-    static final String TRACK_COORDS = "Track Coords";
-    static final String TRACK_CAL_DISTANCE = "Track Distance";
-    static final String TRACK_CAL_TIME = "Track Time";
+    private static final String TRACK_DATA = "Track Data";
+    private static final String TRACK_COORDS = "Track Coords";
+    private static final String TRACK_CAL_DISTANCE = "Track Distance";
+    private static final String TRACK_CAL_TIME = "Track Time";
     private static final String KEY_KNN = "gdsc.smlm.tracklength.knn";
     private static final String KEY_MODE = "gdsc.smlm.tracklength.mode";
     private static final String KEY_COLOR = "gdsc.smlm.tracklength.color";
@@ -2104,7 +2112,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       gd.addSlider("KNN", 1, 10, knn);
       gd.addChoice("Mode", new String[] {"Time", "Distance"}, mode);
       gd.addColorField("Color", color);
-      gd.addCheckbox("Debug", debug);
+      gd.addCheckbox("Log_neighbours", debug);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
@@ -2129,14 +2137,31 @@ public class TrackPopulationAnalysis implements PlugIn {
       return false;
     }
 
+    /**
+     * Adds the track data to the image.
+     *
+     * @param imp the image
+     * @param track the track data
+     * @param x the track x coords
+     * @param y the track y coords
+     * @param deltaT the time step in seconds
+     * @param unitsToNm the scale factor to convert localisation units to nm
+     */
+    static void addTrackData(ImagePlus imp, TrackData track, float[] x, float[] y,
+        double deltaT, double unitsToNm) {
+      imp.setProperty(TRACK_DATA, track);
+      imp.setProperty(TRACK_COORDS, new float[][] {x, y});
+      imp.setProp(TRACK_CAL_TIME, deltaT);
+      imp.setProp(TRACK_CAL_DISTANCE, unitsToNm);
+    }
+
     // --------------
     // Actions
     // --------------
 
     // Mouse press:
     // - Find KNN
-    // - Check if the KNN are within a suitable time period
-    // - if not then allow anyway and log error?
+    // - Find nearest in distance or time
     // - Store press location
 
     // Mouse drag
@@ -2144,8 +2169,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     // Mouse released
     // - Find KNN
-    // - Check if the KNN are within a suitable time period
-    // - if not then allow anyway and log error?
+    // - Find nearest in distance or time
     // - Output Euclidian distance
 
     // Mouse clicked with modifier key
@@ -2297,13 +2321,6 @@ public class TrackPopulationAnalysis implements PlugIn {
      */
     private double[] getLocalisation(TrackData data, ImagePlus imp, double x, double y,
         boolean start) {
-      // TODO:
-      // Require the track coords used to build the tree.
-      // These should be used in the distance table.
-      // If we use the actual localisation position then we cannot remove
-      // lines from the table without knowing the offset.
-      // Can we get the offset from the image calibration?
-
       final IntDoubleKdTree tree = getTree(data, imp);
       final double scale = imp.getNumericProp(TRACK_CAL_DISTANCE);
 
@@ -2379,7 +2396,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     private static String createDistancesHeader() {
       final StringBuilder sb = new StringBuilder(512);
-      sb.append("Track ID\t");
+      sb.append("#\tTrack ID\t");
       sb.append("T1 (s)\tX1 (nm)\tY1 (nm)\t");
       sb.append("T2 (s)\tX2 (nm)\tY2 (nm)\t");
       sb.append("Distance (nm)\t");
@@ -2408,9 +2425,10 @@ public class TrackPopulationAnalysis implements PlugIn {
 
       final StringBuilder sb = new StringBuilder();
       sb.append(data.id);
+      sb.append('\t').append(data.getTraceId());
       sb.append('\t').append(MathUtils.rounded(t1));
       sb.append('\t').append(MathUtils.rounded(x1));
-      sb.append('\t').append(MathUtils.rounded(y1));
+      sb.append('\t').append(MathUtils.rounded(y1)); 
       sb.append('\t').append(MathUtils.rounded(t2));
       sb.append('\t').append(MathUtils.rounded(x2));
       sb.append('\t').append(MathUtils.rounded(y2));
@@ -2454,6 +2472,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         if (searchBounds.width == 0 || searchBounds.height == 0) {
           return;
         }
+        System.out.println(searchBounds.toString());
 
         // Remove all the overlay components
         Overlay overlay = imp.getOverlay();
@@ -2504,12 +2523,12 @@ public class TrackPopulationAnalysis implements PlugIn {
             final String[] fields = line.split("\t");
 
             try {
-              final double x1 = cal.getRawX(Double.parseDouble(fields[2]));
-              final double y1 = cal.getRawY(Double.parseDouble(fields[3]));
+              final double x1 = cal.getRawX(Double.parseDouble(fields[3]));
+              final double y1 = cal.getRawY(Double.parseDouble(fields[4]));
               boolean clear = searchBounds.contains(x1, y1);
               if (!clear) {
-                final double x2 = cal.getRawX(Double.parseDouble(fields[5]));
-                final double y2 = cal.getRawY(Double.parseDouble(fields[6]));
+                final double x2 = cal.getRawX(Double.parseDouble(fields[6]));
+                final double y2 = cal.getRawY(Double.parseDouble(fields[7]));
                 clear = searchBounds.contains(x2, y2);
               }
               if (clear) {
@@ -3115,6 +3134,7 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static void addTrack(int minimumSize, final List<Trace> tracks, Trace track) {
     if (track.size() >= minimumSize) {
       tracks.add(track);
+      track.setId(tracks.size());
     }
   }
 
