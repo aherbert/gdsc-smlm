@@ -52,7 +52,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,6 +59,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -321,9 +321,10 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static class TrackData {
     private static AtomicLong NEXT_ID = new AtomicLong();
 
-    /** Unique ID within this JVM. Analysis can use this to uniquely identify results.
-     * Required if two instances of the analysis are open as trace IDs always start
-     * from 1 within each analysis. */
+    /**
+     * Unique ID within this JVM. Analysis can use this to uniquely identify results. Required if
+     * two instances of the analysis are open as trace IDs always start from 1 within each analysis.
+     */
     final long id;
     final int[] component;
     final double[][] data;
@@ -2147,8 +2148,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param deltaT the time step in seconds
      * @param unitsToNm the scale factor to convert localisation units to nm
      */
-    static void addTrackData(ImagePlus imp, TrackData track, float[] x, float[] y,
-        double deltaT, double unitsToNm) {
+    static void addTrackData(ImagePlus imp, TrackData track, float[] x, float[] y, double deltaT,
+        double unitsToNm) {
       imp.setProperty(TRACK_DATA, track);
       imp.setProperty(TRACK_COORDS, new float[][] {x, y});
       imp.setProp(TRACK_CAL_TIME, deltaT);
@@ -2428,7 +2429,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       sb.append('\t').append(data.getTraceId());
       sb.append('\t').append(MathUtils.rounded(t1));
       sb.append('\t').append(MathUtils.rounded(x1));
-      sb.append('\t').append(MathUtils.rounded(y1)); 
+      sb.append('\t').append(MathUtils.rounded(y1));
       sb.append('\t').append(MathUtils.rounded(t2));
       sb.append('\t').append(MathUtils.rounded(x2));
       sb.append('\t').append(MathUtils.rounded(y2));
@@ -2461,18 +2462,17 @@ public class TrackPopulationAnalysis implements PlugIn {
       synchronized (this) {
         // Option to remove the result
         final ImageCanvas ic = imp.getCanvas();
-        final int x = ic.offScreenX(event.getX());
-        final int y = ic.offScreenY(event.getY());
+        // Note: The lines on the track image are drawn using 0,0 as the centre of the pixel.
+        // But the mouse click uses 0.5,0.5 as the centre of the pixel. Subtracting this offset
+        // allows the click to map to the results.
+        final double x = ic.offScreenXD(event.getX()) - 0.5;
+        final double y = ic.offScreenYD(event.getY()) - 0.5;
 
-        // Get the region bounds to search for maxima
-        final int searchRange = 2;
-        final Rectangle searchBounds =
-            new Rectangle(x - searchRange, y - searchRange, 2 * searchRange + 1,
-                2 * searchRange + 1).intersection(new Rectangle(imp.getWidth(), imp.getHeight()));
-        if (searchBounds.width == 0 || searchBounds.height == 0) {
-          return;
-        }
-        System.out.println(searchBounds.toString());
+        // Get the region bounds to search for maxima.
+        // This should be scaled by the image magnification.
+        final double searchRange = 5 / ic.getMagnification();
+        final Rectangle2D.Double searchBounds = new Rectangle2D.Double(x - searchRange,
+            y - searchRange, 2 * searchRange, 2 * searchRange);
 
         // Remove all the overlay components
         Overlay overlay = imp.getOverlay();
