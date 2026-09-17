@@ -1998,10 +1998,10 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
      - Description
 
    * - First frame
-     - Used to remove traces start at or before the first frame. Set to zero to disable.
+     - Used to remove traces starting at or before the first frame. Set to zero to disable.
 
    * - Last frame
-     - Used to remove traces end at or after the last frame. If negative the actual last frame ``t`` in the data is identified and all traces ending above ``t + last frame`` are removed. Set to zero to disable.
+     - Used to remove traces ending at or after the last frame. If negative the actual last frame ``t`` in the data is identified and all traces ending above ``t + last frame`` are removed. Set to zero to disable.
 
    * - Min size
      - The minimum number of localisations in a track. Use this to exclude single localisations or short tracks. The residence time histogram is computed using the track duration beyond this minimum threshold.
