@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  *
  * <p>Note that if the filter is not a {@link DirectFilter} then the result of filtering a
  * PreprocessedPeakResult is always false using that filter.
- * 
+ *
  * <p>Warning: This filter requires a {@link DirectFilter} to implement the weakest filter
  * functionality. This is performed using the {@link DirectFilter#lowerBoundOrientation(int)} to
  * identify the strongest parameters. Otherwise it will raise an exception if comparison of
