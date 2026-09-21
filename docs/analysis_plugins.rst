@@ -2154,6 +2154,14 @@ The following parameters can be set:
 The simulation allows experimenting with the exposure time and number of samples required to obtain satisfactory results for the populations of bound molecules.
 
 
+.. index:: ! Compare Jump Distances
+
+Compare Jump Distances
+----------------------
+
+The ``Compare Jump Distances`` plugin compares the cumulative probability distribution of the jump distances between two datasets.
+
+
 .. index:: ! OPTICS
 
 OPTICS
