@@ -31,6 +31,8 @@ import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.statistics.descriptive.Median;
@@ -40,6 +42,7 @@ import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -47,7 +50,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -72,21 +75,18 @@ public class CompareJumpDistances implements PlugIn {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    String inputOption1;
-    String inputOption2;
+    List<String> selected;
     int frames;
     boolean precisionCorrection;
 
     Settings() {
       // Set defaults
-      inputOption1 = "";
-      inputOption2 = "";
+      selected = Collections.emptyList();
       frames = 1;
     }
 
     Settings(Settings source) {
-      inputOption1 = source.inputOption1;
-      inputOption2 = source.inputOption2;
+      selected = source.selected;
       frames = source.frames;
       precisionCorrection = source.precisionCorrection;
     }
@@ -131,77 +131,74 @@ public class CompareJumpDistances implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    if (MemoryPeakResults.isMemoryEmpty()) {
-      IJ.error(TITLE, "No localisations in memory");
+    final MemoryResultsList items = new MemoryResultsList(MemoryPeakResults::hasId);
+
+    if (items.isEmpty()) {
+      IJ.error(TITLE, "No traced localisations in memory");
       return;
     }
 
-    if (!showDialog()) {
-      return;
-    }
+    final List<MemoryPeakResults> results = new LocalList<>();
 
-    // Load the results
-    MemoryPeakResults results1 =
-        ResultsManager.loadInputResults(settings.inputOption1, false, null, null);
-    MemoryPeakResults results2 =
-        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
-    if (MemoryPeakResults.isEmpty(results1) || MemoryPeakResults.isEmpty(results2)) {
-      IJ.error(TITLE, "No results could be loaded");
-      return;
-    }
-
-    // Results must have the same calibration
-    CalibrationReader cal1 = results1.getCalibrationReader();
-    CalibrationReader cal2 = results2.getCalibrationReader();
-    if (cal1.getNmPerPixel() != cal2.getNmPerPixel()) {
-      IJ.error(TITLE, String.format("Distance calibration mismatch: %.3f != %.3f nm/px",
-          cal1.getNmPerPixel(), cal2.getNmPerPixel()));
-      return;
-    }
-    if (cal1.getExposureTime() != cal2.getExposureTime()) {
-      IJ.error(TITLE, String.format("Exposure time mismatch: %.3f != %.3f ms/frame",
-          cal1.getExposureTime(), cal2.getExposureTime()));
+    if (!showDialog() || !showMultiDialog(results, items)) {
       return;
     }
 
     // Extract the jump distances
-    double[] distances1 = getDistances(results1, settings.frames);
-    double[] distances2 = getDistances(results2, settings.frames);
+    final double[][] distances =
+        results.stream().map(r -> getDistances(r, settings.frames)).toArray(double[][]::new);
 
-    if ((distances1.length & distances2.length) == 0) {
-      IJ.error(TITLE, "No distances for time delay: " + settings.frames);
-      return;
+    for (int i = 0; i < distances.length; i++) {
+      if (distances[i].length == 0) {
+        IJ.error(TITLE,
+            results.get(i).getName() + ": No distances for time delay " + settings.frames);
+        return;
+      }
     }
 
     TypeConverter<DistanceUnit> distanceConverter;
     try {
-      distanceConverter = cal1.getDistanceConverter(DistanceUnit.UM);
+      distanceConverter = results.get(0).getDistanceConverter(DistanceUnit.UM);
     } catch (final ConversionException | ConfigurationException ex) {
-      IJ.error(TITLE, "Cannot convert units to um or seconds: " + ex.getMessage());
+      IJ.error(TITLE, "Cannot convert units to um: " + ex.getMessage());
       return;
     }
 
-    Arrays.sort(distances1);
-    Arrays.sort(distances2);
-
-    // Apply precision correction
-    double error1 = 0;
-    double error2 = 0;
-    if (settings.precisionCorrection) {
-      // Get the localisation error (4s^2) in raw units^2
-      error1 = getLocalisationError(results1, distanceConverter);
-      error2 = getLocalisationError(results2, distanceConverter);
-      applyCorrection(distances1, error1);
-      applyCorrection(distances2, error2);
+    for (int i = 0; i < distances.length; i++) {
+      Arrays.sort(distances[i]);
     }
 
-    // KS test
-    TwoResult r = KolmogorovSmirnovTest.withDefaults().test(distances1, distances2);
+    // Apply precision correction
+    final double[] error = new double[distances.length];
+    if (settings.precisionCorrection) {
+      // Get the localisation error (4s^2) in raw units^2
+      for (int i = 0; i < distances.length; i++) {
+        error[i] = getLocalisationError(results.get(i), distanceConverter);
+        applyCorrection(distances[i], error[i]);
+      }
+    }
+
+    // Table of results convert (4s^2) to s in nm
+    final double scale = distanceConverter.convert(1) * 0.5e3;
+
+    // All-vs-all KS test
+    for (int i = 0; i < distances.length; i++) {
+      for (int j = i + 1; j < distances.length; j++) {
+        final TwoResult r = KolmogorovSmirnovTest.withDefaults().test(distances[i], distances[j]);
+        addResult(settings, results.get(i).getName(), results.get(j).getName(),
+            scale * Math.sqrt(error[i]), scale * Math.sqrt(error[j]), distances[i].length,
+            distances[j].length, r);
+      }
+    }
+
+    if (results.size() > 2) {
+      return;
+    }
 
     // Plot cumulative histogram
-    double[][] h1 = MathUtils.cumulativeHistogram(distances1, true);
-    double[][] h2 = MathUtils.cumulativeHistogram(distances2, true);
-    Plot plot = new Plot(TITLE,
+    final double[][] h1 = MathUtils.cumulativeHistogram(distances[0], true);
+    final double[][] h2 = MathUtils.cumulativeHistogram(distances[1], true);
+    final Plot plot = new Plot(TITLE,
         String.format("Distance (um/%s)", TextUtils.pleural(settings.frames, "frame")),
         "Probability");
     SimpleArrayUtils.apply(h1[0], distanceConverter::convert);
@@ -211,24 +208,17 @@ public class CompareJumpDistances implements PlugIn {
     plot.setColor(Color.BLUE);
     plot.addPoints(h2[0], h2[1], Plot.LINE);
     plot.setColor(Color.BLACK);
-    plot.addLabel(0, 0, String.format("KS Test: %.4g", r.getPValue()));
     ImageJUtils.display(TITLE, plot);
 
     // QQ plot
 
-    // Table of results
-    // convert (4s^2) to s in nm
-    final double scale = distanceConverter.convert(1) * 0.5e3;
-    addResult(settings, scale * Math.sqrt(error1), scale * Math.sqrt(error2),
-        distances1.length, distances2.length, r);
   }
 
   private boolean showDialog() {
     settings = Settings.load();
+
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addMessage("Compare the jump distances of two traced datasets");
-    ResultsManager.addInput(gd, "Input_1", settings.inputOption1, InputSource.MEMORY_CLUSTERED);
-    ResultsManager.addInput(gd, "Input_2", settings.inputOption2, InputSource.MEMORY_CLUSTERED);
+    gd.addMessage("Compare the jump distances of traced datasets");
     gd.addSlider("Frames", 1, 10, settings.frames);
     gd.addCheckbox("Precision_correction", settings.precisionCorrection);
     gd.addHelp(HelpUrls.getUrl("compare-jump-distances"));
@@ -236,11 +226,66 @@ public class CompareJumpDistances implements PlugIn {
     if (gd.wasCanceled()) {
       return false;
     }
-    settings.inputOption1 = ResultsManager.getInputSource(gd);
-    settings.inputOption2 = ResultsManager.getInputSource(gd);
     settings.frames = (int) gd.getNextNumber();
     settings.precisionCorrection = gd.getNextBoolean();
     settings.save();
+    return true;
+  }
+
+  private boolean showMultiDialog(List<MemoryPeakResults> allResults, MemoryResultsList items) {
+    // Show a list box containing all the results. This should remember the last set of chosen
+    // items.
+    final MultiDialog md = new MultiDialog(TITLE, items);
+    md.setDisplayConverter(items.getDisplayConverter());
+    md.setSelected(settings.selected);
+    md.setHelpUrl(HelpUrls.getUrl("compare-jump-distances"));
+
+    md.showDialog();
+
+    if (md.wasCancelled()) {
+      return false;
+    }
+
+    final List<String> selected = md.getSelectedResults();
+    if (selected.isEmpty()) {
+      IJ.error(TITLE, "No results were selected");
+      return false;
+    }
+    settings.selected = selected;
+
+    for (final String name : selected) {
+      final MemoryPeakResults r = MemoryPeakResults.getResults(name);
+      if (r != null) {
+        allResults.add(r);
+      }
+    }
+
+    // Check calibration exists for the first set of results
+    if (allResults.isEmpty()) {
+      return false;
+    }
+
+    // Check the calibration is the same for the rest
+    final CalibrationReader cal = allResults.get(0).getCalibrationReader();
+    if (cal == null) {
+      IJ.error(TITLE, "Uncalibrated results were selected");
+      return false;
+    }
+    final double nmPerPixel = cal.getNmPerPixel();
+    final double exposureTime = cal.getExposureTime();
+    final DistanceUnit distanceUnit = cal.getDistanceUnit();
+    for (int i = 1; i < allResults.size(); i++) {
+      final MemoryPeakResults results = allResults.get(i);
+
+      if (!results.hasCalibration()
+          || results.getCalibrationReader().getExposureTime() != exposureTime
+          || results.getNmPerPixel() != nmPerPixel || results.getDistanceUnit() != distanceUnit) {
+        IJ.error(TITLE,
+            "The exposure time, pixel pitch and distance unit must match across all the results");
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -251,7 +296,7 @@ public class CompareJumpDistances implements PlugIn {
       p.getPrecision();
 
       // Precision in nm using the median
-      double precision = Median.withDefaults().evaluate(p.precisions);
+      final double precision = Median.withDefaults().evaluate(p.precisions);
       // Convert from nm to um to raw units
       final double rawPrecision = distanceConverter.convertBack(precision * 1e-3);
       // Get the localisation error (4s^2) in units^2
@@ -274,18 +319,26 @@ public class CompareJumpDistances implements PlugIn {
     final DoubleArrayList distances = new DoubleArrayList();
     final LocalList<Position> track = new LocalList<>();
 
+    // Note that during processing we cannot use use j = i+t as the
+    // track may have frame gaps
+
     results.sort(IdFramePeakResultComparator.INSTANCE);
     final FrameCounter id = new FrameCounter(-1);
     results.forEach((PeakResultProcedure) r -> {
       if (id.advance(r.getId())) {
         if (!track.isEmpty()) {
           // Process track
-          final int maxStart = track.size() - t;
-          for (int i = 0; i < maxStart; i++) {
-            final Position origin = track.unsafeGet(i);
-            final Position position = track.unsafeGet(i + t);
-            if (position.t - origin.t == t) {
-              distances.add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
+          for (int i = 1; i < track.size(); i++) {
+            final Position origin = track.unsafeGet(i - 1);
+            for (int j = i; j < track.size(); j++) {
+              final Position position = track.unsafeGet(j);
+              final int gap = position.t - origin.t;
+              if (gap >= t) {
+                if (gap == t) {
+                  distances.add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
+                }
+                break;
+              }
             }
           }
           track.clear();
@@ -296,12 +349,17 @@ public class CompareJumpDistances implements PlugIn {
     // Process final track
     if (!track.isEmpty()) {
       // Process track
-      final int maxStart = track.size() - t;
-      for (int i = 0; i < maxStart; i++) {
-        final Position origin = track.unsafeGet(i);
-        final Position position = track.unsafeGet(i + t);
-        if (position.t - origin.t == t) {
-          distances.add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
+      for (int i = 1; i < track.size(); i++) {
+        final Position origin = track.unsafeGet(i - 1);
+        for (int j = i; j < track.size(); j++) {
+          final Position position = track.unsafeGet(j);
+          final int gap = position.t - origin.t;
+          if (gap >= t) {
+            if (gap == t) {
+              distances.add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
+            }
+            break;
+          }
         }
       }
     }
@@ -334,12 +392,12 @@ public class CompareJumpDistances implements PlugIn {
         "Frames", "N1", "N2", "KS D", "p(D)"}).collect(Collectors.joining("\t"));
   }
 
-  private void addResult(Settings settings, double precision1, double precision2,
-      int n1, int n2, TwoResult r) {
+  private void addResult(Settings settings, String input1, String input2, double precision1,
+      double precision2, int n1, int n2, TwoResult r) {
     final StringBuilder sb = new StringBuilder(1024);
     //@formatter:off
-    sb.append(settings.inputOption1).append('\t')
-      .append(settings.inputOption2).append('\t')
+    sb.append(input1).append('\t')
+      .append(input2).append('\t')
       .append(MathUtils.rounded(precision1)).append('\t')
       .append(MathUtils.rounded(precision2)).append('\t')
       .append(settings.frames).append('\t')
