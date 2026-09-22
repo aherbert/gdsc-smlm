@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.statistics.descriptive.Median;
+import org.apache.commons.statistics.descriptive.Quantile;
 import org.apache.commons.statistics.inference.KolmogorovSmirnovTest;
 import org.apache.commons.statistics.inference.KolmogorovSmirnovTest.TwoResult;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -43,6 +44,7 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -78,6 +80,7 @@ public class CompareJumpDistances implements PlugIn {
     List<String> selected;
     int frames;
     boolean precisionCorrection;
+    boolean qqPlot;
 
     Settings() {
       // Set defaults
@@ -89,6 +92,7 @@ public class CompareJumpDistances implements PlugIn {
       selected = source.selected;
       frames = source.frames;
       precisionCorrection = source.precisionCorrection;
+      qqPlot = source.qqPlot;
     }
 
     Settings copy() {
@@ -195,12 +199,15 @@ public class CompareJumpDistances implements PlugIn {
       return;
     }
 
+    final WindowOrganiser wo = new WindowOrganiser();
+
+    final String axisTitle =
+        String.format("Distance (um/%s)", TextUtils.pleural(settings.frames, "frame"));
+
     // Plot cumulative histogram
     final double[][] h1 = MathUtils.cumulativeHistogram(distances[0], true);
     final double[][] h2 = MathUtils.cumulativeHistogram(distances[1], true);
-    final Plot plot = new Plot(TITLE,
-        String.format("Distance (um/%s)", TextUtils.pleural(settings.frames, "frame")),
-        "Probability");
+    Plot plot = new Plot(TITLE, axisTitle, "Probability");
     SimpleArrayUtils.apply(h1[0], distanceConverter::convert);
     SimpleArrayUtils.apply(h2[0], distanceConverter::convert);
     plot.setColor(Color.RED);
@@ -208,10 +215,25 @@ public class CompareJumpDistances implements PlugIn {
     plot.setColor(Color.BLUE);
     plot.addPoints(h2[0], h2[1], Plot.LINE);
     plot.setColor(Color.BLACK);
-    ImageJUtils.display(TITLE, plot);
+    ImageJUtils.display(TITLE, plot, wo);
 
     // QQ plot
-
+    if (settings.qqPlot) {
+      final String title = TITLE + " QQ plot";
+      // plot = new Plot(title, axisTitle, axisTitle);
+      plot = new Plot(title, results.get(0).getName(), results.get(1).getName());
+      final double[] p = Quantile.probabilities(1000);
+      final int n = distances[0].length;
+      final int m = distances[1].length;
+      final double[] q1 = Quantile.withDefaults().evaluate(n, i -> distances[0][i], p);
+      final double[] q2 = Quantile.withDefaults().evaluate(m, i -> distances[1][i], p);
+      plot.addPoints(q1, q2, Plot.LINE);
+      plot.setColor(Color.RED);
+      final double max = Math.max(distances[0][n - 1], distances[1][m - 1]);
+      plot.drawLine(0, 0, max, max);
+      ImageJUtils.display(title, plot, wo);
+      wo.tile();
+    }
   }
 
   private boolean showDialog() {
@@ -221,6 +243,7 @@ public class CompareJumpDistances implements PlugIn {
     gd.addMessage("Compare the jump distances of traced datasets");
     gd.addSlider("Frames", 1, 10, settings.frames);
     gd.addCheckbox("Precision_correction", settings.precisionCorrection);
+    gd.addCheckbox("QQ_plot", settings.qqPlot);
     gd.addHelp(HelpUrls.getUrl("compare-jump-distances"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -228,6 +251,7 @@ public class CompareJumpDistances implements PlugIn {
     }
     settings.frames = (int) gd.getNextNumber();
     settings.precisionCorrection = gd.getNextBoolean();
+    settings.qqPlot = gd.getNextBoolean();
     settings.save();
     return true;
   }
