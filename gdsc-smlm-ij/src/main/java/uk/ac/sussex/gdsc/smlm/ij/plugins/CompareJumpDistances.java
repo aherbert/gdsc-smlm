@@ -80,18 +80,21 @@ public class CompareJumpDistances implements PlugIn {
     List<String> selected;
     int frames;
     boolean precisionCorrection;
+    boolean cdfPlot;
     boolean qqPlot;
 
     Settings() {
       // Set defaults
       selected = Collections.emptyList();
       frames = 1;
+      cdfPlot = true;
     }
 
     Settings(Settings source) {
       selected = source.selected;
       frames = source.frames;
       precisionCorrection = source.precisionCorrection;
+      cdfPlot = source.cdfPlot;
       qqPlot = source.qqPlot;
     }
 
@@ -180,6 +183,11 @@ public class CompareJumpDistances implements PlugIn {
         error[i] = getLocalisationError(results.get(i), distanceConverter);
         applyCorrection(distances[i], error[i]);
       }
+    } else {
+      // Convert squared distances to distances
+      for (int i = 0; i < distances.length; i++) {
+        SimpleArrayUtils.apply(distances[i], Math::sqrt);
+      }
     }
 
     // Table of results convert (4s^2) to s in nm
@@ -201,27 +209,27 @@ public class CompareJumpDistances implements PlugIn {
 
     final WindowOrganiser wo = new WindowOrganiser();
 
-    final String axisTitle =
-        String.format("Distance (um/%s)", TextUtils.pleural(settings.frames, "frame"));
-
     // Plot cumulative histogram
-    final double[][] h1 = MathUtils.cumulativeHistogram(distances[0], true);
-    final double[][] h2 = MathUtils.cumulativeHistogram(distances[1], true);
-    Plot plot = new Plot(TITLE, axisTitle, "Probability");
-    SimpleArrayUtils.apply(h1[0], distanceConverter::convert);
-    SimpleArrayUtils.apply(h2[0], distanceConverter::convert);
-    plot.setColor(Color.RED);
-    plot.addPoints(h1[0], h1[1], Plot.LINE);
-    plot.setColor(Color.BLUE);
-    plot.addPoints(h2[0], h2[1], Plot.LINE);
-    plot.setColor(Color.BLACK);
-    ImageJUtils.display(TITLE, plot, wo);
-
+    if (settings.cdfPlot) {
+      final double[][] h1 = MathUtils.cumulativeHistogram(distances[0], true);
+      final double[][] h2 = MathUtils.cumulativeHistogram(distances[1], true);
+      final String axisTitle =
+          String.format("Distance (um/%s)", TextUtils.pleural(settings.frames, "frame"));
+      Plot plot = new Plot(TITLE, axisTitle, "Probability");
+      SimpleArrayUtils.apply(h1[0], distanceConverter::convert);
+      SimpleArrayUtils.apply(h2[0], distanceConverter::convert);
+      plot.setColor(Color.RED);
+      plot.addPoints(h1[0], h1[1], Plot.LINE);
+      plot.setColor(Color.BLUE);
+      plot.addPoints(h2[0], h2[1], Plot.LINE);
+      plot.setColor(Color.BLACK);
+      ImageJUtils.display(TITLE, plot, wo);
+    }
     // QQ plot
     if (settings.qqPlot) {
       final String title = TITLE + " QQ plot";
       // plot = new Plot(title, axisTitle, axisTitle);
-      plot = new Plot(title, results.get(0).getName(), results.get(1).getName());
+      Plot plot = new Plot(title, results.get(0).getName(), results.get(1).getName());
       final double[] p = Quantile.probabilities(1000);
       final int n = distances[0].length;
       final int m = distances[1].length;
@@ -232,8 +240,8 @@ public class CompareJumpDistances implements PlugIn {
       final double max = Math.max(distances[0][n - 1], distances[1][m - 1]);
       plot.drawLine(0, 0, max, max);
       ImageJUtils.display(title, plot, wo);
-      wo.tile();
     }
+    wo.tile();
   }
 
   private boolean showDialog() {
@@ -243,6 +251,7 @@ public class CompareJumpDistances implements PlugIn {
     gd.addMessage("Compare the jump distances of traced datasets");
     gd.addSlider("Frames", 1, 10, settings.frames);
     gd.addCheckbox("Precision_correction", settings.precisionCorrection);
+    gd.addCheckbox("CDF_plot", settings.cdfPlot);
     gd.addCheckbox("QQ_plot", settings.qqPlot);
     gd.addHelp(HelpUrls.getUrl("compare-jump-distances"));
     gd.showDialog();
@@ -251,6 +260,7 @@ public class CompareJumpDistances implements PlugIn {
     }
     settings.frames = (int) gd.getNextNumber();
     settings.precisionCorrection = gd.getNextBoolean();
+    settings.cdfPlot = gd.getNextBoolean();
     settings.qqPlot = gd.getNextBoolean();
     settings.save();
     return true;
@@ -271,8 +281,8 @@ public class CompareJumpDistances implements PlugIn {
     }
 
     final List<String> selected = md.getSelectedResults();
-    if (selected.isEmpty()) {
-      IJ.error(TITLE, "No results were selected");
+    if (selected.size() < 2) {
+      IJ.error(TITLE, "Require at least 2 datasets");
       return false;
     }
     settings.selected = selected;
@@ -332,7 +342,7 @@ public class CompareJumpDistances implements PlugIn {
   }
 
   /**
-   * Get the jump distances for the specified time delay. Adapted from
+   * Get the squared jump distances for the specified time delay. Adapted from
    * {@link TrackDiffusionAnalysis} for a single time delay.
    *
    * @param results the results
@@ -359,7 +369,7 @@ public class CompareJumpDistances implements PlugIn {
               final int gap = position.t - origin.t;
               if (gap >= t) {
                 if (gap == t) {
-                  distances.add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
+                  distances.add(MathUtils.distance2(origin.x, origin.y, position.x, position.y));
                 }
                 break;
               }
@@ -380,7 +390,7 @@ public class CompareJumpDistances implements PlugIn {
           final int gap = position.t - origin.t;
           if (gap >= t) {
             if (gap == t) {
-              distances.add(MathUtils.distance(origin.x, origin.y, position.x, position.y));
+              distances.add(MathUtils.distance2(origin.x, origin.y, position.x, position.y));
             }
             break;
           }
@@ -395,12 +405,12 @@ public class CompareJumpDistances implements PlugIn {
       return;
     }
     int i = 0;
-    while (i < distances.length && distances[i] < error) {
+    while (i < distances.length && distances[i] <= error) {
       distances[i] = 0;
       i++;
     }
     while (i < distances.length) {
-      distances[i] -= error;
+      distances[i] = Math.sqrt(distances[i] - error);
       i++;
     }
   }

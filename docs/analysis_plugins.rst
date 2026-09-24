@@ -2159,7 +2159,36 @@ The simulation allows experimenting with the exposure time and number of samples
 Compare Jump Distances
 ----------------------
 
-The ``Compare Jump Distances`` plugin compares the cumulative probability distribution of the jump distances between two datasets.
+The ``Compare Jump Distances`` plugin compares the empirical cumulative probability distribution of the jump distances between multiple datasets. Jumps distances for each traced dataset are extracted for the configured frame gap. The distance can be corrected using the localisation precision; values below zero are set to zero.
+
+.. math::
+
+    D=\sqrt{(x_{i+t}-x_i)^2 + (y_{i+t}-y_i)^2 - 4s^2)}
+
+The cumulative probability distribution for each dataset is compared using a Kolmogorov-Smirnov (KS) test. Results are recorded to a table. If only two datasets are selected then options are provided to plot the two distributions, and display a QQ plot.
+
+When the plugin runs the following parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Frame
+     - Frame gap between localisations used to measure the distance.
+
+   * - Precision correction
+     - If ``true`` then distances are adjusted using the localisation precision. This alters the initial curve of the probability distribution to set jumps from non-diffusing particles to zero.
+
+   * - CDF plot
+     - If ``true`` then a cumulative distribution plot is show when only two datasets are selected.
+
+   * - QQ plot
+     - If ``true`` then a QQ plot is show when only two datasets are selected.
+
+After parameters are configured a dialog is presented that allows multiple datasets to be selected. All datasets must have the same distance and time calibration so that jumps across frames are comparable.
 
 
 .. index:: ! OPTICS
