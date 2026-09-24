@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.statistics.descriptive.Median;
 import org.apache.commons.statistics.descriptive.Quantile;
 import org.apache.commons.statistics.inference.KolmogorovSmirnovTest;
@@ -49,6 +50,7 @@ import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -82,12 +84,15 @@ public class CompareJumpDistances implements PlugIn {
     boolean precisionCorrection;
     boolean cdfPlot;
     boolean qqPlot;
+    int maxN;
+    long seed;
 
     Settings() {
       // Set defaults
       selected = Collections.emptyList();
       frames = 1;
       cdfPlot = true;
+      seed = 2367842638462864L;
     }
 
     Settings(Settings source) {
@@ -96,6 +101,8 @@ public class CompareJumpDistances implements PlugIn {
       precisionCorrection = source.precisionCorrection;
       cdfPlot = source.cdfPlot;
       qqPlot = source.qqPlot;
+      maxN = source.maxN;
+      seed = source.seed;
     }
 
     Settings copy() {
@@ -171,6 +178,29 @@ public class CompareJumpDistances implements PlugIn {
       return;
     }
 
+    if (settings.maxN > 0) {
+      for (int i = 0; i < distances.length; i++) {
+        final double[] d = distances[i];
+        // Partial Fisher-Yates shuffle.
+        // Shuffle the smaller half.
+        final int move = Math.min(settings.maxN, d.length - settings.maxN);
+        if (move < 0) {
+          continue;
+        }
+        final UniformRandomProvider rng = UniformRandomProviders.create(settings.seed);
+        for (int n = 0; n < move; n++) {
+          // Swap the remaining end with any earlier position (including itself)
+          final int j = d.length - n - 1;
+          final int k = rng.nextInt(j + 1);
+          final double t = d[j];
+          d[j] = d[k];
+          d[k] = t;
+        }
+        // Extract the shuffle random N from the end of the array
+        distances[i] = Arrays.copyOfRange(d, d.length - settings.maxN, d.length);
+      }
+    }
+
     for (int i = 0; i < distances.length; i++) {
       Arrays.sort(distances[i]);
     }
@@ -215,7 +245,7 @@ public class CompareJumpDistances implements PlugIn {
       final double[][] h2 = MathUtils.cumulativeHistogram(distances[1], true);
       final String axisTitle =
           String.format("Distance (um/%s)", TextUtils.pleural(settings.frames, "frame"));
-      Plot plot = new Plot(TITLE, axisTitle, "Probability");
+      final Plot plot = new Plot(TITLE, axisTitle, "Probability");
       SimpleArrayUtils.apply(h1[0], distanceConverter::convert);
       SimpleArrayUtils.apply(h2[0], distanceConverter::convert);
       plot.setColor(Color.RED);
@@ -229,7 +259,7 @@ public class CompareJumpDistances implements PlugIn {
     if (settings.qqPlot) {
       final String title = TITLE + " QQ plot";
       // plot = new Plot(title, axisTitle, axisTitle);
-      Plot plot = new Plot(title, results.get(0).getName(), results.get(1).getName());
+      final Plot plot = new Plot(title, results.get(0).getName(), results.get(1).getName());
       final double[] p = Quantile.probabilities(1000);
       final int n = distances[0].length;
       final int m = distances[1].length;
@@ -253,6 +283,8 @@ public class CompareJumpDistances implements PlugIn {
     gd.addCheckbox("Precision_correction", settings.precisionCorrection);
     gd.addCheckbox("CDF_plot", settings.cdfPlot);
     gd.addCheckbox("QQ_plot", settings.qqPlot);
+    gd.addNumericField("Max_N", settings.maxN);
+    gd.addHexField("Seed", settings.seed);
     gd.addHelp(HelpUrls.getUrl("compare-jump-distances"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -262,6 +294,8 @@ public class CompareJumpDistances implements PlugIn {
     settings.precisionCorrection = gd.getNextBoolean();
     settings.cdfPlot = gd.getNextBoolean();
     settings.qqPlot = gd.getNextBoolean();
+    settings.maxN = (int) gd.getNextNumber();
+    settings.seed = gd.getNextHexLong();
     settings.save();
     return true;
   }

@@ -2188,6 +2188,12 @@ When the plugin runs the following parameters can be set:
    * - QQ plot
      - If ``true`` then a QQ plot is show when only two datasets are selected.
 
+   * - Max N
+     - Limit the number of distances used to ``N`` with a random sample. As the sample size reduces the significance of the KS test between distributions will reduce. Used to investigate the affect of sample size on the test.
+
+   * - Seed
+     - The seed for random sampling.
+
 After parameters are configured a dialog is presented that allows multiple datasets to be selected. All datasets must have the same distance and time calibration so that jumps across frames are comparable.
 
 
