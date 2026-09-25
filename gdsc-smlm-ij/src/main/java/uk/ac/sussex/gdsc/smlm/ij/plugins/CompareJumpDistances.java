@@ -82,6 +82,7 @@ public class CompareJumpDistances implements PlugIn {
     List<String> selected;
     int frames;
     boolean precisionCorrection;
+    boolean removeZeros;
     boolean cdfPlot;
     boolean qqPlot;
     int maxN;
@@ -99,6 +100,7 @@ public class CompareJumpDistances implements PlugIn {
       selected = source.selected;
       frames = source.frames;
       precisionCorrection = source.precisionCorrection;
+      removeZeros = source.removeZeros;
       cdfPlot = source.cdfPlot;
       qqPlot = source.qqPlot;
       maxN = source.maxN;
@@ -158,18 +160,6 @@ public class CompareJumpDistances implements PlugIn {
       return;
     }
 
-    // Extract the jump distances
-    final double[][] distances =
-        results.stream().map(r -> getDistances(r, settings.frames)).toArray(double[][]::new);
-
-    for (int i = 0; i < distances.length; i++) {
-      if (distances[i].length == 0) {
-        IJ.error(TITLE,
-            results.get(i).getName() + ": No distances for time delay " + settings.frames);
-        return;
-      }
-    }
-
     TypeConverter<DistanceUnit> distanceConverter;
     try {
       distanceConverter = results.get(0).getDistanceConverter(DistanceUnit.UM);
@@ -178,6 +168,37 @@ public class CompareJumpDistances implements PlugIn {
       return;
     }
 
+    // Extract the jump distances
+    final double[][] distances =
+        results.stream().map(r -> getDistances(r, settings.frames)).toArray(double[][]::new);
+
+    // Apply precision correction
+    final double[] error = new double[distances.length];
+    if (settings.precisionCorrection) {
+      // Get the localisation error (4s^2) in raw units^2
+      for (int i = 0; i < distances.length; i++) {
+        error[i] = getLocalisationError(results.get(i), distanceConverter);
+        applyCorrection(distances[i], error[i]);
+      }
+    }
+
+    // Remove zeros
+    if (settings.removeZeros) {
+      for (int i = 0; i < distances.length; i++) {
+        distances[i] = Arrays.stream(distances[i]).filter(x -> x > 0).toArray();
+      }
+    }
+
+    // Check we have a sample
+    for (int i = 0; i < distances.length; i++) {
+      if (distances[i].length == 0) {
+        IJ.error(TITLE,
+            results.get(i).getName() + ": No distances for time delay " + settings.frames);
+        return;
+      }
+    }
+
+    // Sub-sample
     if (settings.maxN > 0) {
       for (int i = 0; i < distances.length; i++) {
         final double[] d = distances[i];
@@ -201,23 +222,10 @@ public class CompareJumpDistances implements PlugIn {
       }
     }
 
+    // Convert squared distances to distances and sort
     for (int i = 0; i < distances.length; i++) {
+      SimpleArrayUtils.apply(distances[i], Math::sqrt);
       Arrays.sort(distances[i]);
-    }
-
-    // Apply precision correction
-    final double[] error = new double[distances.length];
-    if (settings.precisionCorrection) {
-      // Get the localisation error (4s^2) in raw units^2
-      for (int i = 0; i < distances.length; i++) {
-        error[i] = getLocalisationError(results.get(i), distanceConverter);
-        applyCorrection(distances[i], error[i]);
-      }
-    } else {
-      // Convert squared distances to distances
-      for (int i = 0; i < distances.length; i++) {
-        SimpleArrayUtils.apply(distances[i], Math::sqrt);
-      }
     }
 
     // Table of results convert (4s^2) to s in nm
@@ -281,6 +289,7 @@ public class CompareJumpDistances implements PlugIn {
     gd.addMessage("Compare the jump distances of traced datasets");
     gd.addSlider("Frames", 1, 10, settings.frames);
     gd.addCheckbox("Precision_correction", settings.precisionCorrection);
+    gd.addCheckbox("Remove_zeros", settings.removeZeros);
     gd.addCheckbox("CDF_plot", settings.cdfPlot);
     gd.addCheckbox("QQ_plot", settings.qqPlot);
     gd.addNumericField("Max_N", settings.maxN);
@@ -292,6 +301,7 @@ public class CompareJumpDistances implements PlugIn {
     }
     settings.frames = (int) gd.getNextNumber();
     settings.precisionCorrection = gd.getNextBoolean();
+    settings.removeZeros = gd.getNextBoolean();
     settings.cdfPlot = gd.getNextBoolean();
     settings.qqPlot = gd.getNextBoolean();
     settings.maxN = (int) gd.getNextNumber();
@@ -438,14 +448,8 @@ public class CompareJumpDistances implements PlugIn {
     if (error == 0) {
       return;
     }
-    int i = 0;
-    while (i < distances.length && distances[i] <= error) {
-      distances[i] = 0;
-      i++;
-    }
-    while (i < distances.length) {
-      distances[i] = Math.sqrt(distances[i] - error);
-      i++;
+    for (int i = 0; i < distances.length; i++) {
+      distances[i] = distances[i] > error ? distances[i] - error : 0;
     }
   }
 
@@ -457,7 +461,8 @@ public class CompareJumpDistances implements PlugIn {
 
   private String createHeader() {
     return Arrays.stream(new String[] {"Input1", "Input2", "Precision1 (nm)", "Precision2 (nm)",
-        "Frames", "N1", "N2", "KS D", "p(D)"}).collect(Collectors.joining("\t"));
+        "Frames", "Remove zeros", "N1", "N2", "KS D", "p(D)", "Ties"})
+        .collect(Collectors.joining("\t"));
   }
 
   private void addResult(Settings settings, String input1, String input2, double precision1,
@@ -469,10 +474,15 @@ public class CompareJumpDistances implements PlugIn {
       .append(MathUtils.rounded(precision1)).append('\t')
       .append(MathUtils.rounded(precision2)).append('\t')
       .append(settings.frames).append('\t')
+      .append(settings.removeZeros).append('\t')
       .append(n1).append('\t')
-      .append(n2).append('\t')
-      .append(r.getStatistic()).append('\t')
-      .append(r.getPValue());
+      .append(n2).append('\t');
+    if (r.getSign() != 0) {
+      sb.append(r.getSign()  == 1 ? '+' : '-');
+    }
+    sb.append(r.getStatistic()).append('\t')
+      .append(r.getPValue()).append('\t')
+      .append(r.hasSignificantTies());
     //@formatter:on
     createTable().append(sb.toString());
   }

@@ -2167,6 +2167,8 @@ The ``Compare Jump Distances`` plugin compares the empirical cumulative probabil
 
 The cumulative probability distribution for each dataset is compared using a Kolmogorov-Smirnov (KS) test. Results are recorded to a table. If only two datasets are selected then options are provided to plot the two distributions, and display a QQ plot.
 
+Note that the KS test is valid under the assumption that there are no ties in the data that affect the computed statistic. If the ties are resolved by forcing an order on the two values, and the KS statistic changes if the order is reversed then this is identified as a significant tie. In this case the computed p-value may be greater than the actual p-value if greater resolution in the data removed ties, i.e. the difference can be more extreme depending on how ties are resolved. Precision correction will create zeros in the data if some jumps are below the resolution of the localisations. This creates ties that will be significant. An option is provided to remove all jumps with zero distance allowing comparison of the distributions of diffusing molecules.
+
 When the plugin runs the following parameters can be set:
 
 .. list-table::
@@ -2181,6 +2183,9 @@ When the plugin runs the following parameters can be set:
 
    * - Precision correction
      - If ``true`` then distances are adjusted using the localisation precision. This alters the initial curve of the probability distribution to set jumps from non-diffusing particles to zero.
+
+   * - Remove zeros
+     - If ``true`` then zero distances are removed from the distribution. Allows comparison of diffusing populations of molecules.
 
    * - CDF plot
      - If ``true`` then a cumulative distribution plot is shown when only two datasets are selected.
