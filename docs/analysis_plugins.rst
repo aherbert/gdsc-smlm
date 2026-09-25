@@ -2183,10 +2183,10 @@ When the plugin runs the following parameters can be set:
      - If ``true`` then distances are adjusted using the localisation precision. This alters the initial curve of the probability distribution to set jumps from non-diffusing particles to zero.
 
    * - CDF plot
-     - If ``true`` then a cumulative distribution plot is show when only two datasets are selected.
+     - If ``true`` then a cumulative distribution plot is shown when only two datasets are selected.
 
    * - QQ plot
-     - If ``true`` then a QQ plot is show when only two datasets are selected.
+     - If ``true`` then a QQ plot is shown when only two datasets are selected.
 
    * - Max N
      - Limit the number of distances used to ``N`` with a random sample. As the sample size reduces the significance of the KS test between distributions will reduce. Used to investigate the affect of sample size on the test.
