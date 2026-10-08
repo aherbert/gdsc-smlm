@@ -9,16 +9,20 @@ Version 2.1
 
 Minor release of GDSC SMLM.
 
+* Update to GDSC IJ parent 4.0 based on pom-scijava 45.1.0 for compatibility with
+  ImageJ/Fiji July 2026.
 * Update to GDSC Core 2.3.
 * Update the tracing algorithm used by the :numref:`{name} <analysis_plugins:Trace Diffusion>`
   plugin to allow weighted fitting where each trace contributes equally to the fit irrespective
   of the trace length. This reduces bias introduced by long lasting immobile molecules (more jumps)
   and short lasting fast diffusing molecules (fewer jumps).
 * Added the :numref:`{name} <calibration_plugins:Diffusion Depth of Field>` plugin to model the
-  probabiity of a diffusing molecule remaining in the depth of field.
+  probability of a diffusing molecule remaining in the depth of field.
 * Added the :numref:`{name} <analysis_plugins:Track Diffusion Analysis>` plugin to fit diffusion
   coefficients of a mixed population of fixed and moving molecules using a model that accounts
   for diffusion out of the depth-of-field.
+* Added the :numref:`{name} <analysis_plugins:Compare Jump Distances>` plugin to compare the
+  empirical cumulative probability distribution of the jump distances between multiple datasets.
 * Update the :numref:`{name} <model_plugins:PSF HWHM>` plugin to allow fitting a 1D Gaussian
   to the projection of the X and Y axes.
 * Update the :numref:`{name} <results_plugins:Filter Results>` plugin to allow selecting results
