@@ -92,7 +92,6 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
     <dependency>
       <groupId>sc.fiji</groupId>
       <artifactId>3D_Viewer</artifactId>
-      <!-- For testing <version>4.0.3-SNAPSHOT</version> -->
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
