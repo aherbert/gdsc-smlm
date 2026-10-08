@@ -5,7 +5,7 @@
   <parent>
     <groupId>uk.ac.sussex.gdsc</groupId>
     <artifactId>gdsc-ij-parent</artifactId>
-    <version>4.0-SNAPSHOT</version>
+    <version>4.0</version>
     <relativePath>../gdsc-ij-parent</relativePath>
   </parent>
 
@@ -443,6 +443,30 @@ Software for single molecule localisation microscopy (SMLM)
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!-- Release to central requires javadoc -->
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>create-javadoc-jar</id>
+                <goals>
+                  <goal>javadoc</goal>
+                  <goal>jar</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <source>${maven.compiler.source}</source>
+            </configuration>
           </plugin>
         </plugins>
       </build>
