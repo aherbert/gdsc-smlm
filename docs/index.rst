@@ -282,6 +282,9 @@ Analysis Plugins
    * - :ref:`analysis_plugins:Residence Time Analysis`
      - Analyses the residence time of stationary (bound) molecules.
 
+   * - :ref:`analysis_plugins:Compare Jump Distances`
+     - Compares the empirical cumulative probability distribution of the jump distances between multiple datasets.
+
    * - :ref:`analysis_plugins:OPTICS`
      - Runs the OPTICS algorithm to perform interactive density-based clustering of localisation data.
 
