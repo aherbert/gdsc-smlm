@@ -60,9 +60,10 @@ Install
 
 The SMLM plugins are distributed using an ImageJ2/Fiji update site.
 
-To install the plugins using Fiji (an ImageJ distribution) just follow the
-instructions [How_to_follow_a_3rd_party_update_site](http://fiji.sc/How_to_follow_a_3rd_party_update_site)
-and add the GDSC SMLM update site. All the plugins will appear under the 'Plugins > GDSC SMLM' menu.
+To install the plugins using Fiji (an ImageJ distribution) just use the
+instructions [Following an update site](https://imagej.net/update-sites/following)
+and add the GDSC SMLM update site. All the plugins will appear under the
+'Plugins > GDSC SMLM' menu.
 
 
 Installation from source
