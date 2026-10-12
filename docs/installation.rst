@@ -13,7 +13,7 @@ Install using ImageJ2/Fiji
 
 The SMLM plugins are distributed using an ``ImageJ2``/``Fiji`` update site. This allows the plugins to be easily installed and kept up-to-date. To install the plugins using ``Fiji`` just follow the instructions here:
 
-* https://imagej.net/Following_an_update_site
+* https://imagej.net/update-sites/following
 
 Add the ``GDSC SMLM2`` update site. ``Fiji`` will automatically check for a new version during start-up and install it if desired.
 
