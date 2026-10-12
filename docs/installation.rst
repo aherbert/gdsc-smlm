@@ -27,7 +27,7 @@ Install using ImageJ version 1
 
 The plugin is designed to run within ``ImageJ``. You can obtain the latest version of ``ImageJ`` from:
 
-* https://imagej.nih.gov/ij/download.html
+* https://imagej.net/ij/download.html
 
 To get the plugins you can download the latest Jar files from the update site and put them in your ``ImageJ`` plugins folder. The jars can be found here:
 
@@ -36,7 +36,7 @@ To get the plugins you can download the latest Jar files from the update site an
 You will also need to install the additional Apache Commons Math 3 library and EJML. These are already included in ``Fiji`` so are not on the update site. You can get the files here:
 
 * `Apache Commons Math 3 <https://repo.maven.apache.org/maven2/org/apache/commons/commons-math3/3.6.1/>`_
-* `EJML v0.24 <https://sourceforge.net/projects/ejml/files/v0.24/>`_
+* `EJML v0.25 <https://sourceforge.net/projects/ejml/files/v0.25/>`_
 
 Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
 
@@ -50,11 +50,14 @@ Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
    * - commons-math3
      - Contains math routines.
 
+   * - commons-numbers-*
+     - Contains number routines.
+
    * - commons-rng-*
      - Contains random number routines.
 
-   * - gdsc-analytics
-     - Contains the GDSC analytics library.
+   * - commons-statistics-*
+     - Contains statistics routines.
 
    * - gdsc-core
      - Contains the GDSC core library.
