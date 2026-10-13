@@ -34,6 +34,7 @@ import ij.gui.ImageWindow;
 import ij.gui.Line;
 import ij.gui.Overlay;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -149,6 +150,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Mixers;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -332,6 +334,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final Trace trace;
     BitSet bits;
     int transitionsCount = -1;
+    double unitsToNm;
 
     /**
      * Create an instance.
@@ -341,12 +344,13 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param fitData the fit data (can be null if no fitting was done)
      * @param trace the trace
      */
-    TrackData(int[] component, double[][] data, double[][] fitData, Trace trace) {
+    TrackData(int[] component, double[][] data, double[][] fitData, Trace trace, double unitsToNm) {
       this.id = NEXT_ID.incrementAndGet();
       this.component = component;
       this.data = data;
       this.fitData = fitData;
       this.trace = trace;
+      this.unitsToNm = unitsToNm;
     }
 
     /**
@@ -781,15 +785,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
 
       if (settings.showSingleJumpPlot) {
-        selectedAction =
-            selectedAction.andThen(new TrackDPlot(deltaT, distanceConverter, colourMap, wo));
+        selectedAction = selectedAction.andThen(new TrackDPlot(deltaT, colourMap, wo));
       }
 
       // Show an image of the track coloured by the component.
       // Do this last as all the plot are the same size and will tile nicely.
       if (settings.showTrackImage) {
-        selectedAction = selectedAction.andThen(new TrackImage(distanceConverter,
-            settings.nmPerPixel, deltaT, settings.minDisplaySize, colourMap, wo));
+        selectedAction = selectedAction.andThen(
+            new TrackImage(settings.nmPerPixel, deltaT, settings.minDisplaySize, colourMap, wo));
       }
 
       if (selectedAction != NoopAction.INSTANCE) {
@@ -1646,8 +1649,6 @@ public class TrackPopulationAnalysis implements PlugIn {
     final double nmPerPixel;
     final double deltaT;
     final int minDisplaySize;
-    final double unitsToNm;
-    final double scale;
     final IntFunction<Color> colourMap;
     final WindowOrganiser wo;
 
@@ -1661,15 +1662,11 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param colourMap the colour map
      * @param wo the window organiser
      */
-    TrackImage(TypeConverter<DistanceUnit> distanceConverter, double nmPerPixel, double deltaT,
-        int minDisplaySize, IntFunction<Color> colourMap, WindowOrganiser wo) {
+    TrackImage(double nmPerPixel, double deltaT, int minDisplaySize, IntFunction<Color> colourMap,
+        WindowOrganiser wo) {
       this.nmPerPixel = nmPerPixel;
       this.deltaT = deltaT;
       this.minDisplaySize = minDisplaySize;
-      // Get the scale factor
-      // Create a distance converter to convert the units to the desired nm per pixel
-      unitsToNm = distanceConverter.convert(1) * 1000;
-      this.scale = unitsToNm / nmPerPixel;
       this.colourMap = colourMap;
       this.wo = wo;
     }
@@ -1685,6 +1682,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       final int points = trace.size();
       final double[] xd = new double[points];
       final double[] yd = new double[points];
+      final double scale = track.unitsToNm / nmPerPixel;
       for (int i = 0; i < points; i++) {
         xd[i] = trace.get(i).getXPosition() * scale;
         yd[i] = trace.get(i).getYPosition() * scale;
@@ -1781,7 +1779,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
 
       // Add data for the trace length tool
-      TrackLengthTool.addTrackData(imp, track, x, y, deltaT, unitsToNm);
+      TrackLengthTool.addTrackData(imp, track, x, y, deltaT);
     }
 
     private Roi createRoi(float[] x, float[] y, int n, int current) {
@@ -1843,8 +1841,10 @@ public class TrackPopulationAnalysis implements PlugIn {
         plot.setColor(colourMap.apply(n));
         plot.addPoints(x, y[n], Plot.LINE);
       }
-      ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
-          .setLimitsToFit(true);
+      final PlotWindow pw = ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo);
+      pw.getPlot().setLimitsToFit(true);
+      // Add data for the track length tool
+      TrackLengthTool.addTrackData(pw, track, deltaT);
     }
   }
 
@@ -1942,8 +1942,10 @@ public class TrackPopulationAnalysis implements PlugIn {
           plot.addPoints(c.getX(), c.getY(), Plot.CIRCLE);
         });
       }
-      ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
-          .setLimitsToFit(true);
+      final PlotWindow pw = ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo);
+      pw.getPlot().setLimitsToFit(true);
+      // Add data for the track length tool
+      TrackLengthTool.addTrackData(pw, track, deltaT);
     }
   }
 
@@ -1953,16 +1955,11 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private static class TrackDPlot implements Consumer<List<TrackData>> {
     final double deltaT;
-    final double scale;
     final IntFunction<Color> colourMap;
     final WindowOrganiser wo;
 
-    TrackDPlot(double deltaT, TypeConverter<DistanceUnit> distanceConverter,
-        IntFunction<Color> colourMap, WindowOrganiser wo) {
+    TrackDPlot(double deltaT, IntFunction<Color> colourMap, WindowOrganiser wo) {
       this.deltaT = deltaT;
-      // Extract effective diffusion coefficient in um^2/s:
-      // d = MSD / (4 * deltaT)
-      scale = MathUtils.pow2(distanceConverter.convert(1)) / (4 * deltaT);
       this.colourMap = colourMap;
       this.wo = wo;
     }
@@ -1987,6 +1984,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       final float[] d = new float[points - 1];
       double x = trace.get(0).getXPosition();
       double y = trace.get(0).getYPosition();
+      // Extract effective diffusion coefficient in um^2/s:
+      // d = MSD / (4 * deltaT)
+      final double scale = MathUtils.pow2(track.unitsToNm * 1e-3) / (4 * deltaT);
       for (int i = 1; i < points; i++) {
         final double x1 = trace.get(i).getXPosition();
         final double y1 = trace.get(i).getYPosition();
@@ -2040,8 +2040,10 @@ public class TrackPopulationAnalysis implements PlugIn {
         }
         plot.addPoints(coords.getX(), coords.getY(), Plot.CIRCLE);
       }
-      ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
-          .setLimitsToFit(true);
+      final PlotWindow pw = ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo);
+      pw.getPlot().setLimitsToFit(true);
+      // Add data for the track length tool
+      TrackLengthTool.addTrackData(pw, track, deltaT);
     }
   }
 
@@ -2054,7 +2056,6 @@ public class TrackPopulationAnalysis implements PlugIn {
     static final String TOOL_TITLE = "Track Length";
     private static final String TRACK_DATA = "Track Data";
     private static final String TRACK_COORDS = "Track Coords";
-    private static final String TRACK_CAL_DISTANCE = "Track Distance";
     private static final String TRACK_CAL_TIME = "Track Time";
     private static final String KEY_KNN = "gdsc.smlm.tracklength.knn";
     private static final String KEY_MODE = "gdsc.smlm.tracklength.mode";
@@ -2146,14 +2147,24 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param x the track x coords
      * @param y the track y coords
      * @param deltaT the time step in seconds
-     * @param unitsToNm the scale factor to convert localisation units to nm
      */
-    static void addTrackData(ImagePlus imp, TrackData track, float[] x, float[] y, double deltaT,
-        double unitsToNm) {
+    static void addTrackData(ImagePlus imp, TrackData track, float[] x, float[] y, double deltaT) {
       imp.setProperty(TRACK_DATA, track);
       imp.setProperty(TRACK_COORDS, new float[][] {x, y});
       imp.setProp(TRACK_CAL_TIME, deltaT);
-      imp.setProp(TRACK_CAL_DISTANCE, unitsToNm);
+    }
+
+    /**
+     * Adds the track data to the plot window.
+     *
+     * @param pw the plot window
+     * @param track the track data
+     * @param deltaT the time step in seconds
+     */
+    static void addTrackData(PlotWindow pw, TrackData track, double deltaT) {
+      final ImagePlus imp = pw.getImagePlus();
+      imp.setProperty(TRACK_DATA, track);
+      imp.setProp(TRACK_CAL_TIME, deltaT);
     }
 
     // --------------
@@ -2161,6 +2172,11 @@ public class TrackPopulationAnalysis implements PlugIn {
     // --------------
 
     // Mouse press:
+    // TrackPlot
+    // - Find time
+    // - Map time to localisation index
+    // - Store press location
+    // TrackImage
     // - Find KNN
     // - Find nearest in distance or time
     // - Store press location
@@ -2169,10 +2185,20 @@ public class TrackPopulationAnalysis implements PlugIn {
     // - Draw a line ROI from the start location
 
     // Mouse released
+    // - Clear the line ROI from the image
+    // TrackPlot
+    // - Find time
+    // - Map time to localisation index
+    // - Output Euclidian distance to a table
+    // - Find Track Image
+    // - Overlay the line on the image
+    // TrackImage
     // - Find KNN
     // - Find nearest in distance or time
-    // - Output Euclidian distance
+    // - Output Euclidian distance to a table
+    // - Overlay the line on the image
 
+    // TrackImage
     // Mouse clicked with modifier key
     // - Find Overlay components within the region and remove from Overlay and table
 
@@ -2198,8 +2224,18 @@ public class TrackPopulationAnalysis implements PlugIn {
         ox = ic.offScreenXD(event.getX());
         oy = ic.offScreenYD(event.getY());
 
-        // Analyse KNN to find start time and actual coords.
-        origin = getLocalisation(data, imp, ox, oy, true);
+        // Check if this is a plot
+        if (imp.getWindow() instanceof PlotWindow) {
+          final int i = getLocalisation(imp, event, data);
+          if (i >= 0) {
+            origin = new double[] {i};
+          } else {
+            origin = null;
+          }
+        } else {
+          // Analyse KNN to find start time and actual coords.
+          origin = getLocalisation(data, imp, ox, oy, true);
+        }
 
         if (origin != null) {
           // Store the actual pixel position so it is clear when the mouse has
@@ -2260,26 +2296,47 @@ public class TrackPopulationAnalysis implements PlugIn {
           // Remove drag line
           imp.killRoi();
 
-          final ImageCanvas ic = imp.getCanvas();
-          final double tx = ic.offScreenXD(event.getX());
-          final double ty = ic.offScreenYD(event.getY());
+          double[] end = null;
+          ImagePlus trackImp = null;
 
-          // Analyse KNN to find end time and actual coords.
-          final double[] end = getLocalisation(data, imp, tx, ty, false);
+          // Check if this is a plot
+          if (imp.getWindow() instanceof PlotWindow) {
+            // Since this dragged then origin is not null
+            final int i = (int) origin[0];
+            final int j = getLocalisation(imp, event, data);
+            // Allow dragging backwards but the two points must be different
+            if (j >= 0 && i != j) {
+              final double deltaT = imp.getNumericProp(TRACK_CAL_TIME);
+              origin = toResultData(data.trace.get(i), deltaT, data.unitsToNm);
+              end = toResultData(data.trace.get(j), deltaT, data.unitsToNm);
+              // Overlay on the track image
+              trackImp = WindowManager.getImage(TrackImage.TITLE);
+            }
+          } else {
+            trackImp = imp;
+            final ImageCanvas ic = imp.getCanvas();
+            final double tx = ic.offScreenXD(event.getX());
+            final double ty = ic.offScreenYD(event.getY());
 
-          if (end != null) {
-            Overlay overlay = imp.getOverlay();
+            // Analyse KNN to find end time and actual coords.
+            end = getLocalisation(data, imp, tx, ty, false);
+          }
+
+          // The distance result is not added if the start and end are the same
+          if (end != null &&
+              addDistanceResult(data, origin, end) &&
+              trackImp != null) {
+            // Overlay on the track image
+            Overlay overlay = trackImp.getOverlay();
             if (overlay == null) {
               overlay = new Overlay();
             }
             // Line using localisation positions. To align with the track image
             // PolygonRoi this should not use an offset line.
-            final ij.measure.Calibration cal = imp.getCalibration();
+            final ij.measure.Calibration cal = trackImp.getCalibration();
             overlay.add(createLine(cal.getRawX(origin[0]), cal.getRawY(origin[1]),
                 cal.getRawX(end[0]), cal.getRawY(end[1]), color, false));
-            imp.setOverlay(overlay);
-
-            addDistanceResult(imp, data, origin, end);
+            trackImp.setOverlay(overlay);
           }
         }
       }
@@ -2307,6 +2364,25 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     /**
+     * Gets the localisation index from the image PlotWindow.
+     *
+     * @param imp the image
+     * @param event the mouse event
+     * @param data the track data
+     * @return the localisation index (negative if not found)
+     */
+    private int getLocalisation(ImagePlus imp, MouseEvent event, TrackData data) {
+      final PlotWindow pw = (PlotWindow) imp.getWindow();
+      // Convert time axis to find the localisation
+      final double x = pw.getPlot().descaleX(event.getX());
+      final int i = (int) Math.round(x / imp.getNumericProp(TRACK_CAL_TIME)) - 1;
+      if (i >= data.trace.size()) {
+        return -1;
+      }
+      return i;
+    }
+
+    /**
      * Gets the localisation from the track data. Searches the KNN around the search coordinates.
      * Reports if the times for the localisations are very different. In distance mode the closest
      * point is returned. In time mode the latest (start) or earliest (end) point is returned.
@@ -2318,12 +2394,12 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param x the search x
      * @param y the search y
      * @param start true if a start position, else it is an end position
-     * @return the localisation [x, y, t, id]
+     * @return the localisation [x, y, t]
      */
     private double[] getLocalisation(TrackData data, ImagePlus imp, double x, double y,
         boolean start) {
       final IntDoubleKdTree tree = getTree(data, imp);
-      final double scale = imp.getNumericProp(TRACK_CAL_DISTANCE);
+      final double scale = data.unitsToNm;
 
       // Search for close localisations
       final Trace trace = data.trace;
@@ -2356,15 +2432,25 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       // else mode==distance and they are already sorted descending
       r = localisations.pop();
+      return toResultData(r, imp.getNumericProp(TRACK_CAL_TIME), scale);
+    }
+
+    /**
+     * Convert the localisation to data for the result table.
+     *
+     * @param r the localisation
+     * @param deltaT the time step in seconds
+     * @param unitsToNm the scale to convert raw distance units to nm
+     * @return the double[]
+     */
+    private static double[] toResultData(PeakResult r, double deltaT, double unitsToNm) {
       double lx = r.getXPosition();
       double ly = r.getYPosition();
       double t = r.getFrame();
-
       // convert the raw units to nm/second
-      final double exposureTime = imp.getNumericProp(TRACK_CAL_TIME);
-      lx *= scale;
-      ly *= scale;
-      t *= exposureTime;
+      lx *= unitsToNm;
+      ly *= unitsToNm;
+      t *= deltaT;
       return new double[] {lx, ly, t};
     }
 
@@ -2407,7 +2493,10 @@ public class TrackPopulationAnalysis implements PlugIn {
       return sb.toString();
     }
 
-    private void addDistanceResult(ImagePlus imp, TrackData data, double[] start, double[] end) {
+    private boolean addDistanceResult(TrackData data, double[] start, double[] end) {
+      if (start[2] == end[2]) {
+        return false;
+      }
       // Create the result window (if it is not available).
       final TextWindow window = ImageJUtils.refresh(distancesWindow,
           () -> new TextWindow(TITLE + " " + TOOL_TITLE, createDistancesHeader(), "", 700, 300));
@@ -2442,6 +2531,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       sb.append('\t').append(MathUtils.rounded(distance / (t2 - t1)));
 
       window.append(sb.toString());
+      return true;
     }
 
     @Override
@@ -2843,11 +2933,14 @@ public class TrackPopulationAnalysis implements PlugIn {
     final int[] lengths = trackData.getFirst();
     final double[][] data = trackData.getSecond();
     int from = 0;
+    final double unitsToNm =
+        CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM).convert(1);
     for (int i = 0; i < lengths.length; i++) {
       final int to = from + lengths[i];
       list.add(
           new TrackData(Arrays.copyOfRange(component, from, to), Arrays.copyOfRange(data, from, to),
-              fitData == null ? null : Arrays.copyOfRange(fitData, from, to), tracks.get(i)));
+              fitData == null ? null : Arrays.copyOfRange(fitData, from, to), tracks.get(i),
+              unitsToNm));
       from = to;
     }
 
