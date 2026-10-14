@@ -91,8 +91,9 @@ class HelpUrlsTest {
     Assertions.assertTrue(url.startsWith("http"));
 
     // Default base url
-    url = HelpUrls.getUrl("testplugin", props);
+    url = HelpUrls.getUrl("missing-testplugin", props);
     Assertions.assertTrue(url.startsWith("http"));
+    Assertions.assertEquals(url, HelpUrls.getUrl(), "Non-existent key should match base URL");
   }
 
   @Test
