@@ -1,4 +1,4 @@
 # Read the Docs : Reproducible builds
 # https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
 
-sphinx==5.3.0
+sphinx==9.1.0
