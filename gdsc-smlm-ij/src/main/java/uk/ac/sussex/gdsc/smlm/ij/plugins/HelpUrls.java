@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.smlm.Version;
 public final class HelpUrls {
   /** The system property to define the base help url. */
   private static final String HELP_URL_BASE_PROPERTY = "gdsc.smlm.help.url.base";
-  /** The system property to define the verion of the help url. */
+  /** The system property to define the version of the help url. */
   private static final String HELP_URL_VERSION_PROPERTY = "gdsc.smlm.help.url.version";
   /** The system property to define the help url properties configuration file. */
   private static final String HELP_URL_CONF_PROPERTY = "gdsc.smlm.help.url.conf";
