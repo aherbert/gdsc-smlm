@@ -23,11 +23,11 @@ GDSC Single Molecule Light Microscopy (SMLM) ImageJ Plugins
     :target: https://www.gnu.org/licenses/gpl-3.0
     :alt: License: GPL v3
 
-GDSC SMLM plugins provide various tools for single molecule localisation analysis. The code was developed at the `Genome Damage and Stability Centre <https://www.sussex.ac.uk/research/centres/genome-damage-and-stability-centre/>`_ at the University of Sussex, UK.
+GDSC SMLM plugins provide various tools for single molecule localisation analysis. These run as plugins within `ImageJ <https://imagej.net/ij/index.html>`_, an image processing and analysis program using Java.
 
 The tools are easily :ref:`installed <installation:Installation>` into ``ImageJ``. The library works for Java 1.8+.
 
-The code is hosted on GitHub_.
+The code was developed at the `Genome Damage and Stability Centre <https://www.sussex.ac.uk/research/centres/genome-damage-and-stability-centre/>`_ at the University of Sussex, UK. The source code is hosted on GitHub_.
 
 Citation
 --------
