@@ -184,9 +184,9 @@ All the images in the folder are opened and processed by the plugin. Each image 
 Analysis
 ~~~~~~~~
 
-If all the images are valid (contain at least 2 frames) then the plugin will perform the mean-variance test. The average value of the bias images is used as the bias. Each image is then analysed in turn. The mean of each frame is computed. Then a pairwise difference image (i.e. one frame subtracted from the other) is computed for all-vs-all frames. If the system was perfect then the difference between frames would be zero as each pixel would have the same value. However the system has noise for example from the variations in photons emitted in a fixed time period (photon shot noise), or from the measurement of the electrons captured on the camera sensor (read noise). The photon shot noise variance will scale linearly with exposure time and the read noise should be constant. A plot of variance against exposure time will be linear and the gradient of the line is the gain. The gain represents how many counts are recorded per photo-electron captured by the camera sensor.
+If all the images are valid (contain at least 2 frames) then the plugin will perform the mean-variance test. The average value of the bias images is used as the bias. Each image is then analysed in turn. The mean of each frame is computed. Then a pairwise difference image (i.e. one frame subtracted from the other) is computed for all-vs-all frames. If the system was perfect then the difference between frames would be zero as each pixel would have the same value. However the system has noise for example from the variations in photons emitted in a fixed time period (photon shot noise), or from the measurement of the electrons captured on the camera sensor (read noise). The photon shot noise variance will scale linearly with exposure time and the read noise should be constant. A plot of variance against mean will be linear and the gradient of the line is the gain. The gain represents how many counts are recorded per photo-electron captured by the camera sensor.
 
-The variance of the difference image is recorded and used to approximate the camera gain:
+Half the variance of the difference image (the variance of a single frame) is recorded and used to approximate the camera gain:
 
 .. math::
 
@@ -235,7 +235,7 @@ The plugin produces a summary table of the analysis for each pair of frames. The
      - The mean of both slices.
 
    * - Variance
-     - The variance of the difference image.
+     - Half the variance of the difference image.
 
    * - Gain
      - The gain estimate:
@@ -411,7 +411,7 @@ where
 :math:`p` is the average number of photons,
 :math:`m` is the EM-gain multiplication factor,
 :math:`c` is the observed pixel count,
-:math:`\delta(c)` is the Dirac delta function (1 when c=0, 0 otherwise),
+:math:`\delta(c)` is the Dirac delta function (a unit point mass at c=0),
 :math:`\mathit{BesselI}_1` is the modified Bessel function of the 1\ :sup:`st` kind, and
 :math:`G_{p,m}(c)` is the probability of observing the pixel count c.
 
@@ -639,7 +639,7 @@ The analysis requires the following parameters:
 
        :math:`\mathit{variance} = \left( \sum{x_i^2} - \frac{(\sum{x_i})^2}{n} \right) / (n-1)`
 
-       This algorithm is only suitable if the sum of the squared values will not overflow a 64-bit signed integer. For 16-bit unsigned data the maximum squared value is :math:`2^32` and the overflow will occur if using more than :math:`2^31` image frames. In most cases this option should be set to **false**.
+       This algorithm is only suitable if the sum of the squared values will not overflow a 64-bit signed integer. For 16-bit unsigned data the maximum squared value is :math:`2^{32}` and the overflow will occur if using more than :math:`2^{31}` image frames. In most cases this option should be set to **false**.
 
    * - Re-use processed data
      - If **true** the plugin will check for a processed data file for each directory of images. This is a tif image with the mean and variance of each pixel in the image series. This data is written by the plugin during processing.
@@ -768,7 +768,7 @@ Model the on-chip amplification from an EM-CCD camera, CCD or sCMOS camera and c
 
 The camera noise model can be selected from those that are available for use in fitting or from more robust models that are computationally expensive. An ideal model should fit the data over a range of low to high photons that are the expected photon levels of the localisation image data.
 
-Each camera simulation is performed using only two parameters: gain  :math:`g` and read noise :math:`\sigma^2`. The simulation for a CCD or sCMOS camera will perform sampling of the specified number of photons :math:`x` using a Poisson distribution to produce photo-electrons. This is multiplied by the gain (to simulate linear amplification) and combined with a Gaussian sample of the read noise of the camera pixel. The result is rounded to an integer count. This is the Poisson-Gaussian (PG) model:
+Each camera simulation is performed using only two parameters: gain  :math:`g` and read noise :math:`\sigma`. The simulation for a CCD or sCMOS camera will perform sampling of the specified number of photons :math:`x` using a Poisson distribution to produce photo-electrons. This is multiplied by the gain (to simulate linear amplification) and combined with a Gaussian sample of the read noise of the camera pixel. The result is rounded to an integer count. This is the Poisson-Gaussian (PG) model:
 
 .. math::
 
@@ -830,7 +830,7 @@ The ``Camera Model Analysis`` plugin supports a preview mode. The parameters of 
 Camera Noise Models
 ~~~~~~~~~~~~~~~~~~~
 
-The simulation is configured using gain :math:`g` and read noise :math:`\sigma^2`. The gain can be set to 1 and read noise to 0 to effectively disable them. The simulation is valid but many models may not be valid and exceptions will be logged to the ``ImageJ`` log window. Some models may require that the gain is above 1. Models that use a read noise may require that the read noise is above 0. In this case a read noise of 0.001 (or lower) can be used when the read noise must be strictly positive.
+The simulation is configured using gain :math:`g` and read noise :math:`\sigma`. The gain can be set to 1 and read noise to 0 to effectively disable them. The simulation is valid but many models may not be valid and exceptions will be logged to the ``ImageJ`` log window. Some models may require that the gain is above 1. Models that use a read noise may require that the read noise is above 0. In this case a read noise of 0.001 (or lower) can be used when the read noise must be strictly positive.
 
 The camera model functions have been written to generate a continuous probability density function (PDF) or a discrete probability mass function (PMF) for observed camera count value :math:`x` and the number of photons :math:`x/g`.
 
@@ -956,7 +956,7 @@ The Fisher information is the amount of information an observable random variabl
 
 .. math::
 
-  I = \mathbb{E} \left[ \left(\frac{\delta}{\delta \theta} \ln f(X; \theta) \, \middle| \, \theta \right)^2 \right]
+  I = \mathbb{E} \left[ \left(\frac{\partial}{\partial \theta} \ln f(X; \theta) \, \middle| \, \theta \right)^2 \right]
 
 In this case the observable :math:`X` is the count from the microscope camera and the parameter :math:`\theta` is the number of photons. Thus this is the Fisher information of the camera count distribution created when light is captured by the camera pixels. The Fisher information can be used to determine the lower bounds on the precision of fitting a model to data. The Cramer-Rao inequality states that the covariance matrix of any unbiased estimator :math:`\hat{\theta}` of :math:`\theta` is no smaller than the inverse of the Fisher information matrix:
 
@@ -968,21 +968,21 @@ Thus computation of the Fisher information for a camera model allows determinati
 
 .. math::
 
-  \mathbb{E} \left[ \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right]
+  \mathbb{E} \left[ \left(\frac{\partial}{\partial v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right]
 
-where :math:`v_{\theta}` is the mean of the Poisson random variable that models the detected signal in the pixel, and :math:`p_{\theta}(z))` is the probability distribution of the data :math:`z` at the pixel. The subscript :math:`\theta` denotes the dependence of :math:`v_{\theta}` on the parameter vector :math:`\theta`, i.e. the parameters of the model. The expectation term is a nonnegative scalar, and is proportional to the amount of information the data contains about the parameters in :math:`\theta`. This term is the Fisher information of the probability model with respect to :math:`v_{\theta}`.
+where :math:`v_{\theta}` is the mean of the Poisson random variable that models the detected signal in the pixel, and :math:`p_{\theta}(z)` is the probability distribution of the data :math:`z` at the pixel. The subscript :math:`\theta` denotes the dependence of :math:`v_{\theta}` on the parameter vector :math:`\theta`, i.e. the parameters of the model. The expectation term is a nonnegative scalar, and is proportional to the amount of information the data contains about the parameters in :math:`\theta`. This term is the Fisher information of the probability model with respect to :math:`v_{\theta}`.
 
 Two models can be compared using their expectation terms. However instead of comparing them directly they can be compared using their noise coefficient :math:`\alpha`. This is the expectation term normalised by the expectation term for an uncorrupted Poisson signal :math:`\frac{1}{v_{\theta}}`:
 
 .. math::
 
-  \alpha = v_{\theta} \cdot \mathbb{E} \left[ \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right]
+  \alpha = v_{\theta} \cdot \mathbb{E} \left[ \left(\frac{\partial}{\partial v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right]
 
 The noise coefficient is 1 for a hypothetical best scenario and :math:`0 \leq \alpha \leq 1` for a Poisson signal corrupted by detector noise.
 
-Chao *et al* provide the equation for a CCD detector as a convolution between a Poisson and a Gaussian with width :math:`\sigma^2` equal to the read noise of the CCD (SI equation 7). This is also applicable to single pixels on a sCMOS camera.
+Chao *et al* provide the equation for a CCD detector as a convolution between a Poisson and a Gaussian with standard deviation :math:`\sigma` equal to the read noise of the CCD (SI equation 7). This is also applicable to single pixels on a sCMOS camera.
 
-Chao *et al* provide the equation for an EM-CCD detector as a convolution between a Poisson, a geometric branching distribution with mean gain :math:`m` and a Gaussian with width :math:`\sigma^2` equal to the read noise of the EM-CCD (SI equation 8; also [Chao *et al* (2012)] equation 13). For the purpose of this plugin the geometric branching distribution has been replaced by the Gamma distribution to use the Poisson-Gamma equation of [Ulbrich & Isacoff, 2007] SI equation 3. This models the EM process of a high number of multiplication stages as an exponential distribution instead of a branched chain geometric distribution. Note that unlike [Chao *et al* (2012)] equation 22 which models using a similar zero-modified exponential distribution (which prevents loss of electrons in the EM gain process) this is not an approximation for high gain only as the gain is not eliminated from the computation of :math:`\alpha`. Thus different gains can create different output Fisher information. However the model is only valid if the gain is significant compared to the read noise (which is to be expected for an EM-CCD) due to assumptions made during the computation for speed.
+Chao *et al* provide the equation for an EM-CCD detector as a convolution between a Poisson, a geometric branching distribution with mean gain :math:`m` and a Gaussian with standard deviation :math:`\sigma` equal to the read noise of the EM-CCD (SI equation 8; also [Chao *et al* (2012)] equation 13). For the purpose of this plugin the geometric branching distribution has been replaced by the Gamma distribution to use the Poisson-Gamma equation of [Ulbrich & Isacoff, 2007] SI equation 3. This models the EM process of a high number of multiplication stages as an exponential distribution instead of a branched chain geometric distribution. Note that unlike [Chao *et al* (2012)] equation 22 which models using a similar zero-modified exponential distribution (which prevents loss of electrons in the EM gain process) this is not an approximation for high gain only as the gain is not eliminated from the computation of :math:`\alpha`. Thus different gains can create different output Fisher information. However the model is only valid if the gain is significant compared to the read noise (which is to be expected for an EM-CCD) due to assumptions made during the computation for speed.
 
 An additional model is provided for comparison purposes that models the Gaussian read noise as a Poisson distribution. The Poisson-Gaussian approximation is then a single Poisson distribution with mean equal to the sum of Poisson mean photon signal and the Gaussian read-noise variance. This model is used in the ``Peak Fit`` plugin for the ``LVM MLE`` and ``Fast MLE`` fit solver.
 
@@ -990,8 +990,8 @@ The expected term is evaluated by integration:
 
 .. math::
 
-  \mathbb{E} \left[ \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right] & = \int_{-\infty}^{\infty} \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 p_{\theta}(z) \, \delta z \\
-  & = \int_{-\infty}^{\infty} \frac{1}{p_{\theta}(z)} \left(\frac{\delta p_{\theta}(z)}{\delta v_{\theta}} \right)^2 \delta z
+  \mathbb{E} \left[ \left(\frac{\partial}{\partial v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right] & = \int_{-\infty}^{\infty} \left(\frac{\partial}{\partial v_{\theta}} \ln (p_{\theta}(z)) \right)^2 p_{\theta}(z) \, \mathrm{d}z \\
+  & = \int_{-\infty}^{\infty} \frac{1}{p_{\theta}(z)} \left(\frac{\partial p_{\theta}(z)}{\partial v_{\theta}} \right)^2 \, \mathrm{d}z
 
 Thus the expectation term can be evaluated using the probability mass function for the noise model and its gradient function with respect to the mean photon signal :math:`v_{\theta}`. This is numerically integrated over a suitable range to compute both the Fisher information and the noise coefficient.
 
@@ -1235,7 +1235,7 @@ Diffusion Rate Test
 
 The ``Diffusion Rate Test`` plugin will simulate molecule diffusion and fit a graph of mean-squared displacement to determine the diffusion coefficient. This is a test plugin to show that the simulated diffusion in the ``Create Data`` plugin generates correct moving particles.
 
-When a molecule is diffusing it can move in any direction. The total distance it moves and the track it took may not be visible due to the speed of movement. However the diffusion of particles in a single dimension can be modelled as a population. If the squared distances from the origin after a set time are plotted as a histogram they can be modelled using a Gaussian curve. The average distance the particles will move is zero and the variance of the Gaussian curve will be the mean-squared displacement (MSD). This can be expressed by unit time. The MSD is proportional to the diffusion coefficient (:math:`D`). The relationship for a single-dimension is MSD = :math:`2D`. This increases to :math:`4D` and :math:`6D` for two and three dimensional distances (since the diffusion in each dimension is independent).
+When a molecule is diffusing it can move in any direction. The total distance it moves and the track it took may not be visible due to the speed of movement. However the diffusion of particles in a single dimension can be modelled as a population. If the displacements from the origin after a set time are plotted as a histogram they can be modelled using a Gaussian curve. The average displacement the particles will move is zero and the variance of the Gaussian curve will be the mean-squared displacement (MSD). This can be expressed by unit time. The MSD is proportional to the diffusion coefficient (:math:`D`). The relationship for a single-dimension is MSD = :math:`2D`. This increases to :math:`4D` and :math:`6D` for two and three dimensional distances (since the diffusion in each dimension is independent).
 
 
 .. index:: Grid Walk simulation
@@ -1243,7 +1243,7 @@ When a molecule is diffusing it can move in any direction. The total distance it
 Grid Walk simulation
 ~~~~~~~~~~~~~~~~~~~~
 
-Since the MSD in a single dimension is equal to :math:`2D`, the mean-distance a particle moves will be :math:`\sqrt{2D}`. This step size can be used to simulate diffusion using a grid walk. At each step a particle can move forward or backwards by the step size :math:`s`. If the direction is random then the population of particles will have an average displacement of zero, a mean displacement of the step size:math:`s`, and a mean squared displacement (MSD) of :math:`s^2 = 2D`. Multi-dimension diffusion is done by simulating the movement in each dimension separately.
+Since the MSD in a single dimension is equal to :math:`2D`, the root-mean-square distance a particle moves will be :math:`\sqrt{2D}`. This step size can be used to simulate diffusion using a grid walk. At each step a particle can move forward or backwards by the step size :math:`s`. If the direction is random then the population of particles will have an average displacement of zero, a mean absolute displacement of the step size :math:`s`, and a mean squared displacement (MSD) of :math:`s^2 = 2D`. Multi-dimension diffusion is done by simulating the movement in each dimension separately.
 
 
 .. index:: Random Move simulation
@@ -1353,9 +1353,9 @@ If confined diffusion is performed the MSD will reach a natural upper limit. Thi
 
 .. math::
 
-    \frac{\int ^{R}\mathit{SA} \times r}{V} dr &= \frac{\int ^{R}4\pi r^{2} \times r}{4\pi R^{3}/3} dr \\
-    &= \frac{\int ^{R} r^{3}}{R^{3}/3} dr \\
-    &= \frac{R^{4}}{R^{3}/3} \\
+    \frac{\int_{0}^{R}\mathit{SA} \times r \, \mathrm{d}r}{V} &= \frac{\int_{0}^{R}4\pi r^{2} \times r \, \mathrm{d}r}{4\pi R^{3}/3} \\
+    &= \frac{\int_{0}^{R} r^{3} \, \mathrm{d}r}{R^{3}/3} \\
+    &= \frac{R^{4}/4}{R^{3}/3} \\
     &= \frac{3R}{4}
 
 Thus the mean-distance to the centre for particles in a sphere is 0.75 *R*. This can be used to check that the confined simulation is performing as a true random diffusion within a sphere.
@@ -1537,13 +1537,13 @@ The depth of field (:math:`\Delta z`) is the distance in the z-axis that can be 
 
 .. math::
 
-    \mathit{P}(\Delta t, \Delta z, D) = \frac{1}{\Delta z} \int_{-\Delta z / 2}^{\Delta z / 2} \left\{ 1 - \sum_{n=0}^{\inf} (-1)^n \left[ \text{erfc} \left( \frac{ \frac{(2n+1)\Delta z}{2} - z }{\sqrt{4D \Delta t}} \right) + \text{erfc} \left( \frac{ \frac{(2n+1)\Delta z}{2} + z }{\sqrt{4D \Delta t}} \right) \right] \right\} \text{d}z
+    \mathit{P}(\Delta t, \Delta z, D) = \frac{1}{\Delta z} \int_{-\Delta z / 2}^{\Delta z / 2} \left\{ 1 - \sum_{n=0}^{\infty} (-1)^n \left[ \text{erfc} \left( \frac{ \frac{(2n+1)\Delta z}{2} - z }{\sqrt{4D \Delta t}} \right) + \text{erfc} \left( \frac{ \frac{(2n+1)\Delta z}{2} + z }{\sqrt{4D \Delta t}} \right) \right] \right\} \text{d}z
 
 Note that this is for absorbing boundaries. In practice a molecule may diffuse out of the depth of field and then re-enter it. This may be approximately accounted for by using a larger depth of field :math:`\Delta z_{\text{corr}}` based on coefficient :math:`a` and :math:`b` for a given depth of field :math:`\Delta z`, time delay :math:`\Delta t` and allowed number of gaps :math:`g` in the track:
 
 .. math::
 
-    \Delta z_{\text{corr}} = \Delta z + a(\Delta z, \Delta t, g) + b(\Delta z, \Delta t, g)
+    \Delta z_{\text{corr}} = \Delta z + a(\Delta z, \Delta t, g) \sqrt{D} + b(\Delta z, \Delta t, g)
 
 ..
   No index
@@ -1551,7 +1551,7 @@ Note that this is for absorbing boundaries. In practice a molecule may diffuse o
 Analysis
 ~~~~~~~~
 
-The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps, or for the molecule lifetime sampled from an exponential with the specified mean lifetime. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. If restarts are allowed then the diffusion continues until the lifetime expires. If the molecule re-enters the depth of field a new track is started. The fraction of molecules within the depth of field at each time step of a track is computed. By simulating a range of diffusion coeffcients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
+The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z/2, \Delta z/2]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps, or for the molecule lifetime sampled from an exponential with the specified mean lifetime. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. If restarts are allowed then the diffusion continues until the lifetime expires. If the molecule re-enters the depth of field a new track is started. The fraction of molecules within the depth of field at each time step of a track is computed. By simulating a range of diffusion coeffcients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
 
 Fitting is performed using random starting points for the coefficients within a specified range. Fitted coefficients are not bound by this range but they must be positive. A number of repeats can be configured. If the number of repeats is set to zero then fitting is not performed and the plugin will display results using the configured minimum initial value for coefficient estimates. This option can be used to show the effect of absorbing boundaries if coeffecients are zero, or used to plot specific coefficient values.
 

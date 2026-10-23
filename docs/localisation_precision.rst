@@ -42,7 +42,7 @@ where
     * - :math:`F`
       - The noise scaling factor. 2 for an EM-CCD camera; 1 otherwise.
 
-    * - :math:`S`
+    * - :math:`s`
       - The standard deviation of the Gaussian function.
 
     * - :math:`N`

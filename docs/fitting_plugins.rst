@@ -403,8 +403,8 @@ When fitting image data the individual components factors that convert photons t
 
 .. math::
 
-    \mathit{total\:gain} &= \mathit{QE} \times \mathit{gain} \\
-    &= \mathit{QE} \times \mathit{EM\:gain} \times \mathit{gain}
+    \mathit{total\:gain} &= \mathit{QE} \times \mathit{gain} \quad \text{(CCD)} \\
+    \mathit{total\:gain} &= \mathit{QE} \times \mathit{EM\:gain} \times \mathit{gain} \quad \text{(EM-CCD)}
 
 This creates a simplified model:
 
@@ -594,7 +594,7 @@ The following equation specifies the elliptical 2D Gaussian (named ``Rotating El
 
 .. math::
 
-    u_k(x,y)=B+\frac{\mathit{Signal}}{2\pi \sigma _{x}\sigma_{y}}e^{-a(x-x_{0})^{2}-2b(x-x_{0})(y-y_{0})+c(y-y_{0})^{2}}
+    u_k(x,y)=B+\frac{\mathit{Signal}}{2\pi \sigma _{x}\sigma_{y}}e^{-a(x-x_{0})^{2}-2b(x-x_{0})(y-y_{0})-c(y-y_{0})^{2}}
 
 where
 
@@ -610,7 +610,7 @@ is positive-definite and
 
 .. math::
 
-    b=-{\frac{\sin ^{2}2\theta }{4\sigma _{x}^{2}}}+\frac{\sin ^{2}2\theta}{4\sigma _{y}^{2}}
+    b=-{\frac{\sin 2\theta }{4\sigma _{x}^{2}}}+\frac{\sin 2\theta}{4\sigma _{y}^{2}}
 
 .. math::
 
@@ -670,16 +670,16 @@ with
     * - :math:`\Delta E_x(x,y)`
       - The integral of the Gaussian 2D function over the x-dimension.
 
-        :math:`\Delta E_x(x,y) = \frac{1}{2} \text{erf} (\frac{x - x_0 + \frac{1}{2}}{2 \sigma_x^2}) - \frac{1}{2} \text{erf} (\frac{x - x_0 - \frac{1}{2}}{2 \sigma_x^2})`
+        :math:`\Delta E_x(x,y) = \frac{1}{2} \text{erf} (\frac{x - x_0 + \frac{1}{2}}{\sqrt{2} \sigma_x}) - \frac{1}{2} \text{erf} (\frac{x - x_0 - \frac{1}{2}}{\sqrt{2} \sigma_x})`
 
-        with :math:`\text{erf}` the Error function, :math:`x_0` the Gaussian x centre, :math:`\sigma_x^2` the Gaussian standard deviation in the x-dimension.
+        with :math:`\text{erf}` the Error function, :math:`x_0` the Gaussian x centre, :math:`\sigma_x` the Gaussian standard deviation in the x-dimension.
 
     * - :math:`\Delta E_y(x,y)`
       - The integral of the Gaussian 2D function over the y-dimension.
 
-        :math:`\Delta E_y(x,y) = \frac{1}{2} \text{erf} (\frac{y - y_0 + \frac{1}{2}}{2 \sigma_y^2}) - \frac{1}{2} \text{erf} (\frac{y - y_0 - \frac{1}{2}}{2 \sigma_y^2})`
+        :math:`\Delta E_y(x,y) = \frac{1}{2} \text{erf} (\frac{y - y_0 + \frac{1}{2}}{\sqrt{2} \sigma_y}) - \frac{1}{2} \text{erf} (\frac{y - y_0 - \frac{1}{2}}{\sqrt{2} \sigma_y})`
 
-        with :math:`\text{erf}` the Error function, :math:`y_0` the Gaussian y centre, :math:`\sigma_y^2` the Gaussian standard deviation in the y-dimension.
+        with :math:`\text{erf}` the Error function, :math:`y_0` the Gaussian y centre, :math:`\sigma_y` the Gaussian standard deviation in the y-dimension.
 
 Note that the error function of the Gaussian 2D function can be computed at intervals of 1 pixel and the integral for each pixel computed by subtracting successive values of the series. The formulation exploits the (x,y) separability of the 2D Gaussian and is efficiently computed.
 
@@ -689,9 +689,9 @@ The ``Astigmatic`` Gaussian in the ``PSF`` options uses a z-dependent standard d
 
 .. math::
 
-    \sigma_x(z) = \sigma_{0x} + \sqrt{1 + \frac{(z-\gamma)^2}{d^2} + A_x \frac{(z-\gamma)^3}{d^2} + B_x \frac{(z-\gamma)^4}{d^2} }
+    \sigma_x(z) = \sigma_{0x} \sqrt{1 + \frac{(z-\gamma)^2}{d^2} + A_x \frac{(z-\gamma)^3}{d^2} + B_x \frac{(z-\gamma)^4}{d^2} }
 
-    \sigma_y(z) = \sigma_{0y} + \sqrt{1 + \frac{(z+\gamma)^2}{d^2} + A_y \frac{(z+\gamma)^3}{d^2} + B_y \frac{(z+\gamma)^4}{d^2} }
+    \sigma_y(z) = \sigma_{0y} \sqrt{1 + \frac{(z+\gamma)^2}{d^2} + A_y \frac{(z+\gamma)^3}{d^2} + B_y \frac{(z+\gamma)^4}{d^2} }
 
 with
 
@@ -841,7 +841,7 @@ where :math:`f_i` is the value of the PSF function at pixel *i* and :math:`g_i` 
 
 .. math::
 
-    \sigma_i^2 = \mathit{var}_i + \max(g_i, 1) + 1
+    \sigma_i^2 = \mathit{var}_i + \max(g_i, 0) + 1
 
 
 The ``LVM WLSE`` solver requires a camera calibration so that the bias can be subtracted and the observed values converted to photons. The solver can be applied to CCD-type cameras or sCMOS cameras using a per-pixel model.
@@ -928,7 +928,7 @@ The two noise distributions can be combined by convolution of a Poisson and a Ga
 
 .. math::
 
-    p(k|\lambda ,\sigma )=\sum _{n=0}^{\infty }{\frac{1}{n!}\lambda^{n}\operatorname{e}^{-\lambda }\times {\frac{1}{\sqrt{2\pi }\sigma}\operatorname{e}^{-{\frac{1}{2\sigma ^{2}}(x-n)^{2}}}}}
+    p(k|\lambda ,\sigma )=\sum _{n=0}^{\infty }{\frac{1}{n!}\lambda^{n}\operatorname{e}^{-\lambda }\times {\frac{1}{\sqrt{2\pi }\sigma}\operatorname{e}^{-{\frac{1}{2\sigma ^{2}}(k-n)^{2}}}}}
 
 with
 *k* equal to the pixel count,
@@ -968,7 +968,7 @@ where:
       - The observed pixel count.
 
     * - :math:`\delta(c)`
-      - The Dirac delta function (1 when c=0, 0 otherwise).
+      - The Dirac delta function (a unit point mass at c=0).
 
     * - :math:`\mathit{BesselI}_1`
       - Modified Bessel function of the 1\ :sup:`st` kind.
@@ -1107,7 +1107,7 @@ The fast maximum likelihood estimator uses the method of Smith, *et al* (2010) t
 
 .. math::
 
-    \frac{\delta \ln(L(\overrightarrow{x}|\theta)}{\delta \theta_i} = \sum_k \frac{\delta u_k(x,y)}{\delta \theta_i} \left(\frac{x_k}{u_k(x,y)} -1 \right)
+    \frac{\partial \ln(L(\overrightarrow{x}|\theta))}{\partial \theta_i} = \sum_k \frac{\partial u_k(x,y)}{\partial \theta_i} \left(\frac{x_k}{u_k(x,y)} -1 \right)
 
 where :math:`\overrightarrow{x}` are the pixel values, :math:`u_k(x,y)` is the integral of the PSF function at pixel *k* (see :numref:`%s <fitting_plugins:Gaussian PSF Equation>`) and :math:`x_k` is the actual image intensity at pixel *k* in photons.
 
@@ -1115,8 +1115,8 @@ The update to each parameter requires the first and second partial derivatives o
 
 .. math::
 
-    \theta_{i+1} \rightarrow \theta_i + & \left[ \sum_k \frac{\delta u_k(x,y)}{\delta \theta_i} \left(\frac{x_k}{u_k(x,y)} -1 \right) \right] \times \\
-    & \left[ \sum_k \frac{\delta^2 u_k(x,y)}{\delta \theta_i^2} \left(\frac{x_k}{u_k(x,y)} -1 \right) - \frac{\delta u_k(x,y)^2}{\delta \theta_i} \frac{x_k}{u_k(x,y)^2} \right]^{-1}
+    \theta_i^{(r+1)} = \theta_i^{(r)} - & \left[ \sum_k \frac{\partial u_k(x,y)}{\partial \theta_i} \left(\frac{x_k}{u_k(x,y)} -1 \right) \right] \times \\
+    & \left[ \sum_k \frac{\partial^2 u_k(x,y)}{\partial \theta_i^2} \left(\frac{x_k}{u_k(x,y)} -1 \right) - \left( \frac{\partial u_k(x,y)}{\partial \theta_i} \right)^2 \frac{x_k}{u_k(x,y)^2} \right]^{-1}
 
 
 The ``Fast MLE`` solver converges quadratically when close to the solution. It requires a good initial estimate of the function parameters otherwise the update steps can cause excessively large adjustment of the parameter values and the iteration is unrecoverable. Parameter clamping can reduce this issue.
@@ -1310,10 +1310,10 @@ Precision can also be computed from the fitted function by creating the Fisher i
 
 .. math::
 
-    I(\theta)_{a,b} = \mathbf{E} \left[ \left( \frac{\delta \ln (L(x|\theta)}{\delta \theta_a} \right) \
-                                        \left( \frac{\delta \ln (L(x|\theta)}{\delta \theta_b} \right) \right]
+    I(\theta)_{a,b} = \mathbf{E} \left[ \left( \frac{\partial \ln (L(x|\theta))}{\partial \theta_a} \right) \
+                                        \left( \frac{\partial \ln (L(x|\theta))}{\partial \theta_b} \right) \right]
 
-This is the expected value of the combined partial derivatives of the log-likelihood function with respect to pairs of parameters :math:`\theta_a \: \theta_b`. The diagonal of the inverse of the matrix is the Cramér–Rao lower bounds (CRLB) on the variance of an unbaised estimator of :math:`\theta`. When :math:`\theta_a` or :math:`\theta_b` refers to the coordinate parameter this is the CRLB for the localisation precision. To output a single precision value the two values are averaged.
+This is the expected value of the combined partial derivatives of the log-likelihood function with respect to pairs of parameters :math:`\theta_a \: \theta_b`. The diagonal of the inverse of the matrix is the Cramér–Rao lower bounds (CRLB) on the variance of an unbaised estimator of :math:`\theta`. When both :math:`\theta_a` and :math:`\theta_b` refer to the coordinate parameter this is the CRLB for the localisation precision. To output a single precision value the two values are averaged.
 
 The fisher information matrix can be computed for a Poisson process using [Smith *et al*, 2010]:
 
@@ -2355,7 +2355,7 @@ The counter is scored using:
 
 .. math::
 
-    \mathit{score} & = \frac{\mathit{target\:pass\:count}-\mathit{pass\:count}}{\mathit{target\:pass\:count}}, \: & \text{if } count <= target \\
+    \mathit{score} & = \frac{\mathit{target\:pass\:count}-\mathit{pass\:count}}{\mathit{target\:pass\:count}}, \: & \text{if } \mathit{count} \le \mathit{target} \\
                    & = \frac{\mathit{count}-\mathit{target}}{\mathit{target}},        & \text{otherwise}
 
 where *count* is the number of candidates processed before stopping.

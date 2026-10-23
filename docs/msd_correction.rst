@@ -23,7 +23,7 @@ It is possible to calculate distances between frames of *N* simulation steps tha
 
 .. math::
 
-    d=\sum _{i}^{i+N}{\frac{x_{n}}{N}}-\sum _{i+j}^{i+j+N}{\frac{x_{n}}{N}}
+    d=\sum _{n=i}^{i+N-1}{\frac{x_{n}}{N}}-\sum _{n=i+j}^{i+j+N-1}{\frac{x_{n}}{N}}
 
 This is performed for each dimension in the simulation and summed to the mean squared distance. The MSD from the simulation can be compared to the expected MSD from the diffusion coefficient.
 

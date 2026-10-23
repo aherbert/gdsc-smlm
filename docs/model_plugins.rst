@@ -2022,7 +2022,7 @@ true answer for each parameter that was fitted. Histograms of the differences ca
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
-     - The signal to noise ratio (:math:`\mathit{SNR} = \frac{N}{\sqrt{b^2}}`).
+     - The signal to noise ratio (:math:`\mathit{SNR} = \frac{N}{\mathit{Noise}}`).
 
    * - Limit N
      - The theoretical limit of signal precision.
@@ -2358,7 +2358,7 @@ The following parameters can be configured.
        Set to the same as the ``Match distance`` to ignore the ramped scoring function.
 
    * - Match signal
-     - Define the limit for the difference between the estimated signal and the actual signal for a match. A value of (N-1) indicates the fit is allowed to be N-fold different, i.e. use 2 for a 3-fold difference.
+     - Define the limit for the difference between the estimated signal and the actual signal for a match. A value of :math:`N` indicates the fit is allowed to be :math:`2^N`-fold different, i.e. use 2 for a 4-fold difference.
 
        Set to zero to ignore.
 
@@ -2491,7 +2491,7 @@ The analysis results are then reported in a summary table:
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
-     - The signal to noise ratio (:math:`\mathit{SNR}=\frac{N}{\sqrt{b^2}}`).
+     - The signal to noise ratio (:math:`\mathit{SNR}=\frac{N}{\mathit{Noise}}`).
 
    * - s (px)
      - The standard deviation of the Gaussian profile that matches the PSF in pixels.
@@ -2808,7 +2808,7 @@ The following parameters can be configured:
        Set to the same as the ``Match distance`` to ignore the ramped scoring function.
 
    * - Match signal
-     - Define the limit for the difference between the fitted signal and the actual signal for a match. A value of (N-1) indicates the fit is allowed to be N-fold different, i.e. use 2 for a 3-fold difference.
+     - Define the limit for the difference between the fitted signal and the actual signal for a match. A value of :math:`N` indicates the fit is allowed to be :math:`2^N`-fold different, i.e. use 2 for a 4-fold difference.
 
        Set to zero to ignore.
 
@@ -2934,7 +2934,7 @@ The analysis results are then reported in a summary table:
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
-     - The signal to noise ratio (:math:`\mathit{SNR}=\frac{N}{\sqrt{b^2}}`).
+     - The signal to noise ratio (:math:`\mathit{SNR}=\frac{N}{\mathit{Noise}}`).
 
    * - s (px)
      - The standard deviation of the Gaussian profile that matches the PSF in pixels.
@@ -3623,7 +3623,7 @@ If the ``Show table`` or ``Show summary`` options are selected the plugin will d
      - The noise per pixel. This is a combination of the read noise and the background number of photons.
 
    * - SNR
-     - The signal to noise ratio (:math:`\mathit{SNR}=\frac{N}{\sqrt{b^2}}`).
+     - The signal to noise ratio (:math:`\mathit{SNR}=\frac{N}{\mathit{Noise}}`).
 
    * - s (px)
      - The standard deviation of the Gaussian profile that matches the PSF in pixels.

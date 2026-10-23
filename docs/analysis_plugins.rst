@@ -258,7 +258,7 @@ The following parameters can be specified:
 
 For example if a white light image was taken at the start and then every 20 frames then the method should be called with parameters ``start_frame=1 frame_spacing=20``. The drift will then be calculated as if the `n` slices were at time points::
 
-    1, 21, 41, ..., 20 * (n-1) + 1, 20 * n + 1
+    1, 21, 41, ..., 20 * (n-1) + 1
 
 
 .. index:: Fiducial Markers
@@ -870,7 +870,7 @@ The jump distance is how far a particle moves is given time period. Analysis of 
 
     p(r^{2},\Delta t)\mathit{dr}^{2}=\frac{1}{4D\Delta t}e^{-{\frac{r^{2}}{4D\Delta t}}}\mathit{dr}^{2}
 
-This can be expanded to a mixed population of *m* species where each fraction (:math:`f_i`) has a diffusion coefficient :math:`D_i`\ :
+This can be expanded to a mixed population of *m* species where each fraction (:math:`f_j`) has a diffusion coefficient :math:`D_j`\ :
 
 .. math::
 
@@ -884,7 +884,7 @@ For the purposes of fitting the integrated distribution can be used. For a singl
 
 The advantage of the integrated distribution is that specific histogram bin sizes are not
 required to construct the cumulative histogram from the raw data. Note that the
-integration holds for a mixed population of *m* species where each fraction (:math:`f_i`) has a diffusion coefficient :math:`D_i`\ :
+integration holds for a mixed population of *m* species where each fraction (:math:`f_j`) has a diffusion coefficient :math:`D_j`\ :
 
 .. math::
 
@@ -899,7 +899,7 @@ accurately reproduce the diffusion coefficient in single molecule simulations. T
 
 When :math:`\beta` is above 6 then jump distance analysis reproduces the diffusion coefficient as accurately as MSD analysis for single populations. For mixed populations of moving and stationary particles the MSD analysis fails (it cannot determine multiple diffusion coefficients) and the jump distance analysis yields accurate values when :math:`\beta` is above 6.
 
-The ``Trace Diffusion`` plugin performs jump distance analysis using the jumps between frames that are *n* frames apart. The distances may be from the origin to the *n* th frame or may use all the available internal distances *n* frames apart. A cumulative histogram is produced of the jump distance. This is then fitted using a single population and then for mixed populations of *j* species by minimising the sum-of-squared residuals (SS) between the observed and expected curves. Alternatively the plugin can fit the jump distances directly without using a cumulative histogram. In this case the probability of each jump distance is computed using the formula for :math:`P(r^{2},\Delta t)` and the combined probability (likelihood) of the data given the model is computed. The best model fit is achieved by maximising the likelihood (maximum likelihood estimation, MLE).
+The ``Trace Diffusion`` plugin performs jump distance analysis using the jumps between frames that are *n* frames apart. The distances may be from the origin to the *n* th frame or may use all the available internal distances *n* frames apart. A cumulative histogram is produced of the jump distance. This is then fitted using a single population and then for mixed populations of *m* species by minimising the sum-of-squared residuals (SS) between the observed and expected curves. Alternatively the plugin can fit the jump distances directly without using a cumulative histogram. In this case the probability of each jump distance is computed using the formula for :math:`p(r^{2},\Delta t)` and the combined probability (likelihood) of the data given the model is computed. The best model fit is achieved by maximising the likelihood (maximum likelihood estimation, MLE).
 
 When fitting multiple species the fit is rejected if:
 (a) the relative difference between coefficients is smaller than a given factor; or
@@ -950,7 +950,7 @@ When fitting the linear plot of MSD verses the number of frames the correction f
 
 This is still a linear fit with a new representation for the intercept that allows the intercept to be negative. To ensure the intercept is correctly bounded it is represented using the fit parameters and not just fit using a single constant C.
 
-When performing the linear fit of the MSD verses jump distance plot, 3 equations are fitted and the results with the best information criterion is selected. The results of each fit are written to the ``ImageJ`` log. The following equations are fit:
+When performing the linear fit of the MSD versus time plot, 3 equations are fitted and the result with the best information criterion is selected. The results of each fit are written to the ``ImageJ`` log. The following equations are fit:
 
 Linear fit:
 
@@ -1010,11 +1010,13 @@ The Akaike Information Criterion (AIC) is calculated for the fit using the log l
 
    \mathit{AIC}=2p-2\ln(L)
 
-The AIC penalises additional parameters. The model with the lowest AIC is preferred. If a higher AIC is obtained then increasing the number of fitted species in the mixed population has not improved the fit and so fitting is stopped. Note that when performing maximum likelihood estimation the log likelihood is already known and is used directly to calculate the corrected AIC. When fitting the sum-of-squared residuals (:math:`SS_{\text{res}}`) for the straight line MSD fit the log likelihood can be computed as:
+The AIC penalises additional parameters. The model with the lowest AIC is preferred. If a higher AIC is obtained then increasing the number of fitted species in the mixed population has not improved the fit and so fitting is stopped. Note that when performing maximum likelihood estimation the log likelihood is already known and is used directly to calculate the AIC. When fitting the sum-of-squared residuals (:math:`SS_{\text{res}}`) for the straight line MSD fit the log likelihood can be computed as:
 
 .. math::
 
-    L=-{\frac{n}{2}} \ln (2\pi) - \frac{n}{2} \ln(\sigma^2) - \frac{1}{2\sigma^2} \mathit{SS}
+    \ln(L)=-{\frac{n}{2}} \ln (2\pi) - \frac{n}{2} \ln(\sigma^2) - \frac{1}{2\sigma^2} \mathit{SS}_{\text{res}}
+
+where :math:`n` is the number of data points and the residual variance :math:`\sigma^2` is estimated as :math:`\mathit{SS}_{\text{res}} / n`.
 
 This assumes that the residuals are distributed according to independent identical normal distributions (with zero mean). When the residuals are not identical normal distributions, such as fitting the cumulative jump distance histogram, then the adjusted coefficient of determination is used to select the best model:
 
@@ -1353,7 +1355,7 @@ The plugin shows a summary table of the analysis results. This allows the plugin
      - The number of jumps for jump distance analysis.
 
    * - Beta
-     - The beta parameter which is the ratio between the mean squared distance and the localisation precision: :math:`\frac{\mathit{MSD}}{s^2}`.
+     - The beta parameter which is the ratio between the mean distance and the localisation precision: :math:`\frac{d}{s}`.
 
        A beta above 6 indicates that jump distance analysis will produce reliable results [Weimann *et al*, 2013].
 
@@ -1460,7 +1462,7 @@ Note that a diffusing molecule may move out of the depth of field. This can caus
 
 .. math::
 
-    \Delta z_{\text{corr}} = \Delta z + a(\Delta z, \Delta t, g) + b(\Delta z, \Delta t, g)
+    \Delta z_{\text{corr}} = \Delta z + a(\Delta z, \Delta t, g) \sqrt{D} + b(\Delta z, \Delta t, g)
 
 The steady-state model for a 2-state population with bound fraction :math:`F_1` and diffusion coefficients :math:`D_1` and :math:`D_2` is:
 
@@ -1505,7 +1507,7 @@ The following parameters can be set:
      - The depth of field.
 
    * - Max t
-     - The maximum time step :math:`-\Delta t` to use for diffusion distances (in frames).
+     - The maximum time step :math:`\Delta t` to use for diffusion distances (in frames).
 
    * - Offsets
      - The number of offsets to use for the origin of the track. Each offset will incease the count of diffusion distances but may lead to under representation of long distances at large time delays.
@@ -1600,7 +1602,7 @@ A summary table is shown containing the model parameters. The following columns 
      - The exposure time. This is the time delay for 1 frame.
 
    * - Max t
-     - The maximum time step :math:`-\Delta t` to use for diffusion distances (in frames).
+     - The maximum time step :math:`\Delta t` to use for diffusion distances (in frames).
 
    * - Offsets
      - The number of offsets to use for the origin of the track.
@@ -1929,7 +1931,7 @@ The table allows selection of multiple tracks to perform analysis. If more than 
 
 The track data can be saved to a dataset using the ``Data > Save...`` menu in the track data table. This supports saving the currently selected tracks or the entire set of tracks.
 
-Display of the jump distances used to fit the anomalous exponent can be viewed using ``Analysis > Anomalous exponent view`` menu in the track data table. This will present a dialog for the currently selected track where the data window can be selected; this corresponds to a contiguous set of localisations of the configured analysis window size. The mean squared jump distances for each time gap in the analysis window are extracted and the fit of the standard Brownian model and the fractional Brownian motion (FBM) model are shown. Optionally the plot can be changed to divide the MSD by the time and use a log scale for visualisation; the fitting is unaffected. Assuming a simple exponential equation for the MSD the plot of MSD/t verses time is a straight line where the gradient is the anomalous exponent minus 1:
+Display of the jump distances used to fit the anomalous exponent can be viewed using ``Analysis > Anomalous exponent view`` menu in the track data table. This will present a dialog for the currently selected track where the data window can be selected; this corresponds to a contiguous set of localisations of the configured analysis window size. The mean squared jump distances for each time gap in the analysis window are extracted and the fit of the standard Brownian model and the fractional Brownian motion (FBM) model are shown. Optionally the plot can be changed to divide the MSD by the time and use a log scale for visualisation; the fitting is unaffected. Assuming a simple power-law equation for the MSD the plot of MSD/t versus time on log-log axes is a straight line where the gradient is the anomalous exponent minus 1:
 
 .. math::
 
@@ -1952,6 +1954,10 @@ Note: The population model contains an average of the anomalous diffusion coeffi
 
 The residence times for the length of time spent in each component can be displayed using ``Analysis > Residence time``. This will create a histogram and observed cumulative distribution function of the residence times. The length of time for the component at the start and end of the track is ignored so that the data only contains lengths with a defined start and end. The data is thus generated only for tracks with at least 2 transitions between component states. The observations are fit assuming an exponential distribution where :math:`T_R` is the mean residence time:
 
+.. math::
+
+    p(t) = \frac{1}{T_R} e^{-t / T_R}
+
 The length of tracks can be measured using ``Analysis > Track length``. This will install a ``Track Length Tool`` in the ``ImageJ`` toolbar. When activated the tool can be used on the ``Track Image`` for the currently selected track. Click-and-drag to draw a line on the image. The tool will identify the nearest neighbours to the start and end points of the line. In ``Distance`` mode the closest neighbours will be chosen. In ``Time`` mode the closest start and end points in time are measured. The points and the distance are recorded in a track length result table.
 
 The ``Track Length Tool`` also allows click-and-drag on any of the profile plots. This will identify the start and end localistion of the selected part of the track using the time axis. The result is recorded in the track length table and on the ``Track Image``.
@@ -1972,11 +1978,11 @@ The residence time is fit using the survival function for an exponential model (
 
 .. math::
 
-    P(T >= t) = \sum_i w_i \exp(-k_i t)
+    P(T \geq t) = \sum_i w_i \exp(-k_i t)
 
 where :math:`k_i` is the dissociation rate for the population and the sum of the weights is 1. Fitting supports a 1, 2 or 3 population model. The 1 population model assumes all bound molecules are in the same state. The multi population models assume that bound molecules have multiple states, and each state has a different dissociation rate. For example specific binding and non-specific binding may have a slower dissociation rate for the specific binding as the molecule is used to perform a function; if non-specific binding occurs then the molecule will dissociate faster as it has no function to perform.
 
-The residence time *t* is not continuous as the data contain residence times in frames. Maximum likelihood fitting is performed by assigning observations a probability using the difference of the survival function at the start and end of the frame time, e.g. the duration of frame :math:`f` uses :math:`P(f) = P(T >= f \Delta t) - P(T >= (f+1) \Delta t)` where :math:`\Delta t` is the frame exposure time.
+The residence time *t* is not continuous as the data contain residence times in frames. Maximum likelihood fitting is performed by assigning observations a probability using the difference of the survival function at the start and end of the frame time, e.g. the duration of frame :math:`f` uses :math:`P(f) = P(T \geq f \Delta t) - P(T \geq (f+1) \Delta t)` where :math:`\Delta t` is the frame exposure time.
 
 The observed dissociation rate :math:`k_{obs}` is a combination of the binding dissociation rate :math:`k_b` and the apparent dissociation rate :math:`k_a` due to technical imaging limitations such as photo-bleaching and diffusion of the bound complex. The observed rate is a combination of these two exponential processes:
 
@@ -2167,7 +2173,7 @@ The ``Compare Jump Distances`` plugin compares the empirical cumulative probabil
 
 .. math::
 
-    D=\sqrt{(x_{i+t}-x_i)^2 + (y_{i+t}-y_i)^2 - 4s^2)}
+    d=\sqrt{(x_{i+t}-x_i)^2 + (y_{i+t}-y_i)^2 - 4s^2}
 
 The cumulative probability distribution for each dataset is compared using a Kolmogorov-Smirnov (KS) test. Results are recorded to a table. If only two datasets are selected then options are provided to plot the two distributions, and display a QQ plot.
 
@@ -2719,7 +2725,7 @@ Note that the K and L functions apply to an entire dataset. However it is possib
 
 .. math::
 
-    K_{i}(r)=\lambda ^{-1}\sum ^{j}I(d_{\mathit{ij}}<r)
+    K_{i}(r)=\lambda ^{-1}\sum_{j \neq i}I(d_{\mathit{ij}}<r)
 
 Since the count of localisations is expected to be the area of the local region multiplied by
 the average sample density (:math:`\lambda`) then the :math:`K_{i}(r)` score is expected to be the area of the local region.
@@ -3610,7 +3616,7 @@ When the simulation is run it uses the following defaults:
      - 256
 
    * - Activation Density
-     - The activation density in molecules/|micro|\ m. Pixel pitch is 100nm.
+     - The activation density in molecules/|micro|\ m\ :sup:`2`. Pixel pitch is 100nm.
      - 0.1
 
    * - Non-specific frequency
@@ -3964,7 +3970,7 @@ The threshold is computed at each frequency (:math:`T_i`) for the predefined Fou
 
 .. math::
 
-    T_{i} &= \frac{\mathit{SNR}_{T}/2+2/\sqrt{(N_{i})}\cdot\sqrt{(\mathit{SNR}_{T}/2)}+1/\sqrt{(N_{i})}} {\mathit{SNR}_{T}/2+2/\sqrt{(N_{i})}\cdot\sqrt{r_{i}}+1} \\
+    T_{i} &= \frac{\mathit{SNR}_{T}/2+2/\sqrt{(N_{i})}\cdot\sqrt{(\mathit{SNR}_{T}/2)}+1/\sqrt{(N_{i})}} {\mathit{SNR}_{T}/2+2/\sqrt{(N_{i})}\cdot\sqrt{(\mathit{SNR}_{T}/2)}+1} \\
           &= \frac{\mathit{SNR}_{T}/2+(2\sqrt{(\mathit{SNR}_{T}/2)}+1)/\sqrt{(N_{i})}}{1+\mathit{SNR}_{T}/2+2\sqrt{(\mathit{SNR}_{T}/2)}/\sqrt{(N_{i})}}
 
 (see Heel & Schatz, (2005), equation 13). Note that the desired :math:`\mathit{SNR}_T` is divided by two since we need half the SNR from each of the half datasets (the two images). For a smoother curve the number of points (:math:`N_i`) is computed as :math:`2\pi r` and not the actual number of samples computed during the Fourier ring analysis.
@@ -3979,7 +3985,7 @@ Note the use of the binary logarithm. Classically this can be done using *n-bits
 
 .. math::
 
-    T_{i}=\frac{0.2071+1.9102/\sqrt{N_{i}}}{1.2701+0.9102/\sqrt{N_{i}}}
+    T_{i}=\frac{0.2071+1.9102/\sqrt{N_{i}}}{1.2071+0.9102/\sqrt{N_{i}}}
 
 
 ..
@@ -4008,7 +4014,7 @@ When analysing a single dataset, if the same emitter is localised more than once
 
     \mathit{FRC}(q)=\frac{\sum _{\vec{q}\in C}\widehat {f}_{1}(\vec{q})\ast\widehat {f}_{2}(\vec{q})}{\sqrt{\sum _{\vec{q}\in C}|\widehat{f}_{1}(\vec{q})|^{2}}\sqrt{\sum _{\vec{q}\in C}|\widehat{f}_{2}(\vec{q})|^{2}}}
 
-The sum is computed over all pixels at the specified spatial frequency :math:`q=|\vec{q}|` where C denotes the pixels of the perimeter of a circle of constant spatial frequency and *q* is valued as *0/L*, *1/L*, *2/L*, … with *L* the pixel size of the input images (*1/L* is the pixel size in Fourier space). The ring sum can be scaled to a ring mean by dividing by the number of samples in the circle (:math:`N_C`):
+The sum is computed over all pixels at the specified spatial frequency :math:`q=|\vec{q}|` where C denotes the pixels of the perimeter of a circle of constant spatial frequency and *q* is valued as *0/L*, *1/L*, *2/L*, … with *L* the size of the input images (*1/L* is the pixel size in Fourier space). The ring sum can be scaled to a ring mean by dividing by the number of samples in the circle (:math:`N_C`):
 
 .. math::
 
@@ -4316,7 +4322,7 @@ The FRC numerator at a given frequency *q* is given by the sum of the conjugate 
 
     \mathit{FRC\:numerator}(q)=\sum _{\vec{q}\in C}\widehat{f}_{1}(\vec{q})\ast \widehat {f}_{2}(\vec{q})
 
-The sum is computed over all pixels at the specified spatial frequency :math:`q=|\vec{q}|` where C denotes the pixels of the perimeter of a circle of constant spatial frequency and *q* is valued as *0/L*, *1/L*, *2/L*, … with *L* the pixel size of the input images (*1/L* is the pixel size in Fourier space). This term is divided by the number of pixels in the Fourier circle to produce function *v(q)*:
+The sum is computed over all pixels at the specified spatial frequency :math:`q=|\vec{q}|` where C denotes the pixels of the perimeter of a circle of constant spatial frequency and *q* is valued as *0/L*, *1/L*, *2/L*, … with *L* the size of the input images (*1/L* is the pixel size in Fourier space). This term is divided by the number of pixels in the Fourier circle to produce function *v(q)*:
 
 .. math::
 

@@ -112,7 +112,7 @@ A weight of 1 produces the balanced F-score where precision and recall are weigh
 
 .. math::
 
-    F_1={\frac{\mathit{precision}\cdot
+    F_1=2\cdot {\frac{\mathit{precision}\cdot
     \mathit{recall}}{\mathit{precision}+\mathit{recall}}}
 
 
@@ -198,9 +198,9 @@ Matthews Correlation Coefficient:
 .. math::
 
     \mathit{MCC}=\frac{\mathit{tp}\ast \mathit{tn}-\mathit{fp}\ast
-    \mathit{fn}}{\sqrt{\mathit{tp}+\mathit{fp}\ast
-    {\mathit{tp}+\mathit{fn}}\ast {\mathit{tn}+\mathit{fp}}\ast
-    {\mathit{tn}\ast \mathit{fn}}}}
+    \mathit{fn}}{\sqrt{(\mathit{tp}+\mathit{fp})\ast
+    (\mathit{tp}+\mathit{fn})\ast (\mathit{tn}+\mathit{fp})\ast
+    (\mathit{tn}+\mathit{fn})}}
 
 The Matthews Correlation Coefficient is used in machine learning as a measure of the quality of binary (two-class) classifications, introduced by biochemist Brian W. Matthews in 1975. It takes into account true and false positives and negatives and is generally regarded as a balanced measure which can be used even if the classes are of very different sizes. The MCC is in essence a correlation coefficient between the observed and predicted binary classifications; it returns a value between −1 and +1. A coefficient of +1 represents a perfect prediction, 0 no better than random prediction and −1 indicates total disagreement between prediction and observation. The statistic is also known as the phi coefficient.
 

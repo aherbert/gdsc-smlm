@@ -1379,7 +1379,7 @@ The MSD can be converted to the diffusion coefficient for 2D diffusion:
 
 .. math::
 
-    D = \frac{\mathit{MSD}}{4 * \Delta t}
+    D = \frac{\mathit{MSD}}{4 \Delta t}
 
 When the filter is initialised a histogram is displayed of the diffusion coefficient and the track length data. Outliers are removed from the diffusion coefficient histogram thus the upper range may not include all the molecules. The maximum value is shown in the label for reference. Note that there may be a large peak at 0 for the diffusion coefficient histogram. This is because small jumps below the localisation precision are set to zero. The peak at zero represents static molecules that are not diffusing.
 
@@ -2015,13 +2015,13 @@ The overall score is the sum of the scores for all of the matched pairs. This sc
 
 .. math::
 
-    \mathit{Total\:Score}=\frac{ \sum ^{i}{S_{i}} }{\mathit{max}(\mathit{p1},\mathit{p2})}
+    \mathit{Total\:Score}=\frac{ \sum_{i}{S_{i}} }{\mathit{max}(\mathit{p1},\mathit{p2})}
 
 The number of time-points (*p*) is equal to the count of the number of individual localisations in the results before tracing.
 
 .. math::
 
-    p=\sum ^{i}{\mathit{tEnd}_{i}-\mathit{tStart}_{i}+1}
+    p=\sum_{i}{(\mathit{tEnd}_{i}-\mathit{tStart}_{i}+1)}
 
 where *tStart* is the trace start time and *tEnd* is the trace end time. The normalisation penalises the score if either result set contains many unmatched or partially matched traces. The overall score should have a value between 0 and 1.
 
@@ -2120,7 +2120,7 @@ The results are displayed in a table. Additional fields not in the parameter tab
    * - Rand Index
      - The Rand index. This represents the probability that ``X`` and ``Y`` will agree on a randomly chosen pair of classifications. Has a value between 0 and 1.
 
-       For any pair of classifications in ``X``, the classifications can be the same or different. The identical pair of classifications in ``Y`` can also be the same or different. The Rand index is the probability that the pair is either the same in ``X`` and ``Y`` or different in ``X`` and ``Y`` divided by the total ((same ``X``, same ``Y``) + (different ``X``, different ``Y``) + (same ``X``, different ``Y``) + (different ``X``, same ``Y``)).
+       For any pair of classifications in ``X``, the classifications can be the same or different. The identical pair of classifications in ``Y`` can also be the same or different. The Rand index is the number of pairs that are either the same in ``X`` and ``Y`` or different in ``X`` and ``Y`` divided by the total ((same ``X``, same ``Y``) + (different ``X``, different ``Y``) + (same ``X``, different ``Y``) + (different ``X``, same ``Y``)).
 
    * - Adjusted RI
      - The adjusted Rand index (the Rand index adjusted for the chance of grouping elements by chance). Has a maximum value of 1 and can yield negative values if the index is less than the expected index.
