@@ -5,11 +5,11 @@ References
 
 Abraham AV, Ram S, Chao J, Ward ES & Ober RJ (2009)
 Quantitative study of single molecule location techniques.
-*Optical Express* 17: 23352.
+*Optics Express* 17: 23352.
 
 Amitai A, Seeber A, Gasser SM & Holcman D (2017)
-Visualization of Chromatin Decompaction and Break Site Extrusion as Predicted by Statistical Polymer Modeling of Single-Locus Trajectories. 
-*Cell reports* 18, 1200-1214.
+Visualization of Chromatin Decompaction and Break Site Extrusion as Predicted by Statistical Polymer Modeling of Single-Locus Trajectories.
+*Cell Reports* 18, 1200-1214.
 
 Ankerst M, Breunig MM, Kriegel HP & Sander J (1999)
 OPTICS: ordering points to identify the clustering structure.
@@ -21,7 +21,7 @@ Quantitative Photo Activated Localization Microscopy: Unravelling the Effect of 
 
 Backlund MP, Joyner R & Moerner WE (2015)
 Chromosomal locus tracking with proper accounting of static and dynamic errors.
-*Physical Review* E 91: 062716.
+*Physical Review E* 91: 062716.
 
 Bates M, Huang B, Dempsey GT & Zhuang X (2007)
 Multicolor Super-Resolution Imaging with Photo-Switchable Fluorescent Probes.
@@ -41,7 +41,7 @@ Fisher information matrix for branching processes with application to electron-m
 
 Cisse II, Izeddin I, Causse SZ, Boudarene L, Senecal A, Muresan L, Dugast-Darzacq C, Hajj B, Dahan M & Darzacq X (2013)
 Real-Time Dynamics of RNA Polymerase II Clustering in Live Human Cells.
-s*Science*. 341, 664–667.
+*Science* 341, 664–667.
 
 Coltharp C, Kessler RP & Xiao J (2012)
 Accurate Construction of Photoactivated Localization Microscopy (PALM) Images for Quantitative Measurements.
@@ -56,14 +56,14 @@ A density-based algorithm for discovering clusters in large spatial databases wi
 *Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96)* AAAI Press. pp. 226–231.
 
 Etheridge TJ, Carr AM & Herbert AD (2022)
-GDSC SMLM: Single-molecule localisation microscopy software for ImageJ [version 1; peer review: 1 approved].
+GDSC SMLM: Single-molecule localisation microscopy software for ImageJ [version 1; peer review: 3 approved].
 *Wellcome Open Res* 7:241.
 
 Hansen AS, Woringer M, Grimm JB, Lavis LD, Tjian R & Darzacq X (2018)
 Robust model-based analysis of single-particle tracking experiments with Spot-On.
 *eLife* 7, e33125.
- 
-Heel M & Schatz M (2005)
+
+van Heel M & Schatz M (2005)
 Fourier shell correlation threshold criteria.
 *Journal of Structural Biology* 151(3): 250–262.
 
@@ -71,15 +71,15 @@ Henriques R, Lelek M, Fornasiero EF, Valtorta F, Zimmer C & Mhlanga MM (2010)
 QuickPALM: 3D real-time photoactivation nanoscopy image processing in ImageJ.
 *Nature Methods* 7: 339–340.
 
-Hirsch M, Wareham RJ, Martin-Fernandez ML, Hobson MP, Rolfe DJ (2013)
+Hirsch M, Wareham RJ, Martin-Fernandez ML, Hobson MP & Rolfe DJ (2013)
 A Stochastic Model for Electron Multiplication Charge-Coupled Devices – From Theory to Practice.
 *PLOS ONE* 8(1): e53671.
 
-Holtzer L, Meckel T, Schmidt T (2007)
+Holtzer L, Meckel T & Schmidt T (2007)
 Nanometric three-dimensional tracking of individual quantum dots in cells.
 *Appl. Phys. Lett*. 90: 053902.
 
-Hozé NHD (2017)
+Hozé N & Holcman D (2017)
 Statistical methods for large ensembles of super-resolution stochastic single particle trajectories in cell biology.
 *Annual Review of Statistics and Its Application* 4, 189-223.
 
@@ -91,9 +91,9 @@ Hurvich CM & Tsai CL (1989)
 Regression and time series model selection in small samples.
 *Biometrika* 76: 297–307.
 
-Izeddin I, Récamier V, Bosanac L Cissé II, Boudarene L, Dugast-Darzacq C Proux F, Bénichou O, Voituriez R, Bensaude O, Dahan M & Darzacq X (2014)
+Izeddin I, Récamier V, Bosanac L, Cissé II, Boudarene L, Dugast-Darzacq C, Proux F, Bénichou O, Voituriez R, Bensaude O, Dahan M & Darzacq X (2014)
 Single-molecule tracking in live cells reveals distinct target-search strategies of transcription factors in the nucleus.
-*eLife* e02230.
+*eLife* 3: e02230.
 
 Kriegel HP, Kröger P, Schubert E & Zimek A (2009)
 LoOP: local outlier probabilities.
@@ -105,15 +105,15 @@ Efficient maximum likelihood estimator fitting of histograms.
 
 Lin R, Clowsley AH, Jayasinghe ID, Baddeley D & Soeller C (2017)
 Algorithmic corrections for localization microscopy with sCMOS cameras - characterisation of a computationally efficient localization approach.
-*Optical Express* 25(10): 11701-11716.
+*Optics Express* 25(10): 11701-11716.
 
-Moreira and Santos (2007)
+Moreira A & Santos MY (2007)
 Concave hull: A k-nearest neighbours approach for the computation of the region occupied by a set of points.
-* Conference: GRAPP 2007*, Proceedings of the Second International Conference on Computer Graphics Theory and Applications, Barcelona, Spain.
+*GRAPP 2007*, Proceedings of the Second International Conference on Computer Graphics Theory and Applications, Barcelona, Spain.
 
 Mortensen KI, Churchman LS, Spudich JA & Flyvbjerg H (2010)
 Optimized localization analysis for single-molecule tracking and super-resolution microscopy.
-*Nature Methods* 7(5): 377-81.
+*Nature Methods* 7(5): 377-381.
 
 Neubeck A & Van Gool L (2006)
 Efficient Non-Maximum Suppression.
@@ -127,11 +127,11 @@ Park JS & Oh SJ (2012)
 A New Concave Hull Algorithm and Concaveness Measure for n-dimensional Datasets.
 *Journal of Information Science and Engineering* 28:587-600.
 
-Press WH, Teukolsky S, Vetterling W, Flannery B (2002)
+Press WH, Teukolsky S, Vetterling W & Flannery B (2002)
 Numerical Recipes in C++: The Art of Scientific Computing.
 *Cambridge University Press*, 2nd edition.
 
-Puchnar EM, Walter JM, Kasper R, Huang B & Lim WA (2013)
+Puchner EM, Walter JM, Kasper R, Huang B & Lim WA (2013)
 Counting molecules in single organelles with superresolution microscopy allows tracking of the endosome maturation trajectory.
 *PNAS* 110: 16015-16020.
 
@@ -143,7 +143,7 @@ Schneider CA, Rasband WS & Eliceiri KW (2012)
 NIH Image to ImageJ: 25 years of image analysis.
 *Nature Methods* 9: 671-675.
 
-Schneider J, & Vlachos M (2013)
+Schneider J & Vlachos M (2013)
 Fast parameterless density-based clustering via random projections.
 *Proceedings of the 22nd ACM international conference on Conference on information & knowledge management (CIKM '13)* ACM, New York, NY, USA, 861-866.
 
@@ -159,17 +159,17 @@ Sergé A, Bertaux N, Rigneault H & Marguet D (2008)
 Dynamic multiple-target tracing to probe spatiotemporal cartography of cell membranes.
 *Nature Methods* 5: 687-694.
 
-Snyder DL, Helstrom CW, Lanterman AD, Faisal M & White RL (1995)
-Compensation for readout noise in CCD images.
-*Journal of the Optical Society of America* 12: 272-283.
-
-Smith CS, Joseph N, Rieger B, Lidke KA (2010)
+Smith CS, Joseph N, Rieger B & Lidke KA (2010)
 Fast, single-molecule localization that achieves theoretically minimum uncertainty.
 *Nature Methods* 7: 373-375.
 
+Snyder DL, Helstrom CW, Lanterman AD, Faisal M & White RL (1995)
+Compensation for readout noise in CCD images.
+*Journal of the Optical Society of America A* 12: 272-283.
+
 Stetson PB (1987)
-DAOPHOT: A compute program for crowded-field stellar photometry.
-*Publ Astrom Soc Pac* 99: 191-222.
+DAOPHOT: A computer program for crowded-field stellar photometry.
+*Publ Astron Soc Pac* 99: 191-222.
 
 Tubbs RN (2004)
 Lucky exposures: Diffraction limited astronomical imaging through the atmosphere.

@@ -888,7 +888,7 @@ The following table lists the camera model functions, their intended purpose and
 
    * - Poisson+Gamma+Gaussian approximation
      - EM-CCD
-     - Computes the Poisson-Gamma-Gaussian PDF. The convolution with the Gaussian is approximated using a partial convolution with a Gaussian at low photon counts where the dirac function is significant. This method is provided as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7, 377-383.
+     - Computes the Poisson-Gamma-Gaussian PDF. The convolution with the Gaussian is approximated using a partial convolution with a Gaussian at low photon counts where the dirac function is significant. This method is provided as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7, 377-381.
 
        This model is used in the ``Peak Fit`` plugin for the ``MLE`` fit solver when an EM-CCD camera.
 
