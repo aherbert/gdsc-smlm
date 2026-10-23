@@ -1301,10 +1301,10 @@ The following filters are available:
      - Filter results using a coordinate range. This can be used to crop the results to a rectangular region, for example when batch processing results subsets in a macro.
 
    * - MultiFilter
-     - Filter results using multiple thresholds: Signal, SNR, width, shift, Eclidian shift, precision and z-depth. The fitted background is used to set the background noise for the precision see :numref:`localisation_precision:Localisation Precision`).
+     - Filter results using multiple thresholds: Signal, SNR, width, shift, Eclidian shift, precision and z-depth. The estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
 
    * - MultiFilter2
-     - As per the ``MultiFilter`` but the estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
+     - As per the ``MultiFilter`` but the fitted background is used to set the background noise for the precision see :numref:`localisation_precision:Localisation Precision`).
 
    * - MultiHystersisFilter
      - Filter results using multiple thresholds: Signal, SNR, width, shift, and precision. The fitted background is used to set the background noise for the precision see :numref:`localisation_precision:Localisation Precision`). Any results within the strict limits are included. Any results outside the weak limits are excluded. Any results between the limits (candidates) are included only if they can be traced through time, potentially via other candidates, to a valid result.
