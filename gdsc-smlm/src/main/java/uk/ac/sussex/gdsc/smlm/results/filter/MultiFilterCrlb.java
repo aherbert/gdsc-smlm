@@ -84,7 +84,7 @@ public class MultiFilterCrlb extends MultiFilter {
   @Override
   public String getDescription() {
     return "Filter results using multiple thresholds: Signal, SNR, width, shift, "
-        + "Euclidian shift, precision (uses fitted parameter variance) and Z-depth";
+        + "Euclidean shift, precision (uses fitted parameter variance) and Z-depth";
   }
 
   @Override

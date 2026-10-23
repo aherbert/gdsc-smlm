@@ -65,9 +65,9 @@ public interface IMultiFilter {
   double getShift();
 
   /**
-   * Gets the Euclidian shift.
+   * Gets the Euclidean shift.
    *
-   * @return the Euclidian shift
+   * @return the Euclidean shift
    */
   double getEShift();
 

@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a X/Y coordinate shift as a Euclidian distance. This filter requires that
+ * Filter results using a X/Y coordinate shift as a Euclidean distance. This filter requires that
  * the result X and Y coordinates are reported relative to their initial positions.
  */
 public class EShiftFilter extends DirectFilter implements IMultiFilter {
@@ -96,7 +96,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
 
     for (int i = filterSetupData.length; i-- > 0;) {
       if (filterSetupData[i] instanceof ShiftFilterSetupData) {
-        // Convert standard shift to Euclidian for a 2D?
+        // Convert standard shift to Euclidean for a 2D?
         // Leaving it creates a circle with radius at the box edge.
         // Updating it creates a circle with radius at the box corner.
         final double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
@@ -154,7 +154,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public String getDescription() {
-    return "Filter results using a Euclidian shift factor. (Euclidian shift is relative to "
+    return "Filter results using a Euclidean shift factor. (Euclidean shift is relative to "
         + "initial peak width.)";
   }
 

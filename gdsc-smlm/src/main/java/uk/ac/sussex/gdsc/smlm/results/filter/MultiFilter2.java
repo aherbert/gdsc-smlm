@@ -93,7 +93,7 @@ public class MultiFilter2 extends MultiFilter {
   @Override
   public String getDescription() {
     return "Filter results using multiple thresholds: Signal, SNR, width, shift, "
-        + "Euclidian shift, precision (uses fitted background to set noise) and Z-depth";
+        + "Euclidean shift, precision (uses fitted background to set noise) and Z-depth";
   }
 
   @Override

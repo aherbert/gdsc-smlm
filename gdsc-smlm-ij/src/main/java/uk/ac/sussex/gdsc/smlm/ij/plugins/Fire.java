@@ -1772,7 +1772,7 @@ public class Fire implements PlugIn {
 
     final QPlot qplot = new QPlot(frcCurve, qvalue, low, high);
 
-    // Interactive dialog to estimate Q (blinking events per flourophore) using
+    // Interactive dialog to estimate Q (blinking events per fluorophore) using
     // sliders for the mean and standard deviation of the localisation precision.
     showQEstimationDialog(histogram, qplot, images.nmPerPixel);
 

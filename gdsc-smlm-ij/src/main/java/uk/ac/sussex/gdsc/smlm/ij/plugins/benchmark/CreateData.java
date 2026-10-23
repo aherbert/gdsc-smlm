@@ -5921,7 +5921,7 @@ public class CreateData implements PlugIn {
     }
     gd.addMessage(sb.toString());
 
-    gd.addCheckbox("Flourophore_simulation", fullSimulation);
+    gd.addCheckbox("Fluorophore_simulation", fullSimulation);
     gd.addNumericField("Gaussian_SD", sd, 3, 8, "nm");
     gd.addNumericField("Pixel_pitch", cal.getNmPerPixel(), 3, 8, "nm");
     gd.addNumericField("Background", background, 3, 8, "photon");

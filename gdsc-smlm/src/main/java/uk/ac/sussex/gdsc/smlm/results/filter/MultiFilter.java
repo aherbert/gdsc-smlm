@@ -416,7 +416,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       return false;
     }
 
-    // Euclidian shift
+    // Euclidean shift
     final float dx = peak.getXPosition();
     final float dy = peak.getYPosition();
     return (dx * dx + dy * dy <= eoffset);
@@ -460,7 +460,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   @Override
   public String getDescription() {
     return "Filter results using multiple thresholds: Signal, SNR, width, shift, "
-        + "Euclidian shift, precision and Z-depth";
+        + "Euclidean shift, precision and Z-depth";
   }
 
   @Override

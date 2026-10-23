@@ -2189,13 +2189,13 @@ public class TrackPopulationAnalysis implements PlugIn {
     // TrackPlot
     // - Find time
     // - Map time to localisation index
-    // - Output Euclidian distance to a table
+    // - Output Euclidean distance to a table
     // - Find Track Image
     // - Overlay the line on the image
     // TrackImage
     // - Find KNN
     // - Find nearest in distance or time
-    // - Output Euclidian distance to a table
+    // - Output Euclidean distance to a table
     // - Overlay the line on the image
 
     // TrackImage

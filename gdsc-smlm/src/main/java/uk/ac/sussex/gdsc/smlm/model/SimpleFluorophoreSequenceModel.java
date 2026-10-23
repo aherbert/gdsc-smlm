@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.model;
  */
 public class SimpleFluorophoreSequenceModel extends FluorophoreSequenceModel {
   /**
-   * Construct a new flourophore.
+   * Construct a new fluorophore.
    *
    * @param id The identifier
    * @param xyz The [x,y,z] coordinates

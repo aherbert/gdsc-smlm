@@ -2233,7 +2233,7 @@ Once the data has been loaded the settings for the simulation are configured:
    * - Parameter
      - Description
 
-   * - Flourophore simulation
+   * - Fluorophore simulation
      - Set to **true** if this is a simulation with the same fluorophores occurring in multiple frames. Set to **false** if using single random localisations per frame.
 
    * - Gaussian SD
@@ -2851,7 +2851,7 @@ The following parameters can be configured:
      - See section :numref:`{number}: {name} <fitting_plugins:Multiple Peak Fitting Parameters>`.
 
    * - Show score histograms
-     - Show histograms and cumulative histograms of the metrics used to assess fit results: Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidian Shift, and Precision. Histograms are also shown of the number of iterations and function evaluations used by the fitting algorithm.
+     - Show histograms and cumulative histograms of the metrics used to assess fit results: Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidean Shift, and Precision. Histograms are also shown of the number of iterations and function evaluations used by the fitting algorithm.
 
    * - Show correlation
      - Show a plot of the correlation between the candidate intensity against the true spot intensity for all matches, as a function of the spot candidate rank.
@@ -2878,7 +2878,7 @@ Note that the ``Match Depth`` histogram will not be useful if the data were orig
 
 A scatter plot of the spot intensity against the true spot intensity is shown for all matches. The correlation and slope of the line (assuming an intercept at 0,0) is shown on the plot. An ideal fitting algorithm should produce a slope of 1.
 
-For all of the candidates that were fit the system compiles histograms of each of the common metrics used to assess the fit of the 2D Gaussian to the data (Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidian Shift, and Precision). Three histograms are computed for: all the fitting results; only the matches; and the non-matched results. The histograms are then used to produce an estimate for the range that should be used for each metric as a filter to separate good fits from bad fits. This is done by comparing the values in the matches histogram with the values in the non-matches histogram, for example using the largest separation between the cumulative histograms for each. This may for example produce an estimate that a SNR filter should be in the range of 25 to 300. These ranges are reported to the results table and can optionally be saved to a file for use in the ``Benchmark Filter Analysis`` plugin.
+For all of the candidates that were fit the system compiles histograms of each of the common metrics used to assess the fit of the 2D Gaussian to the data (Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidean Shift, and Precision). Three histograms are computed for: all the fitting results; only the matches; and the non-matched results. The histograms are then used to produce an estimate for the range that should be used for each metric as a filter to separate good fits from bad fits. This is done by comparing the values in the matches histogram with the values in the non-matches histogram, for example using the largest separation between the cumulative histograms for each. This may for example produce an estimate that a SNR filter should be in the range of 25 to 300. These ranges are reported to the results table and can optionally be saved to a file for use in the ``Benchmark Filter Analysis`` plugin.
 
 The results of match scoring are used to compute the match statistics Recall, Precision, Jaccard and F1-score. See section :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>` for more details. The first set of statistics are for the raw candidates (before fitting). These show how effective the filter was at identifying candidates that were processed and sets an upper limit on the performance of the fitted results. The second set summarise the performance of the fitted results. Note that the table does not show the False Negative score since this is equal to the number of simulated molecules minus the True Positives.
 

@@ -23,7 +23,7 @@
  */
 // This is a test macro to run the PC-PALM simulation and cluster the results.
 
-// It is used to test the estimation of the flourophore photoefficiency
+// It is used to test the estimation of the fluorophore photoefficiency
 // parameters and oligomer size as per the method of Puchnar:
 // Puchnar, et al (2013). Counting molecules in single organelles with
 // superresolution microscopy allows tracking of the endosome maturation

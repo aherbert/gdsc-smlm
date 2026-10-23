@@ -3578,7 +3578,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     if (peak.getYRelativeShift2() > shiftOffset) {
       return FilterValidationFlag.Y_RELATIVE_SHIFT;
     }
-    // Note: Do not support Euclidian shift
+    // Note: Do not support Euclidean shift
 
     if (zEnabled) {
       final double z = peak.getZ();

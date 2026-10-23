@@ -50,8 +50,8 @@ public enum ParameterType implements NamedObject {
   SHIFT("Shift"),
   /** Shift Range. */
   SHIFT_RANGE("Shift Range"),
-  /** Euclidian Shift. */
-  ESHIFT("Euclidian Shift", "EShift"),
+  /** Euclidean Shift. */
+  ESHIFT("Euclidean Shift", "EShift"),
   /** Precision. */
   PRECISION("Precision"),
   /** Precision Range. */

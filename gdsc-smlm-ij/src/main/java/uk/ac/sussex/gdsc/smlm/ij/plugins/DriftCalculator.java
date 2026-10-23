@@ -1086,7 +1086,7 @@ public class DriftCalculator implements PlugIn {
    * @param dy the dy
    * @param smoothing loess smoothing fraction
    * @param iterations Iterations for loess smoothing
-   * @return The total update to the drift parameters (Euclidian distance)
+   * @return The total update to the drift parameters (Euclidean distance)
    */
   private double calculateDriftUsingMarkers(Spot[][] roiSpots, double[] weights, double[] sum,
       double[] dx, double[] dy, double smoothing, int iterations) {

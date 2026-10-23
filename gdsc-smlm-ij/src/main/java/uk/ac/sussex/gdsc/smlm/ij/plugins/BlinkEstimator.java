@@ -58,7 +58,7 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
- * Estimates the flourophore blinking rate from a set of localisations.
+ * Estimates the fluorophore blinking rate from a set of localisations.
  *
  * <p>Uses the method of Annibale, et al (2011). Quantitative Photo Activated Localization
  * Microscopy: Unravelling the Effect of Photoblinking. PLoS ONE 6, e22678.
@@ -508,7 +508,7 @@ public class BlinkEstimator implements PlugIn {
    * Fit the dark time to counts of molecules curve. Only use the first n fitted points.
    *
    * <p>Calculates:<br> N = The number of photoblinking molecules in the sample<br> nBlink = The
-   * average number of blinks per flourophore<br> tOff = The off-time
+   * average number of blinks per fluorophore<br> tOff = The off-time
    *
    * @param td The dark time
    * @param ntd The counts of molecules
@@ -678,7 +678,7 @@ public class BlinkEstimator implements PlugIn {
    *
    * <p>N(td) = The number of calculated molecules at different dark times (td)<br> N = The number
    * of photoblinking molecules in the sample<br> nBlink = The average number of blinks per
-   * flourophore<br> td = The dark time<br> tOff = The off-time<br>
+   * fluorophore<br> td = The dark time<br> tOff = The off-time<br>
    */
   private static class BlinkingFunction extends LoggingOptimiserFunction
       implements MultivariateVectorFunction {

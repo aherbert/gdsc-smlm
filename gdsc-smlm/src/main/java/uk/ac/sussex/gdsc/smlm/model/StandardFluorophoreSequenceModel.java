@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
  */
 public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
   /**
-   * Construct a new flourophore.
+   * Construct a new fluorophore.
    *
    * @param averageActivationTime Average time for activation
    * @param id The identifier
@@ -63,7 +63,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
   }
 
   /**
-   * Construct a new flourophore.
+   * Construct a new fluorophore.
    *
    * @param id The identifier
    * @param xyz The [x,y,z] coordinates
