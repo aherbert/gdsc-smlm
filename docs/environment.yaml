@@ -4,9 +4,7 @@
 name: docs
 channels:
   - conda-forge
-  - defaults
 dependencies:
-  - sphinx==3.4.3
-  - nbsphinx==0.8.1
-  - pip:
-    - sphinx_rtd_theme==0.5.1
+  - python=3.13
+  - sphinx==9.2.0
+  - sphinx_rtd_theme==3.1.0
