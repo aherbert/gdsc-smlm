@@ -69,7 +69,7 @@ The following table describes the parameters of the plugin. The calculated prope
      - The objective magnification.
 
    * - Beam Expander
-     - Any addition magnification.
+     - Any additional magnification.
 
    * - Pixel pitch (nm)
      - The calculated image pixel size.
@@ -102,11 +102,11 @@ The following table describes the parameters of the plugin. The calculated prope
      - The calculated PSF Gaussian HWHM in pixels.
 
 
-Note that the first three fields are only used to calculate the image pixel pitch. If this is already known then it can be entered into the Pixel pitch (|micro|\ m) field (note the use of micrometres and not nanometres) and the ``Magnification`` and ``Beam expander`` can be set to 1. The ``Pixel pitch`` in nanometres is then used to convert the calculated widths in nanometers to pixel dimensions.
+Note that the first three fields are only used to calculate the image pixel pitch. If this is already known then it can be entered into the Pixel pitch (|micro|\ m) field (note the use of micrometres and not nanometres) and the ``Magnification`` and ``Beam expander`` can be set to 1. The ``Pixel pitch`` in nanometres is then used to convert the calculated widths in nanometres to pixel dimensions.
 
 Clicking ``OK`` will save the PSF standard deviation in pixels to the global properties. This will be used in the ``Peak Fit`` plugin.
 
-Please contact us if you have feedback on the calculated width from the plugin verses your measured PSF using quantum dots (or other single-point light sources) on calibration images.
+Please contact us if you have feedback on the calculated width from the plugin versus your measured PSF using quantum dots (or other single-point light sources) on calibration images.
 
 
 .. index:: ! PSF Estimator
@@ -114,7 +114,7 @@ Please contact us if you have feedback on the calculated width from the plugin v
 PSF Estimator
 -------------
 
-A plugin that estimates the PSF using a test image. The fit configuration is the same as in the ``Fit Configuration`` plugin with extra parameters provided to control the estimation. The ``PSF Estimator`` dialog is show in :numref:`Figure %s <fig_psf_estimator_dialog>`. Note that a second dialog will collect parameters specific for the selected ``Fit solver``.
+A plugin that estimates the PSF using a test image. The fit configuration is the same as in the ``Fit Configuration`` plugin with extra parameters provided to control the estimation. The ``PSF Estimator`` dialog is shown in :numref:`Figure %s <fig_psf_estimator_dialog>`. Note that a second dialog will collect parameters specific for the selected ``Fit solver``.
 
 .. _fig_psf_estimator_dialog:
 .. figure:: images/psf_estimator_dialog.png
@@ -166,7 +166,7 @@ Note that the estimator may not find any peaks if the fitting parameters are bad
 Mean-Variance Test
 ------------------
 
-The ``Mean-Variance Test`` plugin can be used to calculate the gain and read noise of the microscope Charged Coupled Device (CCD) camera. The plugin requires a set of calibration images. A single-image mode is available but will provide less information on the camera.
+The ``Mean-Variance Test`` plugin can be used to calculate the gain and read noise of the microscope Charge-Coupled Device (CCD) camera. The plugin requires a set of calibration images. A single-image mode is available but will provide less information on the camera.
 
 
 Input Images
@@ -192,7 +192,7 @@ Half the variance of the difference image (the variance of a single frame) is re
 
     \mathit{gain}=\frac{\mathit{variance} - \mathit{bias\:variance}}{\mathit{mean}-\mathit{bias}}
 
-where the bias and the variance of the bias image are the origin of the line. This is recorded in a summary table. A graph is then produced of the mean verses the variance. This data is fitted with a straight line. The gradient of the line is the camera gain. The read noise of the camera is computed as:
+where the bias and the variance of the bias image are the origin of the line. This is recorded in a summary table. A graph is then produced of the mean versus the variance. This data is fitted with a straight line. The gradient of the line is the camera gain. The read noise of the camera is computed as:
 
 .. math::
 
@@ -285,7 +285,7 @@ In single-image mode the plugin will compute the pairwise comparison of consecut
 
 The bias and bias variance must be provided since there is no input bias image; the plugin will ask the user to input the camera bias and variance. Note that these values serve as the origin for a straight line from the measured mean and variance, i.e. the mean and variance at zero exposure. If these are accurate then the gain approximation is close to that provided by the mean-variance test using different exposure times. They can be set as zero. In this case the estimate will not be accurate but does allow analysis of the relative gain through the time-series of the image.
 
-The results will be displayed in a table as described above. In addition the plugin provides a plot of gain verses slice and a histogram of the values.
+The results will be displayed in a table as described above. In addition the plugin provides a plot of gain versus slice and a histogram of the values.
 
 
 .. index:: ! Mean-Variance Test EM-CCD
@@ -326,7 +326,7 @@ plugin. However the analysis of the difference image is used to approximate the 
 
     \mathit{EM\:gain}=\frac{\mathit{variance}- \mathit{bias\:variance}}{(\mathit{mean}-\mathit{bias})\:(2\times\mathit{gain})}
 
-This is recorded in a summary table. A graph is then produced of the mean verses the variance. This data is fitted with a straight line. The gradient of the line is the EM-gain multiplied by twice the camera gain therefore the EM-gain can be computed as:
+This is recorded in a summary table. A graph is then produced of the mean versus the variance. This data is fitted with a straight line. The gradient of the line is the EM-gain multiplied by twice the camera gain therefore the EM-gain can be computed as:
 
 .. math::
 
@@ -336,7 +336,7 @@ This is recorded in a summary table. A graph is then produced of the mean verses
 Output
 ~~~~~~
 
-The plugin summary table and mean-variance plot are the same as the ``Mean-Variance Test`` plugin. The final calculated EM-gain and total gain is reported to the ``ImageJ`` log, e.g.
+The plugin summary table and mean-variance plot are the same as the ``Mean-Variance Test`` plugin. The final calculated EM-gain and total gain are reported to the ``ImageJ`` log, e.g.
 
 .. code-block:: text
 
@@ -377,7 +377,7 @@ The bias and bias variance must be provided since there is no input bias image; 
 
 The camera gain must be input to report the EM-gain. Using a camera gain of 1 will calculate the total gain of the system.
 
-The results will be displayed in a table as described above. In addition the plugin provides a plot of gain verses slice and a histogram of the values.
+The results will be displayed in a table as described above. In addition the plugin provides a plot of gain versus slice and a histogram of the values.
 
 
 .. index:: ! EM-Gain Analysis
@@ -385,7 +385,7 @@ The results will be displayed in a table as described above. In addition the plu
 EM-Gain Analysis
 ----------------
 
-Analyses a white light image from an EM-CCD camera, construct a histogram of pixel intensity and fit the histogram to obtain the bias, EM-gain, read noise and photons per pixel (see Ulbrich & Isacoff (2007) Supplementary Information).
+Analyses a white light image from an EM-CCD camera, constructs a histogram of pixel intensity and fits the histogram to obtain the bias, EM-gain, read noise and photons per pixel (see Ulbrich & Isacoff (2007) Supplementary Information).
 
 
 .. index:: EM-CCD Probability Model
@@ -674,7 +674,7 @@ The ``sCMOS Analysis`` plugin will show summary histograms of the computed pixel
 If the data was created using a simulation the plugin will load the simulation model from the file ``perPixelSimulation.tif``. Comparisons of the computed and known values of the offset, variance and gain are computed. A scatter plot is produced of the simulated against the measured values. The error for each pixel is computed as the measured value minus the simulated value and displayed in a histogram. The following analysis is performed:
 
 * A Pearson correlation is computed.
-* A Komolgorov-Smirnov test is performed to test that the distributions are the same.
+* A Kolmogorov-Smirnov test is performed to test that the distributions are the same.
 * A paired T-Test compares two related samples to assess whether their population means differ. This test is only valid if the distribution of the error is normal; this test is only performed on the gain.
 * A Wilcoxon Signed Rank test compares two related samples to assess whether their population mean ranks differ. This test is performed as an alternative to the paired T-Test when the distribution of the error is not normal.
 
@@ -704,7 +704,7 @@ sCMOS Camera Simulation
 
 The ``sCMOS Analysis`` plugin requires a large amount of data from a sCMOS camera. This data can be simulated allowing the plugin to be tested.
 
-The simulation can be run by holding the ``Shift`` key down when running the plugin. Note that the ``Shift`` must be pressed when the main ``ImageJ`` window is the active. When run in simulation mode the plugin will create image data in a specified output directory. The plugin will prompt for the output directory.
+The simulation can be run by holding the ``Shift`` key down when running the plugin. Note that the ``Shift`` must be pressed when the main ``ImageJ`` window is active. When run in simulation mode the plugin will create image data in a specified output directory. The plugin will prompt for the output directory.
 
 Each pixel is assigned a random offset, variance and gain. The offset is sampled from a Poisson distribution; the variance is sampled from an exponential distribution; and the gain is sampled from a Gaussian distribution. These distributions approximate the raw data shown in Huang `et al` (2013) supplementary figure 1. The defaults for the simulation are configured to approximately match that figure.
 
@@ -780,7 +780,7 @@ The simulation for an EM-CCD camera adds an additional sample from a gamma distr
 
     PGG(x|g,\sigma^2) = \lfloor \mathcal{N}( \text{Gamma}(P(x), g), \sigma^2) \rceil
 
-The simulation requires sampling from multiple distributions. To increase the total number of samples the plugin will generate a given number of Poisson samples. For the EM-CCD simulation each Poisson sample is used to generate a number of gamma samples. For the CCD-simulation the amplification has no noise so no over-sampling is done. In either case amplification generates a real-valued sample from a integer valued photo-electron count. Each amplified sample is combined with a configured number of noise samples. The final value is rounded and a histogram of counts generated. For reference a full convolution of the model probability mass/density functions (PMF/PDF) is performed and added to the histogram. The PG model is a convolution of the discrete Poisson PMF scaled by the gain and the continuous Gaussian PDF. The PGG model is a convolution of the Poisson-Gamma PDF and the Gaussian PDF. The Poisson-Gamma PDF can be expressed using a single analytical expression as per [Ulbrich & Isacoff, 2007] SI equation 3.
+The simulation requires sampling from multiple distributions. To increase the total number of samples the plugin will generate a given number of Poisson samples. For the EM-CCD simulation each Poisson sample is used to generate a number of gamma samples. For the CCD-simulation the amplification has no noise so no over-sampling is done. In either case amplification generates a real-valued sample from an integer-valued photo-electron count. Each amplified sample is combined with a configured number of noise samples. The final value is rounded and a histogram of counts generated. For reference a full convolution of the model probability mass/density functions (PMF/PDF) is performed and added to the histogram. The PG model is a convolution of the discrete Poisson PMF scaled by the gain and the continuous Gaussian PDF. The PGG model is a convolution of the Poisson-Gamma PDF and the Gaussian PDF. The Poisson-Gamma PDF can be expressed using a single analytical expression as per [Ulbrich & Isacoff, 2007] SI equation 3.
 
 The cumulative distribution function (CDF) of the simulated data is easily computed by summing the simulation PMF. This is compared to the CDF of the selected camera model function. Since the camera model function is a continuous PDF the CDF must be computed. This is done using integration of the PDF over the range of each histogram bin. The two CDFs are plotted and the maximum and mean distance between the distributions is computed. A Kolmogorov Smirnov test provides a p-value for rejecting the null hypothesis that the two distributions can be considered equal.
 
@@ -819,7 +819,7 @@ The ``Camera Model Analysis`` plugin supports a preview mode. The parameters of 
      - The camera model function used to model the simulated data. See :numref:`{number}: {name} <calibration_plugins:Camera Noise Models>`.
 
    * - Full integration
-     - If **true** the integration of the camera model function PDF to CDF uses Simpson integration. Otherwise a fast flap-top integration is used.
+     - If **true** the integration of the camera model function PDF to CDF uses Simpson integration. Otherwise a fast flat-top integration is used.
 
    * - Preview
      - Enable dynamic result generation.
@@ -888,7 +888,7 @@ The following table lists the camera model functions, their intended purpose and
 
    * - Poisson+Gamma+Gaussian approximation
      - EM-CCD
-     - Computes the Poisson-Gamma-Gaussian PDF. The convolution with the Gaussian is approximated using a partial convolution with a Gaussian at low photon counts where the dirac function is significant. This method is provided as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7, 377-381.
+     - Computes the Poisson-Gamma-Gaussian PDF. The convolution with the Gaussian is approximated using a partial convolution with a Gaussian at low photon counts where the Dirac function is significant. This method is provided as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7, 377-381.
 
        This model is used in the ``Peak Fit`` plugin for the ``MLE`` fit solver when an EM-CCD camera.
 
@@ -933,14 +933,14 @@ The ``Camera Model Analysis`` plugin produces two output plots. The histogram pl
 
     The histogram is a simulation of 1 photon captured by an EM-CCD camera with gain 40 and read noise 13.
 
-The cumulative density function (CDF) plot shows the CDF of the simulation histogram against the CDF of the camera model function. The example shown in :numref:`Figure %s <fig_camera_model_analysis_cdf>` demonstrates the closeness of the ``Poisson+Gamma+Gaussian approximation`` to a simulated PMF at low photons.
+The cumulative distribution function (CDF) plot shows the CDF of the simulation histogram against the CDF of the camera model function. The example shown in :numref:`Figure %s <fig_camera_model_analysis_cdf>` demonstrates the closeness of the ``Poisson+Gamma+Gaussian approximation`` to a simulated PMF at low photons.
 
 .. _fig_camera_model_analysis_cdf:
 .. figure:: images/camera_model_analysis_cdf.jpg
     :align: center
     :figwidth: 80%
 
-    Camera Model Analysis cumulative density function plot.
+    Camera Model Analysis cumulative distribution function plot.
 
     The CDF is a simulation of 1 photon captured by an EM-CCD camera with gain 40 and read noise 13. The model is the ``Poisson+Gamma+Gaussian approximation`` as used in ``Peak Fit``. The magenta line shows the count for the maximum distance between the two CDF curves. The p-value is the significance of the  Kolmogorov Smirnov test for this distance.
 
@@ -958,13 +958,13 @@ The Fisher information is the amount of information an observable random variabl
 
   I = \mathbb{E} \left[ \left(\frac{\partial}{\partial \theta} \ln f(X; \theta) \, \middle| \, \theta \right)^2 \right]
 
-In this case the observable :math:`X` is the count from the microscope camera and the parameter :math:`\theta` is the number of photons. Thus this is the Fisher information of the camera count distribution created when light is captured by the camera pixels. The Fisher information can be used to determine the lower bounds on the precision of fitting a model to data. The Cramer-Rao inequality states that the covariance matrix of any unbiased estimator :math:`\hat{\theta}` of :math:`\theta` is no smaller than the inverse of the Fisher information matrix:
+In this case the observable :math:`X` is the count from the microscope camera and the parameter :math:`\theta` is the number of photons. Thus this is the Fisher information of the camera count distribution created when light is captured by the camera pixels. The Fisher information can be used to determine the lower bounds on the precision of fitting a model to data. The Cramér-Rao inequality states that the covariance matrix of any unbiased estimator :math:`\hat{\theta}` of :math:`\theta` is no smaller than the inverse of the Fisher information matrix:
 
 .. math::
 
   \text{Cov}(\hat{\theta}) \geq I^{-1}(\theta)
 
-Thus computation of the Fisher information for a camera model allows determination of the limit of fitting precision for each of the fitted parameters. To avoid direct comparison of the Fisher information between models Chao *et al* instead note that the difference in the fisher information is entirely dependent on the expectation term:
+Thus computation of the Fisher information for a camera model allows determination of the limit of fitting precision for each of the fitted parameters. To avoid direct comparison of the Fisher information between models Chao *et al* instead note that the difference in the Fisher information is entirely dependent on the expectation term:
 
 .. math::
 
@@ -1034,7 +1034,7 @@ The plugin provides options to configure the range of photons :math:`v_{\theta}`
    * - Plot point
      - Choose the shape used to plot the evaluated points on the plot. An interpolated curve will be constructed between the computed points.
 
-The ``Camera Model Fisher Information Analysis`` plugin produces two output plots. The Fisher information plot shows the raw Fisher information for selected models (:numref:`Figure %s <fig_fisher_information_plot>`). The noise coefficient plot shows the noise coefficient for two selected models and demonstrates the relative performance of the noise model verses an uncorrupted Poisson signal. The example shown (:numref:`Figure %s <fig_noise_coefficient_plot>`) uses the same parameters as Chao *et al* (2013) figure S1. The CCD model noise coefficient drops to zero at low signal levels. In contrast the EM-CCD noise coefficient is close to 1 over a similar range of low signal levels. At high signal levels the CCD model is preferred and the EM-CCD model converges on the value of 0.5 which is the excess noise factor of 2 commonly referred to in the literature for an EM-CCD. This noise factor is used in the Mortensen formula for precision using an EM-CCD camera (see :numref:`localisation_precision:Localisation Precision`).
+The ``Camera Model Fisher Information Analysis`` plugin produces two output plots. The Fisher information plot shows the raw Fisher information for selected models (:numref:`Figure %s <fig_fisher_information_plot>`). The noise coefficient plot shows the noise coefficient for two selected models and demonstrates the relative performance of the noise model versus an uncorrupted Poisson signal. The example shown (:numref:`Figure %s <fig_noise_coefficient_plot>`) uses the same parameters as Chao *et al* (2013) figure S1. The CCD model noise coefficient drops to zero at low signal levels. In contrast the EM-CCD noise coefficient is close to 1 over a similar range of low signal levels. At high signal levels the CCD model is preferred and the EM-CCD model converges on the value of 0.5 which is the excess noise factor of 2 commonly referred to in the literature for an EM-CCD. This noise factor is used in the Mortensen formula for precision using an EM-CCD camera (see :numref:`localisation_precision:Localisation Precision`).
 
 .. _fig_fisher_information_plot:
 .. figure:: images/fisher_information_plot.jpg
@@ -1181,7 +1181,7 @@ The camera model data is from the data file and the offset (bias), gain and vari
 
     \mathit{var}/g^2 = \frac{\mathit{var}}{g^2}
 
-This is the variance divided by the squared gain. This value represents the pixel read noise in photons. It is used for modelling the camera in some maximum likelihood estimation (MLE) fitting methods in the ``PeakFit`` plugin.
+This is the variance divided by the squared gain. This value represents the pixel read noise in photons. It is used for modelling the camera in some maximum likelihood estimation (MLE) fitting methods in the ``Peak Fit`` plugin.
 
 The plugin will compute the mean and standard deviation of each of the camera model properties and log them to the ``ImageJ`` log window::
 
@@ -1263,7 +1263,7 @@ The generation of the unit vector and the movement distance can be combined into
 Confined Diffusion
 ~~~~~~~~~~~~~~~~~~
 
-Particles may not be able to freely move in any direction, for example when they collide with a barrier. The ``Diffusion Rate Test`` plugin allows particles to be confined in a sphere. In this case the diffusion step is calculated and if the step would move the particle outside the sphere the move is rejected. Attempts are made to move the particle a set number of times until successful otherwise the particle coordinates are not updated. This simulation produces good results when the average step size is at least an order of magnitude less than the sphere radius (so allowing many steps inside the sphere to be valid) and the ``Randon Move`` simulation is used.
+Particles may not be able to freely move in any direction, for example when they collide with a barrier. The ``Diffusion Rate Test`` plugin allows particles to be confined in a sphere. In this case the diffusion step is calculated and if the step would move the particle outside the sphere the move is rejected. Attempts are made to move the particle a set number of times until successful otherwise the particle coordinates are not updated. This simulation produces good results when the average step size is at least an order of magnitude less than the sphere radius (so allowing many steps inside the sphere to be valid) and the ``Random Move`` simulation is used.
 
 
 Analysis
@@ -1435,7 +1435,7 @@ Hold the ``Shift`` key down when running the plugin to activate extra options. T
 Aggregate steps parameter
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The standard plugin simulates diffusion in small steps. These can be aggregated together to simulate the position of the particle in a frame taken on a camera. In this case the average position of a set of consecutive steps is calculated to aggregated the position into a frame. The mean-squared distance between frames is then reported to the ``ImageJ`` log:
+The standard plugin simulates diffusion in small steps. These can be aggregated together to simulate the position of the particle in a frame taken on a camera. In this case the average position of a set of consecutive steps is calculated to aggregate the position into a frame. The mean-squared distance between frames is then reported to the ``ImageJ`` log:
 
 .. code-block:: text
 
@@ -1455,7 +1455,7 @@ MSD Analysis parameter
 
 The ``MSD Analysis`` option is available when data aggregation has been performed using the ``Aggregate steps`` parameter. When multiple small steps are aggregated into single coordinates this causes the observed MSD to be lower than the expected MSD given the diffusion coefficient. Effectively the averaging of the position of a particle within a frame has caused loss of information about the diffusion distance covered within that frame. MSD analysis allows the effect of aggregation to be analysed.
 
-For each simulated track the position of the particle is computed as a rolling average of the coordinates using the configured number of ``Aggregated steps`` (N).
+For each simulated track the position of the particle is computed as a rolling average of the coordinates using the configured number of ``Aggregate steps`` (N).
 
 For example the first position is the average of the first N steps. The next position is computed by adding the N+1 coordinate and subtracting the 1\ :sup:`st` coordinate from the sum to create a new average.
 
@@ -1551,7 +1551,7 @@ Note that this is for absorbing boundaries. In practice a molecule may diffuse o
 Analysis
 ~~~~~~~~
 
-The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z/2, \Delta z/2]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps, or for the molecule lifetime sampled from an exponential with the specified mean lifetime. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. If restarts are allowed then the diffusion continues until the lifetime expires. If the molecule re-enters the depth of field a new track is started. The fraction of molecules within the depth of field at each time step of a track is computed. By simulating a range of diffusion coeffcients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
+The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z/2, \Delta z/2]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps, or for the molecule lifetime sampled from an exponential with the specified mean lifetime. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. If restarts are allowed then the diffusion continues until the lifetime expires. If the molecule re-enters the depth of field a new track is started. The fraction of molecules within the depth of field at each time step of a track is computed. By simulating a range of diffusion coefficients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
 
 Fitting is performed using random starting points for the coefficients within a specified range. Fitted coefficients are not bound by this range but they must be positive. A number of repeats can be configured. If the number of repeats is set to zero then fitting is not performed and the plugin will display results using the configured minimum initial value for coefficient estimates. This option can be used to show the effect of absorbing boundaries if coeffecients are zero, or used to plot specific coefficient values.
 
@@ -1604,7 +1604,7 @@ The plugin has the following parameters:
      - The optimiser to use for fitting.
 
    * - Repeats
-     - The number of repeats for the fitting. Fitted is randomly initialised for coefficient a and b.
+     - The number of repeats for the fitting. Fitting is randomly initialised for coefficients a and b.
 
    * - Min A
      - The minimum initial value for fitting coefficient a.

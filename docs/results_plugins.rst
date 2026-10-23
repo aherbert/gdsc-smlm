@@ -209,7 +209,7 @@ Batch Load Results
 
 Allows multiple files to be loaded into memory. A file selection dialog is opened where multiple files can be selected from the same directory. Hold the ``Control`` key to select multiple files from the dialog.
 
-The plugin will load each file in turn using the same file input options as the ``Results Manager`` plugin. If the file format is not recognised then an error message is displayed. If the file is recognised then a calibration check is performed and if calibration missing a dialog will be shown where the calibration can be entered.
+The plugin will load each file in turn using the same file input options as the ``Results Manager`` plugin. If the file format is not recognised then an error message is displayed. If the file is recognised then a calibration check is performed and if calibration is missing a dialog will be shown where the calibration can be entered.
 
 The results set for each file is named using the metadata in the results file, or if missing, a dialog is presented where the name can be entered.
 
@@ -271,7 +271,7 @@ Rename Results
 
 Allows the name of a results set held in memory to be changed.
 
-Typically new results are named using the name of the input image or input results set appended with details of how the new results were generated, e.g. the name of the fitting engine or in the case of tracing analysis ``Traced``. The name is associated with the results set and used is analysis plugins or when reconstructing super-resolution images. It is also saved in the SMLM file format.
+Typically new results are named using the name of the input image or input results set appended with details of how the new results were generated, e.g. the name of the fitting engine or in the case of tracing analysis ``Traced``. The name is associated with the results set and used in analysis plugins or when reconstructing super-resolution images. It is also saved in the SMLM file format.
 
 The names can be updated using the
 ``Rename Results``
@@ -311,7 +311,7 @@ The ``Peak Fit`` plugin will fit a stack of images using a continuous frame numb
 
 For example if every 20 images is a white light image and this was removed before fitting the frame number can be restored to add blank frames at 1, 21, 41, etc. Or the image may represent 1000 frames of imaging interspersed with 5 second gaps. Resequencing the results can put an appropriate gap between localisations in frame 1000 and 1001.
 
-This plugin can resequences the results using the regular repeat of the original image. The following parameters are required:
+This plugin can resequence the results using the regular repeat of the original image. The following parameters are required:
 
 .. list-table::
    :widths: 20 80
@@ -336,7 +336,7 @@ This plugin can resequences the results using the regular repeat of the original
      - Write to the ``ImageJ`` log the mapping between the current and the new frame number.
 
 
-It is not possible to undo the ``Resequence Results`` plugin. Before running the plugin you can save the results to file using the ``Results Manager`` . These can be reloaded if the resequence operation produced an incorrect frame-by-frame mapping.
+It is not possible to undo the ``Resequence Results`` plugin. Before running the plugin you can save the results to file using the ``Results Manager``. These can be reloaded if the resequence operation produced an incorrect frame-by-frame mapping.
 
 Note: If the source data is interlaced it can be directly handled by the ``Peak Fit`` plugin using the extra options (hold the ``Shift`` or ``Alt`` key down when running the plugin). There is no need to extract all the relevant data frames from the source image before running ``Peak Fit``.
 
@@ -346,7 +346,7 @@ Note: If the source data is interlaced it can be directly handled by the ``Peak 
 Calibrate Results
 -----------------
 
-Allows results held in memory to be calibrated (e.g. the pixel pitch and camera gain can be adjusted). Note that the raw data held in memory is stored using pixel units and image frames. Many of the plugins require calibrated units such as nanometers, micrometres, milliseconds and photons. Thus it is possible to store a calibration within the results. This calibration is added automatically when the results are generated inside the SMLM plugins. However the results may be loaded from file where a calibration is not present or the calibration was incorrect when the results were generated. This plugin allows the calibration to be updated.
+Allows results held in memory to be calibrated (e.g. the pixel pitch and camera gain can be adjusted). Note that the raw data held in memory is stored using pixel units and image frames. Many of the plugins require calibrated units such as nanometres, micrometres, milliseconds and photons. Thus it is possible to store a calibration within the results. This calibration is added automatically when the results are generated inside the SMLM plugins. However the results may be loaded from file where a calibration is not present or the calibration was incorrect when the results were generated. This plugin allows the calibration to be updated.
 
 When the plugin is run it presents a selection of the current results that are held in memory. If no results are available then an error is displayed. The user must select the results to update.
 
@@ -370,7 +370,7 @@ The following options are then available:
        See section :numref:`{number}: {name} <fitting_plugins:Camera Type>`.
 
    * - Calibration (nm/px)
-     - The size of the pixels in nanometers.
+     - The size of the pixels in nanometres.
 
    * - Exposure time (ms)
      - The exposure time for a single frame in milliseconds.
@@ -384,7 +384,7 @@ Note that not all the calibration parameters have to be configured to allow the 
 Update Results Bounds
 ---------------------
 
-Allows the bounds of the results to be updated. The bounds should correspond to the region used for the analysis that generated the results. The bound are used in many plugins, for example in the reconstruction of super resolution images.
+Allows the bounds of the results to be updated. The bounds should correspond to the region used for the analysis that generated the results. The bounds are used in many plugins, for example in the reconstruction of super resolution images.
 
 The bounds should contain the minimum and maximum x and y coordinates. If created from the data this may be smaller than the actual bounds used to generate the results. For example if the data was loaded from file as raw coordinates with no metadata it is useful to define the bounds of the image frame used to acquire the data.
 
@@ -560,7 +560,7 @@ Each line of the file is read as a localisation record of delimited fields. Line
      - Any line starting with this sequence of characters is ignored.
 
    * - Delimiter
-     - Defines the delimiter of the fields. Regular expression are supported and the default is white space (``\s+``).
+     - Defines the delimiter of the fields. Regular expressions are supported and the default is white space (``\s+``).
 
    * - Distance unit
      - The distance units of the localisation records. Records will be converted to the GDSC SMLM format if necessary using the ``Pixel size`` parameter.
@@ -1081,10 +1081,10 @@ The plugin analyses the selected results and computes limits for each of the fil
      - The minimum precision.
 
    * - Min Width
-     - The minimum width for a localisation. Width assumes a Gaussian 2D PSF and using the standard deviation of the Gaussian.
+     - The minimum width for a localisation. Width assumes a Gaussian 2D PSF and uses the standard deviation of the Gaussian.
 
    * - Max Width
-     - The maximum width for a localisation. Width assumes a Gaussian 2D PSF and using the standard deviation of the Gaussian.
+     - The maximum width for a localisation. Width assumes a Gaussian 2D PSF and uses the standard deviation of the Gaussian.
 
    * - Mask
      - Select an image to use as a mask. Only localisations that occur in non-zero mask pixels will be included in the results. The localisation coordinates are mapped to the width and height of the mask based on the bounds of the results dataset. For example to map the x coordinate:
@@ -1098,7 +1098,7 @@ The plugin analyses the selected results and computes limits for each of the fil
 
 If any parameter is set to zero it will be ignored.
 
-The results of filtering are saved to memory with the same name and the ``Filtered`` suffix for those results that pass the filters, and the ``Unfiltered`` suffix for those result that do not pass the filters.
+The results of filtering are saved to memory with the same name and the ``Filtered`` suffix for those results that pass the filters, and the ``Unfiltered`` suffix for those results that do not pass the filters.
 
 
 .. index:: ! Crop Results
@@ -1121,7 +1121,7 @@ Defining the crop
 
 The bounding rectangle can be defined in multiple ways. If more than one bounding rectangle is defined then the final bounding rectangle is the intersection (smallest overlap) of all the rectangles. The following bounding rectangles can be defined:
 
-*   Border: The current data bounds of the results is reduced by a defined border
+*   Border: The current data bounds of the results are reduced by a defined border
 *   Region: A region is defined using an origin, width and height
 *   ROI: A rectangular ROI currently displayed on an image is scaled to the dimensions of the data bounds
 
@@ -1267,7 +1267,7 @@ The following filters are available:
      - Filter results using a shift factor. X/Y shift is relative to the initial peak width.
 
    * - EShiftFilter
-     - Filter results using a Euclidian shift factor. Shift is relative to the initial peak width.
+     - Filter results using a Euclidean shift factor. Shift is relative to the initial peak width.
 
    * - SignalFilter
      - Filter results using a lower signal threshold. The threshold is applied in photons.
@@ -1301,18 +1301,18 @@ The following filters are available:
      - Filter results using a coordinate range. This can be used to crop the results to a rectangular region, for example when batch processing results subsets in a macro.
 
    * - MultiFilter
-     - Filter results using multiple thresholds: Signal, SNR, width, shift, Eclidian shift, precision and z-depth. The estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
+     - Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidean shift, precision and z-depth. The estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
 
    * - MultiFilter2
      - As per the ``MultiFilter`` but the fitted background is used to set the background noise for the precision see :numref:`localisation_precision:Localisation Precision`).
 
-   * - MultiHystersisFilter
+   * - MultiHysteresisFilter
      - Filter results using multiple thresholds: Signal, SNR, width, shift, and precision. The fitted background is used to set the background noise for the precision see :numref:`localisation_precision:Localisation Precision`). Any results within the strict limits are included. Any results outside the weak limits are excluded. Any results between the limits (candidates) are included only if they can be traced through time, potentially via other candidates, to a valid result.
 
        The distance used for tracing is the search distance multiplied by the average precision of the candidates.
 
-   * - MultiHystersisFilter2
-     - As per the ``MultiHystersisFilter`` but the estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
+   * - MultiHysteresisFilter2
+     - As per the ``MultiHysteresisFilter`` but the estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
 
    * - AndFilter
      - Filter results using the combination of two filters. Results must pass both filters.
@@ -1354,7 +1354,7 @@ When the plugin is run the user is presented with a dialog allowing the results 
      - Description
 
    * - Input
-     - Select the results set to filter. Only results sets with localisation that have positive IDs are listed (i.e. the results must be assigned to molecules).
+     - Select the results set to filter. Only results sets with localisations that have positive IDs are listed (i.e. the results must be assigned to molecules).
 
    * - Filter mode
      - Select the filter mode. Each mode will use a separate dialog to configure the filter.
@@ -1527,7 +1527,7 @@ It is recommended to:
 * Limit the rendering option to use simple 3D objects for large datasets.
 * Crop datasets to only those required to create a high resolution image.
 
-The ``3D Results Viewer`` supports interactive cropping allow easy selection of subsets of data for viewing with higher resolution rendering.
+The ``3D Results Viewer`` supports interactive cropping allowing easy selection of subsets of data for viewing with higher resolution rendering.
 
 
 .. index:: 3D Results Viewer; Overview
@@ -1537,7 +1537,7 @@ Overview
 
 The ``3D Results Viewer`` is built on top of the ``ImageJ 3D Viewer`` (see `3D Viewer <https://imagej.net/plugins/3d-viewer>`_). The ``ImageJ 3D Viewer`` can render image stacks as texture-based volume renderings, surfaces or orthoslices. It offers functionality to manipulate the image view and change rendering options. The GDSC SMLM ``3D Results Viewer`` uses this functionality to view the XYZ coordinates of a localisation results set. An additional ``GDSC SMLM`` menu has been added to the standard window to add functionality specific to rendering localisations.
 
-A 3D view is created by constructing surfaces, shining a light on the surfaces and then capturing the scene from a viewing position and angle. Thus the localisation XYZ points have to be represented as shapes. The more complex the shape the slower the rendering of the view. The ``3D Results Viewer`` offers shapes as simple as flat dots for rendering millions of localisation to high resolution spheres for smaller datasets. The fastest rendering ignores shapes that are behind others, i.e. the shapes are opaque. A more useful rendering is to use transparency so that you can see through shapes to those behind. This requires additional work from the rendering engine and is slower.
+A 3D view is created by constructing surfaces, shining a light on the surfaces and then capturing the scene from a viewing position and angle. Thus the localisation XYZ points have to be represented as shapes. The more complex the shape the slower the rendering of the view. The ``3D Results Viewer`` offers shapes as simple as flat dots for rendering millions of localisations to high resolution spheres for smaller datasets. The fastest rendering ignores shapes that are behind others, i.e. the shapes are opaque. A more useful rendering is to use transparency so that you can see through shapes to those behind. This requires additional work from the rendering engine and is slower.
 
 Transparency has an additional caveat. The graphics engine constructs each surface sequentially and models the light reflecting on the surface. When an object is transparent the light of the objects that are behind it is used in the rendering. Due to the implementation of the underlying graphics libraries a transparent object can only pass light through from objects that are *already part of the scene*. Thus true transparency requires that the objects are sorted and processed in depth first order. This is very intense and can be prohibitively slow. The ``3D Results Viewer`` supports the dynamic transparency mode of the ``Java 3D`` library. It also offers the ability to enable and disable object transparency and dynamic transparency (object sorting) in the view. Thus the view can be positioned with transparency off and then it can be enabled once the view position is set as desired.
 
@@ -1568,7 +1568,7 @@ When the ``3D Results Viewer`` is run the user must select the results set and t
 
        Coordinates are added to existing windows using the same global reference frame. Thus datasets should be compatible. It is possible to translate datasets using the ``Translate Results`` plugin.
 
-       Note that windows can be synchronized for side-by-side viewing of datasets (``View > Sync view``).
+       Note that windows can be synchronised for side-by-side viewing of datasets (``View > Sync view``).
 
    * - Transparency
      - Set the global transparency applied to all objects. This can be changed later using ``Edit > Change transparency``.
@@ -1604,7 +1604,7 @@ When the ``3D Results Viewer`` is run the user must select the results set and t
        If the selected option is not available the plugin will show an error when the dataset is loaded.
 
    * - Sort mode
-     - The mode used to determine the order of the objects added to the 3D model. This will effect rendering of transparent objects as only existing objects behind the current object will affect the transparency.
+     - The mode used to determine the order of the objects added to the 3D model. This will affect rendering of transparent objects as only existing objects behind the current object will affect the transparency.
 
        * ``None``: Use the results set order.
        * ``XYZ``: Sort using XYZ. The precedence of each dimension is defined using a 3D vector to set the direction and scale of the view.
@@ -1640,8 +1640,8 @@ When the ``3D Results Viewer`` is run the user must select the results set and t
        Set the method used to adjust the z coordinate to prevent creating shapes in a single plane.
 
        * ``None``: Draw shapes in a single plane. Rendering side-effects may occur.
-       * ``Intensity``: Rank localisation by intensity and uniformly spread them over the z range.
-       * ``Dither``: Random choose a z position for each localisation. The seed for randomness can be configured allowing the same dataset to be rendered in two windows with the same dither.
+       * ``Intensity``: Rank localisations by intensity and uniformly spread them over the z range.
+       * ``Dither``: Randomly choose a z position for each localisation. The seed for randomness can be configured allowing the same dataset to be rendered in two windows with the same dither.
 
        The ``...`` button specifies the range (in nm) to spread the z coordinates, and optionally the ``Dither seed``.
 
@@ -1712,7 +1712,7 @@ More surfaces will slow down rendering. If a large number of surfaces will be cr
      - 3D sphere
      - 1280
 
-Note: The ``Point`` rendering is not a true shape. It is rendered as a circle of fixed radius and does not scale with view distance. Keyboards shortcuts are provided to increase/decrease the size of the points as the viewing distance is updated. The circle is presented face-on irrespective of the view. This is very fast and can handle large datasets.
+Note: The ``Point`` rendering is not a true shape. It is rendered as a circle of fixed radius and does not scale with view distance. Keyboard shortcuts are provided to increase/decrease the size of the points as the viewing distance is updated. The circle is presented face-on irrespective of the view. This is very fast and can handle large datasets.
 
 Use of the 2D rendering objects can be used to provide an alternative to the rasterised 2D image output created for 2D localisations by the ``Results Manager``. However the view has the advantage of dynamic resizing of the window; image zoom and translation; and selection of localisations by mouse click or ROIs.
 
@@ -1730,7 +1730,7 @@ A single mouse-click will select objects. Each dataset added to the view is trea
 
 The keyboard arrow keys will update the view by rotating around the X or Y axis. If the ``ImageJ`` scrolling tool is enabled the view will respond to mouse click and drag operations to rotate the view. If the ``Shift`` key is held during drag the view is translated. Mouse scroll actions will zoom the view.
 
-Additional features have been added for the ``3D Results Viewer``. If an ROI tool is selected the current localisations can be cropped to a new dataset. The localisation coordinates are projected onto the view. Any projected point inside the ROI is added to the new dataset. Any area ROI is supported including composite ROIs created by holding the ``Shift`` key to draw multiple ROIs. The cropped dataset name is configured using the ``GDCS SMLM > Update settings`` option.
+Additional features have been added for the ``3D Results Viewer``. If an ROI tool is selected the current localisations can be cropped to a new dataset. The localisation coordinates are projected onto the view. Any projected point inside the ROI is added to the new dataset. Any area ROI is supported including composite ROIs created by holding the ``Shift`` key to draw multiple ROIs. The cropped dataset name is configured using the ``GDSC SMLM > Update settings`` option.
 
 If the ``Ctrl`` button is held the mouse can be used to select localisations. A single mouse-click will select the localisation; the selection is marked with a configurable outline. A double mouse-click will centre the view rotation on the localisation. This can be reset using ``View > Center > Universe``.
 
@@ -1756,7 +1756,7 @@ The following menu options are useful:
 
    * - Edit
      - Delete
-     - Removed the selected object from the view. The dataset is not deleted from memory.
+     - Remove the selected object from the view. The dataset is not deleted from memory.
 
    * - Edit
      - Transformation
@@ -1776,7 +1776,7 @@ The following menu options are useful:
 
    * - View
      - Sync view
-     - If **true** the view orientation is synchronized with all other views with this option enabled. Allows side-by-side view of datasets.
+     - If **true** the view orientation is synchronised with all other views with this option enabled. Allows side-by-side view of datasets.
 
    * - View
      - Fullscreen
@@ -1822,10 +1822,10 @@ The ``ImageJ 3D Viewer`` window has a ``GDSC SMLM`` menu added with features for
      - Sorts objects from front to back given the current eye position. This works for objects not created for dynamic transparency.
 
    * - Change colour
-     - Opens a dialog allow the look-up table to be changed. The image may take a long time to update after the colour change.
+     - Opens a dialog allowing the look-up table to be changed. The image may take a long time to update after the colour change.
 
    * - Change point size
-     - Opens a dialog allow the point size to be changed. Applies to ``Point`` rendering.
+     - Opens a dialog allowing the point size to be changed. Applies to ``Point`` rendering.
 
    * - Increase point size
      - Increase the point size. Applies to ``Point`` rendering.
@@ -1888,7 +1888,7 @@ Several of the options in the ``3D Results Viewer`` are controlled by settings. 
      - Specify the name of the dataset created by the ``Crop`` command. The options are the same as those described in :numref:`{number}: {name} <results_plugins:Crop Results>`.
 
    * - Update existing tables
-     - If **true** any changes to the table settings configured for ``Show results table`` will be applied to existing table. Otherwise they apply to new tables.
+     - If **true** any changes to the table settings configured for ``Show results table`` will be applied to existing tables. Otherwise they apply to new tables.
 
 
 .. index:: ! Results Match Calculator
@@ -1898,7 +1898,7 @@ Results Match Calculator
 
 Calculate the match statistics between two results sets.
 
-The ``Results Match Calculator`` allows two sets of localisations to be compared. The results are processed per time frame. The plugin can identify results that span multiple time frames, e.g. trace results produced by the ``Trace Molecules`` plugin. These will processed using a configurable option to either split into a single localisation for each frame, all with identical coordinates, or create a single localisation at the start or end frame of the span.
+The ``Results Match Calculator`` allows two sets of localisations to be compared. The results are processed per time frame. The plugin can identify results that span multiple time frames, e.g. trace results produced by the ``Trace Molecules`` plugin. These will be processed using a configurable option to either split into a single localisation for each frame, all with identical coordinates, or create a single localisation at the start or end frame of the span.
 
 Localisations are identified as a match if they are within a set distance. The plugin computes matches iteratively allocating the closest pairs first until no more matches can be made. The matches are used to compute comparison score metrics to show the similarity between the two results sets. The available metrics are Precision, Recall, F-score and Jaccard. Details of the comparison metrics can be found in section :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>`.
 
@@ -1954,7 +1954,7 @@ The following parameters can be set:
 
        * ``None``: Do not save.
        * ``Matched``: Save the localisations that *do* match.
-       * ``Unmatched``: Save the localisation that *do not* match.
+       * ``Unmatched``: Save the localisations that *do not* match.
        * ``All``: Save all localisations.
 
    * - Id analysis
@@ -1963,7 +1963,7 @@ The following parameters can be set:
        Note: Ids are added to the results by various plugins, e.g. ``Trace Molecules``, ``Create Data``.
 
    * - Save Pairs
-     - Save the *matched* localisations from each result set to an output directory. Files are created containing only those localisation that lie within an incremental distance interval. Thus the combination of all files is the entire set of matched localisations. For example if settings were ``Distance=1, Increments=2, Delta=0.5`` then files would be output for the intervals ``0-1, 1-1.5, 1.5-2``.
+     - Save the *matched* localisations from each result set to an output directory. Files are created containing only those localisations that lie within an incremental distance interval. Thus the combination of all files is the entire set of matched localisations. For example if settings were ``Distance=1, Increments=2, Delta=0.5`` then files would be output for the intervals ``0-1, 1-1.5, 1.5-2``.
 
        Files will be named ``Match[12]_<ResultsName>_<lower>_<upper>.txt`` where ``<ResultsName>`` is the results set name and ``<lower>`` and ``<upper>`` are the bounds of the match distance.
 
@@ -1985,7 +1985,7 @@ To assist in viewing the localisations that are matches the table supports mouse
 
 The coordinates for each point are taken from the X1 & Y1 columns, or if they are unavailable (in the case of an unmatched pair), the X2 & Y2 columns.
 
-Note: The image must be open before the plugin is run for the table to be linked the source image.
+Note: The image must be open before the plugin is run for the table to be linked to the source image.
 
 
 .. index:: ! Trace Match Calculator
@@ -2027,7 +2027,7 @@ where *tStart* is the trace start time and *tEnd* is the trace end time. The nor
 
 The score metrics are shown in a results table. Optionally a table of the matched pairs can be displayed showing the matched and unmatched localisations. The pairs table supports interactive identification of the selected points on the source image. This is the same functionality as the :ref:`results_plugins:Results Match Calculator` (see :numref:`{number}: {name} <results_plugins:Interactive Results Match Table>`). Any previous results in the pairs table will be cleared.
 
-The plugin can compare one or two results sets to the same reference. This allows the user to compare different tracing results to a benchmark, for example the results of tracing raw localisations can be be compared to tracing filtered localisations. If two test sets are input then the matched pairs table will contain additional columns to display triples.
+The plugin can compare one or two results sets to the same reference. This allows the user to compare different tracing results to a benchmark, for example the results of tracing raw localisations can be compared to tracing filtered localisations. If two test sets are input then the matched pairs table will contain additional columns to display triples.
 
 The following parameters can be set:
 
@@ -2180,7 +2180,7 @@ The following parameters can be configured:
 Yeast Mask
 ----------
 
-Creates a mask of a fission yeast cell (*S. pombe*). The mask can be used to simulate diffusion with a cell.
+Creates a mask of a fission yeast cell (*S. pombe*). The mask can be used to simulate diffusion within a cell.
 
 The mask uses an idealised model with a tube for the main body of the cell with a spherical end cap. The height of the output image is defined by the total length of the cell and the pixel scale. The width will either fit one cell or be a square image which is packed with cells until no more fit within the image.
 
@@ -2218,7 +2218,7 @@ The following parameters can be configured:
      - The number of *extra* pixels to use between the cell and the edge of the image, or other cells. A border of 1 is always used to allow the cells to be distinct.
 
    * - 2D
-     - If **true** the output will be a 2D image of the central slice through the cell. Othewise a 3D image is created.
+     - If **true** the output will be a 2D image of the central slice through the cell. Otherwise a 3D image is created.
 
 
 .. index:: ! Depth Mask
@@ -2228,7 +2228,7 @@ Depth Mask
 
 Creates a 3D mask using three 2D masks to define the shape. This is an inverse of a three way maximum intensity projection of a 3D mask. However due to information loss during projection the type of 3D masks that can be created are simple solid shapes.
 
-The plugin presents a dialog where 3 mask Masks can be selected. The Masks are then validated to check that:
+The plugin presents a dialog where 3 masks can be selected. The Masks are then validated to check that:
 
 * ``Mask XY`` width == ``Mask XZ`` width
 * ``Mask XY`` height == ``Mask YZ`` width

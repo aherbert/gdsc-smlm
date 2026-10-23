@@ -175,7 +175,7 @@ The following parameters can be specified:
      - The z-slice step size used when acquiring the calibration image.
 
    * - Camera type
-     - Configure the camera type. This is used to subtract the pixel offset bias from the input data. It is not strictly required for EMCCD/CCD cameras which have a common bias which will not effect the cross correlation. For sCMOS cameras the per pixel bias may effect correlation and a suitable per-pixel camera model must be provided to subtract the bias.
+     - Configure the camera type. This is used to subtract the pixel offset bias from the input data. It is not strictly required for EMCCD/CCD cameras which have a common bias which will not affect the cross correlation. For sCMOS cameras the per pixel bias may affect correlation and a suitable per-pixel camera model must be provided to subtract the bias.
 
    * - Analysis window
      - Set the border to exclude from analysis on the PSF, for example computations on the PSF pixel values such as intensity and min/max. This can be used to ignore noise at the edge of the PSF. A setting of 0 uses the entire region.
@@ -193,7 +193,7 @@ The following parameters can be specified:
      - Set the magnification to apply to each PSF before alignment. Magnification uses tricubic interpolation to enlarge the PSF. Note: Magnification will remove noise from individual PSFs before alignment.
 
    * - Smooth stack signal
-     - After magnification each PSF is normalised to sum to 1 so each contributes equally to the combined PSF. Normalisation uses the maximum signal across the PSF stack. Set to **true** to apply smoothing to the signal verses slice data before picking the maximum. Smoothing helps reduce noise in the final combined PSF by more equally weighting individual PSFs.
+     - After magnification each PSF is normalised to sum to 1 so each contributes equally to the combined PSF. Normalisation uses the maximum signal across the PSF stack. Set to **true** to apply smoothing to the signal versus slice data before picking the maximum. Smoothing helps reduce noise in the final combined PSF by more equally weighting individual PSFs.
 
    * - Max iterations
      - The maximum number of iterations used to refine the alignment.
@@ -224,13 +224,13 @@ Analysis
 
 Analysis begins by extracting all the spots into stacks based around their z-centre. The z-centres are determined automatically based on the spot type. In ``Interactive mode`` the analysis to determine the z-centre of each PSF can be inspected. The z-centre and z-radius can be manually changed and analysis settings updated based on the displayed PSF. For each candidate PSF the plugin will display:
 
-* A outline box on the input image of the current PSF.
+* An outline box on the input image of the current PSF.
 * The magnified PSF that was used for alignment.
 * The XY, XZ and YZ projections of the PSF.
-* A plot of the foreground intensity verses z slice. The foreground is the maximum intensity in the slice.
-* A plot of the background intensity verses z slice. The background is the minimum intensity in the slice.
-* A plot of the signal verses z slice. The signal is the sum of intensity in the slice.
-* A plot of the spot width verses z slice for ``Spot`` and ``Astigmatism`` modes, otherwise the rotation angle verses z slice for ``Double Helix`` mode.
+* A plot of the foreground intensity versus z slice. The foreground is the maximum intensity in the slice.
+* A plot of the background intensity versus z slice. The background is the minimum intensity in the slice.
+* A plot of the signal versus z slice. The signal is the sum of intensity in the slice.
+* A plot of the spot width versus z slice for ``Spot`` and ``Astigmatism`` modes, otherwise the rotation angle versus z slice for ``Double Helix`` mode.
 
 The plots show the current z-centre. A dialog is shown allowing the z-centre to be adjusted. The analysis parameters for the spots can also be adjusted based on inspecting the initial PSF and plot data:
 
@@ -258,7 +258,7 @@ Refinement of the combined PSF uses re-alignment of each individual PSF with cro
 * ``Reject``: Reject the alignment translation. The spot centre will not be updated this iteration. The spot will contribute to the combined PSF next iteration using its current relative position.
 * ``Cancel``: Stop the analysis.
 
-When all spots have been re-aligned the convergence criteria are evaluated. If the satisfied then the refinement stops, otherwise is continues. In ``Interactive mode`` a dialog is presented with the last RMSD change in the XY and Z centres of each spot and the change in centre-of-mass of the combined PSF. The dialog has the following options:
+When all spots have been re-aligned the convergence criteria are evaluated. If satisfied then the refinement stops, otherwise it continues. In ``Interactive mode`` a dialog is presented with the last RMSD change in the XY and Z centres of each spot and the change in centre-of-mass of the combined PSF. The dialog has the following options:
 
 * ``Converged``: Stop refinement.
 * ``Continue``: Continue with refinement.
@@ -483,7 +483,7 @@ The ``Slice`` parameter controls the current slice from the PSF image that will 
     :align: center
     :figwidth: 80%
 
-    Relative signal verses z-depth for a PSF spot.
+    Relative signal versus z-depth for a PSF spot.
 
     The plot shows the percentage of signal within 3 times the standard deviation (SD) of the fitted PSF for the z-centre against the depth. The green line shows the currently active slice.
 
@@ -494,7 +494,7 @@ A plot is also shown of the cumulative signal as the distance from the centre of
     :align: center
     :figwidth: 80%
 
-    Cumulative signal verses radius for a PSF spot.
+    Cumulative signal versus radius for a PSF spot.
 
     The cumulative signal is shown for the slice and distance (green line) as selected in the ``PSF Creator`` interactive spot analysis dialog.
 
@@ -509,7 +509,7 @@ Finally the Centre-of-Mass (CoM) of the PSF is computed and shown on a plot (:nu
     :align: center
     :figwidth: 80%
 
-    Centre-of-mass (CoM) verses z-depth for a PSF spot.
+    Centre-of-mass (CoM) versus z-depth for a PSF spot.
 
     Centre-of-mass computed for each slice in the final combined PSF. The raw data is shown as points with a smoothed curve for X (red) and Y (blue) coordinates.
 
@@ -651,7 +651,7 @@ The drift curve plot shows the average centre of spots fitted to the simulated i
 
     Example drift plot for the Y centre of the PSF
 
-    The plot shows the average Y centre when simulated spots are fit using a Gaussian 2D function.Original data points in blue with magenta vertical bars for the standard error of the mean. The smoothed curve is shown as a blue line. Green vertical lines mark the points where the recall falls below the configured limit. The PSF has an equivalent pixel pitch of 107nm.
+    The plot shows the average Y centre when simulated spots are fit using a Gaussian 2D function. Original data points in blue with magenta vertical bars for the standard error of the mean. The smoothed curve is shown as a blue line. Green vertical lines mark the points where the recall falls below the configured limit. The PSF has an equivalent pixel pitch of 107nm.
 
 
 .. index:: Recall Curve
@@ -721,7 +721,7 @@ When the plugin is run it searches all the open images for valid PSF images. The
 
 When the input images have been selected the plugin checks that each PSF has the same image scale (pixel size and depth). Note that input PSFs can have different X, Y and Z dimensions. If the scales are not the same then the images cannot be combined and an error is shown. Otherwise the plugin then presents a dialog where the z-depth of the combined PSF can be selected. This allows the size of the output PSF to be limited to N frames above and below the z-centre.
 
-The combined PSF is created by overlaying the x,y,z-centres and summing the individual PSF images. Each PSF is weighted using the number of images used to created the PSF divided by the total number of images:
+The combined PSF is created by overlaying the x,y,z-centres and summing the individual PSF images. Each PSF is weighted using the number of images used to create the PSF divided by the total number of images:
 
 .. math::
 
@@ -762,7 +762,7 @@ When the plugin is run the following parameters can be configured:
      - The threshold for the fraction of the maximum value to use for the PSF image noise floor. Values have the noise floor subtracted; negatives are set to zero. The noise floor reduces the contribution of noise at the edge of the image to the image sum. Used when approximating the Gaussian from the integral.
 
    * - Show PSF
-     - Options to display the PSF after application of the noise floor. Can use a render of the PSF or sampling from the PSF as a distribution. Note that rendering uses biliear interpolation of a cumulative sum image. Floating-point rounding errors may produce artifacts at very low probability densities. Sampling will show speckled noise at low ``PSF samples``.
+     - Options to display the PSF after application of the noise floor. Can use a render of the PSF or sampling from the PSF as a distribution. Note that rendering uses bilinear interpolation of a cumulative sum image. Floating-point rounding errors may produce artifacts at very low probability densities. Sampling will show speckled noise at low ``PSF samples``.
 
    * - PSF samples
      - The number of samples to create the output PSF image. For rendering mode the PSF probability density is multiplied by the provided value.
@@ -832,7 +832,7 @@ When the ``Cubic Spline Manager`` plugin is run a dialog allows a choice from th
 Print All Model Details
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This options prints the details of each model to the ``ImageJ`` log window. The settings contain the name of the model, the details of the file containing the model data and the scale (in nm) of the PSF model. Note that the scale defines the spacing interval between data points in the cubic spline. For efficiency during fitting of a model to data this spacing should be an integer factor of the pixel width, e.g. for a pixel width of 104nm the spline scale could be 104, 52, 26, etc.
+This option prints the details of each model to the ``ImageJ`` log window. The settings contain the name of the model, the details of the file containing the model data and the scale (in nm) of the PSF model. Note that the scale defines the spacing interval between data points in the cubic spline. For efficiency during fitting of a model to data this spacing should be an integer factor of the pixel width, e.g. for a pixel width of 104nm the spline scale could be 104, 52, 26, etc.
 
 
 ..
@@ -893,7 +893,7 @@ For maximum efficiency the scale should be an integer. However the translations 
 Astigmatism Model Manager
 -------------------------
 
-The ``Astigmatism Model Manager`` provides creation and management of astigmatism models for 2D Gaussian point spread functions (PSFs) imaged using an cylindrical lens. This creates a spot where the width of the spot in the X and Y dimensions varies with the Z depth. This occurs as the focal planes for the X and Y dimensions are not colocated.
+The ``Astigmatism Model Manager`` provides creation and management of astigmatism models for 2D Gaussian point spread functions (PSFs) imaged using a cylindrical lens. This creates a spot where the width of the spot in the X and Y dimensions varies with the Z depth. This occurs as the focal planes for the X and Y dimensions are not colocated.
 
 The model provides a function to compute the X and Y width using Z and is based on Smith *et al*, (2010) *Nature Methods* **7**, 373-375 and Holtzer *et al* (2007) *Applied Physics Letters* **90**, 1–3.
 
@@ -930,7 +930,7 @@ When the ``Astigmatism Model Manager`` plugin is run a dialog allows a choice fr
 Create Model
 ~~~~~~~~~~~~
 
-Create a model by fitting a 2D Gaussian to a PSF image. An stack image must be available with an example PSF marked with a single ``ImageJ`` point ROI. Multiple points are not currently supported because it does not appear to be necessary. Repeating the analysis on different examples should create a model with approximately the same width curve. This is simplified by the plugin saving the configuration options used in the last analysis.
+Create a model by fitting a 2D Gaussian to a PSF image. A stack image must be available with an example PSF marked with a single ``ImageJ`` point ROI. Multiple points are not currently supported because it does not appear to be necessary. Repeating the analysis on different examples should create a model with approximately the same width curve. This is simplified by the plugin saving the configuration options used in the last analysis.
 
 Presents a dialog where PSF image can be selected. The plugin then asks for the z-step resolution of the PSF stack and presents a dialog where the fitting can be configured. The fitting options are a simplified version of the options available in the ``Peak Fit`` plugin (see :numref:`{number}: {name} <fitting_plugins:Peak Fit>`). The same dialog fields are used to allow users familiar with ``Peak Fit`` to configure the options. The camera used to image the data must be configured and the expected PSF type. This should be an elliptical Gaussian; other options that do not fit independent X and Y widths will produce data that cannot be fit with a model. Fitting is most sensitive to the initial PSF width parameter so this should be tried using a few different sizes. The ``Fitting Width`` parameter should be wide enough to capture the out-of-focus PSF. Filtering options can be used to discard bad fits for out-of-focus spots. The ``Max width factor`` should be high so that wide spots can be used to model the out-of-focus PSF.
 
@@ -1005,7 +1005,7 @@ The model is created by fitting the parameters using the raw data. The model is 
 
     Astigmatism raw data width curve
 
-    The curve shows the PSF x and y widths against the z depth. The z region currently selected for use in building the model is shown an an ROI.
+    The curve shows the PSF x and y widths against the z depth. The z region currently selected for use in building the model is shown as an ROI.
 
 .. _fig_astig_model_manager_fit_model_curve:
 .. figure:: images/astig_model_manager_fit_model_curve.jpg
@@ -1121,16 +1121,16 @@ The read-out laser is a continuous light source. The activation laser can be con
 
 The amount of photons required for photo-activation of each molecule is defined by sampling from a random exponential distribution. The average for this distribution is set using the cumulative number of photons in the centre of the field at 30% of the simulation length. Thus approximately 50% of the molecules should have activated by 1/3 of the simulation.
 
-The simulation allows for a single dark state or dual dark state model. For the single dark state model the fluorophore can be either on or off (dark state). The number of times the fluorophore enters the dark state is selected from a probability distribution. For the dual dark state model the fluorophore can be on or in either dark state 1 or dark state 2. The dark state can only transition between the on state. There is no transition from dark state 1 to 2 or the reverse. The number of times the fluorophore enters the 2\ :sup:`nd` dark state is selected from a probability distribution. For each time the molecule is in the on state the number of times the fluorophore enters the 1\ :sup:`st` dark state is selected from a probability distribution. The dual dark state model can be used to simulate flickering of the fluorophore at a fast rate (i.e. moving between the on state and dark state 1) broken by longer period of off time (i.e. moving between the on state and dark state 2).
+The simulation allows for a single dark state or dual dark state model. For the single dark state model the fluorophore can be either on or off (dark state). The number of times the fluorophore enters the dark state is selected from a probability distribution. For the dual dark state model the fluorophore can be on or in either dark state 1 or dark state 2. The dark state can only transition to and from the on state. There is no transition from dark state 1 to 2 or the reverse. The number of times the fluorophore enters the 2\ :sup:`nd` dark state is selected from a probability distribution. For each time the molecule is in the on state the number of times the fluorophore enters the 1\ :sup:`st` dark state is selected from a probability distribution. The dual dark state model can be used to simulate flickering of the fluorophore at a fast rate (i.e. moving between the on state and dark state 1) broken by longer periods of off time (i.e. moving between the on state and dark state 2).
 
 The number of blinks is sampled from a Poisson or Geometric distribution and the length of time in the on-state and off-state(s) are sampled from exponential distributions. The average for these distributions are set as simulation parameters.
 
-Analysis of the signal-per-frame verses the time for the lifetime of the fluorophore shows that the signal is approximately constant, i.e. the signal does not get weaker over time. However it does vary which can be attributed to the fluorophore orientation. Consequently the signal for each fluorophore is modelled by sampling from a distribution with a specified mean emission rate (in photons/second). A fixed distribution uses the same rate for all fluorophores. A uniform distribution chooses the signal-per-frame uniformly between a lower and upper limit. A custom distribution can be specified by loading an empirical distribution from a file, for example inputting a set of observed photon budgets extracted from real data. A gamma distribution can be used; this is based on analysis of the signal of mEOS3 fluorophores in yeast that shows the signal-per-frame can be modelled using a gamma distribution. Finally a correlated distribution can be used where the signal-per-frame is correlated to the total on time. This is based on analysis of mEOS3 fluorophores in yeast that shows the signal-per-frame of a molecule is negatively correlated with the total on-time, i.e. molecules that are on for a shorter amount of time have a brighter signal. This may be because the release of more photons per second causes the molecule to expend the total photon budget and then photo bleach in a shorter time. Thus the simulation allows the total on-time of the fluorophore to be negatively correlated with the photon emission rate.
+Analysis of the signal-per-frame versus the time for the lifetime of the fluorophore shows that the signal is approximately constant, i.e. the signal does not get weaker over time. However it does vary which can be attributed to the fluorophore orientation. Consequently the signal for each fluorophore is modelled by sampling from a distribution with a specified mean emission rate (in photons/second). A fixed distribution uses the same rate for all fluorophores. A uniform distribution chooses the signal-per-frame uniformly between a lower and upper limit. A custom distribution can be specified by loading an empirical distribution from a file, for example inputting a set of observed photon budgets extracted from real data. A gamma distribution can be used; this is based on analysis of the signal of mEOS3 fluorophores in yeast that shows the signal-per-frame can be modelled using a gamma distribution. Finally a correlated distribution can be used where the signal-per-frame is correlated to the total on time. This is based on analysis of mEOS3 fluorophores in yeast that shows the signal-per-frame of a molecule is negatively correlated with the total on-time, i.e. molecules that are on for a shorter amount of time have a brighter signal. This may be because the release of more photons per second causes the molecule to expend the total photon budget and then photo bleach in a shorter time. Thus the simulation allows the total on-time of the fluorophore to be negatively correlated with the photon emission rate.
 
 Molecules can move using diffusion. The diffusion is modelled using a random walk as described in the
 ``Diffusion Rate Test`` plugin (see section :numref:`calibration_plugins:Diffusion Rate Test`). The diffusion can be random or confined to a specified volume. The diffusion can be limited to a fraction of the molecules by fixing a random sample of the molecules.
 
-The simulation runs for a specified duration at a given time interval per simulation step. At each step the simulation calculates the new position, if diffusing, and fluorescence of the molecules. These are then drawn on an image at a specified exposure rate. The simulation interval does not have to match the exposure time of the output image. Using a shorter simulation step than the exposure time is useful when simulating diffusion molecules. The appearance of the fluorophore is modelled using a configurable point spread function (PSF).
+The simulation runs for a specified duration at a given time interval per simulation step. At each step the simulation calculates the new position, if diffusing, and fluorescence of the molecules. These are then drawn on an image at a specified exposure time. The simulation interval does not have to match the exposure time of the output image. Using a shorter simulation step than the exposure time is useful when simulating diffusing molecules. The appearance of the fluorophore is modelled using a configurable point spread function (PSF).
 
 When the molecules have been simulated the results can be filtered to remove low signal spots. This allows the ``Create Data`` plugin to generate images at a certain signal-to-noise ratio for benchmarking experiments.
 
@@ -1198,7 +1198,7 @@ The PSF image pixel scale may not match the simulation; ideally the PSF image sh
 
 During initialisation the PSF image has background noise subtracted. The noise fraction parameter configures the noise floor threshold using a fraction of the maximum value in each image plane. After subtraction of the noise floor all values below zero are set to zero. Background subtraction reduces the effect of pixels far from the PSF origin contributing to the signal. After background subtraction the PSF is normalised so the z-centre has a sum of 1 (and all the other slices are scaled appropriately). A cumulative image is then calculated for each slice. No cumulative image is allowed a total above 1.
 
-PSF sampling is performed by selecting the appropriate slice from the image using the z-depth. The z-centre is specified using the middle of the slice so if the slice depth is 30nm then both -10 and 10 will be sampled from the centre slice. A random sample from 0 to 1 is taken and used to look up the appropriate pixel within the cumulative image for that slice. This sampled PSF pixel is then mapped to the output and the location added to the image. Note that if the cumulative total for the slice is below 1 then the sample may be ignored. This is allowed since the image PSF has a limited size (i.e. does not have infinite dimensions). Missed samples are unlikely to effect the output image as the pixels are very far from the PSF centre.
+PSF sampling is performed by selecting the appropriate slice from the image using the z-depth. The z-centre is specified using the middle of the slice so if the slice depth is 30nm then both -10 and 10 will be sampled from the centre slice. A random sample from 0 to 1 is taken and used to look up the appropriate pixel within the cumulative image for that slice. This sampled PSF pixel is then mapped to the output and the location added to the image. Note that if the cumulative total for the slice is below 1 then the sample may be ignored. This is allowed since the image PSF has a limited size (i.e. does not have infinite dimensions). Missed samples are unlikely to affect the output image as the pixels are very far from the PSF centre.
 
 
 .. index:: Image Reconstruction
@@ -1343,7 +1343,7 @@ The following parameters can be used to control the simulation:
      - The strength of the activation laser relative to the background activation level, e.g. 100 means 100 times more activation photons in a pulse than all the frames between pulses. Set to zero to disable.
 
    * - Background image
-     - Ony presented if there are suitable background images. Images must be grayscale and square.
+     - Only presented if there are suitable background images. Images must be grayscale and square.
 
        Select the image that will form the background photon level. The image will be scaled so that the maximum value is the level defined by the ``Background`` parameter. Each frame will use this image as the background with each pixel subject to Poisson noise.
 
@@ -1402,7 +1402,7 @@ The following parameters can be used to control the simulation:
 
        * ``Custom``: The distribution is specified using an input file of photon values, one per line. The photons will be sampled using a probability distribution based on these values but with a mean of the photon rate specified by the ``Photons`` parameter.
 
-       * ``Fixed``: Used a fixed emission rate specified by the ``Photons`` parameter.
+       * ``Fixed``: Use a fixed emission rate specified by the ``Photons`` parameter.
 
        * ``Correlated``: If non zero the total photon budget of a fluorophore will be proportional to the total on time using the chosen ``Correlation``. Ideally the correlation should be negative so short lived fluorophores are brighter.
 
@@ -1521,11 +1521,11 @@ The ``Create Data`` plugin summarises the dataset when the image has been constr
      - The standard deviation of the Gaussian equivalent of the PSF. This is the exact SD of the Gaussian PSF or if using an Airy or Image PSF it is the Gaussian that best matches the width profile of PSF.
 
    * - Sa
-     - The standard deviation of the Gaussian equivalent of the PSF adjusted for square pixels. The pixel adjustment in computed as:
+     - The standard deviation of the Gaussian equivalent of the PSF adjusted for square pixels. The pixel adjustment is computed as:
 
        :math:`s_a = \sqrt{s^2+a^2/12}`
 
-       where *s* is the standard deviation and *a* is the pixel size, both in nanometers.
+       where *s* is the standard deviation and *a* is the pixel size, both in nanometres.
 
        This should be used as the input width to ``Peak Fit``.
 
@@ -1638,7 +1638,7 @@ Note that the attributes do not have to be set when they are zero. They are set 
    * - Linear Walk
      - A random walk along a linear axis. The axis orientation is random and the particle will slide back-and-forth along the axis.
 
-When the compound is created the centre of mass is placed at the randomly chosen location. The compound can be rotated around the centre of mass. This rotation can be done once when the compound is created (``Rotate initial orientation``) and during the simulation (``Rotate during simulation``). If the ``Enable 2D rotation`` option is chosen then the rotation only occurs around the Z-axis, otherwise the axis is a randomly chosen unit vector. The rotation is a random angle from 0-360 degrees at each simulation step. Currently is it not possible to configure the rotation speed of the compound. Note that rotation will not occur if the molecule is part of the fixed fraction but will be allowed if the molecule is not fixed but the diffusion rate is zero.
+When the compound is created the centre of mass is placed at the randomly chosen location. The compound can be rotated around the centre of mass. This rotation can be done once when the compound is created (``Rotate initial orientation``) and during the simulation (``Rotate during simulation``). If the ``Enable 2D rotation`` option is chosen then the rotation only occurs around the Z-axis, otherwise the axis is a randomly chosen unit vector. The rotation is a random angle from 0-360 degrees at each simulation step. Currently it is not possible to configure the rotation speed of the compound. Note that rotation will not occur if the molecule is part of the fixed fraction but will be allowed if the molecule is not fixed but the diffusion rate is zero.
 
 The compound molecules dialog contains a ``Show examples`` checkbox. If this is selected the plugin will output a set of examples to the ``ImageJ`` log. Cancel the dialog to allow the ``ImageJ`` log to be selected and use the examples as the basis for new compounds.
 
@@ -1652,7 +1652,7 @@ Sampled Statistics
 
 The simulation computes the on and off times for each fluorophore using fractions of a second. However the image is reconstructed using a specified exposure time into image frames. Thus it is possible for a fluorophore to turn off and then back on in the same frame or in consecutive frames. This will be seen on the image as a less intense spot since the fluorophore is emitting for less time. However it will not be possible to see these fast off-times since the spot emission will appear continuous.
 
-The sampled statistics recompute the number of blinks, on and off times for frame-by-frame sampling. Any off-time than does not completely span a frame cannot be viewed and is removed. This means that the average off-time increases as the short off-times are removed. The average on time increases as well since bursts that are joined by a short off time will be joined up to longer bursts. Finally the number of blinks is reduced because very short blinks cannot be counted.
+The sampled statistics recompute the number of blinks, on and off times for frame-by-frame sampling. Any off-time that does not completely span a frame cannot be viewed and is removed. This means that the average off-time increases as the short off-times are removed. The average on time increases as well since bursts that are joined by a short off time will be joined up to longer bursts. Finally the number of blinks is reduced because very short blinks cannot be counted.
 
 It should be possible to experimentally compute values close to the sampled statistics by using optimised fitting parameters within the ``Peak Fit`` plugin (see section :numref:`%s<fitting_plugins:Peak Fit>`) and then using the ``Blink Estimator`` plugin (see section :numref:`%s<analysis_plugins:Blink Estimator>`). An approximate number of molecules and pulses can be estimated using the ``Trace Molecules`` plugin (see section :numref:`%s<analysis_plugins:Trace Molecules>`).
 
@@ -1803,13 +1803,13 @@ Create Track Data
 
 Creates an image by simulating single molecule localisations diffusing in tracks that do not overlap in time. This is the simplest simulation to test moving molecules.
 
-The ``Create Track Data`` plugin is a modification of the ``Create Data`` plugin to simplify the simulation of diffusing fluorophores. Each flourophore will have a fixed lifetime configured by the ``On time`` parameter. The simulation draws a single fluorophore that will diffuse using the configured parameters such as the diffusion rate and type, the fraction of fixed molecules, and the diffusion confinement. A single dark frame will be added to the image at the end of a flourophore lifetime before a new flourophore is created.
+The ``Create Track Data`` plugin is a modification of the ``Create Data`` plugin to simplify the simulation of diffusing fluorophores. Each fluorophore will have a fixed lifetime configured by the ``On time`` parameter. The simulation draws a single fluorophore that will diffuse using the configured parameters such as the diffusion rate and type, the fraction of fixed molecules, and the diffusion confinement. A single dark frame will be added to the image at the end of a fluorophore lifetime before a new fluorophore is created.
 
 The parameters are configured as for the ``Create Data`` plugin (see :numref:`{number}: {name} <model_plugins:Create Data>`). Some parameters have been removed as they are redundant as follows:
 
  * The simulation duration (``Seconds``) has been removed. The duration of the simulation is defined by the ``On time`` and the number of ``Particles``.
  * The correlation mode is removed from the available photon distributions as all fluorophores have the same lifetime.
- * The additional parameters to configure the on-times, off-times, and distribution of the number of blinks has been removed since each flourophore has a single pulse of a fixed lifetime.
+ * The additional parameters to configure the on-times, off-times, and distribution of the number of blinks have been removed since each fluorophore has a single pulse of a fixed lifetime.
 
 
 .. index:: ! Create Benchmark Data
@@ -2079,7 +2079,7 @@ true answer for each parameter that was fitted. Histograms of the differences ca
      - The average and standard deviation of the time for fitting per localisation.
 
    * - dActualSignal & +/-
-     - The average and standard deviation of the difference of the fit to the actual signal for the localisation (Note that the ``Create Benchmark Data`` plugin stores the number of photons that were simulation per localisation after Poisson sampling to allow this comparison).
+     - The average and standard deviation of the difference of the fit to the actual signal for the localisation (Note that the ``Create Benchmark Data`` plugin stores the number of photons that were simulated per localisation after Poisson sampling to allow this comparison).
 
    * - dSax & +/-
      - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the X dimension, adjusted for square pixels.
@@ -2222,7 +2222,7 @@ When the plugin runs the input data must be selected:
 
        If *false* the results are loaded via a universal results loader that will collect the required calibration data.
 
-When the input data is selected the plugin will load the ground-truth localisation result file. If this is pre-processed data then it is assumed the input is in a GDSC SMLM localisations format and the calibration is valid. Otherwise a dialog is presented to load the localisation data. The data is loaded using the generic ``Load Localisations`` plugin (see :numref:`{number}: {name} <results_plugins:Load Localisations>`). Settings should be configured to read the correct columns from the text file.The dataset will be loaded into memory with the name of the localisations image and the suffix ``(Results)``.
+When the input data is selected the plugin will load the ground-truth localisation result file. If this is pre-processed data then it is assumed the input is in a GDSC SMLM localisations format and the calibration is valid. Otherwise a dialog is presented to load the localisation data. The data is loaded using the generic ``Load Localisations`` plugin (see :numref:`{number}: {name} <results_plugins:Load Localisations>`). Settings should be configured to read the correct columns from the text file. The dataset will be loaded into memory with the name of the localisations image and the suffix ``(Results)``.
 
 Once the data has been loaded the settings for the simulation are configured:
 
@@ -2249,7 +2249,7 @@ Once the data has been loaded the settings for the simulation are configured:
      - The type of camera in the simulation. This will be pre-populated with the calibration if available. The settings can be configured using the ``...`` button. Some additional settings may be required over those collected when loading the localisations.
 
    * - Depth
-     - The maximum z-depth of the simulation relative to the focal plain (z=0). The units are pixels. This field is pre-populated with the maximum z-depth in the input data. Convert a known z-depth (e.g. in nanometers) to pixels using the calibration defined by the ``Pixel pitch`` parameter.
+     - The maximum z-depth of the simulation relative to the focal plane (z=0). The units are pixels. This field is pre-populated with the maximum z-depth in the input data. Convert a known z-depth (e.g. in nanometres) to pixels using the calibration defined by the ``Pixel pitch`` parameter.
 
 
 .. index:: ! Filter Spot Data
@@ -2263,7 +2263,7 @@ Filter a simulated image with associated ground-truth localisations and compute 
 Analysis
 ~~~~~~~~
 
-The ``Filter Spot data`` plugin will filter a stack image of localisations to identify candidates for fitting. This image can be created by the ``Create Data`` plugin or a variant such as ``Create Simple Data`` or ``Create Spot Data`` plugins. These store the simulation parameters and ground-truth localisations in memory. Alternatively the ``Load Benchmark Data`` plugin can load a set of ground-truth localisations and the simulation settings and associate them with a simulated image.
+The ``Filter Spot Data`` plugin will filter a stack image of localisations to identify candidates for fitting. This image can be created by the ``Create Data`` plugin or a variant such as ``Create Simple Data`` or ``Create Spot Data`` plugins. These store the simulation parameters and ground-truth localisations in memory. Alternatively the ``Load Benchmark Data`` plugin can load a set of ground-truth localisations and the simulation settings and associate them with a simulated image.
 
 The plugin allows the spot filter and the analysis settings to be configured. The filtering is then performed on each frame in the image, candidates in the configured border are ignored and the combined list of spot candidates ranked. This ranking depends on the filter but is usually done using the pixel value in the filtered image at the spot candidate position. The ranking will be the same as that used when performing fitting within the ``Peak Fit`` plugin, however it can be performed on all the candidates at the same time and not on the candidates per frame (since ``Peak Fit`` processes and fits frames individually). The ranked spot candidates are then analysed to produce scoring metrics of the filter performance by comparison to the simulated spot positions.
 
@@ -2292,7 +2292,7 @@ The performance is then calculated by summing:
 *   The false positives (FP) as the sum of the 1-TP score for all candidates, limited to 0 in the case of multiple matches. If a candidate does not match anything then TP=0 and FP=1
 *   The false negatives (FN) as the total number of localisations minus the TP total (i.e. how many localisations were missed)
 
-The TP, FP and FN totals can be used to produced scoring metrics to assess the filters.
+The TP, FP and FN totals can be used to produce scoring metrics to assess the filters.
 
 Note that the use of a ramped score function based on distance (and signal factor) allows the comparison of scores between different filters, since some algorithms may identify spot candidates closer to the true localisation. Also note that if it is not clear at what level to set the match distance and signal factor then using a ramped score will produce similar results as repeating the analysis with multiple thresholds and averaging the score with the same ramped weighting for each scoring threshold.
 
@@ -2329,7 +2329,7 @@ The following parameters can be configured.
      - Define the region within which to search for a local maxima. The region size is 2n+1. This must be at least 1.
 
    * - Border
-     - Define the number of border pixels for the filter to ignore. This prevents detection of maxima at the edge of the image where fitting is has an incomplete PSF.
+     - Define the number of border pixels for the filter to ignore. This prevents detection of maxima at the edge of the image where fitting has an incomplete PSF.
 
    * - Score relative distances
      - Set to **true** to make all distances relative to the Half-Width at Half-Maxima (HWHM) of the PSF used to create the data. This applies to the spot scoring options. Note that the actual distances used will be recorded in the results table.
@@ -2372,7 +2372,7 @@ The following parameters can be configured.
      - The fraction of the maximum recall to use for calculating the second set of recall and precision scores.
 
    * - Show plots
-     - Select this option to show plots of the results (the match statistics verses the spot candidate rank and the precision-recall curve).
+     - Select this option to show plots of the results (the match statistics versus the spot candidate rank and the precision-recall curve).
 
    * - Plot rank by intensity
      - The default x-axis rank when plotting is an integer series starting from 1.
@@ -2406,7 +2406,7 @@ Given that the spot candidates are ranked, it is possible to compute the scoring
 
     Filter spot data scoring metrics against spot rank
 
-The same data can be plot using the ``Plot rank by intensity`` option (:numref:`Figure %s <fig_filter_spot_data_score_vs_intensity>`).
+The same data can be plotted using the ``Plot rank by intensity`` option (:numref:`Figure %s <fig_filter_spot_data_score_vs_intensity>`).
 
 .. _fig_filter_spot_data_score_vs_intensity:
 .. figure:: images/filter_spot_data_score_vs_intensity.jpg
@@ -2433,7 +2433,7 @@ A scatter plot of the candidate intensity against the true spot intensity is sho
     :align: center
     :figwidth: 80%
 
-    Filter spot data actual intensity verses candidate spot intensity for matches
+    Filter spot data actual intensity versus candidate spot intensity for matches
 
 An ideal filter should produce a slope of 1 meaning that the estimated signal is a good starting approximation for a fitting algorithm. However as the filter smoothing increases the intensity of spots is reduced due to merging of the spot pixels with surrounding background. Thus higher smoothing values tend to increase the slope as the intensity is underestimated.
 
@@ -2526,7 +2526,7 @@ The analysis results are then reported in a summary table:
      - The analysis border.
 
    * - Matching
-     - The matching stragety.
+     - The matching strategy.
 
    * - Ranked
      - True if matching was performed using the candidate in their ranked order, i.e. higher ranked candidates are matched to true results first. The default is to use nearest neighbour matching, irrespective of the candidate ranking.
@@ -2713,10 +2713,10 @@ The following options can be selected:
 
        * ``AUC``: The filter with the highest AUC score
        * ``Max Jaccard``: The filter with the highest max Jaccard score
-       * ``AUC+Max Jaccard``: The filter with the highest combined AUC amd Max Jaccard score. The scores are combined by converting them to z-scores using the mean and standard deviation of the population, then the z-scores are summed.
+       * ``AUC+Max Jaccard``: The filter with the highest combined AUC and Max Jaccard score. The scores are combined by converting them to z-scores using the mean and standard deviation of the population, then the z-scores are summed.
 
    * - Show plots
-     - Select this option to show plots of the results (the match statistics verses the spot candidate rank and the precision-recall curve).
+     - Select this option to show plots of the results (the match statistics versus the spot candidate rank and the precision-recall curve).
 
    * - Plot rank by intensity
      - The default x-axis rank when plotting is an integer series starting from 1.
@@ -2761,7 +2761,7 @@ For the purpose of benchmarking it is possible to speed up processing by ignorin
 
 The algorithm used to fit the spots can be configured in the plugin options. However all fit results are accepted as long as the fitted signal is above zero, the coordinates are within the fit region and the fitted width is within a factor of 5 of the initial estimate. There is no further filtering performed by the plugin on the fit results. This provides an upper limit for the recall that is possible using this fitting configuration. Filtering of the results using limits on the signal, peak width, precision, etc. is done using the ``Benchmark Filter Analysis`` plugin.
 
-When all the fitting has been done the fitted coordinates and any candidates coordinates that were not fitted or failed to fit are compared with the actual coordinates that were simulated. The two sets of coordinates are assigned as matches if they are within a configured distance. In addition the fitted candidates can be set as matches if they are within a factor of the true signal for the localisation. The relative signal factor is the fitted signal divided by the true signal. The relative signal factor above or below the true signal (which has 1 for a perfect match) is adjusted so that the new signal factor (sf) score is 0 for a perfect match:
+When all the fitting has been done the fitted coordinates and any candidate coordinates that were not fitted or failed to fit are compared with the actual coordinates that were simulated. The two sets of coordinates are assigned as matches if they are within a configured distance. In addition the fitted candidates can be set as matches if they are within a factor of the true signal for the localisation. The relative signal factor is the fitted signal divided by the true signal. The relative signal factor above or below the true signal (which has 1 for a perfect match) is adjusted so that the new signal factor (sf) score is 0 for a perfect match:
 
 .. math::
 
@@ -2831,7 +2831,7 @@ The following parameters can be configured:
        See section :numref:`{number}: {name} <fitting_plugins:Fitting Parameters>`.
 
    * - Multi-path filter
-     - The filter used to select results during fitting. Note that although all configured candidate are fit, the results from early fits can influence later fits as they can be included as neighbours with known parameters.
+     - The filter used to select results during fitting. Note that although all configured candidates are fit, the results from early fits can influence later fits as they can be included as neighbours with known parameters.
 
    * - Fail limit
      - The fail limit used to stop storing results during fitting. This only affects the scoring analysis of the localisation dataset created using the configured multi-path filter and fail limit.
@@ -2851,7 +2851,7 @@ The following parameters can be configured:
      - See section :numref:`{number}: {name} <fitting_plugins:Multiple Peak Fitting Parameters>`.
 
    * - Show score histograms
-     - Show histograms and cumulation histograms of the metrics used to assess fit results: Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidian Shift, and Precision. Histograms are also shown of the number of iterations and function evaluations used by the fitting algorithm.
+     - Show histograms and cumulative histograms of the metrics used to assess fit results: Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidian Shift, and Precision. Histograms are also shown of the number of iterations and function evaluations used by the fitting algorithm.
 
    * - Show correlation
      - Show a plot of the correlation between the candidate intensity against the true spot intensity for all matches, as a function of the spot candidate rank.
@@ -2878,7 +2878,7 @@ Note that the ``Match Depth`` histogram will not be useful if the data were orig
 
 A scatter plot of the spot intensity against the true spot intensity is shown for all matches. The correlation and slope of the line (assuming an intercept at 0,0) is shown on the plot. An ideal fitting algorithm should produce a slope of 1.
 
-For all of the candidates that were fit the system compiles histograms of each of the common metrics used to assess the fit of the 2D Gaussian to the data (Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidian Shift, and Precision). Three histograms are computed for: all the fitting results; only the matches; and the non-matched results. The histogram are then used to produce an estimate for the range that should be used for each metric as a filter to separate good fits from bad fits. This is done by comparing the values in the matches histogram with the values in the non-matches histogram, for example using the largest separation between the cumulative histograms for each. This may for example produce an estimate that a SNR filter should be in the range of 25 to 300. These ranges are reported to the results table and can optionally be saved to a file for use in the ``Benchmark Filter Analysis`` plugin.
+For all of the candidates that were fit the system compiles histograms of each of the common metrics used to assess the fit of the 2D Gaussian to the data (Signal, SNR, MinWidth, MaxWidth, XY Shift, Euclidian Shift, and Precision). Three histograms are computed for: all the fitting results; only the matches; and the non-matched results. The histograms are then used to produce an estimate for the range that should be used for each metric as a filter to separate good fits from bad fits. This is done by comparing the values in the matches histogram with the values in the non-matches histogram, for example using the largest separation between the cumulative histograms for each. This may for example produce an estimate that a SNR filter should be in the range of 25 to 300. These ranges are reported to the results table and can optionally be saved to a file for use in the ``Benchmark Filter Analysis`` plugin.
 
 The results of match scoring are used to compute the match statistics Recall, Precision, Jaccard and F1-score. See section :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>` for more details. The first set of statistics are for the raw candidates (before fitting). These show how effective the filter was at identifying candidates that were processed and sets an upper limit on the performance of the fitted results. The second set summarise the performance of the fitted results. Note that the table does not show the False Negative score since this is equal to the number of simulated molecules minus the True Positives.
 
@@ -3057,7 +3057,7 @@ The analysis results are then reported in a summary table:
      - The lower and upper range estimate for an absolute max X or Y shift filter.
 
    * - EShift
-     - The lower and upper range estimate for a Euclidian shift filter.
+     - The lower and upper range estimate for a Euclidean shift filter.
 
    * - Precision
      - The lower and upper range estimate for a precision filter.
@@ -3102,11 +3102,11 @@ Expanding Filter Sets
 
 Note that the plugin will detect if a filter set only contains 3 filters and determine if it can be expanded. The criteria for expansion are that the second filter has a value for each parameter equal or above the first filter. The first filter then forms the minimum value and the second filter the maximum value. The third filter must then have a value that is positive for each parameter where the second filter value was above the first filter value. The third filter then forms the increment for the parameters. Note that if the increment is infinity then it is ignored. This means that it is possible to create a series of values from minimum to maximum using the increment. Note that the increment does not have to be an exact factor of the range. The value is just incremented from the minimum until the maximum is reached (or exceeded).
 
-Note that a filter set file can be created using suitable ranges for the current fit results by the ``Fit Spot Data`` plugin using the ``Save filter range`` option. To avoid testing filters that assess similar properties the ``Fit Spot Data`` plugin disables certain filters. Currently EShift and Signal filtering are disabled as they are similar to Shift and SNR. They can be renabled by editing the filter file and changing the third filter value from Infinity to a suitable increment. The Z depth filtering is also disabled as 3D fitting using astigmatism is experimental and not supported in the benchmarking plugins. If a filter set file was saved using ``Fit Spot Data`` then the file will be pre-selected in the dialog for convenience.
+Note that a filter set file can be created using suitable ranges for the current fit results by the ``Fit Spot Data`` plugin using the ``Save filter range`` option. To avoid testing filters that assess similar properties the ``Fit Spot Data`` plugin disables certain filters. Currently EShift and Signal filtering are disabled as they are similar to Shift and SNR. They can be re-enabled by editing the filter file and changing the third filter value from Infinity to a suitable increment. The Z depth filtering is also disabled as 3D fitting using astigmatism is experimental and not supported in the benchmarking plugins. If a filter set file was saved using ``Fit Spot Data`` then the file will be pre-selected in the dialog for convenience.
 
 If the filter set can be expanded the plugin will compute the number of combinations that will be created after expansion. It will then ask the user if they would like to expand the filters.
 
-Expanding filters is much faster that reading a large number of filters from a file and so is the preferred method of loading a large evenly spaced filter set. Note that advanced filters using ``And`` or ``Or`` filters can be constructed using expansion. The user should note that the parameters for the combined filters are represented as a single linear array, for example:
+Expanding filters is much faster than reading a large number of filters from a file and so is the preferred method of loading a large evenly spaced filter set. Note that advanced filters using ``And`` or ``Or`` filters can be constructed using expansion. The user should note that the parameters for the combined filters are represented as a single linear array, for example:
 
 .. code-block:: xml
 
@@ -3263,7 +3263,7 @@ Note that due to the use of mutation the genetic algorithm is able to produce pa
      - The size of the population.
 
    * - Failure limit
-     - The limit on the number of failed attempts to create a new individual before stopping growing the population. Note that new individuals are checked to be unique so it is common in a highly similar population that many crossovers will no create unique combinations.
+     - The limit on the number of failed attempts to create a new individual before stopping growing the population. Note that new individuals are checked to be unique so it is common in a highly similar population that many crossovers will not create unique combinations.
 
    * - Tolerance
      - The relative error for convergence of the top filter score.
@@ -3396,7 +3396,7 @@ When the plugin is run a dialog is presented allowing parameters to be configure
 
 The dialog message shows a summary of the results computed by ``Fit Spot Data`` that will be analysed. The number of results is shown along with the number of true positives within the results if they are scored with the current values for the match distances. This is the upper limit of true positives for any filter. If the match distances are altered then the number of true positives will be recomputed when the plugin is run but will not update in the plugin message until it is next displayed.
 
-The expected signal and localisation precision of the simulation localisations is computed using the formulas of Thompson (for signal) and Mortensen (for localisation), see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>` for more details. If analysis has been previously run on this data then the score for the best filter result held in memory is shown. (The results in memory functionality is used for choosing the optimum fail count settings for a filter set.)
+The expected signal and localisation precision of the simulated localisations is computed using the formulas of Thompson (for signal) and Mortensen (for localisation), see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>` for more details. If analysis has been previously run on this data then the score for the best filter result held in memory is shown. (The results in memory functionality is used for choosing the optimum fail count settings for a filter set.)
 
 Note that the match distance parameters are expressed relative to those used in the ``Fit Spot Data`` plugin. This is because the matches are assigned within that program and cannot be recomputed. A lower distance is allowed as it will change a match to a non-match. However higher values are not allowed as this requires recomputation of all match distances. The distances that were used by the ``Fit Spot Data`` plugin are shown in a message above the section where the distances are configured to remind the user of the values. Re-run the ``Fit Spot Data`` plugin if you wish to use higher values.
 
@@ -3481,7 +3481,7 @@ The following parameters can be adjusted:
        Set to the same as the ``Upper signal factor`` to ignore the ramped scoring function. Otherwise matches with a signal-factor between ``Partial`` and ``Upper signal factor`` will have a score between 0 and 1.
 
    * - Depth recall analysis
-     - Produce a histogram of the recall verses z-depth of the original localisations.
+     - Produce a histogram of the recall versus z-depth of the original localisations.
 
        This option is only available if the simulation had variable z-depth.
 
@@ -3500,7 +3500,7 @@ The following parameters can be adjusted:
        - ``All``: Output all results per round building filters using an enumeration of all combinations of the components.
 
    * - Evolve
-     - Perform a search optimisation of the filter parameters (see section :numref:`%s <model_plugins:Filter Optimisation>`). This option may not evaluate all the filters in the input filter set. The input filter set is used to defined bounds of the filter parameters for the search. Once the optimal parameters have been identified then the best filter is included in the output results.
+     - Perform a search optimisation of the filter parameters (see section :numref:`%s <model_plugins:Filter Optimisation>`). This option may not evaluate all the filters in the input filter set. The input filter set is used to define bounds of the filter parameters for the search. Once the optimal parameters have been identified then the best filter is included in the output results.
 
        - ``None``: No optimisation
        - ``Genetic Algorithm``: Use a genetic algorithm to explore combinations of the best filters until convergence.
@@ -3532,13 +3532,13 @@ Once the main parameters have been chosen a second dialog is presented where the
 
 If the ``Evolve`` option is selected a dialog will be presented for each filter set to be optimised. The parameters are all prefixed with the filter set number. This allows support for recording the plugin using the ``ImageJ`` recorder for use in the ``ImageJ`` macro language. See section :numref:`{number}: {name} <model_plugins:Filter Optimisation>` for details.
 
-When using the ``Evolve`` option a results table is created named ``Benchmark Filter Analysis Evolution``. This table contains the same columns as the main results table with an extra column for the iteration of the algorithm. The results from the best filter per iteration are added to the table. This table can be used to track the progress of the algorithm. If desired the algorithm can be stopped manually by pressing the ``Escape`` character.
+When using the ``Evolve`` option a results table is created named ``Benchmark Filter Analysis Evolution``. This table contains the same columns as the main results table with an extra column for the iteration of the algorithm. The results from the best filter per iteration are added to the table. This table can be used to track the progress of the algorithm. If desired the algorithm can be stopped manually by pressing the ``Escape`` key.
 
 
 Results
 ~~~~~~~
 
-If the ``Depth recall analysis`` option was selected the plugin will compute a histogram of the recall verses z-depth. Three histograms are computed. The first is for all the localisations. This is plotted in black and provides the upper limit for performance. The second is the histogram for all the fitted results that match a localisation. This is plotted in blue and provides the upper limit that can be achieved by fitting. The third is the histogram for all the fitted results that were accepted by the filter. This is plotted in red. An example is shown in :numref:`Figure %s <fig_filter_analysis_depth_recall_analysis>`.
+If the ``Depth recall analysis`` option was selected the plugin will compute a histogram of the recall versus z-depth. Three histograms are computed. The first is for all the localisations. This is plotted in black and provides the upper limit for performance. The second is the histogram for all the fitted results that match a localisation. This is plotted in blue and provides the upper limit that can be achieved by fitting. The third is the histogram for all the fitted results that were accepted by the filter. This is plotted in red. An example is shown in :numref:`Figure %s <fig_filter_analysis_depth_recall_analysis>`.
 
 .. _fig_filter_analysis_depth_recall_analysis:
 .. figure:: images/filter_analysis_depth_recall_analysis.png
@@ -3706,7 +3706,7 @@ If the ``Show table`` or ``Show summary`` options are selected the plugin will d
      - The fractional false negative score.
 
    * - fMetrics
-     - The fraction score metrics computed using fTP, fFP and fFN.
+     - The fractional score metrics computed using fTP, fFP and fFN.
 
 
 The summary table contains the same fields as the results table. The following additional columns are present:
@@ -3772,7 +3772,7 @@ The following parameters are used by every single filter:
 
 The ``Benchmark Filter Parameters`` plugin uses the top scoring filter from the ``Benchmark Filter Analysis`` plugin and searches for the best filter control parameters. The search algorithms are similar to those described in section :numref:`{number}: {name} <model_plugins:Filter Optimisation>` and the filters are scored using the same metrics. Due to the low number of parameters and the expected bounds for each parameter the number of combinations is expected to be small. Thus the genetic algorithm has been removed and a new algorithm has been added that allows enumeration of the entire range in appropriate step increments.
 
-In the ``Benchmark Filter Analysis`` plugin the range for the parameter optimisation is defined using a filter set due unlimited number of filter combinations. In contrast the ``Benchmark Filter Parameters`` plugin defines the range for the small set of parameters in the plugin dialog. The dialog is very similar to the dialog for the ``Benchmark Filter Analysis`` plugin. The following are different options for this plugin:
+In the ``Benchmark Filter Analysis`` plugin the range for the parameter optimisation is defined using a filter set due to the unlimited number of filter combinations. In contrast the ``Benchmark Filter Parameters`` plugin defines the range for the small set of parameters in the plugin dialog. The dialog is very similar to the dialog for the ``Benchmark Filter Analysis`` plugin. The following are different options for this plugin:
 
 .. list-table::
    :widths: 20 80
@@ -3840,7 +3840,7 @@ Searching all parameters that control fitting and filtering of fitting results i
 Iteration
 ~~~~~~~~~
 
-Note that the fitting of spot candidates involves filtering results dynamically as they are generated. Fitting stops when filtering is consistently rejecting fits. Thus changes to the spot filter can effect the number of fitted spots. This requires iteration of the spot fitting and the filtering together.
+Note that the fitting of spot candidates involves filtering results dynamically as they are generated. Fitting stops when filtering is consistently rejecting fits. Thus changes to the spot filter can affect the number of fitted spots. This requires iteration of the spot fitting and the filtering together.
 
 The plugin uses the following routine:
 
@@ -3895,7 +3895,7 @@ The plugin requires the following parameters to control the iteration:
      - The maximum number of iterations. This includes the optional inner iterations to converge on the best filter before a refit. If using the ``Converge before refit`` option then the maximum iterations should be increased.
 
    * - Min range reduction
-     - The minimum reduction factor to adjust the parameter ranges when performing the filter optimisation. Set to 1 this has no effect. Otherwise the reduction factor linear ramps from 1 to min over the configured number of iterations.
+     - The minimum reduction factor to adjust the parameter ranges when performing the filter optimisation. Set to 1 this has no effect. Otherwise the reduction factor linearly ramps from 1 to min over the configured number of iterations.
 
    * - Min range reduction iterations
      - The number of iterations taken to reach the ``Min range reduction`` factor. The iteration count is the number of refits of the spot data thus excludes the optional inner convergence of the filter parameters.
@@ -3938,19 +3938,19 @@ Super-resolution data may contain overlapping localisations. These may be so clo
 Analysis
 ~~~~~~~~
 
-The ``Doublet Analysis`` plugin fits a subset of the candidate spots identified in the benchmark image by the ``Filter Spot Data`` plugin. Localisations are assigned to their nearest spot candidate. There is no distance threshold but the localisation must be within the fit window that will be used when fitting the candidate, i.e the localisation could be fit by the candidate spot. All candidates that match one or more localisations are processed using the fitting routine since these have the possibility of being a doublet (a match to two localisations). Candidates that do not match any localisations are ignored, simplifying analysis; these are results that should be eliminated as a single fit by a good results filter preventing them from entering doublet fitting.
+The ``Doublet Analysis`` plugin fits a subset of the candidate spots identified in the benchmark image by the ``Filter Spot Data`` plugin. Localisations are assigned to their nearest spot candidate. There is no distance threshold but the localisation must be within the fit window that will be used when fitting the candidate, i.e. the localisation could be fit by the candidate spot. All candidates that match one or more localisations are processed using the fitting routine since these have the possibility of being a doublet (a match to two localisations). Candidates that do not match any localisations are ignored, simplifying analysis; these are results that should be eliminated as a single fit by a good results filter preventing them from entering doublet fitting.
 
 Optionally any spot candidate that has a neighbour spot candidate in the fit window can be ignored. This is a situation where the fitting algorithm could be set to fit multiple peaks, which is the preferred option to a guess between a single or doublet fit.
 
-The plugins stores the count of the number of actual results that match a spot, and the number of spots with neighbours within the fit region or within the fit region expanded 50%. These can be reported in a results table for each candidate and plotted as summary histograms.
+The plugin stores the count of the number of actual results that match a spot, and the number of spots with neighbours within the fit region or within the fit region expanded 50%. These can be reported in a results table for each candidate and plotted as summary histograms.
 
 The candidates are then fit as a single and a doublet (irrespective of what the true number of localisations is) and the results stored for analysis. Various metrics are computed including the residual score for the single fit, and the distances from the original fit centre of the doublet centres.
 
-Once all the fitting has been completed the results are compared to the actual localisations and scored. Scoring uses distance and signal factor thresholds with an upper and lower bounds and a ramped scoring function. This is same as the ramped scoring used in the ``Benchmark Filter Analysis`` plugin (see section :numref:`{number} <model_plugins:Benchmark Filter Analysis>`).
+Once all the fitting has been completed the results are compared to the actual localisations and scored. Scoring uses distance and signal factor thresholds with upper and lower bounds and a ramped scoring function. This is the same as the ramped scoring used in the ``Benchmark Filter Analysis`` plugin (see section :numref:`{number} <model_plugins:Benchmark Filter Analysis>`).
 
 Results are scored as if all fits were accepted as a single fit, or all results accepted as a doublet fit. The results are stored for use in the ``Doublet Filter Analysis`` plugin. This accumulates the scores for singles or doublets depending on the fit results that are accepted.
 
-Note that precomputing scoring results as only two sets (singles or doublets) is a compromise for computational speed. Ideally the analysis would filter the results to accept single or doublet fits and then compute match scores for the coordinates that remain. However in practice the coordinates of one of the doublet results is likely to match the same localisation as the corresponding single result, so totalling scores from either the single fit or doublet fit is valid. Using the option to ignore any candidates with neighbour candidates will ensure that no other fit results encroach within the fit window, and reduce scoring errors when summing single and doublet score results.
+Note that precomputing scoring results as only two sets (singles or doublets) is a compromise for computational speed. Ideally the analysis would filter the results to accept single or doublet fits and then compute match scores for the coordinates that remain. However in practice the coordinates of one of the doublet results are likely to match the same localisation as the corresponding single result, so totalling scores from either the single fit or doublet fit is valid. Using the option to ignore any candidates with neighbour candidates will ensure that no other fit results encroach within the fit window, and reduce scoring errors when summing single and doublet score results.
 
 Matching of fit results to localisations can be performed using different methods:
 
@@ -4029,7 +4029,7 @@ The following parameters can be configured:
        See :numref:`{number}: {name} <fitting_plugins:Fitting Parameters>`.
 
    * - Iteration increase
-     - The fitting algorithm normally increases the number of iterations when fitting multiple peaks. This increase is based on the results of testing on many datasets. However this factor can be increased by an addition factor to ensure all doublets are fit.
+     - The fitting algorithm normally increases the number of iterations when fitting multiple peaks. This increase is based on the results of testing on many datasets. However this factor can be increased by an additional factor to ensure all doublets are fit.
 
    * - Show overlay
      - Show an overlay on the image of the spot candidates that will be processed. Candidates are coloured using the number of localisations they match: 1 (red); 2 (green); over 2 (blue).
@@ -4041,7 +4041,7 @@ The following parameters can be configured:
      - Show a results table with details of the fit results for each spot candidate.
 
    * - Show Jaccard plot
-     - Show a plot of the performance scores verses the residuals threshold.
+     - Show a plot of the performance scores versus the residuals threshold.
 
    * - Use max residuals
      - Use the maximum residuals score. This is a measure of the maximum asymmetry in the fit residuals.
@@ -4082,7 +4082,7 @@ If the ``Show Jaccard Plot`` option was selected the scoring statistics can be p
     :align: center
     :figwidth: 80%
 
-    Doublet Analysis ``Show Jaccard Plot`` displays the scoring statistics verses the residuals threshold
+    Doublet Analysis ``Show Jaccard Plot`` displays the scoring statistics versus the residuals threshold
 
 The plot usually shows a region where the Jaccard score is optimal. Measures of the size of this region are calculated for the summary table. An ideal result would be the maximum Jaccard score when the residuals threshold is zero, i.e. the system fits all spots as singles and doublets and can pick the best result from each fit. However no filtering of fit results is performed and so many doublet results may contain poor spot data that can be filtered out using thresholds such as width, precision and SNR. Consequently the performance is often better when the single fits that have symmetric residuals (low residuals score) are accepted as singles and not as doublets, i.e. the residuals threshold is above 0. Unless the density is extremely low (and there are no doublets) it is unlikely the best score will be at residuals score 1, i.e. accept all fits as a single spot.
 
@@ -4105,13 +4105,13 @@ The analysis results are reported in a summary table:
      - The density of the molecules.
 
    * - minN
-     - The minimum number of photons (per second) for a flourophore.
+     - The minimum number of photons (per second) for a fluorophore.
 
    * - maxN
-     - The maximum number of photons (per second) for a flourophore.
+     - The maximum number of photons (per second) for a fluorophore.
 
    * - N
-     - The average number of photons (per frame) for a flourophore.
+     - The average number of photons (per frame) for a fluorophore.
 
    * - s (nm)
      - The PSF standard deviation.
@@ -4168,7 +4168,7 @@ The analysis results are reported in a summary table:
      - The match mode.
 
    * - BestJ
-     - The best jaccard score if the system was able to correctly filter single and doublet fit results. This sets an upper bounds for what is possible.
+     - The best Jaccard score if the system was able to correctly filter single and doublet fit results. This sets an upper bound for what is possible.
 
    * - J (r=1)
      - The Jaccard score for fitting everything as singles (residuals threshold = 1).
@@ -4228,7 +4228,7 @@ If the ``Show overlay`` option was selected the plugin will put a cross on the i
     :align: center
     :figwidth: 80%
 
-    Double Analysis ``Show overlay`` option identifies localisations that match fitted results
+    Doublet Analysis ``Show overlay`` option identifies localisations that match fitted results
 
     The overlay is coloured using the number of localisations they match: 1 (red); 2 (green); over 2 (blue).
 
@@ -4341,10 +4341,10 @@ The following data is shown:
      - The result of fitting the candidate as a doublet (this is empty if the spot cannot be fit as a single).
 
    * - ss1
-     - The residual sum-of-squares when fitting as a single spot (least square estimation).
+     - The residual sum-of-squares when fitting as a single spot (least squares estimation).
 
    * - ss2
-     - The residual sum-of-squares when fitting as a doublet (least square estimation).
+     - The residual sum-of-squares when fitting as a doublet (least squares estimation).
 
    * - ll1
      - The log-likelihood when fitting as a single spot (maximum likelihood estimation).
@@ -4573,7 +4573,7 @@ The following parameters can be configured:
      - The method used to compute the precision.
 
    * - Drift angle
-     - Set the maximum angle that a doublet centre can be away from the vector defining the assymetry in the single fit residuals. The angle criteria is only applied if the doublet centre has shifted beyond the configured shift factor for filtering a single spot (i.e. if the doublet centre is far from the original fitted position it must be in the correct direction given the fit residuals).
+     - Set the maximum angle that a doublet centre can be away from the vector defining the asymmetry in the single fit residuals. The angle criteria is only applied if the doublet centre has shifted beyond the configured shift factor for filtering a single spot (i.e. if the doublet centre is far from the original fitted position it must be in the correct direction given the fit residuals).
 
        Note: This angle is displayed in the results table for each candidate fit result if the ``Show results`` option is chosen.
 
@@ -4584,7 +4584,7 @@ The following parameters can be configured:
      - Show a results table with details of the fit results for each spot candidate.
 
    * - Show Jaccard plot
-     - Show a plot of the performance scores verses the residuals threshold.
+     - Show a plot of the performance scores versus the residuals threshold.
 
    * - Use max residuals
      - Use the maximum residuals score. This is a measure of the maximum asymmetry in the fit residuals.
@@ -4606,7 +4606,7 @@ The following parameters can be configured:
 Results
 ~~~~~~~
 
-After spot candidates have been filtered using the specified criteria the results are summarised. Each candidate that was fitted as a single spot has a residuals score. The results are sorted by their residuals score and the binary scoring statistics (Precision, Recall, Jaccard) are computed for each possible threshold for the residuals score; for a given threshold all spots below the threshold are assessed as single fits and all above are subjected to the selction criteria to choose the single or doublet fit.
+After spot candidates have been filtered using the specified criteria the results are summarised. Each candidate that was fitted as a single spot has a residuals score. The results are sorted by their residuals score and the binary scoring statistics (Precision, Recall, Jaccard) are computed for each possible threshold for the residuals score; for a given threshold all spots below the threshold are assessed as single fits and all above are subjected to the selection criteria to choose the single or doublet fit.
 
 If the ``Show Jaccard Plot`` option was selected the scoring statistics can be plotted against the residuals threshold (::numref:`Figure %s <fig_doublet_filter_analysis_jaccard_plot>`).
 
@@ -4615,7 +4615,7 @@ If the ``Show Jaccard Plot`` option was selected the scoring statistics can be p
     :align: center
     :figwidth: 80%
 
-    Doublet Filter Analysis ``Show Jaccard Plot`` displays the scoring statistics verses the residuals threshold
+    Doublet Filter Analysis ``Show Jaccard Plot`` displays the scoring statistics versus the residuals threshold
 
 This plot is similar to the output from the
 ``Doublet Analysis``
@@ -4686,7 +4686,7 @@ The filter analysis results are reported in a summary table:
      - The angle limit.
 
    * - Gap
-     - The minimum gap between doublets centres.
+     - The minimum gap between doublet centres.
 
    * - J (r=1)
      - The Jaccard score for fitting everything as singles (residuals threshold = 1).
@@ -4744,9 +4744,9 @@ If the ``Show results`` option was selected the plugin outputs information about
 Smart Spot Ranking
 ------------------
 
-Compare methods for classifying spot candidates. This plugins requires that a set of benchmark spot candidates has been generated from a benchmarking image (see :numref:`{number}: {name} <model_plugins:Filter Spot Data>`).
+Compare methods for classifying spot candidates. This plugin requires that a set of benchmark spot candidates has been generated from a benchmarking image (see :numref:`{number}: {name} <model_plugins:Filter Spot Data>`).
 
-The plugin will classify spot candidates into those that match a true result and those that do not. The plugin then uses various methods to classify the spot candidates and scores each method. An ideal classification would identify all candidates which match actual spots into one group and maximise the false positive candidates which do not match a spot into a second group.
+The plugin will classify spot candidates into those that match a true result and those that do not. The plugin then uses various methods to classify the spot candidates and scores each method. An ideal classification would identify all candidates which match actual spots into one group and all candidates which do not match a spot into a second group.
 
 For the purpose of benchmarking it is possible to speed up processing by ignoring many of the candidates. The ``Smart Spot Ranking`` plugin allows the user to specify the fraction of positives in each frame that will be processed. This sets a target limit for the positives. When this target has been reached the plugin will continue processing candidates until: (1) a set fraction of the total number of candidates processed are negatives; and (2) a minimum number of negatives after the positive target have been processed. The rest of the candidates are then ignored from the analysis.
 
@@ -4828,7 +4828,7 @@ Results Table
 
 The initial columns in the result table show details of the benchmark simulation and the spot filter used to identify spot candidates. These columns are as described in :numref:`{number}: {name} <model_plugins:Filter Spot Data>`. The next section of columns summarise the candidates that are included in the analysis and are identical for each ranking method. Finally the method scores are recorded.
 
-The following tables describes the results data specific to the ``Smart Spot Ranking`` plugin:
+The following tables describe the results data specific to the ``Smart Spot Ranking`` plugin:
 
 .. list-table::
    :widths: 20 80
@@ -4877,13 +4877,13 @@ The following tables describes the results data specific to the ``Smart Spot Ran
      - The count of the fractional negatives included in the analysis.
 
    * - Spot Av
-     - The average of number of localisations per frame.
+     - The average number of localisations per frame.
 
    * - Spot SD
      - The standard deviation of the number of localisations per frame.
 
    * - Candidate Av
-     - The average of number of spot candidates per frame.
+     - The average number of spot candidates per frame.
 
    * - Candidate SD
      - The standard deviation of the number of spot candidates per frame.

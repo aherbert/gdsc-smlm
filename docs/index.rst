@@ -77,7 +77,7 @@ Super-resolution microscopy uses small molecules that can be activated to emit l
 
 The GDSC Single Molecule Light Microscopy (SMLM) plugins provide various tools for single molecule localisation analysis.
 
-- Fit an image, or series of images, using a 2D Guassian Point Spread Function (PSF)
+- Fit an image, or series of images, using a 2D Gaussian Point Spread Function (PSF)
 - Save results to a table, a file, an image and/or to memory
 - Trace or cluster localisations through time to identify molecules
 - Correct drift in long time course images
@@ -114,7 +114,7 @@ Fitting Plugins
      - Allows setting the fitting parameters and saving them to file.
 
    * - :ref:`fitting_plugins:Peak Fit (Series)`
-     - Performs fitting on folder of images to generate a list of molecule localisations.
+     - Performs fitting on a folder of images to generate a list of molecule localisations.
 
    * - :ref:`fitting_plugins:Spot Finder`
      - Identifies candidate maxima in an image.
@@ -179,7 +179,7 @@ Results Plugins
      - Allows results held in memory to be converted to different units.
 
    * - :ref:`results_plugins:Show Results Header`
-     - Shows the header information from any support localisation results file format.
+     - Shows the header information from any supported localisation results file format.
 
    * - :ref:`results_plugins:Overlay Results`
      - Draws an overlay on an image using all the localisations from a results dataset.
@@ -304,7 +304,7 @@ Analysis Plugins
      - Estimate the blinking rate of fluorophores in a results set.
 
    * - :ref:`analysis_plugins:Time Correlated (TC-PALM) Analysis`
-     - Performs time correlated photo-activated light microscopy (TC-PALM) analysis.
+     - Performs time correlated photo-activated localisation microscopy (TC-PALM) analysis.
 
    * - :ref:`analysis_plugins:Neighbour Analysis`
      - Saves all localisations paired with their neighbour (if present) to file.
@@ -386,7 +386,7 @@ Model Plugins
      - Combines several PSF images into a single average PSF.
 
    * - :ref:`model_plugins:PSF HWHM`
-     - Diplays the half-width at half-maxima (HWHM) curve for a PSF image.
+     - Displays the half-width at half-maxima (HWHM) curve for a PSF image.
 
    * - :ref:`model_plugins:Cubic Spline Manager`
      - Allows management of the cubic spline models of point spread functions (PSFs).
@@ -436,7 +436,7 @@ Model Plugins
      - Run different filter control parameters on a set of benchmark fitting results outputting performance statistics on the success of the filter.
 
    * - :ref:`model_plugins:Iterate Filter Analysis`
-     - Iterates the ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugin to optimise performance on a set of benchmark fitting results.
+     - Iterates the ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins to optimise performance on a set of benchmark fitting results.
 
    * - :ref:`model_plugins:Score Filter`
      - Scores a filter against a set of benchmark fitting results.
@@ -497,7 +497,7 @@ Calibration Plugins
 Tool Plugins
 ------------
 
-In addition to the principle plugins for localisation fitting and analysis there are several utility plugins provided.
+In addition to the principal plugins for localisation fitting and analysis there are several utility plugins provided.
 
 .. list-table::
    :widths: 30 70
@@ -552,7 +552,7 @@ These plugins provide quick access to the various SMLM plugins via `ImageJ` tool
    * - :ref:`toolset_plugins:Show SMLM Tools`
      - Display a ``SMLM Tools`` window with buttons to run plugins.
 
-   * - :ref:`toolset_plugins:Create SMLM Tools config`
+   * - :ref:`toolset_plugins:Create SMLM Tools Config`
      - Create a configuration file allowing the ``SMLM Tools`` panel to be customised.
 
    * - :ref:`toolset_plugins:SMLM Macro Extensions`

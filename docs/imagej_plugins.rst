@@ -120,7 +120,7 @@ Performance
 
 Note that usage tracking should not slow down ``ImageJ``. The tracking was performed in the background only when the computer was doing nothing else. If it was always too busy then no tracking data was sent.
 
-If not connected to the internet then the tracker identified that messages could not be sent and shutdown.
+If not connected to the internet then the tracker identified that messages could not be sent and shut down.
 
 
 .. index:: User Preferences
@@ -164,4 +164,4 @@ The code used the Analytics Measurement Protocol. This allows any web connected 
 
 Data was sent using a secure HTTP connection. All information sent was non-personal however Google may have stored an IP address associated with the data.
 
-Data used Google's Universal Analytics. This service will stop processing data in `July 2023 <https://support.google.com/analytics/answer/11583528>`_. It is currently unknown when the data will be made inaccessible.
+Data used Google's Universal Analytics. This service stopped processing data in `July 2023 <https://support.google.com/analytics/answer/11583528>`_. It is currently unknown when the data will be made inaccessible.

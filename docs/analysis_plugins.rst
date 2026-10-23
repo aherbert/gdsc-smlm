@@ -311,13 +311,13 @@ Traces localisations through time and collates them into traces using time and d
 Molecule Tracing
 ~~~~~~~~~~~~~~~~
 
-The fluorophores used in single molecule imaging can exist is several states. When in an active state it can absorb light and emit it at a different frequency (fluorescence). The active state can move into a dark state where it does not fluoresce. The dark state can move back to the active state. Eventually the molecule moves into a bleached state where it will no longer fluoresce (photo-bleached). The rates of the transitions between states are random as are the number of times this can occur. This means that it is possible for the same molecule to turn on and off several times causing blinking.
+The fluorophores used in single molecule imaging can exist in several states. When in an active state it can absorb light and emit it at a different frequency (fluorescence). The active state can move into a dark state where it does not fluoresce. The dark state can move back to the active state. Eventually the molecule moves into a bleached state where it will no longer fluoresce (photo-bleached). The rates of the transitions between states are random as are the number of times this can occur. This means that it is possible for the same molecule to turn on and off several times causing blinking.
 
 To prevent over-counting of molecules due to blinking it is possible to trace the localisations through time. Any localisation that occurs very close to another localisation from a different frame may be the same molecule. The distance between localisations can be spatial or temporal. Using two parameters it is possible to trace localisations using the following algorithm:
 
 Any spot that occurred within time threshold and distance threshold of a previous spot is grouped into the same trace as that previous spot. Note that existing traces are identified only by their last known position, not all previous positions. In the event of multiple candidate connections the algorithm assigns the closest distance connection first. The previous time frames can be searched using all time frames together, or iteratively using each time frame within the time threshold either in earliest or latest order. Matching uses a greedy nearest neighbour algorithm and may not achieve the maximum cardinality matching for the specified distance threshold.
 
-To remove the possibility for overlapping tracks the plugin allows the track to be excluded if a second localisation occurs within an exclusion threshold of the current track position. This ensures that the localisation assigned to the track is the only candidate within the exclusion distance and effectively removes jumps of particles that could overlap with another moving particle. Note however that the effect is to terminate the track and start a new one. This will result it over counting of molelcules and shortening of track lengths. Setting the exclusion distance to less than the distance threshold disables this feature.
+To remove the possibility for overlapping tracks the plugin allows the track to be excluded if a second localisation occurs within an exclusion threshold of the current track position. This ensures that the localisation assigned to the track is the only candidate within the exclusion distance and effectively removes jumps of particles that could overlap with another moving particle. Note however that the effect is to terminate the track and start a new one. This will result in over counting of molecules and shortening of track lengths. Setting the exclusion distance to less than the distance threshold disables this feature.
 
 When all frames are processed the resulting traces are assigned a spatial position equal to the centroid position of all the spots included in the trace.
 
@@ -380,7 +380,7 @@ The following parameters can be configured:
      - Sets the pulse window for traces (in frames). Set to zero to disable pulse analysis. See section :numref:`{number}: {name} <analysis_plugins:Pulse Analysis>`.
 
    * - Split pulses
-     - Enable this to split traces that span the a pulse boundary into separate traces. Use this setting if your imaging conditions use pulsed activation and you have imaged for long enough between pulses to be sure that all fluorophores have photo-bleached.
+     - Enable this to split traces that span a pulse boundary into separate traces. Use this setting if your imaging conditions use pulsed activation and you have imaged for long enough between pulses to be sure that all fluorophores have photo-bleached.
 
    * - Save derived datasets
      - Enable this to save derived datasets to memory such as the singles, multi, and centroids.
@@ -414,7 +414,7 @@ For example a pulse could be defined using ``Pulse Interval`` 30 and ``Pulse Win
 
 This option was added to allow analysis of images acquired using a pulsed activation laser. Consequently only localisations that could be traced back to a short period after the activation pulse are of interest. All other localisations are likely to be random background fluorescence events.
 
-The options should be disabled when using a continuous activation laser by setting to the parameters to zero.
+The options should be disabled when using a continuous activation laser by setting the parameters to zero.
 
 When using a pulse activation it is possible to photo-bleach all fluorophores that were activated by the pulse before the next pulse. This requires a long pulse interval. If you are confident that all molecules have bleached then it does not make sense for a trace to span pulse intervals. Use the ``Split pulses`` option to break apart any traces that span a pulse interval boundary into separate traces.
 
@@ -425,7 +425,7 @@ Optimisation
 ~~~~~~~~~~~~
 
 It is possible to produce an estimate of the optimum distance and time thresholds if the blinking rate of the fluorophore is known. Note that the blinking rate can be estimated from the data using the
-``Blink Estimator`` plugin (see :numref:`{number}: {name} <analysis_plugins:Blink Estimator>`). Alternatively it can be measured by manual inspection of purified single fluorophores sufficiently spread on a slide to avoid two molecules in the same location. Care must be taken to ensure that the imaging condition are the same as those used for
+``Blink Estimator`` plugin (see :numref:`{number}: {name} <analysis_plugins:Blink Estimator>`). Alternatively it can be measured by manual inspection of purified single fluorophores sufficiently spread on a slide to avoid two molecules in the same location. Care must be taken to ensure that the imaging conditions are the same as those used for
 *in vivo*
 experiments.
 
@@ -447,7 +447,7 @@ A score metric can be computed for a given tracing result:
 
     \mathit{Score}=\frac{\mathit{Traces}-\mathit{Expected\:molecules}}{\mathit{Expected\:molecules}}
 
-The closer the score to zero, the more likely that the tracing parameters are correct. In addition a negative score indicates over-clustering, a positive score is under-clustering. Consequently a plot of the distance and time thresholds verses the score will indicate the parameters that are best suited to achieving a zero score. The zero score can be more easily seen on such a plot by using the absolute value of the score.
+The closer the score to zero, the more likely that the tracing parameters are correct. In addition a negative score indicates over-clustering, a positive score is under-clustering. Consequently a plot of the distance and time thresholds versus the score will indicate the parameters that are best suited to achieving a zero score. The zero score can be more easily seen on such a plot by using the absolute value of the score.
 
 The following table describes the parameters used during the optimisation:
 
@@ -472,7 +472,7 @@ The following table describes the parameters used during the optimisation:
      - The maximum time threshold.
 
    * - Steps
-     - The number of steps to use between the minimum and maximum. Steps intervals are chosen using a geometric (not linear) scale to bias sampling towards lower threshold values.
+     - The number of steps to use between the minimum and maximum. Step intervals are chosen using a geometric (not linear) scale to bias sampling towards lower threshold values.
 
    * - Blinking rate
      - The average blinking rate of the fluorophore. Must be above 1 (otherwise no occurrences of repeat molecules are expected).
@@ -564,7 +564,7 @@ where:
 
 The prefix ``#`` character allows the clusters to be ignored as comments, for example when the cluster file is loaded as a results file.
 
-Note that the number of pulse (or bursts) is equal to the number of blinks + 1. It is equivalent to the blinking rate of the molecule.
+Note that the number of pulses (or bursts) is equal to the number of blinks + 1. It is equivalent to the blinking rate of the molecule.
 
 
 .. index:: ! Cluster Molecules
@@ -656,10 +656,10 @@ The following table lists the available clustering algorithms:
      - Hierarchical centroid-linkage clustering by joining the closest pair of any single particle and another single or cluster. Clusters are not joined and can only grow when particles are added.
 
    * - Pairwise
-     - Join the current set of closest pairs in a greedy algorithm. This method computes the pairwise distances and joins the closest pairs without updating the centroid of each cluster, and the distances, after every join (centroids and distances are updated after each pass over the data). This can lead to errors over true hierarchical centroid-linkage clustering where centroid are computed after each link step. For example if A joins B and C joins D in a single step but the new centroid of AB is closer to C than D.
+     - Join the current set of closest pairs in a greedy algorithm. This method computes the pairwise distances and joins the closest pairs without updating the centroid of each cluster, and the distances, after every join (centroids and distances are updated after each pass over the data). This can lead to errors over true hierarchical centroid-linkage clustering where centroids are computed after each link step. For example if A joins B and C joins D in a single step but the new centroid of AB is closer to C than D.
 
    * - Pairwise without neighbours
-     - A variant of ``PairwiseWithoutNeighbours`` is to join the closest pairs only if the number of neighbours for each is 1. In the event that no pairs has only a single neighbour then only the closest pair is joined.
+     - A variant of ``PairwiseWithoutNeighbours`` is to join the closest pairs only if the number of neighbours for each is 1. In the event that no pairs have only a single neighbour then only the closest pair is joined.
 
        This algorithm should return the same results as the ``Centroid-linkage`` algorithm (but with different run-time performance).
 
@@ -821,7 +821,7 @@ Tracing can be performed using different trace modes:
    * - Dynamic Multiple Target Tracing (DMTT)
      - Uses the dynamic multiple target tracing algorithm from the ``Dynamic Trace Molecules`` plugin  (see section :numref:`%s <analysis_plugins:Dynamic Trace Molecules>`).
 
-Note that diffusion analysis is based in consecutive frames. If tracing allows gaps then the initial discontinuous tracks are divided into continuous tracks before diffusion analysis.
+Note that diffusion analysis is based on consecutive frames. If tracing allows gaps then the initial discontinuous tracks are divided into continuous tracks before diffusion analysis.
 
 Analysis
 ~~~~~~~~
@@ -864,7 +864,7 @@ The plugin thus computes the average precision for the localisations included in
 Jump Distance Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The jump distance is how far a particle moves is given time period. Analysis of a population of jump distances can be used to determine if the population contains molecules diffusing with one or more diffusion coefficients [Weimann *et al*, 2013]. For two dimensional Brownian motion the probability that a particle starting at the origin will be encountered within a shell of radius *r* and a width *dr* at time :math:`\Delta t` is given by:
+The jump distance is how far a particle moves in a given time period. Analysis of a population of jump distances can be used to determine if the population contains molecules diffusing with one or more diffusion coefficients [Weimann *et al*, 2013]. For two dimensional Brownian motion the probability that a particle starting at the origin will be encountered within a shell of radius *r* and a width *dr* at time :math:`\Delta t` is given by:
 
 .. math::
 
@@ -890,7 +890,7 @@ integration holds for a mixed population of *m* species where each fraction (:ma
 
     P(r^{2},\Delta t)=1-\sum _{j=1}^{m}f_{j}e^{-{\frac{r^{2}}{4D_{j}\Delta t}}}
 
-Weimmann *et al* (2013) show that fitting of the cumulative histogram of jump distances can
+Weimann *et al* (2013) show that fitting of the cumulative histogram of jump distances can
 accurately reproduce the diffusion coefficient in single molecule simulations. The performance of the method uses an indicator :math:`\beta` expressed as the average distance a particle travels in the chosen time (*d*) divided by the average localisation precision (:math:`\sigma`):
 
 .. math::
@@ -926,7 +926,7 @@ The observed MSD can be converted to the true MSD by dividing by a correction fa
 
 Where *n* is the number of frames over which the jump distance is measured (i.e. end - start).
 
-When performing jump distance analysis it is not necessary to the correct each observed squared distance before fitting. Since the correction is a single scaling factor instead the computed diffusion coefficient can be adjusted by applying the correction factor after fitting. This allows the plugin to save the raw data to file and use for display on results plots.
+When performing jump distance analysis it is not necessary to correct each observed squared distance before fitting. Since the correction is a single scaling factor instead the computed diffusion coefficient can be adjusted by applying the correction factor after fitting. This allows the plugin to save the raw data to file and use for display on results plots.
 
 If the ``MSD correction`` option is selected the plugin will compute the corrected diffusion coefficient as:
 
@@ -938,10 +938,10 @@ If the ``MSD correction`` option is selected the plugin will compute the correct
 ..
   No index
 
-Fitting the Plot of MSD verses N Frames
+Fitting the Plot of MSD versus N Frames
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When fitting the linear plot of MSD verses the number of frames the correction factor can be included. The observed MSD is composed of the actual MSD multiplied by the correction factor before being adjusted for the precision error:
+When fitting the linear plot of MSD versus the number of frames the correction factor can be included. The observed MSD is composed of the actual MSD multiplied by the correction factor before being adjusted for the precision error:
 
 
 .. math::
@@ -1138,7 +1138,7 @@ When all the datasets have been traced the plugin presents a second dialog to co
      - Description
 
    * - Truncate traces
-     - Set to to true to only use the first N points specified by the ``Min trace length`` parameter.
+     - Set to true to only use the first N points specified by the ``Min trace length`` parameter.
 
    * - Internal distances
      - Compute the all-vs-all distances. Otherwise only compute distance from the origin.
@@ -1166,7 +1166,7 @@ When all the datasets have been traced the plugin presents a second dialog to co
      - Sets the significance level. This is used when testing the log-likelihood ratio during maximum likelihood fitting that an increase in model parameters improves the model.
 
    * - Fit restarts
-     - The number of restarts to attempt when fitting using the CMAES optimiser. A higher number produces and more robust fit solution since the best fit of all the restarts is selected.
+     - The number of restarts to attempt when fitting using the CMAES optimiser. A higher number produces a more robust fit solution since the best fit of all the restarts is selected.
 
        Note that the CMAES optimiser is only used when the default Powell optimiser fails to converge.
 
@@ -1213,17 +1213,17 @@ Output
 ..
   No index
 
-MSD verses Time
+MSD versus Time
 ^^^^^^^^^^^^^^^
 
-The plugin will plot the mean-squared distances against the time as show in :numref:`Figure %s <fig_trace_diffusion_msd_vs_time>`. The plot shows the best fit line. If the data is not linear then the diffusion of particles may be confined, for example by cellular structures when using *in vivo* image data. In this case the diffusion coefficient will be underestimated.
+The plugin will plot the mean-squared distances against the time as shown in :numref:`Figure %s <fig_trace_diffusion_msd_vs_time>`. The plot shows the best fit line. If the data is not linear then the diffusion of particles may be confined, for example by cellular structures when using *in vivo* image data. In this case the diffusion coefficient will be underestimated.
 
 .. _fig_trace_diffusion_msd_vs_time:
 .. figure:: images/trace_diffusion_msd_vs_time.png
     :align: center
     :figwidth: 80%
 
-    Plot of mean-squared distance verses time produced by the Trace Diffusion plugin.
+    Plot of mean-squared distance versus time produced by the Trace Diffusion plugin.
 
     The mean of the raw data is plotted with bars representing standard error of the mean. The best fit line is shown in magenta.
 
@@ -1319,7 +1319,7 @@ The plugin shows a summary table of the analysis results. This allows the plugin
      - True if tracks were truncated to the min length.
 
    * - Internal
-     - True if internal distance were used.
+     - True if internal distances were used.
 
    * - Fit length
      - The number of points fitted in the linear regression.
@@ -1368,7 +1368,7 @@ The plugin shows a summary table of the analysis results. This allows the plugin
    * - Fit Score
      - The score for the best model fit.
 
-       Note that the score is not comparable between the MLE or LSQ methods for fitting. It is also not comparable when the number of jumps is different. It can only be used to compare fitting the same jump distances with a different number of mobile species. This can can be controlled using the ``Minimum`` and ``Maximum N`` parameters.
+       Note that the score is not comparable between the MLE or LSQ methods for fitting. It is also not comparable when the number of jumps is different. It can only be used to compare fitting the same jump distances with a different number of mobile species. This can be controlled using the ``Minimum`` and ``Maximum N`` parameters.
 
    * - Total signal
      - The average total signal of each trace.
@@ -1450,7 +1450,7 @@ The probability of a particle starting at the origin and ending at location :mat
 
     P(r, \Delta t) = N \frac{r}{2D \Delta t} e^{-\frac{r^2}{4D \Delta t}}
 
-where :math:`N` is a normalisation constant with units of length. This is ommitted from subsequent expressions. To account for localisation error :math:`\sigma` the probability is adjusted:
+where :math:`N` is a normalisation constant with units of length. This is omitted from subsequent expressions. To account for localisation error :math:`\sigma` the probability is adjusted:
 
 .. math::
 
@@ -1485,7 +1485,7 @@ The steady-state model for a 3-state population with bound fraction :math:`F_1`,
 
 Likewise a steady-state model for a 4-state population adds an explicit coefficient :math:`F_3` and an additional diffusion coefficient :math:`D_4`. The fourth fraction is :math:`F_4 = 1 - F_1 - F_2 - F_3`.
 
-The probability model can be fit using the observed distances from tracks using different time delays, for example delays of 1 to 5 frames. The observations can be fit against a numerical integration of the probabilty model over suitable bin sizes using either maximum likelihood estimation (MLE) or least squares fitting.
+The probability model can be fit using the observed distances from tracks using different time delays, for example delays of 1 to 5 frames. The observations can be fit against a numerical integration of the probability model over suitable bin sizes using either maximum likelihood estimation (MLE) or least squares fitting.
 
 If the number of observed distances is low then fitting may be unreliable. A simulation can be performed to generate data for a set number of molecules. This can be used to determine how many tracks are required for a reliable fit to an expected population with specified diffusion coefficients.
 
@@ -1510,7 +1510,7 @@ The following parameters can be set:
      - The maximum time step :math:`\Delta t` to use for diffusion distances (in frames).
 
    * - Offsets
-     - The number of offsets to use for the origin of the track. Each offset will incease the count of diffusion distances but may lead to under representation of long distances at large time delays.
+     - The number of offsets to use for the origin of the track. Each offset will increase the count of diffusion distances but may lead to under representation of long distances at large time delays.
 
    * - Precision
      - The localisation precision. This can be fixed, or a fitted parameter.
@@ -1537,7 +1537,7 @@ The following parameters can be set:
      - The optimiser to use for fitting.
 
    * - Repeats
-     - The number of repeats for fitting. Each repeat uses a random initialisation for the parameters; multiple repeats can avoid choosing a local minima for the final result.
+     - The number of repeats for fitting. Each repeat uses a random initialisation for the parameters; multiple repeats can avoid choosing a local minimum for the final result.
 
    * - Min D
      - The minimum diffusion coefficient to use when initialising the mobile population. If the three-state model is used the slow fraction will initialise using the lower third of the range and the fast fraction the upper third of the range ([min D, max D]).
@@ -1572,7 +1572,7 @@ The analysis will record progress to the ``ImageJ`` log window:
 - The fit result for each repeat.
 - The result of the significance test comparing the two-state, three-state model and four-state models.
 
-Note that the choice of the three- or four-state model should also consider the biological rational for the fitted parameters. For example a population fraction may be too small; the diffusion coefficients for the two mobile populations are effectively the same; or a diffusion coefficient is too fast.
+Note that the choice of the three- or four-state model should also consider the biological rationale for the fitted parameters. For example a population fraction may be too small; the diffusion coefficients for the two mobile populations are effectively the same; or a diffusion coefficient is too fast.
 
 The observed PDF and the fit are plotted for each time delay (:numref:`Figure %s <fig_track_diffusion_analysis_pdf>`). This may optionally be separated into a plot for each time delay.
 
@@ -1650,12 +1650,12 @@ A summary table is shown containing the model parameters. The following columns 
      - The fit value, either the sum-of-squares or the log-likelihood.
 
    * - BIC
-     - The Bayesian Information Criterion. Used to compare fit results with a different number of states when all other fit settings are equal, e.g. 2-state verses 3-state model.
+     - The Bayesian Information Criterion. Used to compare fit results with a different number of states when all other fit settings are equal, e.g. 2-state versus 3-state model.
 
 Simulation
 ~~~~~~~~~~
 
-If the ``Shift`` key is held when executing the plugin then a simulation of molecule diffusion is performed. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. Molecules are randomly allocated a specified diffusion coefficient based of the fractions of each population. Three dimensional Brownian diffusion is simulated for a configured number of time steps. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it can start a new track. The simulated tracks are saved to memory. These are idealised tracks with perfect tracing of molecules (no trace distance). The localisations may be retraced using the :ref:`analysis_plugins:Trace Diffusion` plugin.
+If the ``Shift`` key is held when executing the plugin then a simulation of molecule diffusion is performed. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z, \Delta z]`. Molecules are randomly allocated a specified diffusion coefficient based on the fractions of each population. Three dimensional Brownian diffusion is simulated for a configured number of time steps. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it can start a new track. The simulated tracks are saved to memory. These are idealised tracks with perfect tracing of molecules (no trace distance). The localisations may be retraced using the :ref:`analysis_plugins:Trace Diffusion` plugin.
 
 The following parameters can be set:
 
@@ -1766,7 +1766,7 @@ An interactive dialog is shown that allows the traces to be split into fixed and
 
 If the ``Save datasets`` button is pressed the input dataset will be saved to memory as two datasets with the ``Fixed`` and ``Moving`` suffix based on the current diffusion coefficient threshold.
 
-Note: An ideal dual population of fixed and moving molecules will be a bimodel histogram of the diffusion coefficient, for example DNA binding proteins that are either diffusing freely or bound to the DNA. If this plugin is run on data which does not contain an obvious dual population of fixed and moving molecules then the histogram will be unimodal. If the population contains only moving molecules then the diffusion coefficients will have a mode far above zero. If the population contains only fixed molecules then the diffusion coefficients will be very low with a mode close to zero. A split of mixed populations of diffusing molecules with different diffusion coefficients is not supported.
+Note: An ideal dual population of fixed and moving molecules will be a bimodal histogram of the diffusion coefficient, for example DNA binding proteins that are either diffusing freely or bound to the DNA. If this plugin is run on data which does not contain an obvious dual population of fixed and moving molecules then the histogram will be unimodal. If the population contains only moving molecules then the diffusion coefficients will have a mode far above zero. If the population contains only fixed molecules then the diffusion coefficients will be very low with a mode close to zero. A split of mixed populations of diffusing molecules with different diffusion coefficients is not supported.
 
 
 .. index:: ! Track Population Analysis
@@ -1948,7 +1948,7 @@ Display of the jump angles for each component can be viewed using ``Analysis > J
 
 A value above zero indicates more forward jumps, and below zero is more backward jumps (confined diffusion).
 
-Fitting of the jump distances for each component can be performed using ``Analysis > Fit jump distances`` menu in the track data table. Continuous regions of the same component class with a length at least as long as the analysis window are used (these are identified as sub-tracks). All jump distances from 1 frame up to the window length are computed for the sub-track and a least squares fit of the entire dataset is performed. The MSD verses Time plot is shown for each component. Optionally this can be changed to divide the MSD by the time. Error bars show the standard error of the MSD. The number of sub-tracks, the number of full window jumps (N) and the degrees of freedom (DF) of the FBM model (number of jump distances minus 3) are shown in the plot label. The parameters for the Brownian and FBM models are shown in the label with the p-value indicating the likelihood of the FBM model result occurring by chance. Diffusion coefficients (D) are in |micro|\ m\ :sup:`2`/s and localisation precision (s) is in |micro|\ m.
+Fitting of the jump distances for each component can be performed using ``Analysis > Fit jump distances`` menu in the track data table. Continuous regions of the same component class with a length at least as long as the analysis window are used (these are identified as sub-tracks). All jump distances from 1 frame up to the window length are computed for the sub-track and a least squares fit of the entire dataset is performed. The MSD versus Time plot is shown for each component. Optionally this can be changed to divide the MSD by the time. Error bars show the standard error of the MSD. The number of sub-tracks, the number of full window jumps (N) and the degrees of freedom (DF) of the FBM model (number of jump distances minus 3) are shown in the plot label. The parameters for the Brownian and FBM models are shown in the label with the p-value indicating the likelihood of the FBM model result occurring by chance. Diffusion coefficients (D) are in |micro|\ m\ :sup:`2`/s and localisation precision (s) is in |micro|\ m.
 
 Note: The population model contains an average of the anomalous diffusion coefficients for each window in the population. These individual values are produced from fitting a low number of jumps, the windows may contain localisations in different component classes (e.g. a moving molecule transitioning to a fixed molecule) which invalidates the fitted model, and the FBM model may not be significant. In addition averages will use windows that overlap each other therefore using duplicate jumps. Thus average diffusion coefficients may not be comparable to the fit of the entire set of jump distances for each component.
 
@@ -1960,7 +1960,7 @@ The residence times for the length of time spent in each component can be displa
 
 The length of tracks can be measured using ``Analysis > Track length``. This will install a ``Track Length Tool`` in the ``ImageJ`` toolbar. When activated the tool can be used on the ``Track Image`` for the currently selected track. Click-and-drag to draw a line on the image. The tool will identify the nearest neighbours to the start and end points of the line. In ``Distance`` mode the closest neighbours will be chosen. In ``Time`` mode the closest start and end points in time are measured. The points and the distance are recorded in a track length result table.
 
-The ``Track Length Tool`` also allows click-and-drag on any of the profile plots. This will identify the start and end localistion of the selected part of the track using the time axis. The result is recorded in the track length table and on the ``Track Image``.
+The ``Track Length Tool`` also allows click-and-drag on any of the profile plots. This will identify the start and end localisation of the selected part of the track using the time axis. The result is recorded in the track length table and on the ``Track Image``.
 
 Lines can be removed from the ``Track Image`` by holding the ``Shift`` key to click on a line end point. This will remove it from the image and track length table. Options for the ``Track Length Tool`` can be set by double-clicking on the toolbar icon, or by using the ``Analysis > Track length`` menu option.
 
@@ -2038,7 +2038,7 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
      - The number of bootstrap repeats used to create a 95% confidence interval.
 
    * - Bootstrap seed
-     - Random seed for the bootstrap repeats (hexidecimal input).
+     - Random seed for the bootstrap repeats (hexadecimal input).
 
    * - Show QQ plot
      - Display a quantile-quantile plot of the model against the data distribution. The quantile for the model is taken using the cumulative probability of the data as (k - 1/3) / (n + 1/3).
@@ -2123,7 +2123,7 @@ The following parameters can be set:
      - Description
 
    * - Seed
-     - Random seed for the simulation (hexidecimal input).
+     - Random seed for the simulation (hexadecimal input).
 
    * - Samples
      - The number of samples.
@@ -2153,7 +2153,7 @@ The following parameters can be set:
      - The number of bootstrap repeats used to create a 95% confidence interval.
 
    * - Bootstrap seed
-     - Random seed for the bootstrap repeats (hexidecimal input).
+     - Random seed for the bootstrap repeats (hexadecimal input).
 
    * - Show QQ plot
      - Display a quantile-quantile plot of the model against the data distribution. The quantile for the model is taken using the cumulative probability of the data as (k - 1/3) / (n + 1/3).
@@ -2169,7 +2169,7 @@ The simulation allows experimenting with the exposure time and number of samples
 Compare Jump Distances
 ----------------------
 
-The ``Compare Jump Distances`` plugin compares the empirical cumulative probability distribution of the jump distances between multiple datasets. Jumps distances for each traced dataset are extracted for the configured frame gap. The distance can be corrected using the localisation precision; values below zero are set to zero.
+The ``Compare Jump Distances`` plugin compares the empirical cumulative probability distribution of the jump distances between multiple datasets. Jump distances for each traced dataset are extracted for the configured frame gap. The distance can be corrected using the localisation precision; values below zero are set to zero.
 
 .. math::
 
@@ -2204,7 +2204,7 @@ When the plugin runs the following parameters can be set:
      - If ``true`` then a QQ plot is shown when only two datasets are selected.
 
    * - Max N
-     - Limit the number of distances used to ``N`` with a random sample. As the sample size reduces the significance of the KS test between distributions will reduce. Used to investigate the affect of sample size on the test.
+     - Limit the number of distances used to ``N`` with a random sample. As the sample size reduces the significance of the KS test between distributions will reduce. Used to investigate the effect of sample size on the test.
 
    * - Seed
      - The seed for random sampling.
@@ -2221,7 +2221,7 @@ Runs the Ordering Points To Identify the Clustering Structure (`OPTICS <https://
 
 Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the `radius`. If the neighbourhood satisfies `MinPoints` then a new cluster is created. The neighbours are added to a sorted queue to be processed. Processing occurs in order of their reachability-distance. During processing the reachability distance of points already in the queue may change (reduce in size) and the queue is reordered. When no more points are reachable from the cluster then a new unprocessed point is chosen.
 
-The OPTICS algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptomatically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
+The OPTICS algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptotically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
 
 FastOPTICS is a variant that is not parameterised using a neighbour radius. The algorithm is based on the concept that a pair of points close in N-dimensional space are also close when the space is projected to 2D. The algorithm computes a number of projections of the data onto a line. This line can be randomly orientated or orientated using equi-distributed vectors around a circle. Each projection provides a linear order of points along the line using a distance from the origin. This set of points is recursively split using random divisions until subsets are all below `MinPoints` in size. The points in a subset are allocated as neighbours of a chosen point in the subset. The point is chosen either randomly, as the median of the subset (using the distance from the origin) or all points are chosen. After a number of random projections each point has an allocated neighbourhood of points. The rest of the algorithm functions the same as OPTICS but with pre-computed neighbours and no requirement for a `radius`.
 
@@ -2235,7 +2235,7 @@ The ``OPTICS`` plugin has a preview mode that allows the parameters to be change
 Parameters
 ~~~~~~~~~~
 
-The following options are available (extra options are activated by holding the ``Shift`` when running the plugin):
+The following options are available (extra options are activated by holding the ``Shift`` key when running the plugin):
 
 .. list-table::
    :widths: 20 80
@@ -2286,7 +2286,7 @@ The following options are available (extra options are activated by holding the 
        - ``Cluster Depth``: Use the cluster depth.
        - ``Cluster Order``: Use the cluster order.
        - ``Value``: Use the localisation intensity.
-       - ``Count``: Use the a count of 1 for each localisation.
+       - ``Count``: Use a count of 1 for each localisation.
        - ``LoOP``: Use the cluster Local Outlier Probability.
        - ``None``: Do not render localisations on the image.
 
@@ -2300,14 +2300,14 @@ The following options are available (extra options are activated by holding the 
        The concave hull can use the K-nearest neighbour method of Moreira and Santos (2007), or the digging algorithm of Park and Oh (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
 
    * - Spanning tree
-     - Specify how links between localisations should be outlined on the image. Links represent the connections made between points as they were included in the cluster following the imposed OPTICS order. The links create a spanning tree and can be coloured by coloured by cluster ID; depth in the clustering hierarchy; OPTICS order; or the LoOP (local outlier probability) score.
+     - Specify how links between localisations should be outlined on the image. Links represent the connections made between points as they were included in the cluster following the imposed OPTICS order. The links create a spanning tree and can be coloured by cluster ID; depth in the clustering hierarchy; OPTICS order; or the LoOP (local outlier probability) score.
 
    * - Plot mode
      - Configure the options for the reachability profile plot.
 
        The profile represents the reachability of each localisation in the order imposed by the OPTICS algorithm. Clusters represent a span on the profile. The plot can be drawn with just the profile or with lines underneath the profile representing cluster spans. Hierarchical clusters are shown at their corresponding depth level. Clusters are coloured using a look-up table that attempts to achieve maximum distinction between different colours; the colours themselves are not significant.
 
-       The reachability can be highlighted for all points in a cluster or each cluster can be drawn using either cluster ID, depth or order. In the case of multiple clusters at the same point the colour of the deepest cluster takes precedent.
+       The reachability can be highlighted for all points in a cluster or each cluster can be drawn using either cluster ID, depth or order. In the case of multiple clusters at the same point the colour of the deepest cluster takes precedence.
 
    * - Preview
      - Enables the live preview of results. Settings changes will result in live update of the displayed results.
@@ -2319,7 +2319,7 @@ The following options are available (extra options are activated by holding the 
        - ``Table show selection``: If **true** selection events will select the cluster in the ``Clusters`` results table. Only the first cluster selected will be highlighted (as the table does not support discontinuous selections).
        - ``Image create selection``: If **true** mouse clicks in the image inside a cluster generate selection events. The smallest cluster by area is selected allowing clicks of smaller clusters inside larger clusters.
        - ``Image show selection``: If **true** selection events will select the cluster in the image. The image view is positioned with the cluster in the centre.
-       - ``Plot create selection``: If **true** mouse selection drags (using the rectangle tool) on the reachability plot will generate selection events. The cluster that most closely overlaps the horizontal range from the start to the end of the drag are selected.
+       - ``Plot create selection``: If **true** mouse selection drags (using the rectangle tool) on the reachability plot will generate selection events. The cluster that most closely overlaps the horizontal range from the start to the end of the drag is selected.
        - ``Plot show selection``: If **true** selection events will select the cluster in the reachability plot. The plot is zoomed to the start and end of the cluster range with the full profile displayed.
 
        Note: It is possible that the live preview can stop responding to click events, e.g. on the localisation image or cluster table. In this case simply disable and re-enable the preview.
@@ -2398,7 +2398,7 @@ This plugin is a modification of the ``OPTICS`` plugin. The DBSCAN algorithm pre
 
 Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the `radius`. If the neighbourhood satisfies `MinPoints` (defined as a core point) then a new cluster is created. The neighbours that are reachable from a core point are added to the cluster and put in a queue to be processed. Processing occurs in arbitrary order. When no more points are reachable from core points in the cluster then a new unprocessed point is chosen.
 
-The DBSCAN algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptomatically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
+The DBSCAN algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptotically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
 
 If points can be reached within the clustering distance from any core point then they are included in the cluster. Clusters are not hierarchical. The algorithm is faster than OPTICS due to the arbitrary processing order. OPTICS is approximately 1.6x slower.
 
@@ -2408,7 +2408,7 @@ If points can be reached within the clustering distance from any core point then
 Parameter Estimation
 ~~~~~~~~~~~~~~~~~~~~
 
-The ``MinPoints`` parameter can be set to approximately 2 times the number of dimensions. For 2D localisation data this is 4. It may be necessary to increase this number for large datasets, noisy data or data that contains a large number of duplicates. The later scenario is common with localisation data where multiple frames may contain the same fluorophore.
+The ``MinPoints`` parameter can be set to approximately 2 times the number of dimensions. For 2D localisation data this is 4. It may be necessary to increase this number for large datasets, noisy data or data that contains a large number of duplicates. The latter scenario is common with localisation data where multiple frames may contain the same fluorophore.
 
 The ``Clustering distance`` parameter can be chosen by using a k-nearest neighbour (KNN) distance graph, plotting the distance to the ``k = MinPoints - 1`` nearest neighbour in descending order (:numref:`Figure %s <fig_dbscan_knn_distance_example>`). If too small then a large amount of the data will not be clustered. Too large and the clusters will start to merge. A ``Noise`` parameter can be used to indicate a distance threshold by excluding a fraction of the KNN graph, ordered from the largest KNN distance.
 
@@ -2458,7 +2458,7 @@ The following options are available:
      - The distance used to define the local neighbourhood of a point.
 
    * - Core points
-     - Only include core points in clusters. These are points with ``MinPoints`` neighbours within the ``Clustering distance``. Point that are reachable from a core point are excluded from the cluster.
+     - Only include core points in clusters. These are points with ``MinPoints`` neighbours within the ``Clustering distance``. Points that are reachable from a core point are excluded from the cluster.
 
        This option ensures the output clusters are independent of the processing order; otherwise non-core points may be allocated to different clusters depending on processing order.
 
@@ -2475,7 +2475,7 @@ The following options are available:
 
        - ``Cluster Id``: Use the cluster ID.
        - ``Value``: Use the localisation intensity.
-       - ``Count``: Use the a count of 1 for each localisation.
+       - ``Count``: Use a count of 1 for each localisation.
        - ``LoOP``: Use the cluster Local Outlier Probability.
        - ``None``: Do not render localisations on the image.
 
@@ -2776,14 +2776,14 @@ Ripley's L-plot
 
 If the ``Compute L plot`` option is selected then the plugin will compute the L-score for a range of radii. A dialog is presented allowing the user to select the ``L-plot score`` function, ``Min radius``, ``Max Radius`` and the ``Increment`` used to move between them. A plot is produced showing the score for each radius. The :math:`(L_{i}(r)-r)` score should be equal to zero for homogeneous data. If further normalised by :math:`r` the score is comparable across radii.
 
-If the ``Confidence intervals`` parameter is enabled the plugin will create 99 random simulations of the given sample size in the same sample area. The score is computed for each simulation and the upper (blue) and lower (red) bounds of the confidence intervals are shown on the chart. If the actual data values lies outside the confidence intervals then it is a non-random distribution with 99% confidence. Note that the simulations are computed using multiple threads; the number of threads is set in ``Edit > options > Memory & Threads...``.
+If the ``Confidence intervals`` parameter is enabled the plugin will create 99 random simulations of the given sample size in the same sample area. The score is computed for each simulation and the upper (blue) and lower (red) bounds of the confidence intervals are shown on the chart. If the actual data values lie outside the confidence intervals then it is a non-random distribution with 99% confidence. Note that the simulations are computed using multiple threads; the number of threads is set in ``Edit > Options > Memory & Threads...``.
 
 The ``L-plot use square approximation`` option allows use of a look-up table of neighbour counts. This computes each score in :math:`O(n)` time, where :math:`n` is the number of localisations, and is suitable for large datasets and/or radii. The option has a large memory overhead. Reducing the number of threads can allow the plugin to run without raising an out-of-memory error.
 
 An example of Ripley's L-plot is shown in :numref:`Table %s <table_ripleys_l_plot>`. The figure shows the L-plot for simulated localisations of fluorophores. The raw data show significant deviation from a random distribution (A). Tracing of the localisations with a suitable time and distance threshold collates the individual localisations into single molecule traces. These do not show any deviation from a random distribution (B).
 
 .. _table_ripleys_l_plot:
-.. list-table:: Ripley's L-plot shown for two datasets with 99% confidences intervals, upper limit (blue) and lower limit (red). (A) Data showing a significantly non-random distribution. Data was generated by simulating randomly placed fixed position fluorophores with average t-on times of 3 frames. Localisations are expected to be non-random. (B) The same data following tracing with t=10 frames, d=0.3 pixels. Localisations have been collated into single molecules and the traced data do not show deviation from a random distribution.
+.. list-table:: Ripley's L-plot shown for two datasets with 99% confidence intervals, upper limit (blue) and lower limit (red). (A) Data showing a significantly non-random distribution. Data was generated by simulating randomly placed fixed position fluorophores with average t-on times of 3 frames. Localisations are expected to be non-random. (B) The same data following tracing with t=10 frames, d=0.3 pixels. Localisations have been collated into single molecules and the traced data do not show deviation from a random distribution.
    :align: center
 
    * - (A) Raw data
@@ -2813,7 +2813,7 @@ The plugin performs tracing or clustering on the localisations using a specified
     Dark-time Analysis dialog
 
 
-:numref:`Figure %s <fig_dark_time_analysis_dialog>` shows the plugin dialag. The plugin supports the following parameters:
+:numref:`Figure %s <fig_dark_time_analysis_dialog>` shows the plugin dialog. The plugin supports the following parameters:
 
 .. list-table::
     :widths: 20 80
@@ -2856,7 +2856,7 @@ Estimate the blinking rate of fluorophores in a results set.
 
 The
 ``Blink Estimator``
-uses the method of Annibale *et al* (2011) to estimate the blinking rate of a fluorophore. The method is based on performing trace analysis of the localisations using different time thresholds. The distance threshold used for the trace analysis is set using a factor of the average precision of all the localisations in the sample. When the time threshold is 1 then the number of traces will be equal to the total number of flourescent bursts in the sample. As the time threshold is increased the number of traces should asymptote at the number of molecules in the sample, assuming that no missed localisation counts occur. The curve of traces against time threshold can be fitted using the following formula:
+uses the method of Annibale *et al* (2011) to estimate the blinking rate of a fluorophore. The method is based on performing trace analysis of the localisations using different time thresholds. The distance threshold used for the trace analysis is set using a factor of the average precision of all the localisations in the sample. When the time threshold is 1 then the number of traces will be equal to the total number of fluorescent bursts in the sample. As the time threshold is increased the number of traces should asymptote at the number of molecules in the sample, assuming that no missed localisation counts occur. The curve of traces against time threshold can be fitted using the following formula:
 
 .. math::
 
@@ -2905,7 +2905,7 @@ The following parameters can be set within the plugin to control the output:
       - The number of points to fit on the :math:`N(t_d)` curve. Must be 4 or more.
 
     * - Range of fitted points
-      - The maximum number of additional points to fit for variation analysis. Fit are computed in the interval ``[Fitted Points, Fitted Points + Range]``. Set to zero to show the :math:`N(t_d)` curve.
+      - The maximum number of additional points to fit for variation analysis. Fits are computed in the interval ``[Fitted Points, Fitted Points + Range]``. Set to zero to show the :math:`N(t_d)` curve.
 
     * - Time at lower bound
       - When constructing the dark time curve the number of frames used for tracing is converted to time in milliseconds. Set to **true** to output time as nFrames × msPerFrame. Set to **false** to output time as (nFrames+1) × msPerFrame. This setting will shift the time axis of the curve and will produce different curve fitting results. Simulations using the ``Create Data`` plugin suggest that this should be **true**. A value of **false** is stating that localisations in consecutive frames may have blinked into a dark state of less than 1 frame.
@@ -2925,11 +2925,11 @@ The following parameters can be set within the plugin to control the output:
 Time Correlated (TC-PALM) Analysis
 ----------------------------------
 
-Performs time correlated photo-activated light microscopy (TC-PALM) analysis (see Cisse *et al*, 2013). This plugin accepts a results set from memory. The plugin will use any assigned IDs to group localisations for analysis. All localisations with an ID of zero are assigned an ID. The support for grouped localisations allows the plugin to analyse groups of localisations together: an entire group can be selected even if the region of interest only contains some of the localisations; and groups can be selected and displayed together. It is suggested that the input data is a results set that has been clustered using a distance threshold that collects data within the range of interest.
+Performs time correlated photo-activated localisation microscopy (TC-PALM) analysis (see Cisse *et al*, 2013). This plugin accepts a results set from memory. The plugin will use any assigned IDs to group localisations for analysis. All localisations with an ID of zero are assigned an ID. The support for grouped localisations allows the plugin to analyse groups of localisations together: an entire group can be selected even if the region of interest only contains some of the localisations; and groups can be selected and displayed together. It is suggested that the input data is a results set that has been clustered using a distance threshold that collects data within the range of interest.
 
 The analysis uses a cumulative histogram of the number of localisations against time. The profile of the activation against time chart can be used to identify clustering that occurs continuously over the imaging lifetime or during a short interval of the entire imaging lifetime (time correlated activation). If the experiment had constant activation of fluorophores over the lifetime then the chart will show an initial steep gradient that gradually falls off as the fluorophores photo-bleach. If there is selective clustering of fluorophores, for example in response to a stage of the cell life cycle, these bursts of activations will appear as a steep gradient on the activation chart.
 
-Display of the activations against time chart for an entire set of localisations will contain too much information and the bursts may not be visible over the noise of constant activation, or the simultaneous bursts in multiple locations in the image. The plugin thus provides a super-resolution image for an overview of the localisation data. A region of interest (ROI) can be marked on the image and the plugin will create the activations verses time plot.
+Display of the activations against time chart for an entire set of localisations will contain too much information and the bursts may not be visible over the noise of constant activation, or the simultaneous bursts in multiple locations in the image. The plugin thus provides a super-resolution image for an overview of the localisation data. A region of interest (ROI) can be marked on the image and the plugin will create the activations versus time plot.
 
 When the plugin is executed the dataset and image rendering options must be specified.
 
@@ -2948,7 +2948,7 @@ When the plugin is executed the dataset and image rendering options must be spec
 
         The options are the same as those available in the ``Peak Fit`` plugin (see :numref:`{number}: {name} <fitting_plugins:Results Parameters>`).
 
-When the super-resolution image has been constructed a region of interest (ROI) is used to mark an area on the super-resolution image for analysis. The ROI may be created using any area ROI tool for example rectangle, oval, polygon or freehand. All groups that fit entirely within the region are analysed. Alternatively all groups that have at least one localisation within the region are analysed. To assist in analysing the activations verses time chart the range of localisations can be bracketed using a minimum and maximum frame. This allows zooming in on a part of the imaging lifetime. A dialog is shown to control the TC-PALM analysis.
+When the super-resolution image has been constructed a region of interest (ROI) is used to mark an area on the super-resolution image for analysis. The ROI may be created using any area ROI tool for example rectangle, oval, polygon or freehand. All groups that fit entirely within the region are analysed. Alternatively all groups that have at least one localisation within the region are analysed. To assist in analysing the activations versus time chart the range of localisations can be bracketed using a minimum and maximum frame. This allows zooming in on a part of the imaging lifetime. A dialog is shown to control the TC-PALM analysis.
 
 .. list-table::
     :widths: 20 80
@@ -2970,7 +2970,7 @@ When the super-resolution image has been constructed a region of interest (ROI) 
       - Set to **true** to use the full time length of the input data on the time axis of the plots. If ``false`` the plot will zoom to the range of the current clusters.
 
     * - Time in seconds
-      - Set to **true** to plot seconds on the activations verses time plot. The default is frames.
+      - Set to **true** to plot seconds on the activations versus time plot. The default is frames.
 
     * - Dark time tolerance
       - The maximum dark time allowed between activations for connection into a continuous burst.
@@ -2985,29 +2985,29 @@ The ``TC-PALM Analysis`` plugin is interactive. The dialog controlling selection
 
 When the ROI or other parameters controlling the selection are updated the current groups will be identified. The square bounds from the ROI are used to construct a loop view of the region. Any data that is outside the ROI but was included using the ``ROI intersects`` parameter will not be visible. The settings for the loop view can be adjusted using the ``Loop settings`` button. The default loop view has a fixed size and thus smaller ROIs are magnified appropriately to allow an overview of the selected region. This can be changed to use a fixed scale or a fixed output pixel size. The data from the current groups is then displayed in plots and a results table.
 
-The current groups are shown on an activations verses time plot (see :numref:`Figure %s <fig_tc_palm_activations_vs_time>`). Each frame where one or more activations occurred is added as an individual line. High counts and occurrences close in time are easily visible on this plot.
+The current groups are shown on an activations versus time plot (see :numref:`Figure %s <fig_tc_palm_activations_vs_time>`). Each frame where one or more activations occurred is added as an individual line. High counts and occurrences close in time are easily visible on this plot.
 
 .. _fig_tc_palm_activations_vs_time:
 .. figure:: images/tc_palm_activations_vs_time.jpg
     :align: center
     :figwidth: 80%
 
-    TC-PALM activations verses time plot. The number of activations for each frame is shown as a separate line on the plot.
+    TC-PALM activations versus time plot. The number of activations for each frame is shown as a separate line on the plot.
 
-The activations are aggregated into a total activations verses time plot (see :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`). Note that multiple activations may occur at the same time. This is named a clash and the total number of clashes are displayed as a label on the plot. The number of clashes provides an indication of whether time correlated clustering is due to single or multiple fluorophores.
+The activations are aggregated into a total activations versus time plot (see :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`). Note that multiple activations may occur at the same time. This is named a clash and the total number of clashes are displayed as a label on the plot. The number of clashes provides an indication of whether time correlated clustering is due to single or multiple fluorophores.
 
 .. _fig_tc_palm_total_activations_vs_time:
 .. figure:: images/tc_palm_total_activations_vs_time.jpg
     :align: center
     :figwidth: 80%
 
-    TC-PALM total activations verses time plot. Highlighted activation bursts are identified using continuous regions of increasing activations within an allowed dark time tolerance of 40 frames and minimum cluster size of 20.
+    TC-PALM total activations versus time plot. Highlighted activation bursts are identified using continuous regions of increasing activations within an allowed dark time tolerance of 40 frames and minimum cluster size of 20.
 
 The total activations plot is analysed to identify bursts of activations that occur within a continuous time period. A dark time tolerance allows periods of no activations within the same burst. The analysis identifies bursts of activations that are connected within the dark time tolerance and above the minimum cluster size. All bursts above the minimum cluster size are shown in a clusters table and highlighted on the total activations plot. The localisations from these bursts are drawn on the super-resolution images using a point ROI overlay. This can be used to determine if localisations that are close in time are also close in space. This is a time correlated clustering event. The ``Dark time tolerance`` and ``Min cluster size`` parameters can be adjusted and the results updated in real-time. Selecting a cluster in the clusters table will draw the hull of the cluster on the loop image using an ROI.
 
 By default all the localisation groups within the ROI are analysed. These groups are recorded in a table. The table records the average coordinates of the group, the size, the start frame and the duration. The default table sort order uses the start frame of the group. The sort can be changed by clicking on a table header to sort by that column.
 
-The localisation groups table can be used to select a subset of the current data for analysis. Lines can be selected using a single-click. Use the shift key to select multiple lines with a single mouse click starting from a previously selected line. Use the control key to select lines to add or remove from the selection allowing selection of discontinuous ranges. The selected data are sorted by start time and joined into bursts if the end of one group is within a dark time tolerance to the start of the next. Each burst is highlighted on the total activations verses time plot. Note that for convenience the ``Min cluster size`` parameter is ignored allowing the manually selected data to always be displayed on the total activations plot. All the localisations from the selected data are overlaid on the super-resolution images. This manually selected data replaces the results from the automated analysis. The automated analysis results can be recreated by adjusting one of the parameters that affects the input data or the analysis.
+The localisation groups table can be used to select a subset of the current data for analysis. Lines can be selected using a single-click. Use the shift key to select multiple lines with a single mouse click starting from a previously selected line. Use the control key to select lines to add or remove from the selection allowing selection of discontinuous ranges. The selected data are sorted by start time and joined into bursts if the end of one group is within a dark time tolerance to the start of the next. Each burst is highlighted on the total activations versus time plot. Note that for convenience the ``Min cluster size`` parameter is ignored allowing the manually selected data to always be displayed on the total activations plot. All the localisations from the selected data are overlaid on the super-resolution images. This manually selected data replaces the results from the automated analysis. The automated analysis results can be recreated by adjusting one of the parameters that affects the input data or the analysis.
 
 Batch ROI Analysis
 ~~~~~~~~~~~~~~~~~~
@@ -3099,7 +3099,7 @@ The following filters are available:
        Uses the same SNR and width parameters from the ``SNR Filter`` iterating over them as before. The SNR is used to set the lower SNR limit. Contains additional parameters to set the gap to the upper limit. The user can configure the min and max gap and the increment to move between them.
 
    * - Hysteresis Precision filter
-     - Mark all results with a precision below a lower level as valid. Remove all results with a precision above an upper level. Any result with a precision between the upper and lower levels is a candidate result. Candidates are retained if they can be traced traced directly or via other candidates to a valid result.
+     - Mark all results with a precision below a lower level as valid. Remove all results with a precision above an upper level. Any result with a precision between the upper and lower levels is a candidate result. Candidates are retained if they can be traced directly or via other candidates to a valid result.
 
        Uses the same precision parameters from the ``Precision Filter`` to set the lower limit. Contains additional parameters to set the gap to the upper limit. The user can configure the min and max gap along with the increment to move between them.
 
@@ -3132,7 +3132,7 @@ After the filters have been configured there are additional parameters controlli
      - Show a table of the analysis results.
 
    * - Plot top n
-     - Produce a plot of the top N filter sets showing their Jaccard score verses a named parameter value. If a filter set contains filters with different named parameters then the filters are plotted in sequential order.
+     - Produce a plot of the top N filter sets showing their Jaccard score versus a named parameter value. If a filter set contains filters with different named parameters then the filters are plotted in sequential order.
 
    * - Calculate sensitivity
      - Calculate how sensitive the scoring metric is to a change in each filter parameter. Each filter parameter is adjusted by the delta and the gradient computed at the point of the optimum filter score.
@@ -3168,7 +3168,7 @@ If a value for ``Plot top n`` is provided the plugin produces a chart of the Jac
     :align: center
     :figwidth: 80%
 
-    Plot of the Jaccard score verses lower precision limit for the Hysteresis Precision filter.
+    Plot of the Jaccard score versus lower precision limit for the Hysteresis Precision filter.
 
     The upper limit for hysteresis thresholding is 20nm higher than the lower limit (+20).
 
@@ -3181,7 +3181,7 @@ Sensitivity Analysis
 
 If ``Calculate sensitivity`` is selected the plugin produces a table of the sensitivity of each parameter for each unique filter (identified by name). The sensitivity is calculated for the filter parameters that produce the highest Jaccard score. The sensitivity is the partial gradient of the score with respect to each parameter.
 
-If the sensitivity is low then the filter will perform well using a range of parameter values. If the sensitivity is high then the filter performance will rapidly fall-off as the optimum parameter value is changed. Ideally a good filter will have good performance metrics and low sensitivity across all the parameters. It may be better to choose a fil|ter that does not have the highest Jaccard score but has the lowest sensitivity. This filter should perform better on a range of input data.
+If the sensitivity is low then the filter will perform well using a range of parameter values. If the sensitivity is high then the filter performance will rapidly fall-off as the optimum parameter value is changed. Ideally a good filter will have good performance metrics and low sensitivity across all the parameters. It may be better to choose a filter that does not have the highest Jaccard score but has the lowest sensitivity. This filter should perform better on a range of input data.
 
 The sensitivity is calculated by altering each parameter by a relative amount. The delta parameter controls the update magnitude. Note that integer parameters will be correctly adjusted to the next integer. The score is recomputed using the new parameter value following a positive or negative change. The average rate of change of the score is then computed. The sensitivity is output for the Jaccard, Precision and Recall scores. Two scores are output: (a) the raw average change, titled ``Sensitivity (delta)``; or (b) the average change divided by the change in the parameter value, titled ``Sensitivity (unit)``.
 
@@ -3328,9 +3328,9 @@ The following parameters can be set:
 Profiling a Spot Region
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The first action is to select a spot on the input image using a rectangular ROI. It is difficult to see spots on the input image which has many frames and very few fluorescent bursts. Consequently it is recommended that an overview image is created to allow the spots to be identified. This could be a maximum or average intensity projection of the input image. However it is best to identify spots using the ``Find Peaks`` plugin and then reconstruct an image using the fitted PSFs. If the image scale is set to 1 then the reconstructed image is the same size as the input image. This allows spots to be outlined on the PSF image and then the ROI reapplied to the original image. An example of this is show in :numref:`Figure %s <fig_spot_analysis_example_input_image>`.
+The first action is to select a spot on the input image using a rectangular ROI. It is difficult to see spots on the input image which has many frames and very few fluorescent bursts. Consequently it is recommended that an overview image is created to allow the spots to be identified. This could be a maximum or average intensity projection of the input image. However it is best to identify spots using the ``Find Peaks`` plugin and then reconstruct an image using the fitted PSFs. If the image scale is set to 1 then the reconstructed image is the same size as the input image. This allows spots to be outlined on the PSF image and then the ROI reapplied to the original image. An example of this is shown in :numref:`Figure %s <fig_spot_analysis_example_input_image>`.
 
-When a suitable spot has been outlined the region can be analysed using the ``Profile`` button. The analysis extracts the region into a new image named ``Spot Analysis Raw spot``. This is magnified to allow easier viewing. The same region is subjected to a Gaussian blur and extracted to a new image name ``Spot Analysis Blur spot``. The blurred image can make it easier to see peaks in very noisy images. In addition an average intensity projection is created for the spot region and named ``Spot Analysis Average spot``. The average image can indicate if the spot is fixed and central, moves around the image or overlaps with other signal. An example of the raw, blur and average images are shown in :numref:`Figure %s <fig_spot_analysis_spot_images>`. The average spot image shows a blurred spot biased to the upper-right corner but the signal is distinct so the spot is suitable for analysis. The ``Find Peaks`` fitting algorithm is applied to the current frame of the raw and blurred spot (using the configured PSF width). If a spot is detected within 50% of the distance to the centre of the frame it is marked on the image using an cross overlay.
+When a suitable spot has been outlined the region can be analysed using the ``Profile`` button. The analysis extracts the region into a new image named ``Spot Analysis Raw spot``. This is magnified to allow easier viewing. The same region is subjected to a Gaussian blur and extracted to a new image named ``Spot Analysis Blur spot``. The blurred image can make it easier to see peaks in very noisy images. In addition an average intensity projection is created for the spot region and named ``Spot Analysis Average spot``. The average image can indicate if the spot is fixed and central, moves around the image or overlaps with other signal. An example of the raw, blur and average images is shown in :numref:`Figure %s <fig_spot_analysis_spot_images>`. The average spot image shows a blurred spot biased to the upper-right corner but the signal is distinct so the spot is suitable for analysis. The ``Find Peaks`` fitting algorithm is applied to the current frame of the raw and blurred spot (using the configured PSF width). If a spot is detected within 50% of the distance to the centre of the frame it is marked on the image using a cross overlay.
 
 .. _fig_spot_analysis_spot_images:
 .. figure:: images/spot_analysis_spot_images.png
@@ -3358,7 +3358,7 @@ The plugin then analyses the spot region and creates profile plots of the mean a
 Adding On-Frames
 ^^^^^^^^^^^^^^^^
 
-Any fluorophore on-frame should have a higher mean that the frames around it. These can be easily viewed as spikes on the plot profile and the relevant frames in the spot image inspected.
+Any fluorophore on-frame should have a higher mean than the frames around it. These can be easily viewed as spikes on the plot profile and the relevant frames in the spot image inspected.
 
 When the spot image is moved to a new frame the plugin will update the signal and SNR figures for the frame. The signal is calculated as the sum of the raw spot minus the LOESS smoothing fit of the mean profile, i.e. the background. The noise is calculated using the LOESS smoothing fit of the standard deviation profile.
 
@@ -3384,7 +3384,7 @@ When all the on-frames have been marked the fluorophore sequence must be saved u
 
     Spot Analysis summary window
 
-The ``Save`` button can only be pressed once to prevent duplicates in the window. If the sequence list is updated by adding or removing on-frames then the listed can be re-saved. Note that the old sequence will remain in the summary window and the new sequence will have a new ID. The old sequence should be removed using the summary tables ``Edit > Clear`` command to remove selected lines.
+The ``Save`` button can only be pressed once to prevent duplicates in the window. If the sequence list is updated by adding or removing on-frames then the list can be re-saved. Note that the old sequence will remain in the summary window and the new sequence will have a new ID. The old sequence should be removed using the summary tables ``Edit > Clear`` command to remove selected lines.
 
 
 .. index:: Spot Analysis Workflow
@@ -3472,7 +3472,7 @@ Crosstalk Activation Analysis
 
 Perform crosstalk activation analysis of photo-switchable probes under pulsed light activation. This plugin is based on the methods described in Bates `et al` (2007) and Bates `et al` (2012).
 
-Activation analysis is based on the activation of a fluorophore from the flourescence transmission of a closely coupled second chromophore via fluorescence resonance energy transfer (more commonly referred to by the acronym `FRET <https://en.wikipedia.org/wiki/F%C3%B6rster_resonance_energy_transfer>`_). The second chromophore will be activated by a pulse of light and localisations from the primary fluorophore are only of interest if they begin immediately following a pulse activation.
+Activation analysis is based on the activation of a fluorophore from the fluorescence transmission of a closely coupled second chromophore via fluorescence resonance energy transfer (more commonly referred to by the acronym `FRET <https://en.wikipedia.org/wiki/F%C3%B6rster_resonance_energy_transfer>`_). The second chromophore will be activated by a pulse of light and localisations from the primary fluorophore are only of interest if they begin immediately following a pulse activation.
 
 Using a second chromophore to transfer activation energy to the primary fluorophore allows configuration of an experiment where the wavelength of the pulse activation light can be further separated from the typical activation wavelength of the primary fluorophore. Pairs of fluorophores can be combined with suitable excitation and emission spectra to allow multi-colour imaging to be performed by pulsing with different activation wavelengths and assigning localisations that occur immediately following an activation pulse to the appropriate channel. Note that activation of the primary fluorophore can occur spontaneously or from light pulsed in other wavelengths. This is `crosstalk`. The crosstalk of a fluorophore pair under the multi-channel experimental conditions (i.e. pulsing with different activation wavelengths in different frames) can be obtained using crosstalk activation analysis. This plugin performs the following analysis on a set of traced localisations:
 
@@ -3537,7 +3537,7 @@ The localisations are then loaded, the calibration is verified and the traces ar
 
        This is optional depending on the number of configured channels.
 
-Note: The activation frame for each channel is the frame immediately following the pulse activation laser for the flourophore assigned to channel N. The channel is arbitrary. It is used to allow the output results to be mapped to the pulse wavelengths and fluorophores. The pulse life cycle and any computed crosstalk for each channel will be stored and shown as the default settings in the ``Pulse Activation Analysis`` plugin allowing the two plugins to be used together.
+Note: The activation frame for each channel is the frame immediately following the pulse activation laser for the fluorophore assigned to channel N. The channel is arbitrary. It is used to allow the output results to be mapped to the pulse wavelengths and fluorophores. The pulse life cycle and any computed crosstalk for each channel will be stored and shown as the default settings in the ``Pulse Activation Analysis`` plugin allowing the two plugins to be used together.
 
 When the pulse life cycle has been configured the plugin will split the traces into activations using the ``Dark frames for new activation`` parameter. Activations are non-specific if they occur in a frame not following an activation pulse; otherwise the activations are specific to that pulse channel. The plugin records the background (non-specific) and channel (specific) activations rates to the ``ImageJ`` log window. These can be used to verify that the pulse life cycle has been correctly configured. Ideally the channel activation rates should be higher than the background activation rate; the target channel activation rate should be far higher than the other channels. In the following example the analysis has been performed on traced data from a non-pulsed experiment and the background rate is the same as the channel activation rate::
 
@@ -3565,7 +3565,7 @@ Simulated Crosstalk
 
 The ``Crosstalk Activation Analysis`` plugin requires a set of traced localisations from a pulsed life cycle experiment with conjugated fluorophores. This data can be simulated allowing the plugin to be tested.
 
-The simulation can be run by holding the ``Shift`` key down when running the plugin. This will provide an option to run the simulation or to perform crosstalk analysis as normal. Note that the ``Shift`` key must be pressed when the main ``ImageJ`` window is the active. When run in simulation mode the plugin will create multiple datasets in memory and the crosstalk analysis is not run.
+The simulation can be run by holding the ``Shift`` key down when running the plugin. This will provide an option to run the simulation or to perform crosstalk analysis as normal. Note that the ``Shift`` key must be pressed when the main ``ImageJ`` window is active. When run in simulation mode the plugin will create multiple datasets in memory and the crosstalk analysis is not run.
 
 The simulation requires parameters for 3 sets of molecules which are drawn on a fixed size image region. For brevity only the parameters for a single channel are described:
 
@@ -3631,7 +3631,7 @@ When the simulation is run it uses the following defaults:
      - The activation frames for the pulse cycle.
      - 1, 11, 21
 
-Initially the simulation creates the distribution shapes for the molecules in each channel and then samples the shapes to create the molecules. These are then activated in their target channel using an activation probability based on the image region and activation density, i.e. some of the molecules will randomly active each pulse. The crosstalk is used to determine the activation probability for how often the molecules activate following a pulse in their non-target channel. At each pulse the number of activated molecules is sampled from a binomial distribution with the configured activation probability. All non-pulse frame are sampled using the background activation probability. Note that in this simulation a molecule is active for only 1 frame.
+Initially the simulation creates the distribution shapes for the molecules in each channel and then samples the shapes to create the molecules. These are then activated in their target channel using an activation probability based on the image region and activation density, i.e. some of the molecules will randomly activate each pulse. The crosstalk is used to determine the activation probability for how often the molecules activate following a pulse in their non-target channel. At each pulse the number of activated molecules is sampled from a binomial distribution with the configured activation probability. All non-pulse frames are sampled using the background activation probability. Note that in this simulation a molecule is active for only 1 frame.
 
 When the simulation is complete the actual crosstalk for each channel is computed and recorded in the ``ImageJ`` log window with the configured values and the actual crosstalk after the ``->`` text::
 
@@ -3639,7 +3639,7 @@ When the simulation is complete the actual crosstalk for each channel is compute
     Simulated crosstalk C21  0.07117->0.07333, C23  0.09783->0.09856
     Simulated crosstalk C31  0.137->0.1362, C32  0.1297->0.1286
 
-The simulation is recorded using datasets in memory with the prefix ``Activation Analysis Simulation``. Each localisation is assigned a unique ID. The effect is that tracing of results is perfect and all separate activations are a new trace. A combined dataset is create along with a dataset for each channel with the suffix ``CN`` where `N` is 1, 2, or 3. The channel datasets can be used as input for the ``Crosstalk Analysis Plugin`` as they represent the imaging of 1 fluorophore-chromophore pair under the full imaging pulse life cycle.
+The simulation is recorded using datasets in memory with the prefix ``Activation Analysis Simulation``. Each localisation is assigned a unique ID. The effect is that tracing of results is perfect and all separate activations are a new trace. A combined dataset is created along with a dataset for each channel with the suffix ``CN`` where `N` is 1, 2, or 3. The channel datasets can be used as input for the ``Crosstalk Analysis Plugin`` as they represent the imaging of 1 fluorophore-chromophore pair under the full imaging pulse life cycle.
 
 For reference a 3 colour image composite is created with dimensions 1024x1024 pixels (see :numref:`Figure %s <fig_crosstalk_activation_analysis_simulation_example>`). This contains the localisations from each channel drawn with perfect spectral unmixing; each set of localisations is drawn on the correct channel regardless of whether it was due to an activation in the correct or incorrect pulse. This is a reference image for a perfect result. There is currently not an option to draw the localisations with colours associated with the pulse activation frame, i.e. the raw spectrally mixed image. This can be done using no crosstalk correction in the ``Pulse Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Pulse Activation Analysis>`).
 
@@ -3702,7 +3702,7 @@ The probability the assignment is correct is computed as:
 
     p_{\mathit{correct}} = \frac{d}{\mathit{od}}
 
-This is a measure of how much crosstalk effected the observed density in a specific channel. If this is below a threshold then then localisation can be removed as noise. This is computed for specific activations.
+This is a measure of how much crosstalk affected the observed density in a specific channel. If this is below a threshold then the localisation can be removed as noise. This is computed for specific activations.
 
 The probability of each channel can be computed as:
 
@@ -3788,7 +3788,7 @@ The localisations are then loaded, the calibration is verified and the traces ar
 
        This is optional depending on the number of configured channels.
 
-Note: The activation frame for each channel is the frame immediately following the pulse activation laser for the flourophore assigned to channel N. The channel is arbitrary. It must be mapped to the same pulse life cycle used in the ``Crosstalk Analysis Plugin``. The plugin will remember the settings and these should not have to be adjusted.
+Note: The activation frame for each channel is the frame immediately following the pulse activation laser for the fluorophore assigned to channel N. The channel is arbitrary. It must be mapped to the same pulse life cycle used in the ``Crosstalk Analysis Plugin``. The plugin will remember the settings and these should not have to be adjusted.
 
 When the pulse life cycle has been configured the plugin will split the traces into activations using the ``Dark frames for new activation`` parameter. Activations are non-specific if they occur in a frame not following an activation pulse; otherwise the activations are specific to that pulse channel. The plugin records the background (non-specific) and channel (specific) activations rates to the ``ImageJ`` log window. These can be used to verify that the pulse life cycle has been correctly configured. Ideally the channel activation rates should be higher than the background activation rate.
 
@@ -3901,14 +3901,14 @@ Fourier Image Resolution
 
 Calculate the resolution of an image using Fourier Ring Correlation (FRC).
 
-This plugin is based on the FIRE (Fourier Image REsolution) plugin produced as part of the paper by Niewenhuizen, *et al* (2013). Changes to the original functionality include:
+This plugin is based on the FIRE (Fourier Image REsolution) plugin produced as part of the paper by Nieuwenhuizen, *et al* (2013). Changes to the original functionality include:
 
 * Additional options for computation of the FRC curves
 * Improved determination of FRC line crossing points
 * Speed optimisations
 * Support for multi-threaded random repeats
 
-Additional functionality for correction of spurious correlations has been added based on Matlab code kindly provided by Prof. Bernd Reiger (corresponding author of the FIRE paper).
+Additional functionality for correction of spurious correlations has been added based on Matlab code kindly provided by Prof. Bernd Rieger (corresponding author of the FIRE paper).
 
 Fourier Ring Correlation computes the correlation between the features of two images at a certain spatial frequency. A 2D image is transformed into the frequency domain using a Fourier transform. The frequency image represents the amplitude and phase of the original data at different frequencies. These can be visualised as a 2D image, the centre of the image represents the lowest spatial frequencies moving to the highest frequencies at the edge of the image. Points taken from a ring drawn around the centre will represent all the amplitude and phases present at a single frequency. Two images can be compared at a given frequency by measuring the correlation of the data sampled from the same ring on both images. This is the Fourier Ring Correlation (FRC).
 
@@ -3926,7 +3926,7 @@ To compute the image resolution of a set of localisations requires the following
 
 *   Use the smoothed FRC curve to look-up the spatial frequency corresponding to a correlation threshold (cut-off limit)
 
-The spatial frequency at the correlation limit is the Fourier Image Resolution (FIRE). This can be interpreted as stating that there is no meaningful similarity information at any frequency higher than the resolution, i.e. if the images were reconstructed using only frequencies at this level and above then they would be not be recognised as matching.
+The spatial frequency at the correlation limit is the Fourier Image Resolution (FIRE). This can be interpreted as stating that there is no meaningful similarity information at any frequency higher than the resolution, i.e. if the images were reconstructed using only frequencies at this level and above then they would not be recognised as matching.
 
 
 Input Data
@@ -3955,7 +3955,7 @@ The final resolution is dependent on the threshold used to assess when the corre
 Fixed
 ^^^^^
 
-Use the fixed value 1/7 = 0.142857. This is the threshold value preferred by Niewenhuizen, *et al* (2013) as it provides output that closely matches the apparent resolution of images under manual inspection.
+Use the fixed value 1/7 = 0.142857. This is the threshold value preferred by Nieuwenhuizen, *et al* (2013) as it provides output that closely matches the apparent resolution of images under manual inspection.
 
 
 ..
@@ -4040,7 +4040,7 @@ and :math:`H(q)` is the factor in the correlation averages related to the locali
 
     H(q)=\frac{1}{\sqrt{1+8\pi ^{2}\Delta \sigma ^{2}q^{2}}}\exp(-{\frac{4\pi ^{2}\sigma _{m}^{2}q^{2}}{1+8\pi ^{2}\Delta \sigma^{2}q^{2}}})
 
-Note that the given equations have been updated from those provided in Niewenhuizen, *et al* (2013) to those used in the code provided by Bernd Reiger. If *Q=0* then no correction is applied. A plugin for estimating *Q* (the average number of activation cycles per emitter) is provided (see :ref:`analysis_plugins:FIRE Q Estimation`).
+Note that the given equations have been updated from those provided in Nieuwenhuizen, *et al* (2013) to those used in the code provided by Bernd Rieger. If *Q=0* then no correction is applied. A plugin for estimating *Q* (the average number of activation cycles per emitter) is provided (see :ref:`analysis_plugins:FIRE Q Estimation`).
 
 The corrected FRC is thus:
 
@@ -4121,7 +4121,7 @@ A super resolution image is required for analysis. If the image is very large th
    * - Max per bin
      - Set above zero to limit the maximum number of localisations that are drawn in each super-resolution pixel.
 
-       Note: This is set to 5 in Niewenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
+       Note: This is set to 5 in Nieuwenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
 
 
 ..
@@ -4180,7 +4180,7 @@ FIRE Options
 Single Dataset Processing
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A single data must be split into two halves to construct the images for analysis. If this split is random then multiple repeats can be performed to provide a mean resolution with a confidence interval. Additionally spurious correlations can be corrected using a Q correction factor (see :numref:`{number}: {name} <analysis_plugins:Spurious correlation (Q) correction>`).
+A single dataset must be split into two halves to construct the images for analysis. If this split is random then multiple repeats can be performed to provide a mean resolution with a confidence interval. Additionally spurious correlations can be corrected using a Q correction factor (see :numref:`{number}: {name} <analysis_plugins:Spurious correlation (Q) correction>`).
 
 .. list-table::
    :widths: 20 80
@@ -4275,7 +4275,7 @@ FIRE Q Estimation
 
 Estimate the spurious correction factor *Q* for use in Fourier Image Resolution (FIRE) analysis. *Q* is the average number of activation cycles per emitter (i.e. repeat localisations).
 
-This plugin is based on the Matlab code kindly provided by Prof. Bernd Reiger (corresponding author of the FIRE paper [Niewenhuizen, *et al*, 2013]). The method described here is an update to the original method described in the online methods of the FIRE paper.
+This plugin is based on the Matlab code kindly provided by Prof. Bernd Rieger (corresponding author of the FIRE paper [Nieuwenhuizen, *et al*, 2013]). The method described here is an update to the original method described in the online methods of the FIRE paper.
 
 Fourier Ring Correlation (FRC) computes the correlation between the features of two images at a certain spatial frequency. This correlation is high at low spatial frequencies and progressively reduces. When the correlation falls below a set threshold there is no meaningful similarity information at any further frequency. The spatial frequency at the correlation limit is the Fourier Image Resolution (FIRE).
 
@@ -4348,7 +4348,7 @@ This term varies widely in magnitude with q and so the following function is use
 
     f(q)=\log (|\frac{Q_{\mathit{norm}}\cdot v(q)}{H(q)\mathbb{sinc}(\pi \cdot q)^{2}}|)
 
-This function is described below equation (7) of the Online Methods of Niewenhuizen, *et al* (2013). The function *f(q)* typically is a function that initially decreases, then levels off to a constant plateau value and finally increases again. The function can be well fit using a quadratic (:math:`f(q)=a+bq^2`) if the fit is performed over a suitable range of *q* where the plateau occurs.
+This function is described below equation (7) of the Online Methods of Nieuwenhuizen, *et al* (2013). The function *f(q)* typically is a function that initially decreases, then levels off to a constant plateau value and finally increases again. The function can be well fit using a quadratic (:math:`f(q)=a+bq^2`) if the fit is performed over a suitable range of *q* where the plateau occurs.
 
 To reduce noise the plugin allows smoothing using a median window before application of the absolute and logarithm functions or it can be smoothed afterwards using LOESS smoothing. The Y-intercept is used as an initial estimate of *Q*:
 
@@ -4427,7 +4427,7 @@ These are the same as the ``FIRE`` plugin for single datasets. Note that localis
    * - Max per bin
      - Set above zero to limit the maximum number of localisations that are drawn in each super-resolution pixel.
 
-       Note: This is set to 5 in Niewenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
+       Note: This is set to 5 in Nieuwenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
 
 
 ..
@@ -4560,7 +4560,7 @@ over a selected range of *q*, where *g(x)* is a mapping function with value 0 wh
 FRC Curve
 ^^^^^^^^^
 
-The FRC curve (:numref:`Figure %s <fig_q_estimation_frc_curve>`) is similar to that shown by the FIRE plugin (see section :numref:`%s <analysis_plugins:Fourier Image Resolution>`). The raw data of the correlation is shown in black and the smoothed line in red. The resolution is computed using the crossing point with the threshold curve (blue). If the Q-value is above zero then the original data is shown with 50% opacity. The resolution before and after Q correction are shown in the label.
+The FRC curve (:numref:`Figure %s <fig_q_estimation_frc_curve>`) is similar to that shown by the FIRE plugin (see section :numref:`%s <analysis_plugins:Fourier Image Resolution>`). The raw data of the correlation is shown in black and the smoothed line in red. The resolution is computed using the crossing point with the threshold curve (blue). If the Q-value is above zero then the original data is shown with 50% opacity. The resolution before and after Q correction is shown in the label.
 
 .. _fig_q_estimation_frc_curve:
 .. figure:: images/q_estimation_frc_curve.jpg

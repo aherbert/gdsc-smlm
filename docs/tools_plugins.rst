@@ -73,7 +73,7 @@ The following additional parameters can be set:
      - Adjust the contrast of the preview using the min and max value of the smoothed image.
 
    * - Allow inversion
-     - Allow the second smoothing parameter of a difference filter to be smaller that the first. This will create an inverted image where bright spots are dark and possibly surrounded by a ring. If not enabled the plugin raises an error and will disable an active current preview.
+     - Allow the second smoothing parameter of a difference filter to be smaller than the first. This will create an inverted image where bright spots are dark and possibly surrounded by a ring. If not enabled the plugin raises an error and will disable an active current preview.
 
    * - Preview
      - Preview the smoothing filter on the image.
@@ -121,9 +121,9 @@ The display can be manually reset using ``Image > Adjust > Brightness/Contrast .
 Pixel Filter
 ------------
 
-Perform filtering to replace hot pixels from an image.
+Perform filtering to replace hot pixels in an image.
 
-The ``Pixel Filter`` is a simple plugin that will replace pixels with the mean of the surrounding region if they are more than N standard deviations from the mean. The filter is designed to remove outlier (hot) pixels that are much brighter then their neighbour pixels. These pixels will be identified as candidate maxima by the ``Peak Fit`` plugin although they are not suitable for Gaussian fitting.
+The ``Pixel Filter`` is a simple plugin that will replace pixels with the mean of the surrounding region if they are more than N standard deviations from the mean. The filter is designed to remove outlier (hot) pixels that are much brighter than their neighbour pixels. These pixels will be identified as candidate maxima by the ``Peak Fit`` plugin although they are not suitable for Gaussian fitting.
 
 The filter operates on the currently selected image. The preview option allows the results of the filter to be viewed before running the filter on the current frame or optionally the entire image stack.
 
@@ -162,7 +162,7 @@ When loaded the plugin provides a plot of the noise estimate of the next 100 fra
     :align: center
     :figwidth: 80%
 
-    Noise Esimator plugin dialog and the noise plot for the next 100 frames in the image.
+    Noise Estimator plugin dialog and the noise plot for the next 100 frames in the image.
 
     Method1 is shown in blue, Method2 is shown in red.
 
@@ -207,7 +207,7 @@ The following noise methods are available:
 Image Residuals
 ~~~~~~~~~~~~~~~
 
-The residuals of an image are calculated for each pixel using the total difference to the 4n connected pixels. These are normalised so that the sum of the residuals squared is the same as the sum of the image pixels squared. Comparing each pixel to its neighbours provides a robust method of estimating noise if the underlying signal is adequately sampled. Variations between neighbour pixels are expected to be small, consequently large variations indicate high noise.
+The residuals of an image are calculated for each pixel using the total difference to the 4-connected pixels. These are normalised so that the sum of the residuals squared is the same as the sum of the image pixels squared. Comparing each pixel to its neighbours provides a robust method of estimating noise if the underlying signal is adequately sampled. Variations between neighbour pixels are expected to be small, consequently large variations indicate high noise.
 
 All the image residuals methods are based on the “Least trimmed square” robust estimator described in:
 
@@ -313,7 +313,7 @@ Produces a background intensity image and a mask from a sample image.
 
 The ``Image Background`` plugin is used to generate suitable input for the ``Create Data`` plugin. The ``Create Data`` plugin creates an image by simulating fluorophores using a distribution. One allowed distribution is the region defined by a mask. The fluorophores are created and then drawn on the background. The background can be an input image. Both the mask and background image can be created from a suitable *in vivo* image using the ``Image Background`` plugin. The purpose would be to simulate fluorophores in a distribution that matches that observed in super-resolution experiments.
 
-The plugin requires that an image is open. The plugin dialog is show in :numref:`Figure %s <fig_image_background_dialog>`.
+The plugin requires that an image is open. The plugin dialog is shown in :numref:`Figure %s <fig_image_background_dialog>`.
 
 .. _fig_image_background_dialog:
 .. figure:: images/image_background_dialog.png
@@ -445,7 +445,7 @@ Convolve an image with a kernel constructed from another image. The ``Image Kern
 
 The filter operation is readily applied by converting the kernel and the image into the frequency domain. However both the correlation and convolution can also be applied in the spatial domain. The results should be approximately the same as the frequency domain. The spatial domain filter will be faster for small single images. Transforming to the frequency domain is an advantage on larger data and image stacks as the kernel need only be transformed once and can be applied in turn to each image.
 
-When operating in the spatial domain the center of the kernel image is aligned to each pixel in turn and the operation computed using the corresponding pixels from the image that are overlapped by the kernel image. The operation will create regions of the overlap that have no pixels. In this case the value is taken from the closest edge pixel in the image (edge extension), or is set to zero (zero outside image).
+When operating in the spatial domain the centre of the kernel image is aligned to each pixel in turn and the operation computed using the corresponding pixels from the image that are overlapped by the kernel image. The operation will create regions of the overlap that have no pixels. In this case the value is taken from the closest edge pixel in the image (edge extension), or is set to zero (zero outside image).
 
 The following parameters can be configured:
 
@@ -453,7 +453,7 @@ The following parameters can be configured:
    :widths: 20 80
    :header-rows: 1
 
-   * - Operation
+   * - Parameter
      - Description
 
    * - Kernel image

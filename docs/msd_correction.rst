@@ -9,7 +9,7 @@ The mean squared distance (MSD) is classically computed using the distance betwe
 
     \mathit{MSD}={2Dt}
 
-Thus the diffusion coefficient can be computed using observed distances on diffusing particles. This requires an exact location of the molecule. However the situation is different for localisations that have been determined using imaging of moving fluorescent objects. The position is not the exact position of the object but an average over the exposure time used to acquire the image frame. The distance between two frames thus represents the distance between an average position in the start and end frames, optionally with extra frames inserted in-between. The extra frames only effect the time between the start and end frame.
+Thus the diffusion coefficient can be computed using observed distances on diffusing particles. This requires an exact location of the molecule. However the situation is different for localisations that have been determined using imaging of moving fluorescent objects. The position is not the exact position of the object but an average over the exposure time used to acquire the image frame. The distance between two frames thus represents the distance between an average position in the start and end frames, optionally with extra frames inserted in-between. The extra frames only affect the time between the start and end frame.
 
 The effect of averaging the position in the start and end frames can be examined using a simulation. Diffusion can be simulated by sampling from a Gaussian distribution to generate random movements in a single dimension. The width of the Gaussian (*s*) is related to the diffusion coefficient (*D*) and time of diffusion (*t*):
 
@@ -36,7 +36,7 @@ This is performed for each dimension in the simulation and summed to the mean sq
 
     Under-prediction factor of observed MSD and expected MSD against the jump distance
 
-    Simulation was performed using a diffusion coefficient (*D*) of 0.02, 0.1, 0.5 and 1. The resolution is the number simulation steps per frame.
+    Simulation was performed using a diffusion coefficient (*D*) of 0.02, 0.1, 0.5 and 1. The resolution is the number of simulation steps per frame.
 
 The gradient of the under-prediction factor with respect to the jump distance can be computed numerically by taking the difference of adjacent values in Y divided by the difference in X. For the high resolution curve this results in :numref:`Figure %s <fig_observed_msd_vs_expected_gradient>`.
 
@@ -118,10 +118,10 @@ This correction factor effectively states that the diffusion of the objects with
 When performing jump distance analysis when the jump length is fixed it is not necessary to correct each observed squared distance before fitting the MSD data. Since the correction is a single scaling factor the computed diffusion coefficient can be adjusted by applying the linear correction factor.
 
 
-Fitting the Plot of MSD verses N Frames
+Fitting the Plot of MSD versus N Frames
 ---------------------------------------
 
-When fitting the linear plot of MSD verses the number of frames we can account for the correction factor. The observed MSD is composed of the actual MSD multiplied by the correction factor before being adjusted for the precision error:
+When fitting the linear plot of MSD versus the number of frames we can account for the correction factor. The observed MSD is composed of the actual MSD multiplied by the correction factor before being adjusted for the precision error:
 
 
 .. math::

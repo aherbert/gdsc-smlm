@@ -3,7 +3,7 @@
 PC PALM Plugins
 ===============
 
-The following plugins are used to analyse the auto-correlation of a set of localisations using Pair Correlation (PC) analysis. This can provide information on whether the localisations are randomly distributed or clustered ([Sengupta *et al*, 2011], [Sengupta *et al*, 2013], [Veatch *et al*, 2012], [Puchnar, *et al*, 2013]).
+The following plugins are used to analyse the auto-correlation of a set of localisations using Pair Correlation (PC) analysis. This can provide information on whether the localisations are randomly distributed or clustered ([Sengupta *et al*, 2011], [Sengupta *et al*, 2013], [Veatch *et al*, 2012], [Puchner, *et al*, 2013]).
 
 The analysis uses a set of localisations assumed to represent single molecules or single fluorescent bursts. The data is compared to itself using auto-correlation and a curve is computed as a function of the distance from the centre of the localisation. A flat curve is indicative that the distribution of localisations is no different from a random distribution. Shaped curves can be fit using models that apply to various distributions of localisations (random; fluctuations; or an emulsion).
 
@@ -83,7 +83,7 @@ The following parameters are available:
        Only available if there are localisations in memory. Otherwise the mode is ``Simulation`` and the dialog displays the simulation dialog parameters (see :numref:`{number}: {name} <pc_palm_plugins:Run Mode: Simulation>`).
 
    * - Use ROI
-     - Map the ROI from the currently selected image to the input localisations and crop the selected region. This options is only shown if the current image has an area ROI.
+     - Map the ROI from the currently selected image to the input localisations and crop the selected region. This option is only shown if the current image has an area ROI.
 
        This option can be used to dynamically crop results from a dataset using a ROI drawn on a super-resolution render of the data.
 
@@ -145,10 +145,10 @@ The following parameters are available:
      - Set to **true** to show the histograms.
 
    * - Binary image
-     - Set to **true** to display the super resolution image of the molecules as a binary image. If **false** then the image is a histogram where the value of each pixel is the molecule count at that pixel. This will not effect the later analysis and is used for visualisation purposes of the molecule density.
+     - Set to **true** to display the super resolution image of the molecules as a binary image. If **false** then the image is a histogram where the value of each pixel is the molecule count at that pixel. This will not affect the later analysis and is used for visualisation purposes of the molecule density.
 
    * - Blinking rate
-     - Set the blinking rate. This only effects the protein density that is reported to the ``ImageJ`` log window. The protein density is the molecule density divided by the blinking rate. Blinking rate is of interest during later PC-PALM analysis.
+     - Set the blinking rate. This only affects the protein density that is reported to the ``ImageJ`` log window. The protein density is the molecule density divided by the blinking rate. Blinking rate is of interest during later PC-PALM analysis.
 
 
 .. index:: Run Mode: Simulation
@@ -183,7 +183,7 @@ The following cluster simulations are available:
    * - Circles Mask
      - Create a mask using non-overlapping circles of a specified radius. The region is filled with circles. Sample cluster positions from any circle, there may be more than 1 cluster per circle.
 
-When molecules are simulated into localisations (i.e. blinking) the plugin can optionally compute data on the cluster sizes and the intra-molecule distances. A histogram of the distances is computed and summary statistics recorded to the ``ImageJ`` log window. The plugin also computes the mean distance from a cluster member to the cluster centroid and records this in the ``ImageJ`` log window. These distances should be analysed in conjunction with the simulation settings and also to the model produced by subsequent PC-PALM analysis. If the intra-molecule distances are computed an option is provided to run the paricle linkage algorithm to perform clustering. The clustering distance is the 99\ :sup:`th` percentile from the actual intra-molecule distances. During clustering the join distances between the same molecule (intra-molecule) and between different molecules (inter-molecule) are collected and these are displayed in a cumulative histogram. If the clusters are not dense relative to the localisation precision then there should be a larger frequency of intra-molecule links. As the clusters reduce in size different molecules will begin to be joined and the frequency of inter-molecule links will increase.
+When molecules are simulated into localisations (i.e. blinking) the plugin can optionally compute data on the cluster sizes and the intra-molecule distances. A histogram of the distances is computed and summary statistics recorded to the ``ImageJ`` log window. The plugin also computes the mean distance from a cluster member to the cluster centroid and records this in the ``ImageJ`` log window. These distances should be analysed in conjunction with the simulation settings and also to the model produced by subsequent PC-PALM analysis. If the intra-molecule distances are computed an option is provided to run the particle linkage algorithm to perform clustering. The clustering distance is the 99\ :sup:`th` percentile from the actual intra-molecule distances. During clustering the join distances between the same molecule (intra-molecule) and between different molecules (inter-molecule) are collected and these are displayed in a cumulative histogram. If the clusters are not dense relative to the localisation precision then there should be a larger frequency of intra-molecule links. As the clusters reduce in size different molecules will begin to be joined and the frequency of inter-molecule links will increase.
 
 The following parameters are available:
 
@@ -241,7 +241,7 @@ The following parameters are available:
 PC-PALM Analysis
 ----------------
 
-Perform pair-correlation analysis in the frequency domain as per the paper by [Sengupta *et al* , 2011], [Sengupta, *et al*, 2013] to produce a *g(r)* auto-correlation curve. Analysis is based on the PC-PALM protocol of Sengupta, *et al* (2013), steps 19 to 20(A).
+Perform pair-correlation analysis in the frequency domain as per the paper by [Sengupta *et al*, 2011], [Sengupta, *et al*, 2013] to produce a *g(r)* auto-correlation curve. Analysis is based on the PC-PALM protocol of Sengupta, *et al* (2013), steps 19 to 20(A).
 
 Molecules representing distinct on bursts from a fluorophore over one or more frames must be prepared using ``PC-PALM Molecules``. That plugin will create an image of the molecule data. A rectangular region of interest (ROI) should be marked on the image. This is the region that will be extracted from the molecule dataset for analysis. When the plugin is run the image with the ROI must be selected otherwise the plugin will display an error.
 
@@ -267,10 +267,10 @@ The following parameters are available:
      - The maximum distance for the correlation curve (in nm).
 
    * - Binary image
-     - Set to **true** to use a value of 1 for each pixel where 1 or more molecules are located. If **false** then the pixel value uses a count. This may effect the correlation curve when there are high levels of colocated molecules on the super-resolution image.
+     - Set to **true** to use a value of 1 for each pixel where 1 or more molecules are located. If **false** then the pixel value uses a count. This may affect the correlation curve when there are high levels of colocated molecules on the super-resolution image.
 
    * - Blinking rate
-     - The estimated blinking rate of the fluorphore. This is used to map molecule counts to protein counts. The value effects the normalisation of the correlation curve and the same value should be used for all datasets from the same imaging conditions. The number will effect the peak density and ultimately the cluster number output when fitting models to the *g(r)* curve.
+     - The estimated blinking rate of the fluorophore. This is used to map molecule counts to protein counts. The value affects the normalisation of the correlation curve and the same value should be used for all datasets from the same imaging conditions. The number will affect the peak density and ultimately the cluster number output when fitting models to the *g(r)* curve.
 
    * - nm per pixel
      - The pixel pitch (resolution) of super-resolution image constructed for auto-correlation.
@@ -356,7 +356,7 @@ The correlation curve is displayed (see :numref:`Figure %s <fig_pc_palm_gr_curve
 PC-PALM Spatial Analysis
 ------------------------
 
-Perform pair-correlation spatial analysis as per the paper by [Puchnar, *et al*, 2013]. The method plots the molecule density around each localisation as a function of distance from the localisation.
+Perform pair-correlation spatial analysis as per the paper by [Puchner, *et al*, 2013]. The method plots the molecule density around each localisation as a function of distance from the localisation.
 
 Molecules representing distinct on bursts from a fluorophore over one or more frames must be prepared using ``PC-PALM Molecules``. That plugin will create an image of the molecule data. A region of interest (ROI) can be marked on the image using any area ROI. This is the region that will be extracted from the molecule dataset for analysis. For example individual cells may be outlined using the freehand ROI tool. If no ROI is present then the plugin will analyse the entire dataset.
 
@@ -511,11 +511,11 @@ The ratio of the density of the proteins in clusters to the average density acro
 
 Note: Both the emulsion model and random clustered model (:math:`g(r)^\text{protein}`) use a convolution of the protein model function with :math:`g(r)^\text{PSF}`. For simplicity the convolution can be omitted. This is valid when the positional uncertainty :math:`\sigma_s` is an order of magnitude smaller than the spatial extent of clusters thus the Gaussian convolution has a small effect on the curve. Thus the emulsion model for :math:`g(r)^\text{protein}` is a damped cosine function and the random clustered model is an exponential.
 
-Fitting of the curve is performed using a least squares estimtor to minimise the difference between the *g(r)* curve and the model. The fit uses a bounded `CMA-ES optimiser <https://en.wikipedia.org/wiki/CMA-ES>`_ which is stochastic and derivative free. The initial solution may be improved if restarted and the number of restarts is configurable. Optionally an attempt can be made to improve the solution  using a numerical gradient based method which is not suited to the initial search but works well when close to the optimal solution.
+Fitting of the curve is performed using a least squares estimator to minimise the difference between the *g(r)* curve and the model. The fit uses a bounded `CMA-ES optimiser <https://en.wikipedia.org/wiki/CMA-ES>`_ which is stochastic and derivative free. The initial solution may be improved if restarted and the number of restarts is configurable. Optionally an attempt can be made to improve the solution  using a numerical gradient based method which is not suited to the initial search but works well when close to the optimal solution.
 
 Note that the *g(r)* curve may have large errors when the radius *r* is low due to the positional uncertainty of the localisations. The plugin provides the option to ignore small *r* values when fitting the curve. The minimum *r* used is expressed as a factor of the estimated precision.
 
-The curve is initially fit using the random model model and validated against the initial estimates. The fitted localisation precision and protein density are compared to the estimated precision and initial protein density (computed from the aggregated values output by ``PC-PALM Analysis`` for each *g(r)* curve). The change in the parameter is expressed as a percentage and the fit is rejected if above a threshold.
+The curve is initially fit using the random model and validated against the initial estimates. The fitted localisation precision and protein density are compared to the estimated precision and initial protein density (computed from the aggregated values output by ``PC-PALM Analysis`` for each *g(r)* curve). The change in the parameter is expressed as a percentage and the fit is rejected if above a threshold.
 
 The random model is composed of the :math:`g(r)^\text{stoch} + 1`. If the stochastic component of the function is subtracted from the *g(r)* curve the value should be 1. If the value is above 1 then there is a :math:`g(r)^\text{protein}` component in the curve not explained by the model. The random model fit can be rejected if the magnitude of the :math:`g(r)^\text{protein}` component is above a threshold:
 
@@ -545,7 +545,7 @@ The following parameters are available:
      - The estimated average blinking rate of each fluorophore molecule.
 
    * - Show error bars
-     - Set to **true** show the standard error bars on the *g(r)* curve. This settings is relevant when the curve is an average composed from multiple input curves.
+     - Set to **true** to show the standard error bars on the *g(r)* curve. This setting is relevant when the curve is an average composed from multiple input curves.
 
    * - Fit restarts
      - The number of restarts to use for the bounded fitting process.
@@ -623,12 +623,12 @@ PC-PALM Clusters
 
 Clusters localisations using a distance threshold and produces a histogram of cluster size. This can be fit using a zero-truncated negative binomial distribution (with parameters *n*, *p*) to calculate the size of the clusters (*n*) and the probability of seeing a fluorophore (*p*).
 
-The ``PC-PALM Clusters`` plugin is based on the paper by Puchnar, *et al* (2013). The analysis aims to determine the stoichiometry of colocated molecules, i.e. are closer than the localisation precision. Note that this is in contrast to the ``PC-PALM Fitting`` plugin which models clusters of molecules over distances in excess of the localisation precision. The analysis is based on two assumptions:
+The ``PC-PALM Clusters`` plugin is based on the paper by Puchner, *et al* (2013). The analysis aims to determine the stoichiometry of colocated molecules, i.e. are closer than the localisation precision. Note that this is in contrast to the ``PC-PALM Fitting`` plugin which models clusters of molecules over distances in excess of the localisation precision. The analysis is based on two assumptions:
 
 #. The activation, fluorescence and bleaching lifecycle for a fluorophore can be imaged without  interference from other fluorophores.
 #. The fluorophore activation probability is fixed.
 
-The first assumption is that the activation of a single fluorophore, measurement of its location and its final photo-bleaching all occurs before another fluorophore at the same location is activated. This requires careful experimental conditions to avoid excess photoactivation and may also require separation of the photoactivation light from the readout light. In this case the readout light can be run for a long time until all photoactivity is reduced to background before the next round of photoactivation.
+The first assumption is that the activation of a single fluorophore, measurement of its location and its final photo-bleaching all occur before another fluorophore at the same location is activated. This requires careful experimental conditions to avoid excess photoactivation and may also require separation of the photoactivation light from the readout light. In this case the readout light can be run for a long time until all photoactivity is reduced to background before the next round of photoactivation.
 
 The second assumption is that the probability of a fluorophore being photoactivatable is fixed for all fluorophores in the imaging environment. Note that this is not the activation rate (the frequency of activations per second) but the probability that a fluorophore can be activated, for example it has avoided misfolding and the chromophore is valid.
 
@@ -662,7 +662,7 @@ The noise histogram can be subtracted from the live data histogram. When analysi
 
 The noise subtracted histogram will be displayed in a new plot window. If auto-save was selected then the histogram is saved using the original input filename with the suffix updated to ``.noise.tsv``.
 
-Note: Clustering of molecules and background noise localisations produces higher counts than expected across the entire histogram. It is impossible to correctly subtract the additional high cluster counts due to noise. Experiments should be configured to minimise noise to the extent that noise localisations are unlikely to be colocated with localisations from fluorophores. The only significant contributions of noise localisations is a higher count of 1 molecule/cluster due to isolated noise localisations. In this situation background subtraction of noise mainly targets the count of monomers and can improve the fit of the binomial distribution to the corrected data.
+Note: Clustering of molecules and background noise localisations produces higher counts than expected across the entire histogram. It is impossible to correctly subtract the additional high cluster counts due to noise. Experiments should be configured to minimise noise to the extent that noise localisations are unlikely to be colocated with localisations from fluorophores. The only significant contribution of noise localisations is a higher count of 1 molecule/cluster due to isolated noise localisations. In this situation background subtraction of noise mainly targets the count of monomers and can improve the fit of the binomial distribution to the corrected data.
 
 
 .. index:: Histogram normalisation
@@ -701,7 +701,7 @@ The following parameters are available:
      - Use multi-threading if available for the algorithm.
 
    * - Weighted clustering
-     - Set to **true** to use weighted clustering with each molecule weighted using the photon intensity. The weight effects the computation of the centre of mass of a cluster. The default is unweighted.
+     - Set to **true** to use weighted clustering with each molecule weighted using the photon intensity. The weight affects the computation of the centre of mass of a cluster. The default is unweighted.
 
    * - Min N
      - The minimum cluster size *N* to fit to the histogram.
@@ -713,7 +713,7 @@ The following parameters are available:
      - Set to **true** to show the cumulative histogram of the data. Each fit for the various cluster size *N* will be added to the plot.
 
    * - Maximum likelihood.
-     - Set to **true** to use maximum likelihood estimation (MLE); otherise using least squares estimation (LSE).
+     - Set to **true** to use maximum likelihood estimation (MLE); otherwise using least squares estimation (LSE).
 
    * - Save histogram
      - Set to **true** to save the histogram to file.
@@ -725,7 +725,7 @@ The following parameters are available:
      - The number of frames used to generate the localisation data.
 
    * - Area
-     - The are of the region used to generate the localisation data.
+     - The area of the region used to generate the localisation data.
 
    * - Units
      - The units for the area.

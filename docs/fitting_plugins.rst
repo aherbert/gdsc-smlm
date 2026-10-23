@@ -31,7 +31,7 @@ Each frame of the image will be analysed and the localisations recorded in a tab
 Fitting Calibration
 ~~~~~~~~~~~~~~~~~~~
 
-The SMLM plugins require information about the system used to capture the images. This information is used is many of the analysis plugins. The information that is required is detailed below:
+The SMLM plugins require information about the system used to capture the images. This information is used in many of the analysis plugins. The information that is required is detailed below:
 
 .. list-table::
    :widths: 20 80
@@ -65,7 +65,7 @@ The SMLM plugins require information about the system used to capture the images
    * - Exposure Time
      - This is the length of time captured by each frame in milliseconds.
 
-       The exposure time is used in various analysis plugins. Input of an incorrect value will only effect the time scales reported in the results.
+       The exposure time is used in various analysis plugins. Input of an incorrect value will only affect the time scales reported in the results.
 
    * - Peak Width
      - Specify the expected width of the Gaussian function that approximates the Point Spread Function (PSF) Airy disk. This is how spread out the spot of light is when in focus. The width is specified in pixels.
@@ -386,7 +386,7 @@ Where:
      - The quantum efficiency defining the average number of photons converted to electrons.
 
    * - *EM gain*
-     - The electron multiplication (EM) gain defining the average increase in the number of electrons when passed through the EM amplication.
+     - The electron multiplication (EM) gain defining the average increase in the number of electrons when passed through the EM amplification.
 
    * - *gain*
      - The gain defining the average number of counts per electron.
@@ -399,7 +399,7 @@ Where:
 
        Counts are always positive and so are represented in image files using unsigned integers. So that negative values can be recorded (due to noise) an offset is added to all counts. This allows the noise to be analysed and modelled.
 
-When fitting image data the individual components factors that convert photons to counts can be combined to a total gain:
+When fitting image data the individual component factors that convert photons to counts can be combined to a total gain:
 
 .. math::
 
@@ -412,7 +412,7 @@ This creates a simplified model:
 
     \mathit{counts} = \mathit{photons} \times \mathit{total\:gain} + \mathit{read\:noise} + \mathit{bias}
 
-For ``EM-CCD`` and ``CCD`` camera which use a common system to amplify electrons these values are global. In this case a bias (offset zero level) is not always needed since the fitting process fits the background which will include the bias offset. The number of photons in the peak can then be calculated without needing to know the camera bias. This is applicable to the least squares fitting methods. If maximum likelihood fitting is used then the bias is required to accurately model the probability of the counts and the plugin will prompt the user to enter it.
+For ``EM-CCD`` and ``CCD`` cameras which use a common system to amplify electrons these values are global. In this case a bias (offset zero level) is not always needed since the fitting process fits the background which will include the bias offset. The number of photons in the peak can then be calculated without needing to know the camera bias. This is applicable to the least squares fitting methods. If maximum likelihood fitting is used then the bias is required to accurately model the probability of the counts and the plugin will prompt the user to enter it.
 
 For ``sCMOS`` cameras each pixel has its own readout electronics and a per pixel model is required. The model stores a gain, noise and bias for each pixel in the camera.
 
@@ -538,7 +538,7 @@ A ``Difference`` filter will process the image twice with the two configured fil
 
 The ``Difference`` filter is useful when there is a large background variation in the image since the subtraction of the second image is performing a local background subtraction. The spots are then ranked using their relative height over background. This would rank a spot with a height of 10 over a background of 50 as lower than a spot with a height of 30 over a background of 20. In contrast the ``Single`` filter would put the height 10 spot first as its total height is 60 compared to 50 for the other brighter spot. Since spots are processed in rank order until failure this would change the order of fitting when using a ``Single`` or ``Difference`` filter, and may dramatically change fitting results.
 
-A ``Jury`` filter will apply many filters to the image. Each filtered image is used to identify maxima. The pixel value from the filtered image from each maxima is added to a sum image. When all filters have been processed the maxima are then identified in the sum image. The ``Jury`` filter is therefore finding maxima in a combined image composed of pixels that are maxima. Analysis of simple ``Jury`` filters has shown that they have high recall but lower precision than single filters (e.g. a ``Single`` Mean with smoothing 1.3 verses a ``Jury`` of Mean 1, Mean 2 and Mean 3).
+A ``Jury`` filter will apply many filters to the image. Each filtered image is used to identify maxima. The pixel value from the filtered image from each maximum is added to a sum image. When all filters have been processed the maxima are then identified in the sum image. The ``Jury`` filter is therefore finding maxima in a combined image composed of pixels that are maxima. Analysis of simple ``Jury`` filters has shown that they have high recall but lower precision than single filters (e.g. a ``Single`` Mean with smoothing 1.3 versus a ``Jury`` of Mean 1, Mean 2 and Mean 3).
 
 The ``Jury`` filter is experimental and is not recommended. It is not performing a true `scale space <https://en.wikipedia.org/wiki/Scale_space>`_ feature detector.
 
@@ -713,7 +713,7 @@ For all the PSF functions gradients are available for the function parameters al
 
 **Note:**
 
-A previous of the software did not fit the Gaussian volume (signal) but the height of the Gaussian (amplitude). To convert the signal to the amplitude use the following conversion:
+A previous version of the software did not fit the Gaussian volume (signal) but the height of the Gaussian (amplitude). To convert the signal to the amplitude use the following conversion:
 
 .. math::
 
@@ -757,7 +757,7 @@ Additional parameters for each solver are outlined in the following sections.
 Least Squares Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Least-squares estimation is the processes of fitting a function (expected values) to a set of observed values. The fit attempts to minimise the sum of the squared difference:
+Least-squares estimation is the process of fitting a function (expected values) to a set of observed values. The fit attempts to minimise the sum of the squared difference:
 
 .. math::
 
@@ -765,7 +765,7 @@ Least-squares estimation is the processes of fitting a function (expected values
 
 where :math:`f_i` is the value of the PSF function at pixel *i* and :math:`g_i` is the actual image intensity at pixel *i*. This model does not require any camera calibration and is available if the camera type is unknown.
 
-The parameters for the function are updated until no improvement can be made. The estimation process uses the popular Levenberg-Marquardt (LVM) algorithm which uses the gradient of the function, i.e. how the function value will change with a change to the parameters, to choose how to modify the parameters. The method using a weighting factor (``lambda``) to decide the emphasis on the Hessian matrix of partial derivatives. This is a matrix of the gradient of the function with respect to two parameters for all combinations of parameters. The ``lambda`` parameter is updated by the algorithm based on the success of parameter changes.
+The parameters for the function are updated until no improvement can be made. The estimation process uses the popular Levenberg-Marquardt (LVM) algorithm which uses the gradient of the function, i.e. how the function value will change with a change to the parameters, to choose how to modify the parameters. The method uses a weighting factor (``lambda``) to decide the emphasis on the Hessian matrix of partial derivatives. This is a matrix of the gradient of the function with respect to two parameters for all combinations of parameters. The ``lambda`` parameter is updated by the algorithm based on the success of parameter changes.
 
 The ``LVM LSE`` requires the following additional parameters:
 
@@ -809,7 +809,7 @@ The ``LVM LSE`` requires the following additional parameters:
 LVM Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``LVM MLE`` solver applies the Levenberg-Marquardt (LVM) algorithm to the optimisation of a maximum likelihood equation for Poisson distributed data [Lawrence and Chromy, 2010]. The maximum likelihood estimation optimises:
+The ``LVM MLE`` solver applies the Levenberg-Marquardt (LVM) algorithm to the optimisation of a maximum likelihood equation for Poisson distributed data [Laurence and Chromy, 2010]. The maximum likelihood estimation optimises:
 
 .. math::
 
@@ -831,7 +831,7 @@ The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but
 Weighted Least Squares Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The weighted least-squares estimator uses the method of Ruisheng, *et al* (2017) to compute a modified Chi-squared expression assuming a Poisson noise model with Gaussian noise component. The fit attempts to minimise the weighted sum of the squared difference:
+The weighted least-squares estimator uses the method of Lin, *et al* (2017) to compute a modified Chi-squared expression assuming a Poisson noise model with Gaussian noise component. The fit attempts to minimise the weighted sum of the squared difference:
 
 .. math::
 
@@ -854,7 +854,7 @@ The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but
 Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Maximum Likelihood estimation is the processes of fitting a function (expected values) to a set of observed values by maximising the probability of the observed values. MLE requires that there is a probability model for each data point. The function is used to predict the expected value (E) of the data point and the probability model is used to specify the probability (likelihood) of the observed value (O) given the expected value. The total probability is computed by multiplying all the probabilities for all points together:
+Maximum Likelihood estimation is the process of fitting a function (expected values) to a set of observed values by maximising the probability of the observed values. MLE requires that there is a probability model for each data point. The function is used to predict the expected value (E) of the data point and the probability model is used to specify the probability (likelihood) of the observed value (O) given the expected value. The total probability is computed by multiplying all the probabilities for all points together:
 
 .. math::
 
@@ -924,7 +924,7 @@ This model is suitable for modelling a standard CCD camera.
 
 This model accounts for the photon shot noise and the read noise of the camera, i.e. when the number of electrons is read from the camera chip there can be mistakes. The read noise is normally distributed with a mean of zero.
 
-The two noise distributions can be combined by convolution of a Poisson and a Gaussian function to the produce the following model:
+The two noise distributions can be combined by convolution of a Poisson and a Gaussian function to produce the following model:
 
 .. math::
 
@@ -933,7 +933,7 @@ The two noise distributions can be combined by convolution of a Poisson and a Ga
 with
 *k* equal to the pixel count,
 *λ* equal to the expected pixel count and
-*σ* equal to the standard deviation of the Gaussian read noise. This model is evaluated using a saddle-point approximation as described in Snyder *et al* (1995); the implementation is adapted from the authors example source code.
+*σ* equal to the standard deviation of the Gaussian read noise. This model is evaluated using a saddle-point approximation as described in Snyder *et al* (1995); the implementation is adapted from the authors' example source code.
 
 No gradient is available for the function and so non-derivative based methods must be used during fitting.
 
@@ -943,7 +943,7 @@ No gradient is available for the function and so non-derivative based methods mu
 Poisson-Gamma-Gaussian Noise Model
 """"""""""""""""""""""""""""""""""
 
-This model is suitable for modelling a Electron Multiplying (EM) CCD camera.
+This model is suitable for modelling an Electron Multiplying (EM) CCD camera.
 
 This model accounts for the photon shot noise, the electron multiplication gain of the EM register and the read noise of the camera. The EM-gain is modelled using a Gamma distribution. The read noise is normally distributed with a mean of zero.
 
@@ -1091,7 +1091,7 @@ Search using active Covariance Matrix Adaptation Evolution Strategy (`CMA-ES <ht
 Conjugate Gradient
 """""""""""""""""""
 
-Search using a `non-linear conjugate gradient optimiser <https://en.wikipedia.org/wiki/Conjugate_gradient_method>`_. Two variants are provided for the update of the search direction: Fletcher-Reeves and Polak-Ribière, the later is the preferred option due to improved convergence properties.
+Search using a `non-linear conjugate gradient optimiser <https://en.wikipedia.org/wiki/Conjugate_gradient_method>`_. Two variants are provided for the update of the search direction: Fletcher-Reeves and Polak-Ribière, the latter is the preferred option due to improved convergence properties.
 
 This is a bounded search using simple truncation of coordinates at the bounds of the search space. Note that this method has poor robustness (fails to converge) on test data and is not recommended.
 
@@ -1178,11 +1178,11 @@ Which Fit Solver to Choose
 
 The most general fit solver is the least-squares estimator (``LVM LSE``). It does not require any specific information about the camera to perform fitting. For this reason this is the default fitting engine. It is also the fastest method.
 
-Maximum likelihood estimation (MLE) should return a solution that is more precise than least-squares estimation, i.e. has less variation between the fitted result and the actual answer. MLE should be operating at the theoretical limit for fitting given how much information is actually present in the pixels. This limit is the Cramér-Roa lower bound which expresses a lower bound on the variance of estimators of a deterministic parameter. MLE has also been proven to be robust to the position of the localisation within the pixel whereas least-squares estimation is less precise the further the localisation is from the pixel centre [Abraham *et al*, 2009]. Therefore MLE should be used if you would like the best possible fitting. However it requires camera calibration parameters which if configured incorrectly will lead to fitting results that are not as precise as the least-squares estimator.
+Maximum likelihood estimation (MLE) should return a solution that is more precise than least-squares estimation, i.e. has less variation between the fitted result and the actual answer. MLE should be operating at the theoretical limit for fitting given how much information is actually present in the pixels. This limit is the Cramér-Rao lower bound which expresses a lower bound on the variance of estimators of a deterministic parameter. MLE has also been proven to be robust to the position of the localisation within the pixel whereas least-squares estimation is less precise the further the localisation is from the pixel centre [Abraham *et al*, 2009]. Therefore MLE should be used if you would like the best possible fitting. However it requires camera calibration parameters which if configured incorrectly will lead to fitting results that are not as precise as the least-squares estimator.
 
 If you are fitting localisations with a high signal-to-noise ratio (SNR) then the Poisson model will work. At low SNR levels other sources of noise beyond shot noise become more significant and the fitting will produce better results if they are included in the model. The Poisson-Gaussian model will include the read noise in the likelihood function. For CCD-type cameras the Poisson-Gaussian model is enabled if the read noise is non-zero. For sCMOS cameras the Poisson-Gaussian model is always enabled. For either the Poisson model or Poisson-Gaussian model the recommended fitter is ``LVM MLE`` but other gradient-based methods are also available (``LVM WLSE``, ``Fast MLE``).
 
-For explicit modelling of the EM-gain of a EM-CCD camera the Poisson-Gamma-Gaussian model must be used with the ``MLE`` fit solver. This is slow as it is not a gradient based solver. This is recommended for very low SNR localisations. If the signal is moderate then similar results will be obtained using the much faster Poisson-Gaussian model which assumes the EM-gain does not significantly alter the shape of the Poisson distributed photon signal.
+For explicit modelling of the EM-gain of an EM-CCD camera the Poisson-Gamma-Gaussian model must be used with the ``MLE`` fit solver. This is slow as it is not a gradient based solver. This is recommended for very low SNR localisations. If the signal is moderate then similar results will be obtained using the much faster Poisson-Gaussian model which assumes the EM-gain does not significantly alter the shape of the Poisson distributed photon signal.
 
 Methods for determining the bias, read noise and gain of a CCD-type camera can be found in the sections :numref:`{number}: {name} <calibration_plugins:Mean-Variance Test>` and :numref:`{number}: {name} <calibration_plugins:EM-Gain Analysis>`. For per-pixel modelling of sCMOS cameras see section :numref:`{number}: {name} <calibration_plugins:Camera Model Manager>`.
 
@@ -1192,7 +1192,7 @@ Methods for determining the bias, read noise and gain of a CCD-type camera can b
 Multiple Peak Fitting Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-These parameters control how the algorithm handles fitting high density localisations where the region used for fitting a maxima may contain other maxima. Two scenarios are anticipated:
+These parameters control how the algorithm handles fitting high density localisations where the region used for fitting a maximum may contain other maxima. Two scenarios are anticipated:
 
 * A peak has other neighbour peaks that are close but separated
 * A peak has another peak overlapping (a double peak or doublet)
@@ -1201,9 +1201,9 @@ If only a single peak is fitted in a region containing neighbour peaks it is pos
 
 Note that peaks are processed in height order. Thus any candidate maxima with neighbours that are higher will be able to use the exact fit parameters of the neighbour. If they are not available then fitting of the neighbour failed. In this case, as with lower neighbour peaks, the initial parameters for the neighbour are estimated.
 
-Multi-peak fitting put constraints on the location parameters for the non-candidate peaks. The location is not allowed to move more than 1 pixel in x or y directions. This constraint should ensure that only the desired neighbour peak is fit. At the end of fitting if a neighbour was a previously fitted peak the parameters are discarded. If it has yet to be processed as a candidate then the parameters are validated and stored if the peak passes the configured peak filters. These will be used as the initial estimate for the peak when it is processed as a candidate peak. Note that candidates are always processed if they have validated parameters even if the stopping criteria for the current frame have been reached. This ensures that good fits are not lost, i.e. a second attempt will be made to fit any candidate that was successfully fit as a neighbour during multi-peak fitting.
+Multi-peak fitting puts constraints on the location parameters for the non-candidate peaks. The location is not allowed to move more than 1 pixel in x or y directions. This constraint should ensure that only the desired neighbour peak is fit. At the end of fitting if a neighbour was a previously fitted peak the parameters are discarded. If it has yet to be processed as a candidate then the parameters are validated and stored if the peak passes the configured peak filters. These will be used as the initial estimate for the peak when it is processed as a candidate peak. Note that candidates are always processed if they have validated parameters even if the stopping criteria for the current frame have been reached. This ensures that good fits are not lost, i.e. a second attempt will be made to fit any candidate that was successfully fit as a neighbour during multi-peak fitting.
 
-In the event that multiple fitting fails the algorithm reverts to fitting a single peak. During multi-peak fitting the possibility of duplicates fits can be eliminated using the ``Duplicate distance`` parameter.
+In the event that multiple fitting fails the algorithm reverts to fitting a single peak. During multi-peak fitting the possibility of duplicate fits can be eliminated using the ``Duplicate distance`` parameter.
 
 The case of overlapping peaks is handled by analysing the single peak to determine if it may be two peaks (a doublet). The system assumes the fitted function matches the data and a single peak is well approximated by a Gaussian. The difference between the function and the image data are the fit residuals. For a single peak the residuals will be random noise. For a doublet where two peaks are overlapping the fit residuals will not match and will be skewed: some parts will be too high, and some too low. The residuals are analysed to determine if there is a skewed arrangement around the centre point. The skew is calculated by dividing the region into quadrants (clockwise labelled ABCD), summing each quadrant and then calculating the difference of opposite quadrants divided by the sum of the absolute residuals:
 
@@ -1248,7 +1248,7 @@ The following multi-peak parameters can be configured:
 Filtering Parameters
 ~~~~~~~~~~~~~~~~~~~~
 
-These parameters control the fitted peaks that will be discarded. Note that even if a fit solver has produced parameters than have converged the parameters may not represent the image data. The parameters should always be validated.
+These parameters control the fitted peaks that will be discarded. Note that even if a fit solver has produced parameters that have converged the parameters may not represent the image data. The parameters should always be validated.
 
 Various output from the fitting process can be used to create descriptors to filter the peaks:
 
@@ -1257,7 +1257,7 @@ Various output from the fitting process can be used to create descriptors to fil
 * The background noise estimate is used to create a signal-to-noise ratio for the peak
 * The estimated (x,y) localisation precision of the peak
 
-Filtering can use a simple filter that allows setting filters for each of the descriptors of a peak. Alternatively a smart filter can be configured that uses an XML description of a filter. It is not possible to use a smart filter in conjuction with simple filtering. The smart filter can be very complex including combinations of individual filters. More descriptions of the available  filters can be found using the ``Create Filters`` plugin (see section :numref:`%s <analysis_plugins:Create Filters>`). Smart filters are created as output from the benchmarking plugins that identify optimum filters for a simulated training image. These filters will be saved as part of a fitting template. Note that the default smart filter uses the settings from the current simple filters for each peak descriptor.
+Filtering can use a simple filter that allows setting filters for each of the descriptors of a peak. Alternatively a smart filter can be configured that uses an XML description of a filter. It is not possible to use a smart filter in conjunction with simple filtering. The smart filter can be very complex including combinations of individual filters. More descriptions of the available  filters can be found using the ``Create Filters`` plugin (see section :numref:`%s <analysis_plugins:Create Filters>`). Smart filters are created as output from the benchmarking plugins that identify optimum filters for a simulated training image. These filters will be saved as part of a fitting template. Note that the default smart filter uses the settings from the current simple filters for each peak descriptor.
 
 The following filtering parameters can be configured:
 
@@ -1302,7 +1302,7 @@ The following filtering parameters can be configured:
        The method for computing the precision can be configured using the ``...`` button.
 
 
-If a precision threshold is specified then the plugin can calculate the precision of the localisation using the Mortensen *et al* (2010) formula (see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>`). The appropriate formula for either the Maximum Likelihood and Least Squares Estimator is used.
+If a precision threshold is specified then the plugin can calculate the precision of the localisation using the Mortensen *et al* (2010) formula (see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>`). The appropriate formula for either the Maximum Likelihood or Least Squares Estimator is used.
 
 The precision calculation requires the expected background noise at each pixel. The noise can be estimated two ways. The first method is to use the noise estimate for the entire frame. This is computed automatically during fitting for each frame or can be provided using the additional options (see section below). The second is to use the local background level that is computed when fitting the localisation. This background level is the background number of photons at the localisation position that will contribute photon shot noise to the pixels. The global noise estimate will be a composite of the average photon shot noise over the entire frame and the read noise of the camera. The local background will provide more contextual information about the localisation precision and may be preferred if fitting localisations where the image background is highly variable. If using a local background then the camera bias must be provided so that the background photons can be correctly determined.
 
@@ -1313,23 +1313,23 @@ Precision can also be computed from the fitted function by creating the Fisher i
     I(\theta)_{a,b} = \mathbf{E} \left[ \left( \frac{\partial \ln (L(x|\theta))}{\partial \theta_a} \right) \
                                         \left( \frac{\partial \ln (L(x|\theta))}{\partial \theta_b} \right) \right]
 
-This is the expected value of the combined partial derivatives of the log-likelihood function with respect to pairs of parameters :math:`\theta_a \: \theta_b`. The diagonal of the inverse of the matrix is the Cramér–Rao lower bounds (CRLB) on the variance of an unbaised estimator of :math:`\theta`. When both :math:`\theta_a` and :math:`\theta_b` refer to the coordinate parameter this is the CRLB for the localisation precision. To output a single precision value the two values are averaged.
+This is the expected value of the combined partial derivatives of the log-likelihood function with respect to pairs of parameters :math:`\theta_a \: \theta_b`. The diagonal of the inverse of the matrix are the Cramér–Rao lower bounds (CRLB) on the variance of an unbiased estimator of :math:`\theta`. When both :math:`\theta_a` and :math:`\theta_b` refer to the coordinate parameter this is the CRLB for the localisation precision. To output a single precision value the two values are averaged.
 
-The fisher information matrix can be computed for a Poisson process using [Smith *et al*, 2010]:
+The Fisher information matrix can be computed for a Poisson process using [Smith *et al*, 2010]:
 
 .. math::
 
     I(\theta)_{a,b} = \sum_i \left[ \frac {1}{f_i} \left( \frac{\delta f_i}{\delta \theta_a} \right) \
                                                    \left( \frac{\delta f_i}{\delta \theta_b} \right) \right]
 
-This was extended by Huang *et al* (2015) to account for per-observation Gaussian read noise by adding the variance to the function value:
+This was extended by Huang *et al* (2013) to account for per-observation Gaussian read noise by adding the variance to the function value:
 
 .. math::
 
     I(\theta)_{a,b} = \sum_i \left[ \frac {1}{f_i + var_i} \left( \frac{\delta f_i}{\delta \theta_a} \right) \
                                                            \left( \frac{\delta f_i}{\delta \theta_b} \right) \right]
 
-No full definition exists for the Fisher information for a EM-CCD camera. However Mortensen *et al* (2010) provide proof (see supplementary information) that the Fisher information for the localisation precision of a fitted Gaussian is doubled when modelling the likelihood of an EM-CCD camera rather than a CCD camera. Thus to compute the CRLB for a EM-CCD camera the above formula is used and the value multiplied by 2. This simplification produces values that correspond to those produced using the Mortensen formulas.
+No full definition exists for the Fisher information for an EM-CCD camera. However Mortensen *et al* (2010) provide proof (see supplementary information) that the Fisher information for the localisation precision of a fitted Gaussian is doubled when modelling the likelihood of an EM-CCD camera rather than a CCD camera. Thus to compute the CRLB for an EM-CCD camera the above formula is used and the value multiplied by 2. This simplification produces values that correspond to those produced using the Mortensen formulas.
 
 
 .. index:: Results Parameters
@@ -1337,7 +1337,7 @@ No full definition exists for the Fisher information for a EM-CCD camera. Howeve
 Results Parameters
 ~~~~~~~~~~~~~~~~~~
 
-The results parameters control where the list of localisations will be recorded. Parameters have been grouped into table for different outputs: Table; Image; File; and Memory.
+The results parameters control where the list of localisations will be recorded. Parameters have been grouped into tables for different outputs: Table; Image; File; and Memory.
 
 .. list-table:: General results parameters
    :widths: 20 80
@@ -1441,7 +1441,7 @@ The results parameters control where the list of localisations will be recorded.
        Creates a scale using the results pixel size divided by the output pixel size, e.g. a 64x100 image with a calibration of 100nm/pixel and an output pixel size of 10nm will draw a 640x1000 super resolution image (with an effective scale of 10).
 
    * - LUT
-     - Specify the look-up table used colour the image.
+     - Specify the look-up table used to colour the image.
 
 .. list-table:: File results parameters
    :widths: 20 80
@@ -1476,7 +1476,7 @@ The results parameters control where the list of localisations will be recorded.
    * - Save in memory
      - Store all results in memory.
 
-       This is very fast and is the default option applied when no other results outputs are chosen (preventing the loss of results). Results in memory can be accessed by other plugins, for example the ``Result Manager`` can convert them to file or images.
+       This is very fast and is the default option applied when no other results outputs are chosen (preventing the loss of results). Results in memory can be accessed by other plugins, for example the ``Results Manager`` can convert them to file or images.
 
        The memory results will be named using the input image title. If a results set already exists with the same name then it will be replaced.
 
@@ -1495,13 +1495,13 @@ The preview will respect the ``Log progress`` and ``Show deviations`` options on
 
 If the settings are invalid then an error message is written to the ``ImageJ`` log window and the current preview output will be removed. Correcting the settings will redisplay the preview output.
 
-The preview option changes the dialog from a blocking dialog (always on top) to a non-blocking dialog (which allows interaction with the other ``ImageJ`` windows). This allows the current image frame to be changed, and the results windows to be adjusted. The preview only responds to changes of the current frame in the target window; other changes are ignored. The preview is initialised using the ROI bounds present when the plugin is executed. Any ROI changes will be ignored. To change the ROI requires restarting the plugin. If the target window is closed then the preview will shutdown and running the ``Peak Fit`` plugin using the ``OK`` button will do nothing.
+The preview option changes the dialog from a blocking dialog (always on top) to a non-blocking dialog (which allows interaction with the other ``ImageJ`` windows). This allows the current image frame to be changed, and the results windows to be adjusted. The preview only responds to changes of the current frame in the target window; other changes are ignored. The preview is initialised using the ROI bounds present when the plugin is executed. Any ROI changes will be ignored. To change the ROI requires restarting the plugin. If the target window is closed then the preview will shut down and running the ``Peak Fit`` plugin using the ``OK`` button will do nothing.
 
 .. note::
 
     The preview mode does not support the additional options for interlaced or integrated frames (see :numref:`{name} <fitting_plugins:Additional Fitting Options>`).
 
-    The preview performs candidate identification, fitting and then filitering. To perform only candidate identification use the :numref:`{name} <fitting_plugins:Spot Finder (Preview)>` plugin to provide an interactive view of the candidates  identified using the configured spot filter.
+    The preview performs candidate identification, fitting and then filtering. To perform only candidate identification use the :numref:`{name} <fitting_plugins:Spot Finder (Preview)>` plugin to provide an interactive view of the candidates  identified using the configured spot filter.
 
 
 .. index:: Interactive Results Table
@@ -1533,7 +1533,7 @@ Image Examples
 
 :numref:`Table %s <table_example_images>` shows examples of different image rendering methods. The ``Localisations`` and ``Intensity`` methods are able to plot the location of the fibres to a higher resolution than the original average intensity projection. The ``Point Spread Function`` (PSF) plot shows a very similar width for the fibres as the original image. However there has been a significant reduction in background noise since any signals not identified as a localisation are removed.
 
-The ``Localisations`` image method can be used to directly count localisations in an area, for example counting localisations in regions of a cell. This is only valid if the image has not been rendered using the ``Equalised`` option since that adjusts the pixels values to increase contrast. A region can be marked on the image using any of ``ImageJ``'s area ROI tools. The localisation count can be measured by summing the pixel intensity in the region. This is performed using the ``Analyze > Measure`` command (``Ctrl + M``). Note: Ensure that the ``Integrated density`` measurement is selected in the ``ImageJ`` ``Analyze > Set Measurements...`` dialog.
+The ``Localisations`` image method can be used to directly count localisations in an area, for example counting localisations in regions of a cell. This is only valid if the image has not been rendered using the ``Equalised`` option since that adjusts the pixel values to increase contrast. A region can be marked on the image using any of ``ImageJ``'s area ROI tools. The localisation count can be measured by summing the pixel intensity in the region. This is performed using the ``Analyze > Measure`` command (``Ctrl + M``). Note: Ensure that the ``Integrated density`` measurement is selected in the ``ImageJ`` ``Analyze > Set Measurements...`` dialog.
 
 .. _table_example_images:
 .. list-table:: Example super-resolution images using different rendering methods
@@ -1584,7 +1584,7 @@ The standard ``Peak Fit`` plugin allows the user to set all the parameters that 
 
        If **true** the entire image frame is used to estimate the image noise; otherwise the ROI crop is used to estimate the noise.
 
-       The default is **true**. This ensure the signal-to-noise ratio is consistent when fitting the same localisations as part of the entire frame or within an ROI.
+       The default is **true**. This ensures the signal-to-noise ratio is consistent when fitting the same localisations as part of the entire frame or within an ROI.
 
    * - Interlaced Data
      - Image input
@@ -1624,7 +1624,7 @@ The standard ``Peak Fit`` plugin allows the user to set all the parameters that 
 
    * - Show processed frames
      - Image output
-     - Show a new image stack (labelled ``Processed frames``) that show the images that were passed to the fitting engine. This may be a crop of the original image using the ROI.
+     - Show a new image stack (labelled ``Processed frames``) that shows the images that were passed to the fitting engine. This may be a crop of the original image using the ROI.
 
        This option is useful when using the ``Interlaced Data`` or ``Integrate Frames`` options. Each slice will be labelled with the start and end frame of the original image used to produce the image data.
 
@@ -1638,7 +1638,7 @@ The standard ``Peak Fit`` plugin allows the user to set all the parameters that 
 Interlaced Data
 ~~~~~~~~~~~~~~~
 
-The additional fitting options allow for interlaced data where not all the frames in the image should be analysed. Interlaced data must follow a regular pattern where a repeating block of frames should be processed followed by a block of frames to ignore. The plugin must know the size of each block and the first frame that must be processed. If the ``Interlaced Data`` option is selected then an addition dialog will be shown (:numref:`Figure %s <fig_peak_fit_interlaced_data_dialog>`).
+The additional fitting options allow for interlaced data where not all the frames in the image should be analysed. Interlaced data must follow a regular pattern where a repeating block of frames should be processed followed by a block of frames to ignore. The plugin must know the size of each block and the first frame that must be processed. If the ``Interlaced Data`` option is selected then an additional dialog will be shown (:numref:`Figure %s <fig_peak_fit_interlaced_data_dialog>`).
 
 .. _fig_peak_fit_interlaced_data_dialog:
 .. figure:: images/peak_fit_interlaced_data_dialog.png
@@ -1667,7 +1667,7 @@ The additional fitting options allow for interlaced data where not all the frame
 
 The ``Interlaced Data`` option is fully compatible with the ``Integrate Frames`` option. However note that the data is read from the interlaced frames and then aggregated. None of the skipped frames will be aggregated. The user must simply select how many consecutive data frames to integrate.
 
-The use of the interlaced and integrate options together can produce results that have a larger gap between the start and end frame that the number of frames that were integrated. For example if the plugin is set to fit 2 out of 3 frames but integrate 4 frames then any fit results from the first processed image will have a start frame of 1 and an end frame of 5.
+The use of the interlaced and integrate options together can produce results that have a larger gap between the start and end frame than the number of frames that were integrated. For example if the plugin is set to fit 2 out of 3 frames but integrate 4 frames then any fit results from the first processed image will have a start frame of 1 and an end frame of 5.
 
 
 .. index:: ! Template Manager
@@ -1815,7 +1815,7 @@ By default all the images will be processed as input. If the extra options are e
 
     Peak Fit (Series) sequence options dialog
 
-When different options are selected the plugin updates the count of the number of images and frames that will be processed. The parameters that effect what images are loaded are show below:
+When different options are selected the plugin updates the count of the number of images and frames that will be processed. The parameters that affect what images are loaded are shown below:
 
 .. list-table::
    :widths: 20 80
@@ -1827,7 +1827,7 @@ When different options are selected the plugin updates the count of the number o
    * - Number of images
      - Specify the maximum number of images to load.
 
-   * - Staring image
+   * - Starting image
      - The first image in the sequence. The sequence begins at 1.
 
    * - Increment
@@ -1867,7 +1867,7 @@ Spot Finder (Series)
 
 Allows the ``Spot Finder`` plugin to be run on a folder containing many images. This allows the code to run on images that are too large to fit into memory or have been imaged in a sequence.
 
-The plugins allows the user to select a folder containing source images. This works using the same method as the ``Peak Fit (Series)`` plugin. More details on the selection options can be found in section :numref:`{number}: {name} <fitting_plugins:Peak Fit (Series)>`.
+The plugin allows the user to select a folder containing source images. This works using the same method as the ``Peak Fit (Series)`` plugin. More details on the selection options can be found in section :numref:`{number}: {name} <fitting_plugins:Peak Fit (Series)>`.
 
 
 .. index:: ! Spot Finder Preview
@@ -1930,7 +1930,7 @@ If the current image is a simulated image and there is associated ground truth d
      - The fraction of the match distance for a perfect match. When less than 100% there is a lower and upper match distance. Any spot within the lower distance to a localisation scores a perfect match of 1. Above the upper distance is no match. In between the two the match is counted as both a match and not a match using a weighting so the total is 1. The effect is that the match statistics are computed as if an average of the scores using all distances between the lower and upper match distance.
 
    * - Multiple matches
-     - Allow a candidate to match more than one localisation. Note that this is relevant for high density samples where true localisations may overlap and appear as a single larger spot. A candidate that matches multiple localisations has the match scores summed (which may be above 1) and the false positive score for the candidate is the larger of 1 minus the matched score, or zero. Thus a candidates false positive score cannot be negative but the true positive score may be above one.
+     - Allow a candidate to match more than one localisation. Note that this is relevant for high density samples where true localisations may overlap and appear as a single larger spot. A candidate that matches multiple localisations has the match scores summed (which may be above 1) and the false positive score for the candidate is the larger of 1 minus the matched score, or zero. Thus a candidate's false positive score cannot be negative but the true positive score may be above one.
 
    * - Show TP
      - Show the true positives on the overlay in green.
@@ -1964,7 +1964,7 @@ Shows the pixel image after the spot filter has been applied to the current imag
 
 In the default mode if the ``Top N`` option is active then the overlay will include spots for the top N candidates. These are shown using a colour map of intensities that avoids white and black extremes. This is for use over a greyscale image.
 
-If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is marked using a circle. This can be used in conjuction with the candidate intensity plot to find spots with a selected intensity by adjusting the selected candidate based on the plot profile.
+If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is marked using a circle. This can be used in conjunction with the candidate intensity plot to find spots with a selected intensity by adjusting the selected candidate based on the plot profile.
 
 When ground-truth data is available the ``Top N`` option is not active. The overlay will optionally show true positives in green and false positives in red.
 
@@ -2105,9 +2105,9 @@ The following parameters are available:
        This is much faster than a standard search of each 2N+1 region around every pixel. The algorithm finds the maximum in each of the non-overlapping N+1 sized blocks in the image. Only the single maxima from each block is compared to the remaining pixels in the 2N+1 region.
 
    * - Neighbour check
-     - Perform addition checks on neighbours when identifying maxima.
+     - Perform additional checks on neighbours when identifying maxima.
 
-       The block-find algorithm defines a maxima as any pixel with no other *higher* pixels within a radius. This can over-count maxima if they are *equal* height. If enabled this checks adjacent blocks for equal height maxima, eliminating any maxima with neighbours that are already a maxima.
+       The block-find algorithm defines a maximum as any pixel with no other *higher* pixels within a radius. This can over-count maxima if they are *equal* height. If enabled this checks adjacent blocks for equal height maxima, eliminating any maxima with neighbours that are already a maximum.
 
    * - Border
      - The border size in pixels to ignore when identifying maxima.
@@ -2131,7 +2131,7 @@ The following parameters are available:
 
    * - PSF
      - *   ``Circular``: Fits X,Y centre, combined X/Y deviation and amplitude.
-       *   ``Eliptical``: Fits X,Y centre, individual X/Y deviation and amplitude.
+       *   ``Elliptical``: Fits X,Y centre, individual X/Y deviation and amplitude.
        *   ``Free``: Fits X,Y centre, individual X/Y deviation, rotation angle and amplitude.
 
    * - Fit Background
@@ -2233,14 +2233,14 @@ Run the fitting engine on the current image to generate pass/fail data for seque
      - The number of frames to process from the image.
 
    * - Fail count limit
-     - The upper limit for the fail count. Fitting a frame will stop when the number of consecutive failures reach this limit.
+     - The upper limit for the fail count. Fitting a frame will stop when the number of consecutive failures reaches this limit.
 
    * - Save
      - If **true** the fail count data will be saved to file.
 
 When the options are selected a second dialog is shown to configure the fit engine. This uses the same options as the ``Peak Fit`` plugin (see section :numref:`%s <fitting_plugins:Peak Fit>`).
 
-The fitting engine will be run on the selected frames from the image and the fail count data saved to memory. If ``Save`` was enabled then a dialog will be present to save the data to file.
+The fitting engine will be run on the selected frames from the image and the fail count data saved to memory. If ``Save`` was enabled then a dialog will be presented to save the data to file.
 
 
 .. index:: Load Fail Count Data
@@ -2284,24 +2284,24 @@ The following plots are constructed:
      - Description
 
    * - Pass Count
-     - The pass count verses the candidate ID.
+     - The pass count versus the candidate ID.
 
    * - Pass Rate
-     - The pass rate verses the candidate ID:
+     - The pass rate versus the candidate ID:
 
        :math:`\mathit{pass\:rate} = \frac{\sum \mathit{pass} }{n}`
 
    * - Consecutive Fail Count
-     - A count of consecutive fails verses the candidate ID. This resets to zero after a pass.
+     - A count of consecutive fails versus the candidate ID. This resets to zero after a pass.
 
    * - Rolling Fail Count
-     - The count of the number of fails within a rolling window verses the candidate ID.
+     - The count of the number of fails within a rolling window versus the candidate ID.
 
    * - Weighted Fail Count
-     - The weighted fail count verses the candidate ID. For each result the fail count is updated by adding the ``Fail weight`` for a fail or subtracting the ``Pass weight`` for a pass.
+     - The weighted fail count versus the candidate ID. For each result the fail count is updated by adding the ``Fail weight`` for a fail or subtracting the ``Pass weight`` for a pass.
 
    * - Resetting Fail Count
-     - The resetting fail count verses the candidate ID. For each result the fail count is incremented for a fail or reset for a pass by applying the ``Reset fraction``:
+     - The resetting fail count versus the candidate ID. For each result the fail count is incremented for a fail or reset for a pass by applying the ``Reset fraction``:
 
        :math:`\mathit{count} = \mathit{count} \times \mathit{reset\:fraction}`
 
@@ -2524,7 +2524,7 @@ The following option parameters are available:
 Advanced Spot Fit Settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Currently it is not possible to change the fit settings. This allows simple configuration of the tool without having to understand the underlying fitting engine. Since the tool only fits spots that are visually identified it reasonable to assume the spot is well defined and under this scenario the default fit settings are robust.
+Currently it is not possible to change the fit settings. This allows simple configuration of the tool without having to understand the underlying fitting engine. Since the tool only fits spots that are visually identified it is reasonable to assume the spot is well defined and under this scenario the default fit settings are robust.
 
 If the image data has been acquired using a sCMOS camera then the data should be pre-processed before fitting as each pixel will have a different bias and gain. Use the ``Camera Model Manager`` plugin to remove the per-pixel bias and gain from the image (see section :numref:`%s <calibration_plugins:Camera Model Manager>`). The ``Spot Fit Tool`` can then be used to perform fitting using least squares estimation.
 

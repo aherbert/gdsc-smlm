@@ -66,7 +66,7 @@ Recall can be interpreted probabilistically as the chance that a randomly select
 Precision
 ---------
 
-Precision measures the confidence of the predicted points. It is also known as the Positive Predicted Value
+Precision measures the confidence of the predicted points. It is also known as the Positive Predictive Value
 (PPV)
 .
 
