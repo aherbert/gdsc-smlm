@@ -664,10 +664,10 @@ The following table lists the available clustering algorithms:
        This algorithm should return the same results as the ``Centroid-linkage`` algorithm (but with different run-time performance).
 
    * - Centroid-linkage (Distance priority)
-     - Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are compared using time and distance thresholds with priority on the closest time gap (within the distance threshold).
+     - Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are compared using time and distance thresholds with priority on the closest distance gap (within the time threshold).
 
    * - Centroid-linkage (Time priority)
-     - Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are compared using time and distance thresholds with priority on the closest distance gap (within the time threshold).
+     - Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are compared using time and distance thresholds with priority on the closest time gap (within the distance threshold).
 
    * - Particle centroid-linkage (Distance priority)
      - Hierarchical centroid-linkage clustering by joining the closest pair of any single particle and another single or cluster. Clusters are not joined and can only grow when particles are added.
