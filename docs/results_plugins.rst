@@ -1326,7 +1326,7 @@ The ``Free Filter`` plugin provides a powerful tool for customising the subset o
 
     <OrFilter>
       <filter1 class="AndFilter">
-        <filter1 class="SNRFilter" snr="10.0"/>
+        <filter1 class="SnrFilter" snr="10.0"/>
         <filter2 class="PrecisionFilter" precision="30.0"/>
       </filter1>
       <filter2 class="TraceFilter" d="0.5" t="1"/>
