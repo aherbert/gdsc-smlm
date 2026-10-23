@@ -3336,7 +3336,7 @@ The process iterates until the range cannot be reduced in size, or convergence i
      - The number of random samples to seed the initial iteration. These are samples taken using a uniform sample from within the parameter range.
 
    * - Parameter name
-     - Each filter parameter has a boolean flag to state if it is enabled. If **true** then the parameter will be set to the disabled value for the filter. Otherwise the range for the parameter will be enumerated to create filters.
+     - Each filter parameter has a boolean flag to state if it is enabled. If **false** then the parameter will be set to the disabled value for the filter. Otherwise the range for the parameter will be enumerated to create filters.
 
 
 .. index:: Enrichment Search
@@ -3374,7 +3374,7 @@ At each iteration the search will randomly sample points in the configured searc
      - The amount of additional range to add to the range for each dimension.
 
    * - Parameter name
-     - Each filter parameter has a boolean flag to state if it is enabled. If **true** then the parameter will be set to the disabled value for the filter. Otherwise the range for the parameter will be sampled to create filters.
+     - Each filter parameter has a boolean flag to state if it is enabled. If **false** then the parameter will be set to the disabled value for the filter. Otherwise the range for the parameter will be sampled to create filters.
 
 
 .. index:: Step Search

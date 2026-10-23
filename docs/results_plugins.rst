@@ -791,7 +791,7 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
      - The minimum length of each trace. Any trace shorter than this will not be exported.
 
    * - Max length
-     - The maximum length of each trace. Any trace longer than this will not be split into sub-traces. This option can be used to increase the number of short traces.
+     - The maximum length of each trace. Any trace longer than this will be split into sub-traces. This option can be used to increase the number of short traces.
 
    * - Max jump
      - The maximum jump allowed within a trace. If a jump between frames is larger than this then the trace will be split into two sub-traces and exported with a unique Id. Set to zero to disable (no splitting). Set to one to require continuous tracks.
