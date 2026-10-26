@@ -324,8 +324,9 @@ public class TrackDiffusionAnalysis implements PlugIn {
         final UniformRandomProvider rng = parentRng.jump();
         // If no restarts then there is no requirement for a half-life.
         // The half-life parameter can be zero and the track will reach max T.
+        // Exponential lifetime: mean = half-life / ln(2)
         final ContinuousSampler lifeSampler = halfLife <= 0 ? () -> maxT
-            : SamplerUtils.createExponentialSampler(parentRng.jump(), halfLife);
+            : SamplerUtils.createExponentialSampler(parentRng.jump(), halfLife / Math.log(2));
         // Use an optional detector curve
         final DoublePredicate dof;
         if (settings.getUseDetector()) {

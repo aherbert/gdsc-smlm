@@ -402,8 +402,9 @@ public class DiffusionDepthOfField implements PlugIn {
           SamplerUtils.createNormalizedGaussianSampler(rng.jump());
       // If no restarts then there is no requirement for a half-life.
       // The half-life parameter can be zero and the track will reach max T.
-      final ContinuousSampler lifeSampler =
-          halfLife <= 0 ? () -> maxT : SamplerUtils.createExponentialSampler(rng.jump(), halfLife);
+      // Exponential lifetime: mean = half-life / ln(2)
+      final ContinuousSampler lifeSampler = halfLife <= 0 ? () -> maxT
+          : SamplerUtils.createExponentialSampler(rng.jump(), halfLife / Math.log(2));
       // Use an optional detector curve
       final DoublePredicate dof;
       if (settings.useDetector) {
