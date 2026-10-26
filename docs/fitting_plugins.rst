@@ -1677,7 +1677,7 @@ Template Manager
 
 The ``Template Manager`` provides management of the configuration templates that can be used in other fitting plugins to choose a pre-configured set of options. Templates can be used to pre-configure settings for the software for different microscope equipment, or different fitting scenarios (e.g. high density STORM data or low density PALM data).
 
-Note: Templates can be saved using the ``Fit Configuration`` plugin (section :numref:`%s) <fitting_plugins:Fit Configuration>` or the benchmarking workflow (section :numref:`{number}: {name} <model_plugins:Optimisation Overview>`).
+Note: Templates can be saved using the ``Fit Configuration`` plugin (section :numref:`%s <fitting_plugins:Fit Configuration>`) or the benchmarking workflow (section :numref:`{number}: {name} <model_plugins:Optimisation Overview>`).
 
 When the ``Template Manager`` plugin is run a dialog allows a choice from the following options:
 
