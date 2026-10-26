@@ -750,7 +750,7 @@ The simulation requires the following parameters:
 
 The simulation will record the per-pixel model to a file named ``perPixelSimulation.tif`` in the output directory. This is a 3 frame stack of 32-bit float data representing the offset, variance and gain for each pixel. The slices are appropriately labelled.
 
-Simulated images are created using the specified ``Frames``  for output photon level; each level will be written to the directory named ``photonsN`` where ``N`` is the photons. Images are written as a series of tif stacks of 10 frames. The data for a pixel is computed using a random Poisson sample of the number of photons multiplied by the gain and added to a random Gaussian sample using a mean of the pixel offset and variance of the pixel variance:
+Simulated images are created using the specified ``Frames``  for output photon level; each level will be written to the directory named ``photonNNN`` where ``NNN`` is the photons as a 3-digit number. Images are written as a series of tif stacks of 10 frames. The data for a pixel is computed using a random Poisson sample of the number of photons multiplied by the gain and added to a random Gaussian sample using a mean of the pixel offset and variance of the pixel variance:
 
 .. math::
 
@@ -868,7 +868,7 @@ The following table lists the camera model functions, their intended purpose and
      - CCD/sCMOS
      - Convolves the Poisson PMF with a Gaussian PMF. The Gaussian PMF is generated using an integration of the PDF over integer intervals, i.e. x +/- 0.5 for all x required in the convolution.
 
-       This is the most accurate camera model function.
+       This is the most accurate CCD/sCMOS camera model function.
 
    * - Poisson+Gaussian approximation
      - CCD/sCMOS
@@ -908,7 +908,7 @@ The following table lists the camera model functions, their intended purpose and
      - EM-CCD
      - Computes the Poisson-Gamma PMF and convolves with a Gaussian PDF. The integral over the effective range of the Gaussian kernel is computed with Legendre-Gauss integration.
 
-       This is the most accurate camera model function.
+       This is the most accurate EM-CCD camera model function.
 
    * - Poisson+Gamma*Gaussian convolution
      - EM-CCD
@@ -1551,7 +1551,7 @@ Note that this is for absorbing boundaries. In practice a molecule may diffuse o
 Analysis
 ~~~~~~~~
 
-The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z/2, \Delta z/2]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps, or for the molecule lifetime sampled from an exponential with the specified mean lifetime. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. If restarts are allowed then the diffusion continues until the lifetime expires. If the molecule re-enters the depth of field a new track is started. The fraction of molecules within the depth of field at each time step of a track is computed. By simulating a range of diffusion coefficients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
+The coefficients :math:`a` and :math:`b` can be determined from simulations. A configured number of molecules are uniformly placed through the depth of field :math:`[-\Delta z/2, \Delta z/2]`. One dimensional Brownian diffusion using the specified diffusion coefficient is simulated in the z-axis for a configured number of time steps, or for the molecule lifetime sampled from an exponential distribution with the specified half-life. If the molecule exits the depth of field it may re-enter within the given gap distance, otherwise it is lost. If restarts are allowed then the diffusion continues until the lifetime expires. If the molecule re-enters the depth of field a new track is started. The fraction of molecules within the depth of field at each time step of a track is computed. By simulating a range of diffusion coefficients a series of curves of the fraction remaining after a set time is generated. The parameters :math:`a` and :math:`b`, used to generate a corrected depth of field :math:`\Delta z_{\text{corr}}`, are fitted using least squares fitting to the proportion remaining computed using :math:`\mathit{P}(\Delta t, \Delta z_{\text{corr}}, D)`.
 
 Fitting is performed using random starting points for the coefficients within a specified range. Fitted coefficients are not bound by this range but they must be positive. A number of repeats can be configured. If the number of repeats is set to zero then fitting is not performed and the plugin will display results using the configured minimum initial value for coefficient estimates. This option can be used to show the effect of absorbing boundaries if coeffecients are zero, or used to plot specific coefficient values.
 
@@ -1589,7 +1589,7 @@ The plugin has the following parameters:
      - If ``true`` then molecules that are outside the depth-of-field for the maximum ``gap`` distance can re-enter the depth-of-field and start a new track. Otherwise the molecule is lost. Restarts allows an increase in tracks starting close to the edge of the depth-of-field.
 
    * - Half-life
-     - The molecule half-life. This is required when using ``Restarts`` to allow the molecules to bleach. Set to zero to disable when not using ``Restarts``.
+     - The molecule half-life. Lifetimes are sampled from an exponential distribution with mean :math:`t_{1/2} / \ln 2`. This is required when using ``Restarts`` to allow the molecules to bleach. Set to zero to disable when not using ``Restarts``.
 
    * - Min D
      - The minimum diffusion coefficient in the simulation.
@@ -1621,7 +1621,7 @@ The plugin has the following parameters:
    * - Negative B
      - If ``true`` then coefficient b is allowed to be negative. This effectively allows the observed depth-of-field :math:`\Delta z + b` to be smaller than the simulation depth-of-field. It is useful when using a detector curve that may cover the depth-of-field with a partial detection probability.
 
-The simulated fraction remaining is plotted using lines with the fitted probability shown as points (:numref:`Figure %s <fig_depth_of_field_probability>`). Note that the corrected depth of field is an approximation and the fitted points may both under-estimate and over-estimate the fraction remaining depending on the diffusion time. The effect of no correction can be viewed using zero for the number of fit repeats.
+The simulated fraction remaining is plotted using points with the fitted probability shown as lines (:numref:`Figure %s <fig_depth_of_field_probability>`). Note that the corrected depth of field is an approximation and the fitted points may both under-estimate and over-estimate the fraction remaining depending on the diffusion time. The effect of no correction can be viewed using zero for the number of fit repeats.
 
 .. _fig_depth_of_field_probability:
 .. figure:: images/depth_of_field_probability.png

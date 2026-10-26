@@ -191,8 +191,6 @@ One additional image parameter is available for ``Image`` output if the extra op
 
        If set higher than 1 then N frames will be collated together into one output image. Use this option to produce a time-slice stack through your results at a specified collation interval
 
-       This option is not available during live fitting since the result must be sorted. This is not possible with multi-threaded code as the results can appear out of order.
-
 
 .. index:: File Output
 
@@ -958,7 +956,7 @@ NOBIAS Localisations
 
 The `NOBIAS <https://github.com/BiteenMatlab/NOBIAS>`_ localisations file format. This is a Matlab matrix file containing the track IDs and jump steps in the X and Y dimensions.
 
-The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. The export uses the original track IDs from the tracks, not a sequence starting from 1. A second array named ``obs`` of 2 by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`. For convenience an array named ``Frame`` is added to the data corresponding to the start frame of each jump observation. This allows the jump to be identified in the original results using the key ``Frame:ID``, facilitating export of the NOBIAS results with categories assigned to each result.
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. The export uses the original track IDs from the tracks, not a sequence starting from 1. A second array named ``obs`` of 2 rows by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`. For convenience an array named ``Frame`` is added to the data corresponding to the start frame of each jump observation. This allows the jump to be identified in the original results using the key ``Frame:ID``, facilitating export of the NOBIAS results with categories assigned to each result.
 
 Note: The apparent transpose of columns and rows for the two named fields matches the example data format provided by NOBIAS. The ``TrID`` matrix is used as a 1D array and columns*rows must equal `n`.
 
@@ -974,7 +972,7 @@ The cell contents can be displayed for verification using::
 
 Execute NOBIAS HDP-HMM Module using::
 
-    out = NOBIAS(input.data,'pixelsize',input.Params.pixelsize,'frametime',Params.frametime)
+    out = NOBIAS(input.data,'pixelsize',input.Params.pixelsize,'frametime',input.Params.frametime)
 
 Export the state sequence as categories using::
 
@@ -1078,7 +1076,7 @@ The plugin analyses the selected results and computes limits for each of the fil
      - The minimum signal-to-noise ratio.
 
    * - Min Precision
-     - The minimum precision.
+     - The precision threshold. Results with a precision above this value are removed.
 
    * - Min Width
      - The minimum width for a localisation. Width assumes a Gaussian 2D PSF and uses the standard deviation of the Gaussian.
@@ -1282,7 +1280,7 @@ The following filters are available:
      - Filter the results using an upper precision threshold. The estimated noise is used to set the background noise (see :numref:`localisation_precision:Localisation Precision`).
 
    * - PrecisionFilter2
-     - As per the ``PrecisionFilter`` but the estimated noise is used to set the background noise (see :numref:`localisation_precision:Localisation Precision`).
+     - As per the ``PrecisionFilter`` but the fitted background is used to set the background noise (see :numref:`localisation_precision:Localisation Precision`).
 
    * - SnrHysteresisFilter
      - Filter results using a signal-to-noise ratio (SNR) threshold. Any results above the upper SNR limit are included. Any results below the lower SNR limit are excluded. Any results between the limits (candidates) are included only if they can be traced through time, potentially via other candidates, to a valid result.
@@ -1304,15 +1302,15 @@ The following filters are available:
      - Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidean shift, precision and z-depth. The estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
 
    * - MultiFilter2
-     - As per the ``MultiFilter`` but the fitted background is used to set the background noise for the precision see :numref:`localisation_precision:Localisation Precision`).
+     - As per the ``MultiFilter`` but the fitted background is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
 
    * - MultiHysteresisFilter
-     - Filter results using multiple thresholds: Signal, SNR, width, shift, and precision. The fitted background is used to set the background noise for the precision see :numref:`localisation_precision:Localisation Precision`). Any results within the strict limits are included. Any results outside the weak limits are excluded. Any results between the limits (candidates) are included only if they can be traced through time, potentially via other candidates, to a valid result.
+     - Filter results using multiple thresholds: Signal, SNR, width, shift, and precision. The estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`). Any results within the strict limits are included. Any results outside the weak limits are excluded. Any results between the limits (candidates) are included only if they can be traced through time, potentially via other candidates, to a valid result.
 
        The distance used for tracing is the search distance multiplied by the average precision of the candidates.
 
    * - MultiHysteresisFilter2
-     - As per the ``MultiHysteresisFilter`` but the estimated noise is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
+     - As per the ``MultiHysteresisFilter`` but the fitted background is used to set the background noise for the precision (see :numref:`localisation_precision:Localisation Precision`).
 
    * - AndFilter
      - Filter results using the combination of two filters. Results must pass both filters.
@@ -1332,7 +1330,7 @@ The ``Free Filter`` plugin provides a powerful tool for customising the subset o
       <filter2 class="TraceFilter" d="0.5" t="1"/>
     </OrFilter>
 
-Note how the combined filters require that the contained filters are specified in a ``<filter>`` tag and the type of filter is specified using the ``class`` attribute. The filter parameters are specified using attributes.
+Note how the combined filters require that the contained filters are specified in numbered ``<filter1>``, ``<filter2>`` tags and the type of filter is specified using the ``class`` attribute. The filter parameters are specified using attributes.
 
 When the filter is run on the selected data a new dataset is created with the suffix ``Free Filtered``.
 
@@ -1932,7 +1930,7 @@ The following parameters can be set:
      - The method to process multi-frame localisation for ``Results2``.
 
    * - Distance
-     - The minimum distance for a match.
+     - The maximum distance for a match.
 
    * - Increments
      - The number of times to increment the distance threshold.

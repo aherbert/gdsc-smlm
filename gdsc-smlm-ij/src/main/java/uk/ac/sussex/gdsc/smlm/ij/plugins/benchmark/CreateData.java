@@ -1507,9 +1507,15 @@ public class CreateData implements PlugIn {
 
     final double noise = getNoiseEstimateInPhotoelectrons(qe);
 
+    // Convert photons/second to photons/frame for the full simulation.
+    // Exposure time in seconds/frame (exposure time is in milliseconds).
+    // The simple/spot simulation dialog collects the photons/frame (stored in the same
+    // photons/second setting) and does not set the exposure time so no conversion is applied.
+    final double toFrames = fullSimulation ? settings.getExposureTime() * 1e-3 : 1;
+
     simulationParameters = new SimulationParameters(particles, fullSimulation, sd,
-        settings.getPixelPitch(), settings.getPhotonsPerSecond(),
-        settings.getPhotonsPerSecondMaximum(), signalPerFrame, settings.getDepth(),
+        settings.getPixelPitch(), settings.getPhotonsPerSecond() * toFrames,
+        settings.getPhotonsPerSecondMaximum() * toFrames, signalPerFrame, settings.getDepth(),
         settings.getFixedDepth(), settings.getBias(), totalGain, qe, readNoise,
         settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
         settings.getBackground(), noise, createPsf(sd / settings.getPixelPitch()));

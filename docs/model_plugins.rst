@@ -40,7 +40,7 @@ Separation of the optimisation into stages allows exploration of a large paramet
 Optimisation Details
 ~~~~~~~~~~~~~~~~~~~~
 
-The optimisation uses the ground-truth localisations to score candidates or fit results as true positives (TP) if they are within a distance threshold of a ground-truth localisation, otherwise they are false positives (FP). Any ground-truth localisations not matched are false negatives (FN). The binary scoring metrics precision, recall and Jaccard index are used to assess respectively the fraction of predicted results that are valid, fraction of total results that were predicted and the similarity of the ground-truth and predicted results.
+The optimisation uses the ground-truth localisations to score candidates or fit results as true positives (TP) if they are within a distance threshold of a ground-truth localisation, otherwise they are false positives (FP). Any ground-truth localisations not matched are false negatives (FN). The binary scoring metrics precision, recall and Jaccard index are used to assess respectively the fraction of predicted results that are valid, the fraction of ground-truth localisations that were predicted and the similarity of the ground-truth and predicted results.
 
 .. math::
 
@@ -1119,7 +1119,7 @@ Molecules are randomly positioned in a 3D volume. These are then subjected to ph
 
 The read-out laser is a continuous light source. The activation laser can be continuous or pulsed. When pulsed mode is used all readout frames have a low level of activation light. This is interspersed with pulses of the activation laser at set intervals. The pulse is deemed to be a zero time event. The ratio between the amount of energy a fluorophore can receive during the pulse and between pulses can be controlled. This allows the simulation to vary the level of background activation, i.e. molecules that activate in frames not directly following an activation pulse.
 
-The amount of photons required for photo-activation of each molecule is defined by sampling from a random exponential distribution. The average for this distribution is set using the cumulative number of photons in the centre of the field at 30% of the simulation length. Thus approximately 50% of the molecules should have activated by 1/3 of the simulation.
+The amount of photons required for photo-activation of each molecule is defined by sampling from a random exponential distribution. The average for this distribution is set using the cumulative number of photons for the average illumination of the field at 30% of the simulation length. Thus approximately 63% of the molecules should have activated by 30% of the simulation.
 
 The simulation allows for a single dark state or dual dark state model. For the single dark state model the fluorophore can be either on or off (dark state). The number of times the fluorophore enters the dark state is selected from a probability distribution. For the dual dark state model the fluorophore can be on or in either dark state 1 or dark state 2. The dark state can only transition to and from the on state. There is no transition from dark state 1 to 2 or the reverse. The number of times the fluorophore enters the 2\ :sup:`nd` dark state is selected from a probability distribution. For each time the molecule is in the on state the number of times the fluorophore enters the 1\ :sup:`st` dark state is selected from a probability distribution. The dual dark state model can be used to simulate flickering of the fluorophore at a fast rate (i.e. moving between the on state and dark state 1) broken by longer periods of off time (i.e. moving between the on state and dark state 2).
 
@@ -1404,7 +1404,7 @@ The following parameters can be used to control the simulation:
 
        * ``Fixed``: Use a fixed emission rate specified by the ``Photons`` parameter.
 
-       * ``Correlated``: If non zero the total photon budget of a fluorophore will be proportional to the total on time using the chosen ``Correlation``. Ideally the correlation should be negative so short lived fluorophores are brighter.
+       * ``Correlated``: If non zero the photon emission rate (photons per frame) of a fluorophore will be correlated with the total on time using the chosen ``Correlation``. The correlation should be negative so short lived fluorophores are brighter.
 
        Note: If any distribution requires additional parameters they will be collected using a separate dialog.
 
@@ -2010,7 +2010,7 @@ true answer for each parameter that was fitted. Histograms of the differences ca
      - The Y position of the localisations, relative to the centre of the image.
 
    * - Z
-     - The Z position of the localisations, relative to the centre of the image.
+     - The Z position of the localisations, relative to the focal plane.
 
    * - Camera model
      - The camera model used for the simulation.
@@ -2050,9 +2050,6 @@ true answer for each parameter that was fitted. Histograms of the differences ca
 
    * - dB & +/-
      - The average and standard deviation of the difference of the fit to the actual background.
-
-   * - dB & +/-
-     - The average difference of the fit to the average signal.
 
    * - dSignal & +/-
      - The average and standard deviation of the difference of the fit to the average signal.
@@ -2320,7 +2317,7 @@ The following parameters can be configured.
    * - Filter relative distances
      - Set to **true** to make all distances relative to the Half-Width at Half-Maxima (HWHM) of the PSF used to create the data. This is the same as when using the ``Peak Fit`` plugin. This applies to the spot identification. Note that the actual distances used will be recorded in the results table.
 
-       Set to **true** to use absolute distances enabling fine control over the tested settings. Distances will be in pixels.
+       Set to **false** to use absolute distances enabling fine control over the tested settings. Distances will be in pixels.
 
    * - Smoothing
      - The smoothing parameter for the first filter.
@@ -2417,7 +2414,7 @@ The same data can be plotted using the ``Plot rank by intensity`` option (:numre
 
 Since the spot filter will identify many false positives the overall precision score is very low. Thus the plugin also reports the precision at a fraction of the maximum recall. This fraction can be configured and is shown on the plot using a magenta line. In :numref:`Figure %s <fig_filter_spot_data_score_vs_rank>` the line is drawn at 98% of the maximum recall.
 
-In addition the precision can be plotted directly against the recall (:numref:`Figure %s <fig_filter_spot_data_auc>`). The **A**\ rea **U**\ nder the precision-recall **C**\ urve (AUC) is the average precision at each possible recall value. This provides a single score on how good the filter is at finding and ranking spot candidates. The AUC2 score is computed using a modified precision curve that uses the highest precision at that recall or above. This smooths a noisy curve that may occur at low recall values. The AUC2 score is always above the AUC score.
+In addition the precision can be plotted directly against the recall (:numref:`Figure %s <fig_filter_spot_data_auc>`). The **A**\ rea **U**\ nder the precision-recall **C**\ urve (AUC) is the average precision at each possible recall value. This provides a single score on how good the filter is at finding and ranking spot candidates. The AUC2 score is computed using a modified precision curve that uses the highest precision at that recall or above. This smooths a noisy curve that may occur at low recall values. The AUC2 score is always greater than or equal to the AUC score.
 
 .. _fig_filter_spot_data_auc:
 .. figure:: images/filter_spot_data_auc.jpg
@@ -2438,7 +2435,7 @@ A scatter plot of the candidate intensity against the true spot intensity is sho
 An ideal filter should produce a slope of 1 meaning that the estimated signal is a good starting approximation for a fitting algorithm. However as the filter smoothing increases the intensity of spots is reduced due to merging of the spot pixels with surrounding background. Thus higher smoothing values tend to increase the slope as the intensity is underestimated.
 
 An additional analysis is performed using the ranked candidates. For each frame in the input image a count is made of the number of false positives (failures) before each additional true positive. The counts are plotted as a histogram and a cumulative histogram if the ``Show failure plots`` option is selected. The cumulative histogram is then used to determine the number of consecutive false positives to accept to achieve a set fraction of the maximum true positives. The fractions are reported for
-80, 80, 95, 99 and 100%. This value can be used to determine the ``Fail limit`` parameter for the
+80, 90, 95, 99 and 100%. This value can be used to determine the ``Fail limit`` parameter for the
 ``Peak Fit``
 plugin for different imaging conditions (i.e. how many failures to allow before processing of fit candidates is stopped).
 
@@ -2959,7 +2956,7 @@ The analysis results are then reported in a summary table:
        Note: This result is computed with the distance thresholds set in the ``Filter Spot Data`` plugin.
 
    * - fN
-     - The number of spot filter candidates that do not identify a true localisation (positives). This is the number of spot candidates minus ``fP``.
+     - The number of spot filter candidates that do not identify a true localisation (negatives). This is the number of spot candidates minus ``fP``.
 
    * - Solver
      - The fit solver used for fitting.
@@ -3649,7 +3646,7 @@ If the ``Show table`` or ``Show summary`` options are selected the plugin will d
        Note: This result is computed with the distance thresholds set in the ``Filter Spot Data`` plugin.
 
    * - fN
-     - The number of filter candidates that do not identify a true localisation (positives). This is the number of spot candidates minus fP.
+     - The number of filter candidates that do not identify a true localisation (negatives). This is the number of spot candidates minus fP.
 
    * - Solver
      - The fit solver used for fitting.
@@ -3730,7 +3727,7 @@ The summary table contains the same fields as the results table. The following a
    * - RMSD
      - The root mean squared distance (RMSD) between fitted results and the true localisation computed over all true positives.
 
-       The RMSD is the 2D axial error in a single dimension and is the effective localisation precision.
+       The RMSD is the 2D lateral error in a single dimension and is the effective localisation precision.
 
        :math:`\text{RMSD} = \sqrt{ \frac{1}{TP} \sum _{i=1}^{TP} { ( (x_i - x_{0i})^2 + (y_i - y_{0i})^2 ) / 2 } }`
 
@@ -3840,7 +3837,7 @@ Searching all parameters that control fitting and filtering of fitting results i
 Iteration
 ~~~~~~~~~
 
-Note that the fitting of spot candidates involves filtering results dynamically as they are generated. Fitting stops when filtering is consistently rejecting fits. Thus changes to the spot filter can affect the number of fitted spots. This requires iteration of the spot fitting and the filtering together.
+Note that the fitting of spot candidates involves filtering results dynamically as they are generated. Fitting stops when filtering is consistently rejecting fits. Thus changes to the result filter can affect the number of fitted spots. This requires iteration of the spot fitting and the filtering together.
 
 The plugin uses the following routine:
 
@@ -4105,10 +4102,10 @@ The analysis results are reported in a summary table:
      - The density of the molecules.
 
    * - minN
-     - The minimum number of photons (per second) for a fluorophore.
+     - The minimum number of photons (per frame) for a fluorophore.
 
    * - maxN
-     - The maximum number of photons (per second) for a fluorophore.
+     - The maximum number of photons (per frame) for a fluorophore.
 
    * - N
      - The average number of photons (per frame) for a fluorophore.

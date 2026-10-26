@@ -117,7 +117,7 @@ The second dialog (:numref:`Figure %s <fig_simple_fit_wizard_camera>`) of the wi
 Configuration Wizard 3: Pixel Pitch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The second dialog (:numref:`Figure %s <fig_simple_fit_wizard_pitch>`) of the wizard requests the pixel pitch.
+The third dialog (:numref:`Figure %s <fig_simple_fit_wizard_pitch>`) of the wizard requests the pixel pitch.
 
 .. _fig_simple_fit_wizard_pitch:
 .. figure:: images/simple_fit_wizard_pitch.png
@@ -132,7 +132,7 @@ The second dialog (:numref:`Figure %s <fig_simple_fit_wizard_pitch>`) of the wiz
 Configuration Wizard 4: Gain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The third dialog (:numref:`Figure %s <fig_simple_fit_wizard_gain>`) of the wizard requests the total gain.
+The fourth dialog (:numref:`Figure %s <fig_simple_fit_wizard_gain>`) of the wizard requests the total gain.
 
 .. _fig_simple_fit_wizard_gain:
 .. figure:: images/simple_fit_wizard_gain.png
@@ -147,7 +147,7 @@ The third dialog (:numref:`Figure %s <fig_simple_fit_wizard_gain>`) of the wizar
 Configuration Wizard 5: Exposure Time
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The fourth dialog (:numref:`Figure %s <fig_simple_fit_wizard_exposure>`) of the wizard requests the exposure time.
+The fifth dialog (:numref:`Figure %s <fig_simple_fit_wizard_exposure>`) of the wizard requests the exposure time.
 
 .. _fig_simple_fit_wizard_exposure:
 .. figure:: images/simple_fit_wizard_exposure.png
@@ -162,7 +162,7 @@ The fourth dialog (:numref:`Figure %s <fig_simple_fit_wizard_exposure>`) of the 
 Configuration Wizard 6: Peak Width
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The fifth dialog (:numref:`Figure %s <fig_simple_fit_wizard_width>`) of the wizard requests the expected peak width for the 2D Gaussian:
+The sixth dialog (:numref:`Figure %s <fig_simple_fit_wizard_width>`) of the wizard requests the expected peak width for the 2D Gaussian:
 
 .. _fig_simple_fit_wizard_width:
 .. figure:: images/simple_fit_wizard_width.png

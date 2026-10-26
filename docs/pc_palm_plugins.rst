@@ -333,7 +333,7 @@ A summary of the input data used for analysis is recorded to a results table:
      - The number of molecules in the region.
 
    * - PeakDensity
-     - The peak density (in |micro|\ m\ :sup:`2`).
+     - The peak density (in molecules per |micro|\ m\ :sup:`2`).
 
    * - nm/pixel
      - The pixel pitch (resolution) of super-resolution image constructed for auto-correlation.
@@ -621,7 +621,7 @@ Fitting details are recorded in the ``ImageJ`` log window. The fit for each mode
 PC-PALM Clusters
 ----------------
 
-Clusters localisations using a distance threshold and produces a histogram of cluster size. This can be fit using a zero-truncated negative binomial distribution (with parameters *n*, *p*) to calculate the size of the clusters (*n*) and the probability of seeing a fluorophore (*p*).
+Clusters localisations using a distance threshold and produces a histogram of cluster size. This can be fit using a zero-truncated binomial distribution (with parameters *n*, *p*) to calculate the size of the clusters (*n*) and the probability of seeing a fluorophore (*p*).
 
 The ``PC-PALM Clusters`` plugin is based on the paper by Puchner, *et al* (2013). The analysis aims to determine the stoichiometry of colocated molecules, i.e. are closer than the localisation precision. Note that this is in contrast to the ``PC-PALM Fitting`` plugin which models clusters of molecules over distances in excess of the localisation precision. The analysis is based on two assumptions:
 

@@ -99,7 +99,7 @@ Binary Display
 
 Switches an image to binary (white/black) to allow quick visualisation of localisations.
 
-The SMLM plugins contain several methods for generating an image. Often images are created with a large difference in value for pixels that contain localisations. The difference can be so great that some localisations are not visible. The ``Binary Display`` plugin converts all non-zero pixels to the value 1. This allows the user to see any pixel that contains any level of localisation. This mode may be useful for drawing regions of interest (ROIs) around dense sections of localisations.
+The SMLM plugins contain several methods for generating an image. Often images are created with a large difference in value for pixels that contain localisations. The difference can be so great that some localisations are not visible. The ``Binary Display`` plugin displays all non-zero pixels using the highest value in the look-up table. This allows the user to see any pixel that contains any level of localisation. This mode may be useful for drawing regions of interest (ROIs) around dense sections of localisations.
 
 The plugin does not modify the image data. The display range for the current frame is set to use zero for the minimum and the maximum is set to the smallest non-zero value in the data, effectively clipping the non-zero pixels to the highest value in the current look-up table. Note that this plugin shows pixels with a value above zero. Negative pixel values in 32-bit images are effectively set to zero. The display can be reset using the ``Reset Display`` plugin.
 
@@ -223,7 +223,7 @@ All the image residuals methods are based on the “Least trimmed square” robu
 Noise Estimation within the Peak Fit Plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The fitting code in the ``Peak Fit`` plugin currently uses the ``QuickResidualsLeastMeanOfSquares``. This method is more stable than using the standard deviation of the image pixels since large variations around the high intensity localisations are smoothed by using the image residuals.
+The fitting code in the ``Peak Fit`` plugin uses the ``Quick Residuals Least Trimmed Square Estimator`` by default. This method is more stable than using the standard deviation of the image pixels since large variations around the high intensity localisations are smoothed by using the image residuals.
 
 The noise estimation method can be changed in the ``Peak Fit`` plugin by holding the ``Shift`` or ``Alt`` key down when running the plugin to see the extra options.
 

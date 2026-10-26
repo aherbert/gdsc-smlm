@@ -594,7 +594,7 @@ The following options are available:
        Zero is supported to find colocated localisations. This is useful for analysis of ground-truth data from a simulation.
 
    * - Time Threshold
-     - Maximum time separation for two localisations to belong to the same trace (should cover a minimum of 1 frame).
+     - Maximum time separation for two localisations to belong to the same cluster (should cover a minimum of 1 frame).
 
        Note: This is only used for some algorithms.
 
@@ -659,7 +659,7 @@ The following table lists the available clustering algorithms:
      - Join the current set of closest pairs in a greedy algorithm. This method computes the pairwise distances and joins the closest pairs without updating the centroid of each cluster, and the distances, after every join (centroids and distances are updated after each pass over the data). This can lead to errors over true hierarchical centroid-linkage clustering where centroids are computed after each link step. For example if A joins B and C joins D in a single step but the new centroid of AB is closer to C than D.
 
    * - Pairwise without neighbours
-     - A variant of ``PairwiseWithoutNeighbours`` is to join the closest pairs only if the number of neighbours for each is 1. In the event that no pairs have only a single neighbour then only the closest pair is joined.
+     - A variant of ``Pairwise`` is to join the closest pairs only if the number of neighbours for each is 1. In the event that no pairs have only a single neighbour then only the closest pair is joined.
 
        This algorithm should return the same results as the ``Centroid-linkage`` algorithm (but with different run-time performance).
 
@@ -708,7 +708,7 @@ The local diffusion model can be optionally disabled. The result is tracing base
 
 The intensity model is disabled if all localisations have the same intensity (i.e. are only (x,y) positions) and can also be optionally disabled. The result is tracing based on diffusion and blinking.
 
-Setting a disappearance threshold to 0 frames will configure tracing using diffusion and intensity with no allowed blinking. This should create tracks similar to the ``Nearest Neighbour`` trace mode but will use a maximum probability connection test and not the closest first assignment algorithm.
+Setting a disappearance threshold to 0 frames will configure tracing using diffusion and intensity with no allowed blinking. This should create tracks similar to the ``Nearest Neighbour`` trace mode of the ``Trace Diffusion`` plugin but will use a maximum probability connection test and not the closest first assignment algorithm.
 
 This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`%s <analysis_plugins:Trace Molecules>`) and many of the options are the same. The following options are available:
 
@@ -2031,8 +2031,8 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
    * - Min bin count
      - The minimum histogram bin count. The tail of the histogram is truncated to the first bin above this threshold.
 
-   * - Apparent residence time
-     - The apparent residence time (due to imaging limitations). Used to correct the observed residence time.
+   * - Apparent dissociation rate
+     - The apparent dissociation rate (:math:`k_a`) due to imaging limitations such as photo-bleaching. Used to correct the observed residence time.
 
    * - Bootstrap repeats
      - The number of bootstrap repeats used to create a 95% confidence interval.
@@ -2091,7 +2091,7 @@ A summary table is shown containing the model parameters. The following columns 
      - The 95% confidence interval for each fraction.
 
    * - ka
-     - The user-provided apparent residence time (used to correct the observed residence time).
+     - The user-provided apparent dissociation rate (used to correct the observed residence time).
 
    * - Residence time
      - The corrected mean residence time for each population in the model.
@@ -2223,7 +2223,7 @@ Processing starts from an arbitrary unprocessed point. The neighbours are comput
 
 The OPTICS algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptotically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
 
-FastOPTICS is a variant that is not parameterised using a neighbour radius. The algorithm is based on the concept that a pair of points close in N-dimensional space are also close when the space is projected to 2D. The algorithm computes a number of projections of the data onto a line. This line can be randomly orientated or orientated using equi-distributed vectors around a circle. Each projection provides a linear order of points along the line using a distance from the origin. This set of points is recursively split using random divisions until subsets are all below `MinPoints` in size. The points in a subset are allocated as neighbours of a chosen point in the subset. The point is chosen either randomly, as the median of the subset (using the distance from the origin) or all points are chosen. After a number of random projections each point has an allocated neighbourhood of points. The rest of the algorithm functions the same as OPTICS but with pre-computed neighbours and no requirement for a `radius`.
+FastOPTICS is a variant that is not parameterised using a neighbour radius. The algorithm is based on the concept that a pair of points close in N-dimensional space are also close when the space is projected onto a line (1D). The algorithm computes a number of projections of the data onto a line. This line can be randomly orientated or orientated using equi-distributed vectors around a circle. Each projection provides a linear order of points along the line using a distance from the origin. This set of points is recursively split using random divisions until subsets are all below `MinPoints` in size. The points in a subset are allocated as neighbours of a chosen point in the subset. The point is chosen either randomly, as the median of the subset (using the distance from the origin) or all points are chosen. After a number of random projections each point has an allocated neighbourhood of points. The rest of the algorithm functions the same as OPTICS but with pre-computed neighbours and no requirement for a `radius`.
 
 The OPTICS algorithm outputs the points in a particular ordering. A plot of the order against the reachability distance shows a dendrogram-like structure where the clusters show as wells in the reachability profile. OPTICS provides an algorithm that analyses the gradient of the profile in runs of up and down and uses this to assign a hierarchical level of clustering to the data based on a parameter `Xi` (the change in reachability to define a cluster). A second clustering algorithm uses a fixed distance threshold. All adjacent points in the profile that are reachable below this distance are assigned to the same cluster. The result is the same as if using the DBSCAN algorithm (see section :numref:`{number} <analysis_plugins:DBSCAN>`).
 
@@ -2419,7 +2419,7 @@ The ``Clustering distance`` parameter can be chosen by using a k-nearest neighbo
 
     DBSCAN K-nearest neighbour distance graph.
 
-    The distance to the k\ :sup:`th` nearest neighbour for a random sample of points is plotted in descending order. An estimate for the DBSCAN clustering radius can be taken from the "elbow" of the plot. The red line shows the current ``Clustering distance``; the blue line is the distance defined by excluding the lowest fraction as specified by the ``Noise`` parameter.
+    The distance to the k\ :sup:`th` nearest neighbour for a random sample of points is plotted in descending order. An estimate for the DBSCAN clustering radius can be taken from the "elbow" of the plot. The red line shows the current ``Clustering distance``; the blue line is the distance defined by excluding the fraction of points with the largest distances as specified by the ``Noise`` parameter.
 
 
 Parameters
@@ -3084,7 +3084,7 @@ The following filters are available:
        The SNR ratio used is from ``Min SNR`` to ``Max SNR`` in integer increments. The width used is from ``Min Width`` to ``Max Width`` in increments of ``Increment Width``.
 
    * - Precision Filter
-     - Remove all results with a precision below a set value.
+     - Remove all results with a precision above a set value.
 
        The precision used is from ``Min Precision`` to ``Max Precision`` in integer increments.
 
@@ -3349,7 +3349,7 @@ The plugin then analyses the spot region and creates profile plots of the mean a
 
     Spot Analysis mean and standard deviation profiles of the spot region.
 
-    The current frame is shown as a vertical pink line. Candidate on-frames from ``Peak Fit`` results are shown as cyan box. Selected on-frames are shown as magenta circles. The red line is the LOESS smoothing of the plot data.
+    The current frame is shown as a vertical magenta line. Candidate on-frames from ``Peak Fit`` results are shown as cyan squares. Selected on-frames are shown as magenta circles. The red line is the LOESS smoothing of the plot data.
 
 
 ..
@@ -3920,7 +3920,7 @@ To compute the image resolution of a set of localisations requires the following
 
 *   Compute the FRC between the two images at all the available frequencies
 
-*   Plot the FRC against the frequency. This will gradually fall to zero as the frequency decreases (see :numref:`Figure %s <fig_frc_curve_example>`)
+*   Plot the FRC against the frequency. This will gradually fall to zero as the frequency increases (see :numref:`Figure %s <fig_frc_curve_example>`)
 
 *   Smooth the raw FRC curve using robust local regression (LOESS)
 
