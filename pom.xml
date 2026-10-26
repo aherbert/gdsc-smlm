@@ -168,9 +168,17 @@ Software for single molecule localisation microscopy (SMLM)
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-statistics-distribution</artifactId>
     </dependency>
+    <!-- Only the core and dense double modules are used.
+      Version is aligned with the pom-scijava managed ejml-all. -->
     <dependency>
       <groupId>org.ejml</groupId>
-      <artifactId>ejml-all</artifactId>
+      <artifactId>ejml-core</artifactId>
+      <version>${ejml.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-ddense</artifactId>
+      <version>${ejml.version}</version>
     </dependency>
     <dependency>
       <groupId>it.unimi.dsi</groupId>
