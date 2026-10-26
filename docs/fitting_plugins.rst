@@ -1548,7 +1548,7 @@ The ``Localisations`` image method can be used to directly count localisations i
       - | (D) Fitted PSF, equalised
         | |image_examples_psf_equalised_jpg|
 
-Images were generated from a sequence of 2401 frames using the Tubulins 1 dataset from the `Localisation Microscopy Challenge 2013 <http://bigwww.epfl.ch/smlm/challenge/>`_. The original image has been enlarged using 8x magnification and part of the image has been extracted using a region of 256x256 pixels at origin (x=1348, y=1002). The region contains 3855 localisations.
+Images were generated from a sequence of 2401 frames using the Tubulins 1 dataset from the `Localisation Microscopy Challenge 2013 <https://srm.epfl.ch/srm/dataset/challenge-2D-simulation/Tubulins_I/index.html>`_. The original image has been enlarged using 8x magnification and part of the image has been extracted using a region of 256x256 pixels at origin (x=1348, y=1002). The region contains 3855 localisations.
 
 
 .. index:: Running Peak Fit

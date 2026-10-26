@@ -16,7 +16,7 @@ GDSC Single Molecule Light Microscopy (SMLM) ImageJ Plugins
     :alt: Documentation Status
 
 .. image:: https://img.shields.io/maven-central/v/uk.ac.sussex.gdsc/gdsc-smlm
-    :target: https://search.maven.org/artifact/uk.ac.sussex.gdsc/gdsc-smlm/
+    :target: https://central.sonatype.com/artifact/uk.ac.sussex.gdsc/gdsc-smlm
     :alt: Maven Central
 
 .. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg

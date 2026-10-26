@@ -1586,7 +1586,7 @@ The ``Create Data`` plugin summarises the dataset when the image has been constr
 Compound Molecules
 ~~~~~~~~~~~~~~~~~~
 
-By default all the molecules are single particles. However it may be desirable to simulate a collection of compound molecules, for example dimers and hexamers. This is possible using the ``Compound molecules`` option. If this option is selected the plugin will show a second dialog where the user can input the molecule configuration using a `Google Protocol Buffers <https://developers.google.com/protocol-buffers>`_ specification.
+By default all the molecules are single particles. However it may be desirable to simulate a collection of compound molecules, for example dimers and hexamers. This is possible using the ``Compound molecules`` option. If this option is selected the plugin will show a second dialog where the user can input the molecule configuration using a `Google Protocol Buffers <https://protobuf.dev>`_ specification.
 
 The specification is a list of all the compounds that should be simulated. Each compound has a fraction parameter. The compound will be represented using the fraction divided by the total sum of all fractions to indicate the proportion of the compound. Each compound also has a diffusion parameter. When using compound molecules the ``Diffusion`` parameter in the main plugin dialog is ignored. Note that the ``Fixed fraction`` parameter is still used to fix a fraction of the compounds. To gain more control over the moving molecules set the ``Fixed fraction`` parameter to zero. Then simulate a mixed population of diffusing molecules and fixed molecules by specifying the same compounds twice, one with a diffusion coefficient of zero and the other non-zero.
 
