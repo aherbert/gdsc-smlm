@@ -1611,7 +1611,7 @@ The standard ``Peak Fit`` plugin allows the user to set all the parameters that 
      - Specify the method used to calculate the noise. See section :numref:`{number}: {name} <tools_plugins:Noise Estimator>` for details of the methods.
 
    * - Image window
-     - Image output options
+     - Image output
      - Applies to output images.
 
        The ``Image window`` specifies the number of consecutive frames from the results that should be plotted on a single ``ImageJ`` stack frame.
@@ -2390,7 +2390,7 @@ The following fail counters can be used:
 
 When the ``Analyse`` option is run a dialog is presented allowing the fail counters to be configured. This follows the general concept that each counter has parameters that are set using a range from a minimum to a maximum. The ranges to use for each counter are configured and then the data is analysed using all possible counters. The plugin will compute the number of counters and if above a configured size will prompt the user if they wish to perform analysis. This prevents creation of too many counters. To ignore a counter set the maximum threshold for the counter to a negative value. When analysis is complete a table is shown of the top *N* counters.
 
-The following plot parameters can be specified:
+The following analysis parameters can be specified:
 
 .. list-table::
    :widths: 30 70
