@@ -1088,6 +1088,8 @@ CMAES
 
 Search using active Covariance Matrix Adaptation Evolution Strategy (`CMA-ES <https://en.wikipedia.org/wiki/CMA-ES>`_). The CMA-ES is a reliable stochastic optimization method which should be applied if derivative-based methods, e.g. conjugate gradient, fail due to a rugged search landscape. This is a bounded search and does not require derivatives.
 
+.. index:: Conjugate Gradient
+
 Conjugate Gradient
 """""""""""""""""""
 
@@ -1456,7 +1458,7 @@ The results parameters control where the list of localisations will be recorded.
        * ``None``: No output file.
        * ``Text``: Save the results in text format. The suffix is ``.results.xls``. The results are tab delimited and can be opened in a spreadsheet application.
        * ``Binary``: Save the results in binary format. The suffix is ``.results.bin``. Provides very fast read and write performance and is preferred when using large datasets. The data can be read using the ``Results Manager`` plugin.
-       * ``TSF``: Use the ``Micro Manager`` `Tagged Spot File <https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format>`_ format. The suffix is ``.results.tsf``. This is a defined binary format for universal data exchange.
+       * ``TSF``: Use the ``Micro-Manager`` `Tagged Spot File <https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format>`_ format. The suffix is ``.results.tsf``. This is a defined binary format for universal data exchange.
        * ``MALK``: Use the Molecular Accuracy Localisation Keep format. The suffix is ``.results.txt``. This consists of [X,Y,T,Signal] data in a white-space separated format.
 
        The GDSC SMLM ``Text`` and ``Binary`` formats offer the option to store the estimated parameter deviations. The ``Text`` format can also configure the units and output the localisation precision of results. Click the ``...`` button to configure the options.
@@ -1564,6 +1566,8 @@ The number of threads used by the fit engine is :math:`\max (1, \lfloor t \times
 
 Progress is shown on the ``ImageJ`` progress bar. The plugin can be stopped using the ``Escape`` key. If stopped early the plugin will still correctly close any open output files and the partial results will be saved.
 
+
+.. index:: Additional Fitting Options
 
 Additional Fitting Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1800,7 +1804,7 @@ Peak Fit (Series)
 
 Allows the ``Peak Fit`` plugin to be run on a folder containing many images. This allows the code to run on images that are too large to fit into memory or that may have been imaged in a sequence.
 
-Currently only TIFF images are supported. This includes OME-TIFF images produced by ``Micro Manager``.
+Currently only TIFF images are supported. This includes OME-TIFF images produced by ``Micro-Manager``.
 
 When the ``Peak Fit (Series)`` plugin is executed it shows a folder selection dialog where the user can select a folder containing a set of images. The plugin then scans the folder for images. If a file is not a recognised TIFF image then the plugin will fail.
 
