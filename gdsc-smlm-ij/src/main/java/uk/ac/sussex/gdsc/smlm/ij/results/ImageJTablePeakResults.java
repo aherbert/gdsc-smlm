@@ -315,7 +315,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
       sb.append("\tEnd ").append(frameColumnName);
     }
     if (showId) {
-      sb.append("\tId");
+      sb.append("\tID");
     }
     if (showCategory) {
       sb.append("\tCategory");

@@ -191,7 +191,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
   protected String[] getFieldNames() {
     final ArrayList<String> names = new ArrayList<>(20);
     if (isShowId()) {
-      names.add("Id");
+      names.add("ID");
     }
     if (isShowCategory()) {
       names.add("Category");

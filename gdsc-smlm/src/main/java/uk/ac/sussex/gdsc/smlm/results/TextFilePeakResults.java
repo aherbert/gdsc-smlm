@@ -212,7 +212,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
 
     final ArrayList<String> names = new ArrayList<>(20);
     if (isShowId()) {
-      names.add("Id");
+      names.add("ID");
       ci++;
     }
     if (isShowCategory()) {

@@ -4213,7 +4213,7 @@ public class CreateData implements PlugIn {
       try (BufferedWriter output =
           Files.newBufferedWriter(Paths.get(settings.getFluorophoresFilename()))) {
         output.write(createResultsFileHeader());
-        output.write("#Id\tn-Blinks\tStart\tStop\t...");
+        output.write("#ID\tn-Blinks\tStart\tStop\t...");
         output.newLine();
         final StringBuilder sb = new StringBuilder(512);
         for (int id = 1; id <= fluorophores.size(); id++) {
@@ -4276,7 +4276,7 @@ public class CreateData implements PlugIn {
       try (BufferedWriter output =
           Files.newBufferedWriter(Paths.get(settings.getLocalisationsFilename()))) {
         output.write(createResultsFileHeader());
-        output.write("#T\tId\tX\tY\tZ\tIntensity");
+        output.write("#T\tID\tX\tY\tZ\tIntensity");
         output.newLine();
         final StringBuilder sb = new StringBuilder(512);
         for (final LocalisationModel l : localisations) {

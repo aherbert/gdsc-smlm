@@ -282,7 +282,7 @@ public class OverlayResults implements PlugIn {
         boolean is3D = false;
         if (hasId && tw != null) {
           final TextPanel tp = tw.getTextPanel();
-          final int idColumn = ImageJUtils.getColumn(tp, "Id");
+          final int idColumn = ImageJUtils.getColumn(tp, "ID");
           final int start = tp.getSelectionStart();
           if (start != -1 && idColumn != -1) {
             selectedId = new IntOpenHashSet();

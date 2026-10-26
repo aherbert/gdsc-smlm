@@ -1439,7 +1439,7 @@ Track Diffusion Analysis
 
 The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the *Spot-On* paper by Hansen *et al* (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
 
-The plugin uses multiple input datasets that have been assigned to tracks using tracing. A traced dataset is identified using the Id field on the results from each dataset.
+The plugin uses multiple input datasets that have been assigned to tracks using tracing. A traced dataset is identified using the ID field on the results from each dataset.
 
 Analysis
 ~~~~~~~~
@@ -2282,7 +2282,7 @@ The following options are available (extra options are activated by holding the 
    * - Image mode
      - Specify the mode used to colour the image localisations.
 
-       - ``Cluster Id``: Use the cluster ID.
+       - ``Cluster ID``: Use the cluster ID.
        - ``Cluster Depth``: Use the cluster depth.
        - ``Cluster Order``: Use the cluster order.
        - ``Value``: Use the localisation intensity.
@@ -2473,7 +2473,7 @@ The following options are available:
    * - Image mode
      - Specify the mode used to colour the image localisations.
 
-       - ``Cluster Id``: Use the cluster ID.
+       - ``Cluster ID``: Use the cluster ID.
        - ``Value``: Use the localisation intensity.
        - ``Count``: Use a count of 1 for each localisation.
        - ``LoOP``: Use the cluster Local Outlier Probability.

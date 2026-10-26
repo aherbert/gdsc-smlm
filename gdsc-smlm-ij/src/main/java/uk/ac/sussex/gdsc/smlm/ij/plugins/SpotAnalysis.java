@@ -985,7 +985,7 @@ public class SpotAnalysis extends PlugInFrame
   private void createResultsWindow() {
     resultsWindow = ImageJUtils.refresh(RESULTS_WINDOW,
         () -> new TextWindow(PLUGIN_TITLE + " Results",
-            "Id\tcx\tcy\tSignal\tt-On (ms)\tt-Off (ms)\tBlinks\tAv.t-On\tAv.t-Off\tSource", "", 600,
+            "ID\tcx\tcy\tSignal\tt-On (ms)\tt-Off (ms)\tBlinks\tAv.t-On\tAv.t-Off\tSource", "", 600,
             200));
   }
 
@@ -1060,7 +1060,7 @@ public class SpotAnalysis extends PlugInFrame
 
     try (
         BufferedWriter files0 = openBufferedWriter(resultsDirectory + "traces.txt",
-            String.format("#ms/frame = %s%n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
+            String.format("#ms/frame = %s%n#ID\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
                 MathUtils.rounded(msPerFrame, 3)));
         BufferedWriter files1 = openBufferedWriter(resultsDirectory + "tOn.txt", "");
         BufferedWriter files2 = openBufferedWriter(resultsDirectory + "tOff.txt", "");

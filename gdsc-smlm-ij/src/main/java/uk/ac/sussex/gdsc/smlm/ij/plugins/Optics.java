@@ -214,7 +214,7 @@ public class Optics implements PlugIn {
     /** Cluster ID. */
     CLUSTER_ID {
       @Override
-      public String getName() { return "Cluster Id"; }
+      public String getName() { return "Cluster ID"; }
       @Override
       public float getValue(float value, int clusterId, int order) { return clusterId; }
       @Override
@@ -798,10 +798,10 @@ public class Optics implements PlugIn {
    */
   public enum TableSortMode {
     //@formatter:off
-    /** Sort by Id. */
+    /** Sort by ID. */
     ID {
       @Override
-      public String getName() { return "Id"; }
+      public String getName() { return "ID"; }
     },
     /** Sort by size. */
     SIZE {
@@ -3028,7 +3028,7 @@ public class Optics implements PlugIn {
     @Override
     String createTableText(double toUnit) {
       final StringBuilder sb = new StringBuilder();
-      // "Level\tId\tSize\tArea\tDensity\tBounds"
+      // "Level\tID\tSize\tArea\tDensity\tBounds"
       sb.append(level).append('\t').append(id).append('\t').append(size).append('\t');
       if (area > 0) {
         final double area = this.area * toUnit * toUnit;
@@ -3075,7 +3075,7 @@ public class Optics implements PlugIn {
     @Override
     String createTableText(double toUnit) {
       final StringBuilder sb = new StringBuilder(256);
-      // "Level\tId\tSize\tArea\tDensity\tBounds"
+      // "Level\tID\tSize\tArea\tDensity\tBounds"
       sb.append(level).append('\t').append(id).append('\t').append(size).append('\t');
       if (area > 0) {
         final double area = this.area * toUnit * toUnit;
@@ -3303,7 +3303,7 @@ public class Optics implements PlugIn {
         final DistanceUnit unit = DistanceUnit.NM;
         final String name = UnitHelper.getShortName(unit);
         final String headings = String
-            .format("Level\tId\tSize\tArea (%s^2)\tDensity (%s^-2)\tBounds (%s)", name, name, name);
+            .format("Level\tID\tSize\tArea (%s^2)\tDensity (%s^-2)\tBounds (%s)", name, name, name);
         final double toUnit = results.getDistanceConverter(unit).convert(1);
 
         if (tw == null || !tw.isVisible()) {

@@ -394,7 +394,7 @@ public class ResultsMatchCalculator implements PlugIn {
     gd.addCheckbox("Show_pairs", settings.showPairs);
     gd.addChoice("Save_classifications", Settings.SAVE_CLASSIFICATIONS_OPTIONS,
         settings.saveClassificationsOption);
-    gd.addCheckbox("Id_analysis", settings.idAnalysis);
+    gd.addCheckbox("ID_analysis", settings.idAnalysis);
     gd.addCheckbox("Save_pairs", settings.savePairs);
     gd.addCheckbox("Output_end_frame", settings.outputEndFrame);
 

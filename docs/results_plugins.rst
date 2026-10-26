@@ -771,9 +771,9 @@ The following parameters can be set:
 Trace Exporter
 --------------
 
-Export traced datasets to file. A traced dataset is identified using the Id field on the results from each dataset. Each Id is a grouping of results from the dataset. The Id field is typically written by an analysis plugin such as ``Trace Molecules``.
+Export traced datasets to file. A traced dataset is identified using the ID field on the results from each dataset. Each ID is a grouping of results from the dataset. The ID field is typically written by an analysis plugin such as ``Trace Molecules``.
 
-When the ``Trace Exporter`` is run a dialog is presented allowing the export to be configured. If no traced results are available an error is shown. The exporter assumes that each grouping of results with the same Id corresponds to a single molecule traced over a period of time. The following parameters can be set:
+When the ``Trace Exporter`` is run a dialog is presented allowing the export to be configured. If no traced results are available an error is shown. The exporter assumes that each grouping of results with the same ID corresponds to a single molecule traced over a period of time. The following parameters can be set:
 
 .. list-table::
    :widths: 20 80
@@ -792,7 +792,7 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
      - The maximum length of each trace. Any trace longer than this will be split into sub-traces. This option can be used to increase the number of short traces.
 
    * - Max jump
-     - The maximum jump allowed within a trace. If a jump between frames is larger than this then the trace will be split into two sub-traces and exported with a unique Id. Set to zero to disable (no splitting). Set to one to require continuous tracks.
+     - The maximum jump allowed within a trace. If a jump between frames is larger than this then the trace will be split into two sub-traces and exported with a unique ID. Set to zero to disable (no splitting). Set to one to require continuous tracks.
 
    * - Wobble
      - Add a random Gaussian deviation to the coordinates. This can be used to add randomness to simulated data.
@@ -834,7 +834,7 @@ The `Spot-On CSV file format <https://spoton.berkeley.edu/SPTGUI/docs/latest#inp
      - Time (in seconds).
 
    * - Trajectory
-     - The trace Id.
+     - The trace ID.
 
    * - X
      - The x position (in |micro|\ m).
@@ -861,7 +861,7 @@ This matches the Spot-On format with additional columns:
      - Time (in seconds).
 
    * - Trajectory
-     - The trace Id.
+     - The trace ID.
 
    * - X
      - The x position (in |micro|\ m).
@@ -894,7 +894,7 @@ The `anaDDA <https://github.com/HohlbeinLab/anaDDA>`_ localisations file format.
      - Frame number.
 
    * - ID
-     - The track Id.
+     - The track ID.
 
    * - Time
      - Frame time (in seconds). This is the length of the frame (i.e. exposure time). It will be the same for the entire set of localisations.
@@ -1955,8 +1955,8 @@ The following parameters can be set:
        * ``Unmatched``: Save the localisations that *do not* match.
        * ``All``: Save all localisations.
 
-   * - Id analysis
-     - If the results in the results set have an Id label for each localisation the plugin will compute the number of molecules that were matched. The TP, FN and recall for each results set will be added to the results table as additional columns.
+   * - ID analysis
+     - If the results in the results set have an ID label for each localisation the plugin will compute the number of molecules that were matched. The TP, FN and recall for each results set will be added to the results table as additional columns.
 
        Note: Ids are added to the results by various plugins, e.g. ``Trace Molecules``, ``Create Data``.
 
