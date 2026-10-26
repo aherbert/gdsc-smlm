@@ -125,7 +125,8 @@ directory of ImageJ.
         commons-rng-core
         commons-rng-simple
         commons-rng-sampling
-        ejml
+        ejml-core
+        ejml-ddense
         fastutil-core
         guava
         JTransforms

@@ -36,7 +36,7 @@ To get the plugins you can download the latest Jar files from the update site an
 You will also need to install the additional Apache Commons Math 3 library and EJML. These are already included in ``Fiji`` so are not on the update site. You can get the files here:
 
 * `Apache Commons Math 3 <https://repo.maven.apache.org/maven2/org/apache/commons/commons-math3/3.6.1/>`_
-* `EJML v0.25 <https://sourceforge.net/projects/ejml/files/v0.25/>`_
+* `EJML v0.41 <https://repo.maven.apache.org/maven2/org/ejml/>`_ (the ``ejml-core`` and ``ejml-ddense`` jars)
 
 Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
 
@@ -71,8 +71,8 @@ Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
    * - gdsc-smlm-ij\_
      - Contains the GDSC SMLM ``ImageJ`` plugins.
 
-   * - ejml
-     - Efficient Java Matrix Library for linear algebra. Requires version 0.24. This is the version used by ``Fiji``.
+   * - ejml-*
+     - Efficient Java Matrix Library for linear algebra. Requires version 0.41 of the ``ejml-core`` and ``ejml-ddense`` modules. This is the version used by ``Fiji``.
 
    * - fastutil-core
      - Library for type-specific Java collections.
