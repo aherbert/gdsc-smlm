@@ -554,7 +554,7 @@ The following parameters are available:
      - Set to **true** to refit from the initial solution using a gradient based method.
 
    * - Fit above estimate precision
-     - Ignore *r) value on the *g(r)* curve below ``N`` times the ``Estimated precision``. This can be used to avoid the noisy part of the curve when fitting.
+     - Ignore *r* values on the *g(r)* curve below :math:`N` times the ``Estimated precision``. This can be used to avoid the noisy part of the curve when fitting.
 
    * - Fitting tolerance
      - Set the percentage tolerance for the difference between the fitted parameters and the initial estimates for localisation precision and protein density. If the fit changes the values by greater than this threshold the fit is rejected.

@@ -591,13 +591,13 @@ plugin and allows much faster fitting since the Poisson PMF (a) can be evaluated
 sCMOS Analysis
 --------------
 
-Analyse the per pixel offset, variance and gain from a sCMOS camera. This plugin is based on the paper by Huang `et al` (2013).
+Analyse the per pixel offset, variance and gain from a sCMOS camera. This plugin is based on the paper by Huang *et al* (2013).
 
-A sCMOS camera has read-out circuits for each pixel in the camera chip. Contrast this with a CCD based camera which has a single readout circuit for every pixel. To construct a probability model of the pixel output requires the variance and the amplification (gain) of the pixel. The model can be used for maximum likelihood estimation (MLE) based fitting of camera output. To apply MLE fitting of point spread functions to super-resolution data requires a per-pixel camera model. The ``sCMOS Analysis`` plugin allows a per-pixel model to be constructed using the protocol described by Huang `et al` (2013).
+A sCMOS camera has read-out circuits for each pixel in the camera chip. Contrast this with a CCD based camera which has a single readout circuit for every pixel. To construct a probability model of the pixel output requires the variance and the amplification (gain) of the pixel. The model can be used for maximum likelihood estimation (MLE) based fitting of camera output. To apply MLE fitting of point spread functions to super-resolution data requires a per-pixel camera model. The ``sCMOS Analysis`` plugin allows a per-pixel model to be constructed using the protocol described by Huang *et al* (2013).
 
 The first step is to take 60,000 frames of zero exposure from the sCMOS camera. These are used to compute the bias (offset from zero) and read-noise (variance) of each pixel. The bias is the mean pixel value and the variance is computed per-pixel. Note that a fixed value is added to the pixel output by the camera so that the noise can be correctly analysed using the unsigned output data. If no offset was added then any noise below zero could not be recorded.
 
-The gain can be computed using 20,000 frames of increasing exposure from the sCMOS camera. Gain is assumed to be constant. Thus a linear fit of the exposure against the output on a per-pixel basis will output the gain as the slope of the best fit line. The specified numbers of frames for analysis are the numbers used by Huang `et al`.
+The gain can be computed using 20,000 frames of increasing exposure from the sCMOS camera. Gain is assumed to be constant. Thus a linear fit of the exposure against the output on a per-pixel basis will output the gain as the slope of the best fit line. The specified numbers of frames for analysis are the numbers used by Huang *et al*.
 
 The gain estimate is obtained using:
 
@@ -669,7 +669,7 @@ When all the images have been processed the gain is computed for each pixel. The
 
 The plugin will then ask for a filename to save the per-pixel model. The model can be optionally cropped. The model is saved into the specified directory as a 3 frame stack of 32-bit float data representing the offset, variance and gain for each pixel. The slices are appropriately labelled. This model can be loaded by the ``Camera Model Manager`` plugin (see :numref:`%s <calibration_plugins:Camera Model Manager>`) for use in fitting of localisation data. It is recommended to set the model directory for all output models to the same directory and appropriately name the model after the camera.
 
-The ``sCMOS Analysis`` plugin will show summary histograms of the computed pixel offset, variance and gain. These histograms are equivalent to those shown in Huang `et al` (2013) supplementary figure 1.
+The ``sCMOS Analysis`` plugin will show summary histograms of the computed pixel offset, variance and gain. These histograms are equivalent to those shown in Huang *et al* (2013) supplementary figure 1.
 
 If the data was created using a simulation the plugin will load the simulation model from the file ``perPixelSimulation.tif``. Comparisons of the computed and known values of the offset, variance and gain are computed. A scatter plot is produced of the simulated against the measured values. The error for each pixel is computed as the measured value minus the simulated value and displayed in a histogram. The following analysis is performed:
 
@@ -706,7 +706,7 @@ The ``sCMOS Analysis`` plugin requires a large amount of data from a sCMOS camer
 
 The simulation can be run by holding the ``Shift`` key down when running the plugin. Note that the ``Shift`` must be pressed when the main ``ImageJ`` window is active. When run in simulation mode the plugin will create image data in a specified output directory. The plugin will prompt for the output directory.
 
-Each pixel is assigned a random offset, variance and gain. The offset is sampled from a Poisson distribution; the variance is sampled from an exponential distribution; and the gain is sampled from a Gaussian distribution. These distributions approximate the raw data shown in Huang `et al` (2013) supplementary figure 1. The defaults for the simulation are configured to approximately match that figure.
+Each pixel is assigned a random offset, variance and gain. The offset is sampled from a Poisson distribution; the variance is sampled from an exponential distribution; and the gain is sampled from a Gaussian distribution. These distributions approximate the raw data shown in Huang *et al* (2013) supplementary figure 1. The defaults for the simulation are configured to approximately match that figure.
 
 The simulation requires the following parameters:
 
@@ -1527,7 +1527,7 @@ The precision error has the effect of increasing the mean-squared displacement f
 Diffusion Depth of Field
 ------------------------
 
-The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF. This plugin is based on the methods described in the `Spot-On` paper by Hansen `et al` (2018).
+The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF. This plugin is based on the methods described in the *Spot-On* paper by Hansen *et al* (2018).
 
 
 Depth of Field Model
@@ -1675,10 +1675,10 @@ Fitting results are output to a summary table:
      - The number of samples of the diffusion coefficient.
 
    * - a
-     - The fitted coefficient `a`.
+     - The fitted coefficient :math:`a`.
 
    * - b
-     - The fitted coefficient `b`.
+     - The fitted coefficient :math:`b`.
 
    * - obz z
      - The observed depth-of-field :math:`\Delta z + b`.

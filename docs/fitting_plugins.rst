@@ -765,7 +765,7 @@ Least-squares estimation is the process of fitting a function (expected values) 
 
 where :math:`f_i` is the value of the PSF function at pixel *i* and :math:`g_i` is the actual image intensity at pixel *i*. This model does not require any camera calibration and is available if the camera type is unknown.
 
-The parameters for the function are updated until no improvement can be made. The estimation process uses the popular Levenberg-Marquardt (LVM) algorithm which uses the gradient of the function, i.e. how the function value will change with a change to the parameters, to choose how to modify the parameters. The method uses a weighting factor (``lambda``) to decide the emphasis on the Hessian matrix of partial derivatives. This is a matrix of the gradient of the function with respect to two parameters for all combinations of parameters. The ``lambda`` parameter is updated by the algorithm based on the success of parameter changes.
+The parameters for the function are updated until no improvement can be made. The estimation process uses the popular Levenberg-Marquardt (LVM) algorithm which uses the gradient of the function, i.e. how the function value will change with a change to the parameters, to choose how to modify the parameters. The method uses a weighting factor (:math:`\lambda`) to decide the emphasis on the Hessian matrix of partial derivatives. This is a matrix of the gradient of the function with respect to two parameters for all combinations of parameters. The ``lambda`` parameter is updated by the algorithm based on the success of parameter changes.
 
 The ``LVM LSE`` requires the following additional parameters:
 
@@ -2097,7 +2097,7 @@ The following parameters are available:
      - The minimum peak-width at half-maxima (PWHM).
 
    * - Top N
-     - Only fit the top ``N`` identified maxima. Set to zero to disable and fit all maxima.
+     - Only fit the top :math:`N` identified maxima. Set to zero to disable and fit all maxima.
 
    * - Block find algorithm
      - Use the block-find algorithm for non-maximal suppression [Neubeck and Van Gool, 2006].

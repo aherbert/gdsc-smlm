@@ -540,7 +540,7 @@ In addition to the principal plugins for localisation fitting and analysis there
 Toolset Plugins
 ---------------
 
-These plugins provide quick access to the various SMLM plugins via `ImageJ` toolsets and a customisable ``SMLM Tools`` window.
+These plugins provide quick access to the various SMLM plugins via ``ImageJ`` toolsets and a customisable ``SMLM Tools`` window.
 
 .. list-table::
    :widths: 30 70

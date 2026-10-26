@@ -411,7 +411,7 @@ The ``Overlay Image`` plugin must be run after selecting the image to overlay. T
 
 Clear an overlay using the ``Image > Overlay > Remove Overlay`` command.
 
-Note: When using the `Use stack` option the overlay may not be displayed until the current frame of the stack is changed.
+Note: When using the ``Use stack`` option the overlay may not be displayed until the current frame of the stack is changed.
 
 
 .. index:: ! Image Kernel Filter

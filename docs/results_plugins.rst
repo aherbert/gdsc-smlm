@@ -233,7 +233,7 @@ The summary table shows the name of the results dataset and then the following s
 
 *   The number of results
 *   The size of the results in memory
-*   The bounds of the results (minimum and maximum ``x`` and ``y`` coordinates of the source)
+*   The bounds of the results (minimum and maximum :math:`x` and :math:`y` coordinates of the source)
 *   The image calibration
 *   The average, median, minimum and maximum of the precision and signal-to-noise ratio (SNR)
 
@@ -727,7 +727,7 @@ Save Localisations
 
 Saves a set of localisations to a delimited text file. The file format is specified during runtime allowing any localisation data to be saved. This provides an alternative to the fixed formats used by the ``Results Manager`` (see section :numref:`%s <results_plugins:Results Manager>`).
 
-When the plugin is run the localisation result set must be selected. The plugin reads the selected results and presents a list of the available fields. Each field has an identifier and a name (``id: name``). Custom PSF parameters are identified using ``pn`` where ``n`` is the parameter number. The format uses space-delimited identifiers to specify the output fields, for example ``T X Y`` would output the time and XY position of the localisations.
+When the plugin is run the localisation result set must be selected. The plugin reads the selected results and presents a list of the available fields. Each field has an identifier and a name (``id: name``). Custom PSF parameters are identified using ``pn`` where :math:`n` is the parameter number. The format uses space-delimited identifiers to specify the output fields, for example ``T X Y`` would output the time and XY position of the localisations.
 
 The following parameters can be set:
 
@@ -875,7 +875,7 @@ This matches the Spot-On format with additional columns:
 anaDDA Localisations
 ^^^^^^^^^^^^^^^^^^^^
 
-The `anaDDA <https://github.com/HohlbeinLab/anaDDA>`_ localisations file format. This is a Matlab matrix file consisting of 5 columns and `n` rows where `n` is the number of localisations. The format has the following columns:
+The `anaDDA <https://github.com/HohlbeinLab/anaDDA>`_ localisations file format. This is a Matlab matrix file consisting of 5 columns and :math:`n` rows where :math:`n` is the number of localisations. The format has the following columns:
 
 .. list-table::
    :widths: 20 80
@@ -899,7 +899,7 @@ The `anaDDA <https://github.com/HohlbeinLab/anaDDA>`_ localisations file format.
    * - Time
      - Frame time (in seconds). This is the length of the frame (i.e. exposure time). It will be the same for the entire set of localisations.
 
-The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single matrix named ``tracks`` of `n` rows by 5 columns of type double. It can be loaded in to Matlab using::
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single matrix named ``tracks`` of :math:`n` rows by 5 columns of type double. It can be loaded in to Matlab using::
 
     load('/path/to/file.mat')
 
@@ -938,7 +938,7 @@ where the rows define the coordinates in two or three dimensions at each timeste
 
 Note: The Frame and ID are not specified by the vbSPT format. They are added to the required XYZ data to allow localisations to be identified using the key ``Frame:ID``, facilitating export of the vbSPT results with categories assigned to each result. It is ignored by vbSPT analysis which uses the first 2 or 3 columns only.
 
-The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single cell array named ``tracks`` of 1 row by `n` columns, where `n` is the number of tracks. It can be specified as the input within the ``vbSPT`` run input file using::
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single cell array named ``tracks`` of 1 row by :math:`n` columns, where :math:`n` is the number of tracks. It can be specified as the input within the ``vbSPT`` run input file using::
 
     % Inputs
     inputfile = '/path/to/file.mat';
@@ -956,9 +956,9 @@ NOBIAS Localisations
 
 The `NOBIAS <https://github.com/BiteenMatlab/NOBIAS>`_ localisations file format. This is a Matlab matrix file containing the track IDs and jump steps in the X and Y dimensions.
 
-The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. The export uses the original track IDs from the tracks, not a sequence starting from 1. A second array named ``obs`` of 2 rows by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`. For convenience an array named ``Frame`` is added to the data corresponding to the start frame of each jump observation. This allows the jump to be identified in the original results using the key ``Frame:ID``, facilitating export of the NOBIAS results with categories assigned to each result.
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of :math:`n` rows by 1 column, where :math:`n` is the number of jump steps, representing the track IDs. The export uses the original track IDs from the tracks, not a sequence starting from 1. A second array named ``obs`` of 2 rows by :math:`n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is ``nan``. For convenience an array named ``Frame`` is added to the data corresponding to the start frame of each jump observation. This allows the jump to be identified in the original results using the key ``Frame:ID``, facilitating export of the NOBIAS results with categories assigned to each result.
 
-Note: The apparent transpose of columns and rows for the two named fields matches the example data format provided by NOBIAS. The ``TrID`` matrix is used as a 1D array and columns*rows must equal `n`.
+Note: The apparent transpose of columns and rows for the two named fields matches the example data format provided by NOBIAS. The ``TrID`` matrix is used as a 1D array and columns*rows must equal :math:`n`.
 
 If the results are calibrated then a second struct called 'Params' is added to the file containing two named fields: 'frametime' is the frame exposure time in seconds; and 'pixelsize' is the camera pixel size in |micro|\ m.
 
@@ -2116,9 +2116,9 @@ The results are displayed in a table. Additional fields not in the parameter tab
      - The number of matched localisations in the analysis. This is the number of localisations that have their classification compared.
 
    * - Rand Index
-     - The Rand index. This represents the probability that ``X`` and ``Y`` will agree on a randomly chosen pair of classifications. Has a value between 0 and 1.
+     - The Rand index. This represents the probability that :math:`X` and :math:`Y` will agree on a randomly chosen pair of classifications. Has a value between 0 and 1.
 
-       For any pair of classifications in ``X``, the classifications can be the same or different. The identical pair of classifications in ``Y`` can also be the same or different. The Rand index is the number of pairs that are either the same in ``X`` and ``Y`` or different in ``X`` and ``Y`` divided by the total ((same ``X``, same ``Y``) + (different ``X``, different ``Y``) + (same ``X``, different ``Y``) + (different ``X``, same ``Y``)).
+       For any pair of classifications in :math:`X`, the classifications can be the same or different. The identical pair of classifications in :math:`Y` can also be the same or different. The Rand index is the number of pairs that are either the same in :math:`X` and :math:`Y` or different in :math:`X` and :math:`Y` divided by the total ((same :math:`X`, same :math:`Y`) + (different :math:`X`, different :math:`Y`) + (same :math:`X`, different :math:`Y`) + (different :math:`X`, same :math:`Y`)).
 
    * - Adjusted RI
      - The adjusted Rand index (the Rand index adjusted for the chance of grouping elements by chance). Has a maximum value of 1 and can yield negative values if the index is less than the expected index.
@@ -2270,6 +2270,6 @@ The following parameters can be configured:
    * - Pixel depth
      - The depth of each voxel.
 
-If the ``Random`` mode is selected then nuclei are randomly added to the image. The size of the nuclei is configured using the ``Diameter`` parameter. Nuclei are added in columns down the image a random distance apart specified by the `y dither` parameter. The z location is specified by the `z dither parameter`. Set to zero to put all nuclei in the same plane. Columns are added until the image space is filled.
+If the ``Random`` mode is selected then nuclei are randomly added to the image. The size of the nuclei is configured using the ``Diameter`` parameter. Nuclei are added in columns down the image a random distance apart specified by the ``y dither`` parameter. The z location is specified by the ``z dither`` parameter. Set to zero to put all nuclei in the same plane. Columns are added until the image space is filled.
 
 If the ``User input`` mode is selected a blank mask is created and a dialog is presented to allow the nucleus ``Diameter`` to be configured. Any mouse click on the mask will draw a nucleus of the given diameter on the mask located on that z slice. There is no check that nuclei do not overlap. The user can change the diameter and current slice to create the mask as desired. Click ``Close`` to close the dialog and stop adding more nuclei.

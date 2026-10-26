@@ -256,7 +256,7 @@ The following parameters can be specified:
      - The number of frames from the original image between each slice in the reference stack.
 
 
-For example if a white light image was taken at the start and then every 20 frames then the method should be called with parameters ``start_frame=1 frame_spacing=20``. The drift will then be calculated as if the `n` slices were at time points::
+For example if a white light image was taken at the start and then every 20 frames then the method should be called with parameters ``start_frame=1 frame_spacing=20``. The drift will then be calculated as if the :math:`n` slices were at time points::
 
     1, 21, 41, ..., 20 * (n-1) + 1
 
@@ -1437,7 +1437,7 @@ See also :ref:`analysis_plugins:Trace Molecules (Multi)` which performs tracing 
 Track Diffusion Analysis
 ------------------------
 
-The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the `Spot-On` paper by Hansen `et al` (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
+The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the *Spot-On* paper by Hansen *et al* (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
 
 The plugin uses multiple input datasets that have been assigned to tracks using tracing. A traced dataset is identified using the Id field on the results from each dataset.
 
@@ -2011,7 +2011,7 @@ When the plugin runs a dialog is presented that allows multiple datasets to be s
      - Used to remove traces starting at or before the first frame. Set to zero to disable.
 
    * - Last frame
-     - Used to remove traces ending at or after the last frame. If negative the actual last frame ``t`` in the data is identified and all traces ending above ``t + last frame`` are removed. Set to zero to disable.
+     - Used to remove traces ending at or after the last frame. If negative the actual last frame :math:`t` in the data is identified and all traces ending above :math:`t + \text{last frame}` are removed. Set to zero to disable.
 
    * - Min size
      - The minimum number of localisations in a track. Use this to exclude single localisations or short tracks. The residence time histogram is computed using the track duration beyond this minimum threshold.
@@ -2204,7 +2204,7 @@ When the plugin runs the following parameters can be set:
      - If ``true`` then a QQ plot is shown when only two datasets are selected.
 
    * - Max N
-     - Limit the number of distances used to ``N`` with a random sample. As the sample size reduces the significance of the KS test between distributions will reduce. Used to investigate the effect of sample size on the test.
+     - Limit the number of distances used to :math:`N` with a random sample. As the sample size reduces the significance of the KS test between distributions will reduce. Used to investigate the effect of sample size on the test.
 
    * - Seed
      - The seed for random sampling.
@@ -2217,17 +2217,17 @@ After parameters are configured a dialog is presented that allows multiple datas
 OPTICS
 ------
 
-Runs the Ordering Points To Identify the Clustering Structure (`OPTICS <https://en.wikipedia.org/wiki/OPTICS_algorithm>`_) algorithm [Ankerst *et al*, 1999] to perform interactive density-based clustering of localisation data. Each point in the data is analysed to determine the number of neighbours within a specified `radius`. A minimum number of points (`MinPoints`) is specified which describes the number of points required to form a cluster. If the `MinPoints` is achieved for the point neighbourhood the algorithm assigns each point the core distance which is the distance to the `MinPoints`\ :sup:`th` closest point. The reachability-distance of another point `p2` from point `p1` is the maximum of the distance between them or the core distance. If point `p2` is above the maximum radius to consider then there is no reachability distance.
+Runs the Ordering Points To Identify the Clustering Structure (`OPTICS <https://en.wikipedia.org/wiki/OPTICS_algorithm>`_) algorithm [Ankerst *et al*, 1999] to perform interactive density-based clustering of localisation data. Each point in the data is analysed to determine the number of neighbours within a specified ``radius``. A minimum number of points (``MinPoints``) is specified which describes the number of points required to form a cluster. If the ``MinPoints`` is achieved for the point neighbourhood the algorithm assigns each point the core distance which is the distance to the ``MinPoints``\ :sup:`th` closest point. The reachability-distance of another point :math:`p_2` from point :math:`p_1` is the maximum of the distance between them or the core distance. If point :math:`p_2` is above the maximum radius to consider then there is no reachability distance.
 
-Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the `radius`. If the neighbourhood satisfies `MinPoints` then a new cluster is created. The neighbours are added to a sorted queue to be processed. Processing occurs in order of their reachability-distance. During processing the reachability distance of points already in the queue may change (reduce in size) and the queue is reordered. When no more points are reachable from the cluster then a new unprocessed point is chosen.
+Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the ``radius``. If the neighbourhood satisfies ``MinPoints`` then a new cluster is created. The neighbours are added to a sorted queue to be processed. Processing occurs in order of their reachability-distance. During processing the reachability distance of points already in the queue may change (reduce in size) and the queue is reordered. When no more points are reachable from the cluster then a new unprocessed point is chosen.
 
-The OPTICS algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptotically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
+The OPTICS algorithm requires parameters ``radius`` and ``MinPoints``. The run-time of the algorithm depends on ``radius``. If set to the maximum distance between any two points in the data then the run-time is asymptotically quadratic as each neighbourhood returns all the points. The ``MinPoints`` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
 
-FastOPTICS is a variant that is not parameterised using a neighbour radius. The algorithm is based on the concept that a pair of points close in N-dimensional space are also close when the space is projected onto a line (1D). The algorithm computes a number of projections of the data onto a line. This line can be randomly orientated or orientated using equi-distributed vectors around a circle. Each projection provides a linear order of points along the line using a distance from the origin. This set of points is recursively split using random divisions until subsets are all below `MinPoints` in size. The points in a subset are allocated as neighbours of a chosen point in the subset. The point is chosen either randomly, as the median of the subset (using the distance from the origin) or all points are chosen. After a number of random projections each point has an allocated neighbourhood of points. The rest of the algorithm functions the same as OPTICS but with pre-computed neighbours and no requirement for a `radius`.
+FastOPTICS is a variant that is not parameterised using a neighbour radius. The algorithm is based on the concept that a pair of points close in N-dimensional space are also close when the space is projected onto a line (1D). The algorithm computes a number of projections of the data onto a line. This line can be randomly orientated or orientated using equi-distributed vectors around a circle. Each projection provides a linear order of points along the line using a distance from the origin. This set of points is recursively split using random divisions until subsets are all below ``MinPoints`` in size. The points in a subset are allocated as neighbours of a chosen point in the subset. The point is chosen either randomly, as the median of the subset (using the distance from the origin) or all points are chosen. After a number of random projections each point has an allocated neighbourhood of points. The rest of the algorithm functions the same as OPTICS but with pre-computed neighbours and no requirement for a ``radius``.
 
-The OPTICS algorithm outputs the points in a particular ordering. A plot of the order against the reachability distance shows a dendrogram-like structure where the clusters show as wells in the reachability profile. OPTICS provides an algorithm that analyses the gradient of the profile in runs of up and down and uses this to assign a hierarchical level of clustering to the data based on a parameter `Xi` (the change in reachability to define a cluster). A second clustering algorithm uses a fixed distance threshold. All adjacent points in the profile that are reachable below this distance are assigned to the same cluster. The result is the same as if using the DBSCAN algorithm (see section :numref:`{number} <analysis_plugins:DBSCAN>`).
+The OPTICS algorithm outputs the points in a particular ordering. A plot of the order against the reachability distance shows a dendrogram-like structure where the clusters show as wells in the reachability profile. OPTICS provides an algorithm that analyses the gradient of the profile in runs of up and down and uses this to assign a hierarchical level of clustering to the data based on a parameter ``Xi`` (the change in reachability to define a cluster). A second clustering algorithm uses a fixed distance threshold. All adjacent points in the profile that are reachable below this distance are assigned to the same cluster. The result is the same as if using the DBSCAN algorithm (see section :numref:`{number} <analysis_plugins:DBSCAN>`).
 
-A local outlier probability (LoOP [Kriegel `et al`, 2009]) analysis can be performed by the plugin. The local density is estimated by the typical distance at which a point can be "reached" from its neighbours specified using the `MinPoints` nearest neighbour. By comparing the local density of an object to the local densities of its neighbours, one can identify regions of similar density, and points that have a substantially lower density than their neighbours. These are considered to be outliers. LoOP analysis produces a score in the range of 0 to 1.
+A local outlier probability (LoOP [Kriegel *et al*, 2009]) analysis can be performed by the plugin. The local density is estimated by the typical distance at which a point can be "reached" from its neighbours specified using the ``MinPoints`` nearest neighbour. By comparing the local density of an object to the local densities of its neighbours, one can identify regions of similar density, and points that have a substantially lower density than their neighbours. These are considered to be outliers. LoOP analysis produces a score in the range of 0 to 1.
 
 The ``OPTICS`` plugin has a preview mode that allows the parameters to be changed and the results updated in real-time. There are various output options to control outlining of clusters on an image, viewing of the clustering structure on the reachability profile and tabulation of cluster results. The ``OPTICS`` dialog is non-blocking allowing the other ``ImageJ`` windows to be used when the preview is active.
 
@@ -2394,11 +2394,11 @@ DBSCAN
 
 Runs the Density-based spatial clustering of applications with noise (`DBSCAN <https://en.wikipedia.org/wiki/DBSCAN>`_) algorithm [Ester *et al*, 1996] to perform interactive density-based clustering of localisation data.
 
-This plugin is a modification of the ``OPTICS`` plugin. The DBSCAN algorithm predates the OPTICS algorithm. The difference is that localisations are processed in arbitrary order. In OPTICS the algorithm tracks how reachable points are from each other and links more reachable points first. DBSCAN does not make this distinction. As per OPTICS the DBSCAN algorithm analyses each point in the data to determine the number of neighbours within a specified `radius`. A minimum number of points (`MinPoints`) is specified which describes the number of points required to form a cluster.
+This plugin is a modification of the ``OPTICS`` plugin. The DBSCAN algorithm predates the OPTICS algorithm. The difference is that localisations are processed in arbitrary order. In OPTICS the algorithm tracks how reachable points are from each other and links more reachable points first. DBSCAN does not make this distinction. As per OPTICS the DBSCAN algorithm analyses each point in the data to determine the number of neighbours within a specified ``radius``. A minimum number of points (``MinPoints``) is specified which describes the number of points required to form a cluster.
 
-Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the `radius`. If the neighbourhood satisfies `MinPoints` (defined as a core point) then a new cluster is created. The neighbours that are reachable from a core point are added to the cluster and put in a queue to be processed. Processing occurs in arbitrary order. When no more points are reachable from core points in the cluster then a new unprocessed point is chosen.
+Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the ``radius``. If the neighbourhood satisfies ``MinPoints`` (defined as a core point) then a new cluster is created. The neighbours that are reachable from a core point are added to the cluster and put in a queue to be processed. Processing occurs in arbitrary order. When no more points are reachable from core points in the cluster then a new unprocessed point is chosen.
 
-The DBSCAN algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptotically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
+The DBSCAN algorithm requires parameters ``radius`` and ``MinPoints``. The run-time of the algorithm depends on ``radius``. If set to the maximum distance between any two points in the data then the run-time is asymptotically quadratic as each neighbourhood returns all the points. The ``MinPoints`` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
 
 If points can be reached within the clustering distance from any core point then they are included in the cluster. Clusters are not hierarchical. The algorithm is faster than OPTICS due to the arbitrary processing order. OPTICS is approximately 1.6x slower.
 
@@ -3470,15 +3470,15 @@ Running the ``Spot Analysis`` plugin will bind the ``Spot Analysis (Add)`` plugi
 Crosstalk Activation Analysis
 -----------------------------
 
-Perform crosstalk activation analysis of photo-switchable probes under pulsed light activation. This plugin is based on the methods described in Bates `et al` (2007) and Bates `et al` (2012).
+Perform crosstalk activation analysis of photo-switchable probes under pulsed light activation. This plugin is based on the methods described in Bates *et al* (2007) and Bates *et al* (2012).
 
 Activation analysis is based on the activation of a fluorophore from the fluorescence transmission of a closely coupled second chromophore via fluorescence resonance energy transfer (more commonly referred to by the acronym `FRET <https://en.wikipedia.org/wiki/F%C3%B6rster_resonance_energy_transfer>`_). The second chromophore will be activated by a pulse of light and localisations from the primary fluorophore are only of interest if they begin immediately following a pulse activation.
 
-Using a second chromophore to transfer activation energy to the primary fluorophore allows configuration of an experiment where the wavelength of the pulse activation light can be further separated from the typical activation wavelength of the primary fluorophore. Pairs of fluorophores can be combined with suitable excitation and emission spectra to allow multi-colour imaging to be performed by pulsing with different activation wavelengths and assigning localisations that occur immediately following an activation pulse to the appropriate channel. Note that activation of the primary fluorophore can occur spontaneously or from light pulsed in other wavelengths. This is `crosstalk`. The crosstalk of a fluorophore pair under the multi-channel experimental conditions (i.e. pulsing with different activation wavelengths in different frames) can be obtained using crosstalk activation analysis. This plugin performs the following analysis on a set of traced localisations:
+Using a second chromophore to transfer activation energy to the primary fluorophore allows configuration of an experiment where the wavelength of the pulse activation light can be further separated from the typical activation wavelength of the primary fluorophore. Pairs of fluorophores can be combined with suitable excitation and emission spectra to allow multi-colour imaging to be performed by pulsing with different activation wavelengths and assigning localisations that occur immediately following an activation pulse to the appropriate channel. Note that activation of the primary fluorophore can occur spontaneously or from light pulsed in other wavelengths. This is *crosstalk*. The crosstalk of a fluorophore pair under the multi-channel experimental conditions (i.e. pulsing with different activation wavelengths in different frames) can be obtained using crosstalk activation analysis. This plugin performs the following analysis on a set of traced localisations:
 
 * Identify localisations that appear in the frame after an activator pulse.
 * For those localisations identify those that are activated more than once after a pulse of any activator wavelength, or the same activator wavelength.
-* Calculate the ratio of how many times the molecule turns on after an incorrect pulse (channel `N`) to how many times it turns on after a correct pulse (channel `M`); this is the crosstalk ratio between channels `M` and `N`:
+* Calculate the ratio of how many times the molecule turns on after an incorrect pulse (channel :math:`N`) to how many times it turns on after a correct pulse (channel :math:`M`); this is the crosstalk ratio between channels :math:`M` and :math:`N`:
 
 .. math::
 
@@ -3639,7 +3639,7 @@ When the simulation is complete the actual crosstalk for each channel is compute
     Simulated crosstalk C21  0.07117->0.07333, C23  0.09783->0.09856
     Simulated crosstalk C31  0.137->0.1362, C32  0.1297->0.1286
 
-The simulation is recorded using datasets in memory with the prefix ``Activation Analysis Simulation``. Each localisation is assigned a unique ID. The effect is that tracing of results is perfect and all separate activations are a new trace. A combined dataset is created along with a dataset for each channel with the suffix ``CN`` where `N` is 1, 2, or 3. The channel datasets can be used as input for the ``Crosstalk Analysis Plugin`` as they represent the imaging of 1 fluorophore-chromophore pair under the full imaging pulse life cycle.
+The simulation is recorded using datasets in memory with the prefix ``Activation Analysis Simulation``. Each localisation is assigned a unique ID. The effect is that tracing of results is perfect and all separate activations are a new trace. A combined dataset is created along with a dataset for each channel with the suffix ``CN`` where :math:`N` is 1, 2, or 3. The channel datasets can be used as input for the ``Crosstalk Analysis Plugin`` as they represent the imaging of 1 fluorophore-chromophore pair under the full imaging pulse life cycle.
 
 For reference a 3 colour image composite is created with dimensions 1024x1024 pixels (see :numref:`Figure %s <fig_crosstalk_activation_analysis_simulation_example>`). This contains the localisations from each channel drawn with perfect spectral unmixing; each set of localisations is drawn on the correct channel regardless of whether it was due to an activation in the correct or incorrect pulse. This is a reference image for a perfect result. There is currently not an option to draw the localisations with colours associated with the pulse activation frame, i.e. the raw spectrally mixed image. This can be done using no crosstalk correction in the ``Pulse Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Pulse Activation Analysis>`).
 
@@ -3658,7 +3658,7 @@ After the simulation has finished the ``Crosstalk Activation Analysis`` plugin c
 Pulse Activation Analysis
 -------------------------
 
-Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation. This plugin is based on the methods described in Bates `et al` (2007) and Bates `et al` (2012). For multi-channel pulse imaging this plugin requires the crosstalk ratios computed using the ``Crosstalk Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Crosstalk Activation Analysis>`).
+Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation. This plugin is based on the methods described in Bates *et al* (2007) and Bates *et al* (2012). For multi-channel pulse imaging this plugin requires the crosstalk ratios computed using the ``Crosstalk Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Crosstalk Activation Analysis>`).
 
 Pulse imaging is the use of pulsed activation light to activate fluorophores. Localisations that occur immediately after an activation pulse are extracted for analysis. Pulse imaging can use different fluorophores with different activation light to produce multi-channel imaging. This plugin supports up to 3 channels from 3 different activation pulses during a pulse life cycle. When performing multi-channel pulse imaging it is possible that a fluorophore is activated by the incorrect pulse and will be incorrectly labelled in the output results. This is known as crosstalk. The cross talk ratios for a fluorophore can be used to perform spectral unmixing of the raw results. During this process localisations may be reassigned a channel based on the crosstalk ratios and current channel assignments of their local neighbourhood.
 
@@ -3679,16 +3679,16 @@ The quality of the output of the crosstalk correction procedure is subjective an
 Crosstalk Correction
 ~~~~~~~~~~~~~~~~~~~~
 
-For each localisation the count of neighbours assigned to each channel is created. The local neighbourhood is defined by a radius. The observed local densities (`od`) of each channel are converted to the true local densities (`d`) for each channel using the crosstalk ratios (`c`).
+For each localisation the count of neighbours assigned to each channel is created. The local neighbourhood is defined by a radius. The observed local densities (:math:`\mathit{od}`) of each channel are converted to the true local densities (:math:`d`) for each channel using the crosstalk ratios (:math:`c`).
 
-For 2-channel imaging the following equations are solved for `d`:
+For 2-channel imaging the following equations are solved for :math:`d`:
 
 .. math::
 
     \mathit{od}_1 &= d_1 + c_{21} \times d_2 \\
     \mathit{od}_2 &= d_2 + c_{12} \times d_1
 
-For 3-channel imaging the following equations are solved for `d`:
+For 3-channel imaging the following equations are solved for :math:`d`:
 
 .. math::
 
