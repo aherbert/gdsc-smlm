@@ -477,7 +477,7 @@ When the plugin is run the user is prompted to select a text file containing del
     :align: center
     :figwidth: 80%
 
-    Load localisations dialog
+    Load Localisations dialog
 
 The plugin requires that the dataset be given a name. This is used to store the dataset in memory. If the name matches an existing dataset in memory then it will be replaced. Note: The current datasets held in memory can be listed using the ``Summarise Results`` plugin.
 
@@ -715,7 +715,7 @@ If a range of z-depths is available the plugin presents a dialog allowing the us
 
     Z-depth filtering dialog
 
-Thus the ``Load localisations`` plugin can be used to load selected slices of data for analysis.
+Thus the ``Load Localisations`` plugin can be used to load selected slices of data for analysis.
 
 If the user requires a subset of the data in the XY dimensions then this can be achieved using the ``Crop Results`` or ``ROI Crop Results`` plugins once the results have been loaded (see sections :numref:`%s <results_plugins:Crop Results>` and :numref:`%s <results_plugins:ROI Crop Results>`).
 
@@ -1761,7 +1761,7 @@ The following menu options are useful:
      - Options to apply a local transformation to the selected results object. The transformation must first be unlocked.
 
    * - View
-     - Centre
+     - Center
      - Allows the view to be centred on a selected results object or the universe (all objects).
 
    * - View
@@ -2036,7 +2036,7 @@ The following parameters can be set:
    * - Parameter
      - Description
 
-   * - Resuls1
+   * - Results1
      - The first results set (the reference).
 
    * - Results2
@@ -2076,7 +2076,7 @@ The following parameters can be set:
    * - Parameter
      - Description
 
-   * - Resuls1
+   * - Results1
      - The first results set.
 
    * - Results2
@@ -2086,10 +2086,10 @@ The following parameters can be set:
      - The distance for a match between localisations. Used to pair identical localisations from the two results sets.
 
    * - Use id
-     - Configure how to use the id to create the classification. Ignore: do not use the localisation id; Ignore zero: use localisations with a non-zero id; or ALL: use the localisation id.
+     - Configure how to use the id to create the classification. Ignore: do not use the localisation id; Ignore zero: use localisations with a non-zero id; or All: use the localisation id.
 
    * - Use category
-     - Configure how to use the category to create the classification. Ignore; Ignore zero; or ALL.
+     - Configure how to use the category to create the classification. Ignore; Ignore zero; or All.
 
 The results are displayed in a table. Additional fields not in the parameter table are described below:
 

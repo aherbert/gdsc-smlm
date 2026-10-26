@@ -1680,5 +1680,5 @@ Fitting results are output to a summary table:
    * - b
      - The fitted coefficient :math:`b`.
 
-   * - obz z
+   * - obs dz
      - The observed depth-of-field :math:`\Delta z + b`.

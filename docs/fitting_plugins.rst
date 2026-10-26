@@ -1531,7 +1531,7 @@ The super-resolution image is computed in memory and displayed live during the f
 Image Examples
 ~~~~~~~~~~~~~~
 
-:numref:`Table %s <table_example_images>` shows examples of different image rendering methods. The ``Localisations`` and ``Intensity`` methods are able to plot the location of the fibres to a higher resolution than the original average intensity projection. The ``Point Spread Function`` (PSF) plot shows a very similar width for the fibres as the original image. However there has been a significant reduction in background noise since any signals not identified as a localisation are removed.
+:numref:`Table %s <table_example_images>` shows examples of different image rendering methods. The ``Localisations`` and ``Intensity`` methods are able to plot the location of the fibres to a higher resolution than the original average intensity projection. The ``Fitted PSF`` image shows a very similar width for the fibres as the original image. However there has been a significant reduction in background noise since any signals not identified as a localisation are removed.
 
 The ``Localisations`` image method can be used to directly count localisations in an area, for example counting localisations in regions of a cell. This is only valid if the image has not been rendered using the ``Equalised`` option since that adjusts the pixel values to increase contrast. A region can be marked on the image using any of ``ImageJ``'s area ROI tools. The localisation count can be measured by summing the pixel intensity in the region. This is performed using the ``Analyze > Measure`` command (``Ctrl + M``). Note: Ensure that the ``Integrated density`` measurement is selected in the ``ImageJ`` ``Analyze > Set Measurements...`` dialog.
 
@@ -1802,7 +1802,7 @@ Allows the ``Peak Fit`` plugin to be run on a folder containing many images. Thi
 
 Currently only TIFF images are supported. This includes OME-TIFF images produced by ``Micro Manager``.
 
-When the ``Peak Fit Series`` plugin is executed it shows a folder selection dialog where the user can select a folder containing a set of images. The plugin then scans the folder for images. If a file is not a recognised TIFF image then the plugin will fail.
+When the ``Peak Fit (Series)`` plugin is executed it shows a folder selection dialog where the user can select a folder containing a set of images. The plugin then scans the folder for images. If a file is not a recognised TIFF image then the plugin will fail.
 
 Images are sorted numerically into a list, i.e. the first sequence of numeric digits in the filename are used to sort images, e.g. ``image2.tif`` is before ``image10.tif``. This allows correct processing of series images.
 

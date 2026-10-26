@@ -132,7 +132,7 @@ The following options are available:
        * ``New truncated dataset``: Create a new dataset with updated coordinates but truncate the results to the interpolation range of the drift curve (points outside this range may have a poor drift correction).
 
    * - Save drift
-     - Save the drift curve to file. The plugin will prompt the user for a filename. The drift curve can later be loaded by the ``Drift Calculator`` plugin using the ``File`` option for the ``Method`` parameter.
+     - Save the drift curve to file. The plugin will prompt the user for a filename. The drift curve can later be loaded by the ``Drift Calculator`` plugin using the ``Drift File`` option for the ``Method`` parameter.
 
 
 Note that if the drift correction is used to update the results then only the results held in memory will change. Any derived output, for example a table of the results or a reconstructed image, will have to be regenerated from the new results.
@@ -158,7 +158,7 @@ Sub-Image Alignment
 
 If the localisations represent a structural image then a subset of the localisations will also represent the same structure. Where there are a large number of localisations (for example in STORM images) it is possible to create sub-images from sub-sets of the data and align them.
 
-The ``Sub-image alignment`` method performs the following steps:
+The ``Localisation Sub-Images`` method performs the following steps:
 
 #.  Initialise the drift for each time point to zero.
 
@@ -295,7 +295,7 @@ The ``Marked ROIs`` method requires no additional parameters, only ROIs within t
 Image Alignment using Correlation Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Image alignment in the ``Sub-image alignment`` and ``Reference Stack Alignment`` methods is done using the maximum correlation between images (including sub-pixel registration using cubic interpolation). This is computed in the frequency domain after a Fast Fourier Transform (FFT) of the image. The method of producing and then aligning images is computationally intensive so the plugin uses multi-threading to increase speed. The number of threads to use is the ``ImageJ`` default set in ``Edit > Options > Memory & Threads...``.
+Image alignment in the ``Localisation Sub-Images`` and ``Reference Stack Alignment`` methods is done using the maximum correlation between images (including sub-pixel registration using cubic interpolation). This is computed in the frequency domain after a Fast Fourier Transform (FFT) of the image. The method of producing and then aligning images is computationally intensive so the plugin uses multi-threading to increase speed. The number of threads to use is the ``ImageJ`` default set in ``Edit > Options > Memory & Threads...``.
 
 
 .. index:: ! Trace Molecules
@@ -398,7 +398,7 @@ The following parameters can be configured:
      - Save all the histogram data to a results directory to allow further analysis. A folder selection dialog will be presented after the tracing has finished.
 
 
-The plugin will trace the localisations and store the results in memory with a suffix ``Traced``. Additional derived datasets are optionally created: all single localisations which could not be joined are given a suffix ``Trace Singles``; all traces are given a suffix ``Traced Multi``; the centroids of all traces are given the suffix ``Traced Centroids``; and the centroids of the traces-only are given the suffix ``Traced Centroids Multi``. Note: The ``Traced Singles`` plus ``Traced Multi`` datasets equals the ``Traced`` dataset.
+The plugin will trace the localisations and store the results in memory with a suffix ``Traced``. Additional derived datasets are optionally created: all single localisations which could not be joined are given a suffix ``Traced Singles``; all traces are given a suffix ``Traced Multi``; the centroids of all traces are given the suffix ``Traced Centroids``; and the centroids of the traces-only are given the suffix ``Traced Centroids Multi``. Note: The ``Traced Singles`` plus ``Traced Multi`` datasets equals the ``Traced`` dataset.
 
 A summary of the number of traces is shown on the ``ImageJ`` status bar. The results are accessible using the ``Results Manager`` plugin.
 
@@ -465,10 +465,10 @@ The following table describes the parameters used during the optimisation:
    * - Max Distance Threshold (nm)
      - The maximum distance threshold.
 
-   * - Min Time Threshold (seconds)
+   * - Min Time Threshold (frames)
      - The minimum time threshold.
 
-   * - Max Time Threshold (seconds)
+   * - Max Time Threshold (frames)
      - The maximum time threshold.
 
    * - Steps
@@ -521,18 +521,18 @@ The tracing algorithm assigns a unique ID to each trace. All the localisations t
    * - Traced
      - A full set of localisations with each assigned the corresponding trace ID.
 
-   * - Trace Centroids
+   * - Traced Centroids
      - The localisations of each trace combined into a centroid.
 
        Centroids have a signal equal to the sum of the localisations, the coordinates are set using the signal weighted centre-of-mass of the localisations. The background is averaged and the noise combined using the root of the sum-of-squares. The Gaussian standard deviation of the localisation is set using the average precision of the localisations, calculated using the Mortensen formula.
 
-   * - Trace Singles
+   * - Traced Singles
      - Contains the localisations that were not part of a trace, i.e. are a single localisation.
 
-   * - Trace Multi
+   * - Traced Multi
      - Contains the localisations that were part of a trace, i.e. are a multi-frame localisation.
 
-   * - Trace Centroids Multi
+   * - Traced Centroids Multi
      - The localisations of each trace combined into a centroid. Only traces with multiple localisations are included.
 
 
@@ -2774,7 +2774,7 @@ The :math:`L_{i}(r)` score should be equal to *r* if the points are randomly dis
 Ripley's L-plot
 ~~~~~~~~~~~~~~~
 
-If the ``Compute L plot`` option is selected then the plugin will compute the L-score for a range of radii. A dialog is presented allowing the user to select the ``L-plot score`` function, ``Min radius``, ``Max Radius`` and the ``Increment`` used to move between them. A plot is produced showing the score for each radius. The :math:`(L_{i}(r)-r)` score should be equal to zero for homogeneous data. If further normalised by :math:`r` the score is comparable across radii.
+If the ``Compute Ripley's L plot`` option is selected then the plugin will compute the L-score for a range of radii. A dialog is presented allowing the user to select the ``L-plot score`` function, ``Min radius``, ``Max Radius`` and the ``Increment`` used to move between them. A plot is produced showing the score for each radius. The :math:`(L_{i}(r)-r)` score should be equal to zero for homogeneous data. If further normalised by :math:`r` the score is comparable across radii.
 
 If the ``Confidence intervals`` parameter is enabled the plugin will create 99 random simulations of the given sample size in the same sample area. The score is computed for each simulation and the upper (blue) and lower (red) bounds of the confidence intervals are shown on the chart. If the actual data values lie outside the confidence intervals then it is a non-random distribution with 99% confidence. Note that the simulations are computed using multiple threads; the number of threads is set in ``Edit > Options > Memory & Threads...``.
 
@@ -2981,7 +2981,7 @@ When the super-resolution image has been constructed a region of interest (ROI) 
 Output
 ~~~~~~
 
-The ``TC-PALM Analysis`` plugin is interactive. The dialog controlling selection of the current clusters is non-blocking to allow interaction with other windows within ``ImageJ``. Updates to the ROI on the super-resolution image or the selection parameters will result in identification of a new set of current groups.
+The ``TC PALM Analysis`` plugin is interactive. The dialog controlling selection of the current clusters is non-blocking to allow interaction with other windows within ``ImageJ``. Updates to the ROI on the super-resolution image or the selection parameters will result in identification of a new set of current groups.
 
 When the ROI or other parameters controlling the selection are updated the current groups will be identified. The square bounds from the ROI are used to construct a loop view of the region. Any data that is outside the ROI but was included using the ``ROI intersects`` parameter will not be visible. The settings for the loop view can be adjusted using the ``Loop settings`` button. The default loop view has a fixed size and thus smaller ROIs are magnified appropriately to allow an overview of the selected region. This can be changed to use a fixed scale or a fixed output pixel size. The data from the current groups is then displayed in plots and a results table.
 
@@ -3328,9 +3328,9 @@ The following parameters can be set:
 Profiling a Spot Region
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The first action is to select a spot on the input image using a rectangular ROI. It is difficult to see spots on the input image which has many frames and very few fluorescent bursts. Consequently it is recommended that an overview image is created to allow the spots to be identified. This could be a maximum or average intensity projection of the input image. However it is best to identify spots using the ``Find Peaks`` plugin and then reconstruct an image using the fitted PSFs. If the image scale is set to 1 then the reconstructed image is the same size as the input image. This allows spots to be outlined on the PSF image and then the ROI reapplied to the original image. An example of this is shown in :numref:`Figure %s <fig_spot_analysis_example_input_image>`.
+The first action is to select a spot on the input image using a rectangular ROI. It is difficult to see spots on the input image which has many frames and very few fluorescent bursts. Consequently it is recommended that an overview image is created to allow the spots to be identified. This could be a maximum or average intensity projection of the input image. However it is best to identify spots using the ``Peak Fit`` plugin and then reconstruct an image using the fitted PSFs. If the image scale is set to 1 then the reconstructed image is the same size as the input image. This allows spots to be outlined on the PSF image and then the ROI reapplied to the original image. An example of this is shown in :numref:`Figure %s <fig_spot_analysis_example_input_image>`.
 
-When a suitable spot has been outlined the region can be analysed using the ``Profile`` button. The analysis extracts the region into a new image named ``Spot Analysis Raw spot``. This is magnified to allow easier viewing. The same region is subjected to a Gaussian blur and extracted to a new image named ``Spot Analysis Blur spot``. The blurred image can make it easier to see peaks in very noisy images. In addition an average intensity projection is created for the spot region and named ``Spot Analysis Average spot``. The average image can indicate if the spot is fixed and central, moves around the image or overlaps with other signal. An example of the raw, blur and average images is shown in :numref:`Figure %s <fig_spot_analysis_spot_images>`. The average spot image shows a blurred spot biased to the upper-right corner but the signal is distinct so the spot is suitable for analysis. The ``Find Peaks`` fitting algorithm is applied to the current frame of the raw and blurred spot (using the configured PSF width). If a spot is detected within 50% of the distance to the centre of the frame it is marked on the image using a cross overlay.
+When a suitable spot has been outlined the region can be analysed using the ``Profile`` button. The analysis extracts the region into a new image named ``Spot Analysis Raw spot``. This is magnified to allow easier viewing. The same region is subjected to a Gaussian blur and extracted to a new image named ``Spot Analysis Blur spot``. The blurred image can make it easier to see peaks in very noisy images. In addition an average intensity projection is created for the spot region and named ``Spot Analysis Average spot``. The average image can indicate if the spot is fixed and central, moves around the image or overlaps with other signal. An example of the raw, blur and average images is shown in :numref:`Figure %s <fig_spot_analysis_spot_images>`. The average spot image shows a blurred spot biased to the upper-right corner but the signal is distinct so the spot is suitable for analysis. The ``Peak Fit`` fitting algorithm is applied to the current frame of the raw and blurred spot (using the configured PSF width). If a spot is detected within 50% of the distance to the centre of the frame it is marked on the image using a cross overlay.
 
 .. _fig_spot_analysis_spot_images:
 .. figure:: images/spot_analysis_spot_images.png
@@ -3340,7 +3340,7 @@ When a suitable spot has been outlined the region can be analysed using the ``Pr
 
     The centre of the fitted peak for the raw and blurred image for the current frame is shown using a cross overlay.
 
-The plugin then analyses the spot region and creates profile plots of the mean and the signal standard deviation per frame as shown in :numref:`Figure %s <fig_spot_analysis_profiles>`. The currently selected frame in the spot images is shown using a vertical magenta line. The profile can be very noisy and so a LOESS smoothing is applied to the raw plot data to produce a background level (shown in red). Any selected on frames are labelled using magenta circles. In addition the plugin searches the ``Find Peaks`` results that are held in memory for any results that were created from the input image. If so then these are potential candidates for on-frames and are shown as cyan squares.
+The plugin then analyses the spot region and creates profile plots of the mean and the signal standard deviation per frame as shown in :numref:`Figure %s <fig_spot_analysis_profiles>`. The currently selected frame in the spot images is shown using a vertical magenta line. The profile can be very noisy and so a LOESS smoothing is applied to the raw plot data to produce a background level (shown in red). Any selected on frames are labelled using magenta circles. In addition the plugin searches the ``Peak Fit`` results that are held in memory for any results that were created from the input image. If so then these are potential candidates for on-frames and are shown as cyan squares.
 
 .. _fig_spot_analysis_profiles:
 .. figure:: images/spot_analysis_profiles.png
@@ -3639,7 +3639,7 @@ When the simulation is complete the actual crosstalk for each channel is compute
     Simulated crosstalk C21  0.07117->0.07333, C23  0.09783->0.09856
     Simulated crosstalk C31  0.137->0.1362, C32  0.1297->0.1286
 
-The simulation is recorded using datasets in memory with the prefix ``Activation Analysis Simulation``. Each localisation is assigned a unique ID. The effect is that tracing of results is perfect and all separate activations are a new trace. A combined dataset is created along with a dataset for each channel with the suffix ``CN`` where :math:`N` is 1, 2, or 3. The channel datasets can be used as input for the ``Crosstalk Analysis Plugin`` as they represent the imaging of 1 fluorophore-chromophore pair under the full imaging pulse life cycle.
+The simulation is recorded using datasets in memory with the prefix ``Activation Analysis Simulation``. Each localisation is assigned a unique ID. The effect is that tracing of results is perfect and all separate activations are a new trace. A combined dataset is created along with a dataset for each channel with the suffix ``CN`` where :math:`N` is 1, 2, or 3. The channel datasets can be used as input for the ``Crosstalk Activation Analysis`` plugin as they represent the imaging of 1 fluorophore-chromophore pair under the full imaging pulse life cycle.
 
 For reference a 3 colour image composite is created with dimensions 1024x1024 pixels (see :numref:`Figure %s <fig_crosstalk_activation_analysis_simulation_example>`). This contains the localisations from each channel drawn with perfect spectral unmixing; each set of localisations is drawn on the correct channel regardless of whether it was due to an activation in the correct or incorrect pulse. This is a reference image for a perfect result. There is currently not an option to draw the localisations with colours associated with the pulse activation frame, i.e. the raw spectrally mixed image. This can be done using no crosstalk correction in the ``Pulse Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Pulse Activation Analysis>`).
 
@@ -3788,7 +3788,7 @@ The localisations are then loaded, the calibration is verified and the traces ar
 
        This is optional depending on the number of configured channels.
 
-Note: The activation frame for each channel is the frame immediately following the pulse activation laser for the fluorophore assigned to channel N. The channel is arbitrary. It must be mapped to the same pulse life cycle used in the ``Crosstalk Analysis Plugin``. The plugin will remember the settings and these should not have to be adjusted.
+Note: The activation frame for each channel is the frame immediately following the pulse activation laser for the fluorophore assigned to channel N. The channel is arbitrary. It must be mapped to the same pulse life cycle used in the ``Crosstalk Activation Analysis`` plugin. The plugin will remember the settings and these should not have to be adjusted.
 
 When the pulse life cycle has been configured the plugin will split the traces into activations using the ``Dark frames for new activation`` parameter. Activations are non-specific if they occur in a frame not following an activation pulse; otherwise the activations are specific to that pulse channel. The plugin records the background (non-specific) and channel (specific) activations rates to the ``ImageJ`` log window. These can be used to verify that the pulse life cycle has been correctly configured. Ideally the channel activation rates should be higher than the background activation rate.
 
@@ -4390,7 +4390,7 @@ The FRC plugin provides options for each stage of the process:
 Data Selection
 ^^^^^^^^^^^^^^
 
-These are the same as the ``FIRE`` plugin (see :numref:`{number}: {name} <analysis_plugins:Fourier Image Resolution>`) without the option for a second dataset. A subset of the data can be selected using an ROI selected from an open image.
+These are the same as the ``Fourier Image Resolution`` plugin (see :numref:`{number}: {name} <analysis_plugins:Fourier Image Resolution>`) without the option for a second dataset. A subset of the data can be selected using an ROI selected from an open image.
 
 
 ..
@@ -4399,7 +4399,7 @@ These are the same as the ``FIRE`` plugin (see :numref:`{number}: {name} <analys
 Image Construction
 ^^^^^^^^^^^^^^^^^^
 
-These are the same as the ``FIRE`` plugin for single datasets. Note that localisations are drawn using bilinear weighting onto the 4 neighbour pixels surrounding the coordinates to reduce pixelation artefacts in the super-resolution image.
+These are the same as the ``Fourier Image Resolution`` plugin for single datasets. Note that localisations are drawn using bilinear weighting onto the 4 neighbour pixels surrounding the coordinates to reduce pixelation artefacts in the super-resolution image.
 
 .. list-table::
    :widths: 20 80
@@ -4436,7 +4436,7 @@ These are the same as the ``FIRE`` plugin for single datasets. Note that localis
 Fourier Options
 ^^^^^^^^^^^^^^^
 
-These are the same as the ``FIRE`` plugin (see :numref:`{number}: {name} <analysis_plugins:Fourier Image Resolution>`).
+These are the same as the ``Fourier Image Resolution`` plugin (see :numref:`{number}: {name} <analysis_plugins:Fourier Image Resolution>`).
 
 
 ..

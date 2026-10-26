@@ -161,8 +161,8 @@ The following parameters can be specified:
    * - Z radius
      - Define the depth around the z-centre to extract into a stack. If zero then the entire image stack is used. Use this to limit the size of each PSF and ultimately the depth of the final combined PSF. This value can be adjusted later in ``Interactive mode`` when previewing the extracted PSF.
 
-   * - Alignment mode
-     - The alignment mode:
+   * - PSF type
+     - The PSF type:
 
        * ``Spot``: The PSF is 'spot-like'. The initial z-centre is estimated using the slice with the maximum intensity.
        * ``Astigmatism``: The PSF is from an astigmatic lens which changes the X and Y widths individually through the depth of focus. The initial z-centre is estimated using the slice with the smallest combined spot width.
@@ -632,7 +632,7 @@ Parameters
 Output
 ~~~~~~
 
-The drift for each frame is computed as the mean of all the fitted centres. The curve represents the average centre of the PSF following idealised fitting of the data with the chosen ``Fit solver`` and ``Fit function`` (i.e. no noise other than Poisson noise if ``Use sampling`` is enabled).
+The drift for each frame is computed as the mean of all the fitted centres. The curve represents the average centre of the PSF following idealised fitting of the data with the chosen ``Fit solver`` and ``PSF`` (i.e. no noise other than Poisson noise if ``Use sampling`` is enabled).
 
 The drift curves for each dimension (X & Y) are then plotted along with the recall against the z-depth. The z-axis is limited to the input z-depth or the available depth of the PSF, whichever is lower.
 
@@ -1571,7 +1571,7 @@ The ``Create Data`` plugin summarises the dataset when the image has been constr
    * - Precision
      - The average precision (in nm).
 
-   * - Precision
+   * - Precision (in-focus)
      - The average precision (in nm) within the defined depth-of-field.
 
    * - X/Y/Z
@@ -1588,7 +1588,7 @@ Compound Molecules
 
 By default all the molecules are single particles. However it may be desirable to simulate a collection of compound molecules, for example dimers and hexamers. This is possible using the ``Compound molecules`` option. If this option is selected the plugin will show a second dialog where the user can input the molecule configuration using a `Google Protocol Buffers <https://protobuf.dev>`_ specification.
 
-The specification is a list of all the compounds that should be simulated. Each compound has a fraction parameter. The compound will be represented using the fraction divided by the total sum of all fractions to indicate the proportion of the compound. Each compound also has a diffusion parameter. When using compound molecules the ``Diffusion`` parameter in the main plugin dialog is ignored. Note that the ``Fixed fraction`` parameter is still used to fix a fraction of the compounds. To gain more control over the moving molecules set the ``Fixed fraction`` parameter to zero. Then simulate a mixed population of diffusing molecules and fixed molecules by specifying the same compounds twice, one with a diffusion coefficient of zero and the other non-zero.
+The specification is a list of all the compounds that should be simulated. Each compound has a fraction parameter. The compound will be represented using the fraction divided by the total sum of all fractions to indicate the proportion of the compound. Each compound also has a diffusion parameter. When using compound molecules the ``Diffusion rate`` parameter in the main plugin dialog is ignored. Note that the ``Fixed fraction`` parameter is still used to fix a fraction of the compounds. To gain more control over the moving molecules set the ``Fixed fraction`` parameter to zero. Then simulate a mixed population of diffusing molecules and fixed molecules by specifying the same compounds twice, one with a diffusion coefficient of zero and the other non-zero.
 
 The remaining section of the compound specification is the list of atoms. These are fluorophore positions relative to the origin. The distances are specified in nanometres. The atom mass is used to weight the centre of mass for the compound. If omitted it is assumed all the atoms are the same.
 
@@ -2171,7 +2171,7 @@ The following parameters can be configured:
    * - Save image results
      - Show a dialog allowing the image localisations to be saved as a PeakResults file. Note that this does not contain the molecule Z position.
 
-   * - Save Localisations
+   * - Save localisations
      - Show a dialog allowing the localisations to be saved. The file contains the time and X,Y,Z positions of each fluorophore when it was in an on state.
 
    * - Show histograms
@@ -2354,16 +2354,16 @@ The following parameters can be configured.
 
        Set to the same as the ``Match distance`` to ignore the ramped scoring function.
 
-   * - Match signal
+   * - Signal factor
      - Define the limit for the difference between the estimated signal and the actual signal for a match. A value of :math:`N` indicates the fit is allowed to be :math:`2^N`-fold different, i.e. use 2 for a 4-fold difference.
 
        Set to zero to ignore.
 
-   * - Lower signal
+   * - Lower factor
      - The limit defining the maximum score for a match between the estimated signal and the true
        signal.
 
-       Set to the same as the ``Match signal`` to ignore the ramped scoring function.
+       Set to the same as the ``Signal factor`` to ignore the ramped scoring function.
 
    * - Recall fraction
      - The fraction of the maximum recall to use for calculating the second set of recall and precision scores.
@@ -2606,7 +2606,7 @@ The analysis results are then reported in a summary table:
    * - AUC2
      - The area under the adjusted precision-recall curve. The adjustment is made by using the highest precision at that recall or above.
 
-   * - Fail 80
+   * - Fail80
      - The failure count that must be allowed to achieve 80% of the maximum true positive count.
 
    * - Fail90
@@ -4058,10 +4058,10 @@ The following parameters can be configured:
 
        Set to zero to ignore.
 
-   * - Lower signal
+   * - Lower factor
      - The limit defining the maximum score for a match between a fitted signal and the true signal.
 
-       Set to the same as the ``Match signal`` to ignore the ramped scoring function.
+       Set to the same as the ``Signal factor`` to ignore the ramped scoring function.
 
    * - Matching
      - Select the matching algorithm.
