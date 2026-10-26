@@ -676,7 +676,7 @@ The recall curve shows the fraction of fits that were successful at each z-depth
 Saving the Drift
 ~~~~~~~~~~~~~~~~
 
-When the calculation is complete the user is presented with the option to save the curve to the PSF (image :numref:`Figure %s <fig_psf_drift_save_dialog>`). The curve is added as settings stored in the Image Info data field. If the entire stack is not covered by the calculated drift curve then the plugin provides the user with the option to average the last n frames of the drift curve in each direction and store this average drift for the terminal frames.
+When the calculation is complete the user is presented with the option to save the curve to the PSF (:numref:`Figure %s <fig_psf_drift_save_dialog>`). The curve is added as settings stored in the Image Info data field. If the entire stack is not covered by the calculated drift curve then the plugin provides the user with the option to average the last n frames of the drift curve in each direction and store this average drift for the terminal frames.
 
 .. _fig_psf_drift_save_dialog:
 .. figure:: images/psf_drift_save_dialog.png
@@ -1807,9 +1807,9 @@ The ``Create Track Data`` plugin is a modification of the ``Create Data`` plugin
 
 The parameters are configured as for the ``Create Data`` plugin (see :numref:`{number}: {name} <model_plugins:Create Data>`). Some parameters have been removed as they are redundant as follows:
 
- * The simulation duration (``Seconds``) has been removed. The duration of the simulation is defined by the ``On time`` and the number of ``Particles``.
- * The correlation mode is removed from the available photon distributions as all fluorophores have the same lifetime.
- * The additional parameters to configure the on-times, off-times, and distribution of the number of blinks have been removed since each fluorophore has a single pulse of a fixed lifetime.
+* The simulation duration (``Seconds``) has been removed. The duration of the simulation is defined by the ``On time`` and the number of ``Particles``.
+* The correlation mode is removed from the available photon distributions as all fluorophores have the same lifetime.
+* The additional parameters to configure the on-times, off-times, and distribution of the number of blinks have been removed since each fluorophore has a single pulse of a fixed lifetime.
 
 
 .. index:: ! Create Benchmark Data
@@ -4605,7 +4605,7 @@ Results
 
 After spot candidates have been filtered using the specified criteria the results are summarised. Each candidate that was fitted as a single spot has a residuals score. The results are sorted by their residuals score and the binary scoring statistics (Precision, Recall, Jaccard) are computed for each possible threshold for the residuals score; for a given threshold all spots below the threshold are assessed as single fits and all above are subjected to the selection criteria to choose the single or doublet fit.
 
-If the ``Show Jaccard Plot`` option was selected the scoring statistics can be plotted against the residuals threshold (::numref:`Figure %s <fig_doublet_filter_analysis_jaccard_plot>`).
+If the ``Show Jaccard Plot`` option was selected the scoring statistics can be plotted against the residuals threshold (:numref:`Figure %s <fig_doublet_filter_analysis_jaccard_plot>`).
 
 .. _fig_doublet_filter_analysis_jaccard_plot:
 .. figure:: images/doublet_filter_analysis_jaccard_plot.jpg

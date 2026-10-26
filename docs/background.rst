@@ -72,8 +72,3 @@ Peak candidates are processed in descending height order and a 2D Gaussian is fi
 To account for high density samples neighbour peaks within the block region are included in the fit if they are within a fraction of the height of the candidate peak, typically 30%. If multiple peak fitting fails then single peak fitting is attempted. Additionally the candidate can be fit using a two peak model if the fit residuals show an asymmetric distribution around the centre. The doublet fit is selected if it improves the adjusted coefficient of determination for LSE or the Bayesian Information Criterion (BIC) for MLE. To prevent over-counting when fitting multiple peaks a check is made for duplicates using a distance criterion before adding to the results. The method is applicable to all types of localisation microscopy data and results are suitable input for filtering methods using structural models.
 
 Image frames are processed independently allowing multi-threaded operation. Results can be output to memory, file or a rendered image using various methods.
-
-
-.. |airy_pattern_png| image:: images/airy_pattern.png
-
-.. |airy_gauss_png| image:: images/airy_gauss.png

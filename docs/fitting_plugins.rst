@@ -2536,5 +2536,3 @@ If the image data has been acquired using a sCMOS camera then the data should be
 .. |image_examples_psf_equalised_jpg| image:: images/image_examples_psf_equalised.jpg
 
 .. |image_examples_signal_intensity_jpg| image:: images/image_examples_signal_intensity.jpg
-
-.. |simple_fit_dialog_png| image:: images/simple_fit_dialog.png

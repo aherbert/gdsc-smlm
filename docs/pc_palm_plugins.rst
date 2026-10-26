@@ -562,7 +562,7 @@ The following parameters are available:
        Set to 0 to ignore fit validation.
 
    * - gr random threshold
-     - Set the threshold for the :math:`` component of the *g(r)* curve to reject the random model.
+     - Set the threshold for the :math:`g(r)^\text{protein}` component of the *g(r)* curve to reject the random model.
 
    * - Fit clustered models
      - Set to **true** to always fit the clustered models. Otherwise only fit the clustered models if the random model is rejected.

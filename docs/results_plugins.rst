@@ -463,7 +463,7 @@ The ``Show table`` option can be used to present a results table of the localisa
 The ``Overlay Results`` dialog is non-blocking allowing the user to interact with ``ImageJ`` as normal. However if the results are cleared from memory or the image is no longer available then the dialog list will be out-of-date and an error is logged to the ``ImageJ`` log window and shown on the dialog. Restarting the plugin will refresh the list of available results.
 
 
-.. index:: ! load localisations
+.. index:: ! Load Localisations
 
 Load Localisations
 ------------------
@@ -720,7 +720,7 @@ Thus the ``Load Localisations`` plugin can be used to load selected slices of da
 If the user requires a subset of the data in the XY dimensions then this can be achieved using the ``Crop Results`` or ``ROI Crop Results`` plugins once the results have been loaded (see sections :numref:`%s <results_plugins:Crop Results>` and :numref:`%s <results_plugins:ROI Crop Results>`).
 
 
-.. index:: ! save localisations
+.. index:: ! Save Localisations
 
 Save Localisations
 ------------------
@@ -1041,11 +1041,11 @@ using ``Edit > Table Settings ...``.
 
 The table provides interactive functionality:
 
- * Selected results can be displayed on a source image
- * Selected results can show plots of the localisation data against time
- * Data can be sorted by columns
- * Data can be edited to remove traces
- * Data can be saved to a new results set in memory
+* Selected results can be displayed on a source image
+* Selected results can show plots of the localisation data against time
+* Data can be sorted by columns
+* Data can be edited to remove traces
+* Data can be saved to a new results set in memory
 
 
 .. index:: ! Filter Results
