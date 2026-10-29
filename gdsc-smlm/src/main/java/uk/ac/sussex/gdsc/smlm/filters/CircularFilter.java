@@ -262,7 +262,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Read a line into the cache (includes conversion to flaot). Pad with edge pixels in x if
+   * Read a line into the cache (includes conversion to float). Pad with edge pixels in x if
    * necessary.
    */
   private static void readLineToCache(Object pixels, int pixelLineP, int xminInside,
@@ -433,7 +433,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
     return lineRadii[lineRadii.length - 1];
   }
 
-  // number of points in kernal area
+  // number of points in kernel area
   private static int getKernelNumberOfPoints(int[] lineRadii) {
     return lineRadii[lineRadii.length - 2];
   }

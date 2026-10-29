@@ -62,7 +62,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  */
 public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLikelihoodFunction {
   /**
-   * The minimum read-noise. Values below this will be set to zerro and read-noise is not modelled.
+   * The minimum read-noise. Values below this will be set to zero and read-noise is not modelled.
    */
   public static final double MIN_READ_NOISE = 1e-3;
 

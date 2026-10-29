@@ -250,7 +250,7 @@ public abstract class ImageSource {
 
   /**
    * Get the next frame. Return null if the frame is not available and set the current frame to
-   * zero. The data is is packed in yx order: index = y * width + x;
+   * zero. The data is packed in yx order: index = y * width + x;
    *
    * <p>Provides serial access to the data after a successful call to {@link #open()}.
    *
@@ -266,7 +266,7 @@ public abstract class ImageSource {
 
   /**
    * Get the next frame. Return null if the frame is not available and set the current frame to
-   * zero. The data is is packed in yx order: index = y * width + x;
+   * zero. The data is packed in yx order: index = y * width + x;
    *
    * <p>Provides serial access to the data after a successful call to {@link #open()}
    *
@@ -290,7 +290,7 @@ public abstract class ImageSource {
 
   /**
    * Get the next frame of raw pixels. Return null if the frame is not available and set the current
-   * frame to zero. The data is is packed in yx order: index = y * width + x;
+   * frame to zero. The data is packed in yx order: index = y * width + x;
    *
    * <p>Provides serial access to the data after a successful call to {@link #open()}
    *
@@ -325,7 +325,7 @@ public abstract class ImageSource {
   protected abstract boolean initialiseSequentialRead();
 
   /**
-   * Get the next frame of raw pixels. The data is is packed in yx order: index = y * width + x;
+   * Get the next frame of raw pixels. The data is packed in yx order: index = y * width + x;
    *
    * <p>Must be implemented by sub-classes.
    *

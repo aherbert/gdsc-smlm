@@ -67,7 +67,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
    * @param bx Empirical constant B for the x-astigmatism of the PSF
    * @param ay Empirical constant A for the y-astigmatism of the PSF
    * @param by Empirical constant B for the y-astigmatism of the PSF
-   * @return the holtzer astimatism Z model
+   * @return the holtzer astigmatism Z model
    */
   public static HoltzerAstigmatismZModel create(double s0x, double s0y, double gamma, double depth,
       double ax, double bx, double ay, double by) {

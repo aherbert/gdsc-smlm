@@ -40,7 +40,7 @@ public class MleScaledFunctionSolver extends ScaledFunctionSolver implements Mle
    * Instantiates a new MLE scaled function solver.
    *
    * <p>Indexed parameters are up-scaled prior to calling the inner function solver. Output
-   * parameters, deviations and the function value are are down-scaled upon completion.
+   * parameters, deviations and the function value are down-scaled upon completion.
    *
    * @param solver the solver
    * @param scale the scale

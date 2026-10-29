@@ -1066,7 +1066,7 @@ public final class ResidenceTimeFitting {
         new ObjectiveFunction(point -> f2.ll(point[0], point[1], point[2]));
 
     // Bound on rate set using the range of the residence times
-    // Limit fraction to the the (0, 1) interval.
+    // Limit fraction to the (0, 1) interval.
     final double hi = 1 / (1e-1 * resolution);
     final double lo = 1 / (1e1 * (resolution * count.length));
     final double[] lB = {lo, lo, 1e-9};
@@ -1230,7 +1230,7 @@ public final class ResidenceTimeFitting {
         point -> f3.ll(point[0], point[1], point[2], point[3], point[4], point[5]));
 
     // Bound on rate set using the range of the residence times
-    // Limit fraction to the the (0, 1) interval.
+    // Limit fraction to the (0, 1) interval.
     final double hi = 1 / (1e-1 * resolution);
     final double lo = 1 / (1e1 * (resolution * count.length));
     final double[] lB = {lo, lo, lo, 1e-9, 1e-9, 1e-9};

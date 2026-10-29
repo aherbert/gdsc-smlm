@@ -701,7 +701,7 @@ public class BinomialFitter {
 
   /**
    * Since fitting uses a bounded search seeded with random movements, restarting can improve the
-   * fit. Control the number of restarts used fot fitting.
+   * fit. Control the number of restarts used for fitting.
    *
    * @param fitRestarts the number of restarts for fitting
    */

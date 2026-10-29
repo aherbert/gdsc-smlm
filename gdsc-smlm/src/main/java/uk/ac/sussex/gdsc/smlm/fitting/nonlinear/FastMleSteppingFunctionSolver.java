@@ -305,7 +305,7 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
   /**
    * Compute the gradients for the Newton step using the gradient procedure.
    *
-   * @param a the funtion parameters
+   * @param a the function parameters
    */
   protected void computeGradients(double[] a) {
     gradientProcedure.computeSecondDerivative(a);

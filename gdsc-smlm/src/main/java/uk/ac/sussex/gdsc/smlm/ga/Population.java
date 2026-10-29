@@ -223,12 +223,12 @@ public class Population<T extends Comparable<T>> {
    * Check for duplicates in the current and new populations.
    *
    * @param newIndividuals The new population
-   * @param chromsome The chromosome
+   * @param chromosome The chromosome
    * @return true if a duplicate
    */
   private boolean isDuplicate(List<? extends Chromosome<T>> newIndividuals,
-      Chromosome<T> chromsome) {
-    final double[] s = chromsome.sequence();
+      Chromosome<T> chromosome) {
+    final double[] s = chromosome.sequence();
     for (final Chromosome<T> i : this.individuals) {
       if (match(i, s)) {
         return true;

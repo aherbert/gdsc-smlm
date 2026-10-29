@@ -416,18 +416,18 @@ public class MultiHysteresisFilter extends HysteresisFilter {
   }
 
   /**
-   * Gets the precision paramater type.
+   * Gets the precision parameter type.
    *
-   * @return the precision paramater type
+   * @return the precision parameter type
    */
   protected ParameterType getPrecisionParamaterType() {
     return ParameterType.PRECISION;
   }
 
   /**
-   * Gets the precision range paramater type.
+   * Gets the precision range parameter type.
    *
-   * @return the precision range paramater type
+   * @return the precision range parameter type
    */
   protected ParameterType getPrecisionRangeParamaterType() {
     return ParameterType.PRECISION_RANGE;

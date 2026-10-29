@@ -398,7 +398,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
   /**
    * Sets the not duplicate flag. Set to true if this result cannot be a duplicate (i.e. no
-   * preceeding results in the same frame within a close distance).
+   * preceding results in the same frame within a close distance).
    *
    * @param notDuplicate the new not duplicate flag
    */

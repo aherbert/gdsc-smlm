@@ -1022,7 +1022,7 @@ public class Gaussian2DFitter {
    *
    * @param index The angle position within the parameter array
    * @param params the params
-   * @param paramsDev the params deveations
+   * @param paramsDev the params deviations
    */
   protected void correctAngle(final int index, final double[] params, final double[] paramsDev) {
     double angle = params[index];

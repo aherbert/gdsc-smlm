@@ -31,7 +31,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  *
  * <p>Note that this is equivalent to the reverse by modelling the Gaussian noise s as a Poisson
  * with variance s*s for a Poisson-Poisson Fisher information since the combined variance of two
- * convolved Poissons is the sum of the variance.
+ * convolved Poisson distributions is the sum of the variances.
  */
 public class PoissonGaussianApproximationFisherInformation extends BasePoissonFisherInformation {
   /** The variance of the Gaussian. */

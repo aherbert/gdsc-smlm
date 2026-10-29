@@ -44,7 +44,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
  * complete iteration i is equal to 1 + 2<sup>i+1</sup>.
  *
  * <p>If the maximum evaluations is reached or exceeded at the <strong>end</strong> of a
- * non-convereged iteration then a {@link TooManyEvaluationsException} is raised. This can be
+ * non-converged iteration then a {@link TooManyEvaluationsException} is raised. This can be
  * suppressed using a property.
  *
  * <p>If the maximum iterations is exceeded then a {@link MaxCountExceededException} is raised.
@@ -65,7 +65,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
   private int maxEval;
   /** Function evaluations. */
   private int eval;
-  /** Itegration iterations. */
+  /** Integration iterations. */
   private int iter;
   /** Flag to suppress max evaluations exception. */
   private boolean noThrowOnMax;

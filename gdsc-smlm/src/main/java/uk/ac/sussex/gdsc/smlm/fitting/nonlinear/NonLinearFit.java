@@ -220,7 +220,7 @@ public class NonLinearFit extends LseBaseFunctionSolver
    *
    * @param a The old fit parameters
    * @param ap The new fit parameters
-   * @param np the number of fitted parameters (matches gradient indicies length)
+   * @param np the number of fitted parameters (matches gradient indices length)
    */
   protected void accepted(double[] a, double[] ap, int np) {
     decreaseLambda();

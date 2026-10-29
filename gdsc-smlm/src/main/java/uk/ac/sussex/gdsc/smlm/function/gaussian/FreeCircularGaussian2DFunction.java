@@ -38,9 +38,9 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
   /** The number of gradient parameters for each Gaussian. */
   protected static final int GRADIENT_PARAMETERS_PER_PEAK = 5;
-  /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
+  /** The index for the amplitude/height normalisation: 1/(2*pi*sx*sy). */
   protected static final int N = 0;
-  /** The index for the The amplitude./height. */
+  /** The index for the amplitude/height. */
   protected static final int HEIGHT = 1;
   /** The index for the x0 position pre-factor. */
   protected static final int AA = 2;

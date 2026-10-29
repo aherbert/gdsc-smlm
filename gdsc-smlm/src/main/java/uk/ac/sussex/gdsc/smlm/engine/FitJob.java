@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
  */
 public class FitJob {
   /**
-   * Thefit job status.
+   * The fit job status.
    */
   public enum Status {
     /** Pending (waiting to run). */

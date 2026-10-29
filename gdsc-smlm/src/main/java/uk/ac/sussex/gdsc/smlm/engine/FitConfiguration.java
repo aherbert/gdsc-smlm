@@ -3242,7 +3242,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
 
       case CameraType.CAMERA_TYPE_NA_VALUE:
       default:
-        throw new IllegalStateException("Unrecognised camera type for for fit solver: "
+        throw new IllegalStateException("Unrecognised camera type for fit solver: "
             + getFitSolver() + ": " + getCameraType());
     }
   }
@@ -3354,7 +3354,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   }
 
   /**
-   * This returns the XML representation of this object as a smart fitler. This ignores any current
+   * This returns the XML representation of this object as a smart filter. This ignores any current
    * smart filter and only uses the standard filtering settings.
    *
    * @return the smart filter XML if using this object as a smart filter.

@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  * it is also set to zero. This occurs when true signal readout from the sCMOS camera is low enough
  * to be negated by readout noise. In this case the noise can be ignored.
  *
- * <p>See: Hunag, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule
+ * <p>See: Huang, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule
  * localization algorithms. Nature Methods 10, 653–658.
  */
 public class ScmosLikelihoodWrapper extends LikelihoodWrapper {

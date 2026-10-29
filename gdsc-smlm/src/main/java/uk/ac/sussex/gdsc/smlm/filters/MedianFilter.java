@@ -202,7 +202,7 @@ public class MedianFilter {
   /**
    * Add a value.
    *
-   * @param value the vakue
+   * @param value the value
    */
   private void add(float value) {
     if (value > guess) {

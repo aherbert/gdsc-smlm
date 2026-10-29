@@ -111,10 +111,10 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
       // getExponent(DoubleEquality.relativeError(newError, oldError)));
 
       // Check if equal or the fit is near perfect
-      boolean negligable = false;
+      boolean negligible = false;
       if (DoubleEquality.almostEqualRelativeOrAbsolute(oldError, newError, maxRelativeError, 0)
           || newError < 0.001 || false) {
-        negligable = true;
+        negligible = true;
 
         // The desire is to avoid a lot of computation if the error is not really moving anywhere.
       } else if (getIteration() > insignificantImprovmentIteration) {
@@ -130,7 +130,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
         // So check to see if the improvement is the same.
         // Q. Should a check be made to see if the exponent is small?
         if (improvementExponent == exp) {
-          negligable =
+          negligible =
               (++insignificantImprovmentCounter >= CONSECUTIVE_INSIGNIFICANT_IMPROVEMENT_LIMIT);
           // System.out.printf("Tiny improvement %function = %function @ %d\n", oldError - newError,
           // DoubleEquality.relativeError(newError, oldError), getIteration());
@@ -140,7 +140,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
         }
       }
 
-      if (negligable) {
+      if (negligible) {
         // Improvement is negligible
         result = 0;
         iterationCount++;

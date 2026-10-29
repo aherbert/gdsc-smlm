@@ -69,7 +69,7 @@ import java.util.function.DoubleUnaryOperator;
  */
 //@formatter:on
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
-  /** Single instance holding log factorial values for resue. */
+  /** Single instance holding log factorial values for reuse. */
   private static final AtomicReference<SoftReference<LogFactorialCache>> LOG_FACTORIAL_CACHE =
       new AtomicReference<>(new SoftReference<>(null));
 

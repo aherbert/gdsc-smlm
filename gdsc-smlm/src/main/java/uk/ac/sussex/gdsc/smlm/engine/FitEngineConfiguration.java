@@ -935,7 +935,7 @@ public final class FitEngineConfiguration {
    * @return the HWHM min
    */
   public double getHwhmMin() {
-    // Get the half-width at half maximim
+    // Get the half-width at half maximum
     return Gaussian2DFunction.SD_TO_HWHM_FACTOR * getSdMin();
   }
 
@@ -974,7 +974,7 @@ public final class FitEngineConfiguration {
    * @return the HWHM max
    */
   public double getHwhmMax() {
-    // Get the half-width at half maximim
+    // Get the half-width at half maximum
     return Gaussian2DFunction.SD_TO_HWHM_FACTOR * getSdMax();
   }
 

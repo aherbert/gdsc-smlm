@@ -970,7 +970,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
   }
 
   /**
-   * Run after the filter is deserialised using XStream or cloned. Overrride this method if the
+   * Run after the filter is deserialised using XStream or cloned. Override this method if the
    * filter has state that requires resetting.
    */
   protected void initialiseState() {

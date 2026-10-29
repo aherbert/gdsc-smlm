@@ -13,7 +13,7 @@ The goal of the tagged spot file format is to provide an efficient data format
 for superresolution microscopy data that generate images by locating the
 position of single fluorescent emitters.
 
-The orignal TSF description is available here:
+The original TSF description is available here:
 [Tagged Spot File (TSF) format](https://micro-manager.org/wiki/Tagged_Spot_File_(tsf)_format)
 
 The format has been extended to add support for fields in the GDSC SMLM

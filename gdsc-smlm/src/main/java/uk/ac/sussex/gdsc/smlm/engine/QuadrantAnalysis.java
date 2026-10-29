@@ -96,7 +96,7 @@ public class QuadrantAnalysis {
    */
   public double score2;
 
-  /** The vector direction defined by the assymetry in the quadrants. */
+  /** The vector direction defined by the asymmetry in the quadrants. */
   public int[] vector;
   /**
    * The maximum asymmetry score for quadrant analysis. The max of {@link #score1} and
@@ -160,7 +160,7 @@ public class QuadrantAnalysis {
    * matrix is divided into quadrants, with the pixels above both diagonals forming the upper
    * quadrant, the pixels above the main and below the off diagonal forming the right quadrants and
    * so on. Pixels right on the diagonals are ignored. Then, the opposing quadrants are summed, and
-   * these sums substracted from another, resulting in two quadrant differences: upper and lower
+   * these sums subtracted from another, resulting in two quadrant differences: upper and lower
    * minus right and left and right and left minus upper and lower. This process is repeated for the
    * quadrants defined by the central row and the central column.
    *

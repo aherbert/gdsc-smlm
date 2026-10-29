@@ -33,7 +33,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 /**
  * Samples uniformly from the specified volume.
  *
- * <p>Uses a Halton sequence generator by default. This can be overriden by passing in a vector
+ * <p>Uses a Halton sequence generator by default. This can be overridden by passing in a vector
  * sequence generator or by providing a factory for a random generator (which should produce uniform
  * equi-distributed numbers in the domain [0,1]).
  */

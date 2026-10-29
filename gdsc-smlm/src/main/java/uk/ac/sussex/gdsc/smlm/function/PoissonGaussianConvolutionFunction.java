@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  */
 public final class PoissonGaussianConvolutionFunction
     implements LikelihoodFunction, LogLikelihoodFunction {
-  /** Single instance holding log factorial values for resue. */
+  /** Single instance holding log factorial values for reuse. */
   private static final AtomicReference<SoftReference<LogFactorialCache>> LOG_FACTORIAL_CACHE =
       new AtomicReference<>(new SoftReference<>(null));
 
@@ -69,7 +69,7 @@ public final class PoissonGaussianConvolutionFunction
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param variance The variance of the Gaussian distribution at readout (must be positive)
-   * @param isVariance Set to true if the input parameter is variance; otherwise is is standard
+   * @param isVariance Set to true if the input parameter is variance; otherwise it is standard
    *        deviation
    */
   private PoissonGaussianConvolutionFunction(double alpha, double variance, boolean isVariance) {

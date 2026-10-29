@@ -647,7 +647,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     value = PoissonGammaFunction.unscaledPoissonGammaPartial(0, theta, gain, gradient);
 
     // At x=0 integrate from 0 to 0.5 without the Dirac contribution
-    // (i.e. make it a a smooth function for integration).
+    // (i.e. make it a smooth function for integration).
     // Note the Dirac contribution for the unscaled function is 1.
     final double diracContribution = 1;
     value -= diracContribution;

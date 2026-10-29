@@ -221,7 +221,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   private static final byte FILTER_RANK_MINIMAL = (byte) 0;
   private static final byte FILTER_RANK_PRIMARY = (byte) 1;
 
-  /** Flag to indicate that the data is in raw count units (not photon-eletcrons). */
+  /** Flag to indicate that the data is in raw count units (not photon-electrons). */
   final boolean isFitCameraCounts;
 
   /**
@@ -363,7 +363,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   }
 
   /**
-   * Store an estimate for a spot candidate. This may be aquired during multi fitting of neighbours.
+   * Store an estimate for a spot candidate. This may be acquired during multi fitting of neighbours.
    */
   private static class Estimate {
     final double[] params;

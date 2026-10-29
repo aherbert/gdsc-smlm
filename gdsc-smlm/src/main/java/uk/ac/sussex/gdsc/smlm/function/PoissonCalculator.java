@@ -47,7 +47,7 @@ public class PoissonCalculator {
   /** The constant 1/1680. */
   protected static final double ONE_OVER_1680 = 1.0 / 1680;
 
-  private boolean uninitialsed = true;
+  private boolean uninitialised = true;
 
   /** The maximum log likelihood. */
   protected double mll;
@@ -231,8 +231,8 @@ public class PoissonCalculator {
   }
 
   private void initialise() {
-    if (uninitialsed) {
-      uninitialsed = false;
+    if (uninitialised) {
+      uninitialised = false;
       computePrefactors();
     }
   }

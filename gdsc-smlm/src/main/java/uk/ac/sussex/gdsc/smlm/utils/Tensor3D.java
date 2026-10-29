@@ -196,7 +196,7 @@ public class Tensor3D {
   }
 
   /**
-   * Checks for a succesfull Eigen decomposition.
+   * Checks for a successful Eigen decomposition.
    *
    * @return true, if successful
    */

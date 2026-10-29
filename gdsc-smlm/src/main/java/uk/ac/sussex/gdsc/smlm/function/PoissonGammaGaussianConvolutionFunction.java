@@ -61,7 +61,7 @@ public final class PoissonGammaGaussianConvolutionFunction
    *
    * @param alpha The inverse of the on-chip gain multiplication factor
    * @param variance The variance of the Gaussian distribution at readout (must be positive)
-   * @param isVariance Set to true if the input parameter is variance; otherwise is is standard
+   * @param isVariance Set to true if the input parameter is variance; otherwise it is standard
    *        deviation
    */
   private PoissonGammaGaussianConvolutionFunction(double alpha, double variance,

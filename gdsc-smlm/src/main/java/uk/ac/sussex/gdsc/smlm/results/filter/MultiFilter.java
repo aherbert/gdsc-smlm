@@ -548,9 +548,9 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   }
 
   /**
-   * Gets the precision paramater type.
+   * Gets the precision parameter type.
    *
-   * @return the precision paramater type
+   * @return the precision parameter type
    */
   protected ParameterType getPrecisionParamaterType() {
     return ParameterType.PRECISION;

@@ -206,7 +206,7 @@ public class JumpDistanceAnalysis {
    *
    * @param meanJumpDistance The mean jump distance (in um^2)
    * @param jdHistogram The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative
-   *        probability. Must be monototic ascending.
+   *        probability. Must be monotonic ascending.
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
    */
   public @Nullable double[][] fitJumpDistanceHistogram(double meanJumpDistance,
@@ -321,7 +321,7 @@ public class JumpDistanceAnalysis {
    * <p>Results are sorted by the diffusion coefficient ascending.
    *
    * @param jdHistogram The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative
-   *        probability. Must be monototic ascending.
+   *        probability. Must be monotonic ascending.
    * @param estimatedD The estimated diffusion coefficient
    * @param n The number of species in the mixed population
    * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
