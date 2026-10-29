@@ -11,3 +11,5 @@ JumpDistanceAnalysisTest.dat
 .checkstyle
 # Sphinx documentation
 docs/_build/
+# macOS Finder metadata
+.DS_Store
