@@ -14,7 +14,7 @@ single molecule microscopy methods.
 
 The plugins provide tools to:
 
-- Fit an image, or series of images, using a 2D Guassian Point Spread Function
+- Fit an image, or series of images, using a 2D Gaussian Point Spread Function
 (PSF)
 - Save results to a table, a file, an image and/or to memory
 - Trace or cluster localisations through time to identify molecules

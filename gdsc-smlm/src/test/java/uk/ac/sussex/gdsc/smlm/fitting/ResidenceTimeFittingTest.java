@@ -1393,7 +1393,7 @@ class ResidenceTimeFittingTest {
      *
      * @param x the residence times
      * @param resolution the time resolution
-     * @param upper the upper limit of the doamin
+     * @param upper the upper limit of the domain
      * @return the binned data
      */
     static int[] toBins(double[] x, double resolution, double upper) {

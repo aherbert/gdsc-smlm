@@ -570,7 +570,7 @@ message CameraModelAnalysisSettings {
   bool round_down = 15;
 }
 
-// Contains settings for the Camera Model Fisher Informatio Analysis plugin
+// Contains settings for the Camera Model Fisher Information Analysis plugin
 message CameraModelFisherInformationAnalysisSettings {
   int32 min_exponent = 1;
   int32 max_exponent = 2;

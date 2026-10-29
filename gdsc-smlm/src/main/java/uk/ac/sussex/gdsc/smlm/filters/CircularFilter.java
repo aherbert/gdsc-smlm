@@ -175,7 +175,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Filter a grayscale image or one channel of an RGB image using one thread
+   * Filter a greyscale image or one channel of an RGB image using one thread
    *
    * <p>Data handling: The area needed for processing a line is written into the array 'cache'. This
    * is a stripe of sufficient width for all threads to have each thread processing one line, and

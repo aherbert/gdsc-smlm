@@ -124,7 +124,7 @@ class PoissonGaussianFisherInformationTest {
       Assertions.assertTrue(1.0 / Double.longBitsToDouble(upper) != Double.POSITIVE_INFINITY);
       long lower = 1;
       while (lower + 1 < upper) {
-        // 1/Upper is not infinty
+        // 1/Upper is not infinity
         // Test mid-point
         final long mid = (upper + lower) / 2;
         mean = Double.longBitsToDouble(mid);

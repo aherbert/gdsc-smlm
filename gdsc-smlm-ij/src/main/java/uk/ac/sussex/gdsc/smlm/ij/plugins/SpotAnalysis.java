@@ -539,7 +539,7 @@ public class SpotAnalysis extends PlugInFrame
     // This should not be a problem but leave it in for now
     if (image == null || (image.getType() != ImagePlus.GRAY8 && image.getType() != ImagePlus.GRAY16
         && image.getType() != ImagePlus.GRAY32)) {
-      IJ.showMessage(PLUGIN_TITLE, "Images must be grayscale.");
+      IJ.showMessage(PLUGIN_TITLE, "Images must be greyscale.");
       return;
     }
 

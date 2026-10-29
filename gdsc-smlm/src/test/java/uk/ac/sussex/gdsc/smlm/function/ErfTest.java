@@ -347,7 +347,7 @@ class ErfTest {
     // Full integration using the Erf
     // Note: The PSF of a 2D Gaussian is described in Smith et all using a denominator
     // of (2.0 * s * s) for both x and Y directions. This is wrong. We need the
-    // integral of the single Guassian in each dimension so the denomiator is (sqrt(2.0) * s).
+    // integral of the single Gaussian in each dimension so the denominator is (sqrt(2.0) * s).
     // See: Smith et al, (2010). Fast, single-molecule localisation that achieves
     // theoretically minimum uncertainty. Nature Methods 7, 373-375
     // (supplementary note).
