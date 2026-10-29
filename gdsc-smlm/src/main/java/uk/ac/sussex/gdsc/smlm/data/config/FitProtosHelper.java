@@ -236,7 +236,7 @@ public final class FitProtosHelper {
       case POWELL:
         return "Powell";
       case POWELL_ADAPTER:
-        return "Powell (adpator)";
+        return "Powell (adapter)";
       case POWELL_BOUNDED:
         return "Powell (bounded)";
       case UNRECOGNIZED:

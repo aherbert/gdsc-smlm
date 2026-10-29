@@ -42,6 +42,9 @@ Major release of GDSC SMLM.
   (``Transparency``, and the ``Orthographic`` sort mode). Macros using the previous option keys
   (``percential``, ``molcules_c1/2/3``, ``transparancy``) or the ``Othographic`` sort mode must be
   updated.
+* Correct the misspelt ``Powell (adpator)`` search method name to ``Powell (adapter)`` (see
+  :numref:`{name} <fitting_plugins:Powell (Adapter)>`). Macros using the previous search method
+  name must be updated.
 
 
 Version 2.0
