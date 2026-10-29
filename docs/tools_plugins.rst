@@ -181,7 +181,7 @@ The following noise methods are available:
      - The standard deviation of the pixels.
 
    * - Lowest Pixels
-     - The standard deviation of a box region around the lowest intensity pixel in the image. The box region can be adjusted using the ``Lowest radius`` parameter. (This is the method used within QuickPALM [Henriques *et al*, 2010] and can produce inconsistent noise levels between frames due to the small sample size).
+     - The standard deviation of a box region around the lowest intensity pixel in the image. The box region can be adjusted using the ``Lowest radius`` parameter. (This is the method used within QuickPALM [:ref:`Henriques <ref_henriques_2010>` *et al*, 2010] and can produce inconsistent noise levels between frames due to the small sample size).
 
    * - Residuals Least Median Of Squares
      - Calculate the median of the residuals. Then use this to estimate the standard deviation of the residuals.
@@ -209,13 +209,7 @@ Image Residuals
 
 The residuals of an image are calculated for each pixel using the total difference to the 4-connected pixels. These are normalised so that the sum of the residuals squared is the same as the sum of the image pixels squared. Comparing each pixel to its neighbours provides a robust method of estimating noise if the underlying signal is adequately sampled. Variations between neighbour pixels are expected to be small, consequently large variations indicate high noise.
 
-All the image residuals methods are based on the “Least trimmed square” robust estimator described in:
-
-.. code-block:: text
-
-    P. Rousseeuw and A. Leroy
-    Robust Regression and Outlier Detection
-    New York: Wiley, 1987
+All the image residuals methods are based on the “Least trimmed square” robust estimator described in :ref:`Rousseeuw and Leroy <ref_rousseeuw_1987>` (1987).
 
 
 .. index:: Noise Estimation within the Peak Fit Plugin

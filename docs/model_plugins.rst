@@ -895,7 +895,7 @@ Astigmatism Model Manager
 
 The ``Astigmatism Model Manager`` provides creation and management of astigmatism models for 2D Gaussian point spread functions (PSFs) imaged using a cylindrical lens. This creates a spot where the width of the spot in the X and Y dimensions varies with the Z depth. This occurs as the focal planes for the X and Y dimensions are not colocated.
 
-The model provides a function to compute the X and Y width using Z and is based on Smith *et al*, (2010) *Nature Methods* **7**, 373-375 and Holtzer *et al* (2007) *Applied Physics Letters* **90**, 1–3.
+The model provides a function to compute the X and Y width using Z and is based on :ref:`Smith <ref_smith_2010>` *et al*, (2010) *Nature Methods* **7**, 373-375 and :ref:`Holtzer <ref_holtzer_2007>` *et al* (2007) *Applied Physics Letters* **90**, 1–3.
 
 When the ``Astigmatism Model Manager`` plugin is run a dialog allows a choice from the following options:
 
@@ -1105,7 +1105,7 @@ Presents a dialog where a model and export file can be selected. The model is sa
 Create Data
 -----------
 
-Creates an image by simulating single molecule localisations using a model of photoactivated diffusing fluorophore complexes. The simulation is partly based on the work of Colthorpe, *et al* (2012).
+Creates an image by simulating single molecule localisations using a model of photoactivated diffusing fluorophore complexes. The simulation is partly based on the work of :ref:`Coltharp <ref_coltharp_2012>`, *et al* (2012).
 
 
 .. index:: Simulation
@@ -1226,7 +1226,7 @@ When the localisation is drawn on the image the variance of all the background p
 ``Peak Fit``
 plugin during fitting. This noise therefore **ignores the photon shot noise** of the fluorophore signal. The noise is in electrons and is converted to photons to match the captured photons from the fluorophore. The signal-to-noise ratio (SNR) can be used to filter low SNR fluorophore signals from the image. Thus filtering based on SNR is using the raw photons rendered compared to the EM-gain amplified and scaled local noise. This is a simplification to allow filtering to be done before amplification. Any fluorophores below the SNR threshold can be removed from the image.
 
-Once all the localisations have been processed the captured photons are converted to electrons by sampling from a binomial distribution with the probability set to the quantum efficiency. The electrons are amplified for EM noise using a gamma distribution [Hirsch, *et al*, 2004] with the shape parameter equal to the input electrons and the scale parameter is the EM-gain.
+Once all the localisations have been processed the captured photons are converted to electrons by sampling from a binomial distribution with the probability set to the quantum efficiency. The electrons are amplified for EM noise using a gamma distribution [:ref:`Hirsch <ref_hirsch_2013>`, *et al*, 2013] with the shape parameter equal to the input electrons and the scale parameter is the EM-gain.
 
 The read-noise and image background calculated earlier (for use in the per localisation noise calculation) is then added to the image. The EM amplified electrons are then converted to ADUs using the camera gain and the image offset using the camera bias. The bias offset (above zero) ensures that the final output image using 16-bit unsigned integers can record negative noise values.
 
@@ -1910,7 +1910,7 @@ The following parameters can be configured:
 Fitting Limits
 ~~~~~~~~~~~~~~
 
-The ``Create Benchmark Data`` plugin will report the theoretical limit (precision) for fitting the signal (number of photons) and the XY coordinates (localisation). These limits use the formulas of Thompson *et al* (2002) for the signal and Mortensen *et al* (2010) for the localisation (see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>`).
+The ``Create Benchmark Data`` plugin will report the theoretical limit (precision) for fitting the signal (number of photons) and the XY coordinates (localisation). These limits use the formulas of :ref:`Thompson <ref_thompson_2002>` *et al* (2002) for the signal and :ref:`Mortensen <ref_mortensen_2010>` *et al* (2010) for the localisation (see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>`).
 
 Note that these formulas are derived from modelling the point spread function (PSF) as a 2D Gaussian for both the simulation and the fitting. Given that the true data will have a PSF defined by the microscope parameters these formulas only approximate the precision that can be obtained on image data. However they are useful to allow demonstration that the fitting routines in the SMLM plugins can achieve the theoretical limit, i.e. they are working as well as can be expected.
 
@@ -2869,7 +2869,7 @@ Results
 
 After spot candidates have been fitted and scored using their distance to the true localisations the results are summarised.
 
-For all the fitted results that were within the ``Match distance`` of a true localisation, a histogram is computed of the distances, the z-depth of the original localisations and the computed precision of the fit using the Mortensen formula. This allows a visualisation of how close the fitted results are to the actual localisations and also of the depth-of-field of the localisation algorithm.
+For all the fitted results that were within the ``Match distance`` of a true localisation, a histogram is computed of the distances, the z-depth of the original localisations and the computed precision of the fit using the :ref:`Mortensen <ref_mortensen_2010>` formula. This allows a visualisation of how close the fitted results are to the actual localisations and also of the depth-of-field of the localisation algorithm.
 
 Note that the ``Match Depth`` histogram will not be useful if the data were originally simulated with a fixed depth or the PSF does not vary with z-depth. If results were simulated using a fixed photon level then the standard deviation of the match distance should be approximately the same as the average of the calculated precision (since the precision calculation represents the standard deviation of the distance from the true location assuming fitting a 2D Gaussian PSF with Poisson noise).
 
@@ -3182,7 +3182,7 @@ The choice of the distance thresholds for benchmarking a microscope setup can be
 
     \mathit{Resolution}=\frac{\lambda}{2\mathit{NA}}
 
-where NA is the numerical aperture of the microscope [Abbe, 1873]. Any match below this distance is closer than the standard resolution of an optical microscope and so can be classed as a super-resolution match. The lower threshold can be set using the Mortensen formula for the precision of fitting a 2D Gaussian to 2D Gaussian data corrupted by Poisson noise (see :numref:`{number}: {name} <localisation_precision:Localisation Precision>`). Although only an approximation of fitting to a microscope PSF the formula provides an estimate of the limit of super-resolution fitting. Any fitting algorithm will not be expected to perform matches consistently below this limit. In practice though it is usually fair to set the lower distance as 33-50% of the Abbe limit.
+where NA is the numerical aperture of the microscope [Abbe, 1873]. Any match below this distance is closer than the standard resolution of an optical microscope and so can be classed as a super-resolution match. The lower threshold can be set using the :ref:`Mortensen <ref_mortensen_2010>` formula for the precision of fitting a 2D Gaussian to 2D Gaussian data corrupted by Poisson noise (see :numref:`{number}: {name} <localisation_precision:Localisation Precision>`). Although only an approximation of fitting to a microscope PSF the formula provides an estimate of the limit of super-resolution fitting. Any fitting algorithm will not be expected to perform matches consistently below this limit. In practice though it is usually fair to set the lower distance as 33-50% of the Abbe limit.
 
 As well as matching the localisation position it is possible to assign matches using the fitted signal. The signal-factor is computed within the ``Fit Spot Data`` plugin and is a measure of how far the fitted signal was from the true number of photons. Matches can be rejected if they are above a threshold and, as for the distance match, a ramped score is available using a ramped scoring function. In the case that ramped scoring is used for both distance and signal-factor then the final match score is the product of the two ramped scores. The remaining unmatched score is set so the total for the result is 1.
 
@@ -3393,7 +3393,7 @@ When the plugin is run a dialog is presented allowing parameters to be configure
 
 The dialog message shows a summary of the results computed by ``Fit Spot Data`` that will be analysed. The number of results is shown along with the number of true positives within the results if they are scored with the current values for the match distances. This is the upper limit of true positives for any filter. If the match distances are altered then the number of true positives will be recomputed when the plugin is run but will not update in the plugin message until it is next displayed.
 
-The expected signal and localisation precision of the simulated localisations is computed using the formulas of Thompson (for signal) and Mortensen (for localisation), see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>` for more details. If analysis has been previously run on this data then the score for the best filter result held in memory is shown. (The results in memory functionality is used for choosing the optimum fail count settings for a filter set.)
+The expected signal and localisation precision of the simulated localisations is computed using the formulas of :ref:`Thompson <ref_thompson_2002>` (for signal) and :ref:`Mortensen <ref_mortensen_2010>` (for localisation), see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>` for more details. If analysis has been previously run on this data then the score for the best filter result held in memory is shown. (The results in memory functionality is used for choosing the optimum fail count settings for a filter set.)
 
 Note that the match distance parameters are expressed relative to those used in the ``Fit Spot Data`` plugin. This is because the matches are assigned within that program and cannot be recomputed. A lower distance is allowed as it will change a match to a non-match. However higher values are not allowed as this requires recomputation of all match distances. The distances that were used by the ``Fit Spot Data`` plugin are shown in a message above the section where the distances are configured to remind the user of the values. Re-run the ``Fit Spot Data`` plugin if you wish to use higher values.
 

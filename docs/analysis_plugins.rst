@@ -321,7 +321,7 @@ To remove the possibility for overlapping tracks the plugin allows the track to 
 
 When all frames are processed the resulting traces are assigned a spatial position equal to the centroid position of all the spots included in the trace.
 
-An optimisation method for selecting the time and distance thresholds is provided based on the work of Coltharp, *et al* (2012).
+An optimisation method for selecting the time and distance thresholds is provided based on the work of :ref:`Coltharp <ref_coltharp_2012>`, *et al* (2012).
 
 
 .. index:: Trace Molecules Plugin
@@ -429,7 +429,7 @@ It is possible to produce an estimate of the optimum distance and time threshold
 *in vivo*
 experiments.
 
-The optimisation method is adapted from Coltharp, *et al* (2012). Optimisation is based on the following equation:
+The optimisation method is adapted from :ref:`Coltharp <ref_coltharp_2012>`, *et al* (2012). Optimisation is based on the following equation:
 
 .. math::
 
@@ -524,7 +524,7 @@ The tracing algorithm assigns a unique ID to each trace. All the localisations t
    * - Traced Centroids
      - The localisations of each trace combined into a centroid.
 
-       Centroids have a signal equal to the sum of the localisations, the coordinates are set using the signal weighted centre-of-mass of the localisations. The background is averaged and the noise combined using the root of the sum-of-squares. The Gaussian standard deviation of the localisation is set using the average precision of the localisations, calculated using the Mortensen formula.
+       Centroids have a signal equal to the sum of the localisations, the coordinates are set using the signal weighted centre-of-mass of the localisations. The background is averaged and the noise combined using the root of the sum-of-squares. The Gaussian standard deviation of the localisation is set using the average precision of the localisations, calculated using the :ref:`Mortensen <ref_mortensen_2010>` formula.
 
    * - Traced Singles
      - Contains the localisations that were not part of a trace, i.e. are a single localisation.
@@ -694,7 +694,7 @@ Dynamic Trace Molecules
 
 Traces localisations through time and collates them into traces using a probability model to reconnect localisations to existing traces based on diffusion coefficient, intensity and fluorophore disappearance rate.
 
-This plugin implements dynamic multiple target tracing based on Sergé *et al* (2008). Details can be found in the paper's supplementary information appendix 2. Tracing uses a model to assign the probability that a localisation should join a current trajectory (or track). The matrix of all localisations paired with all current trajectories is considered and the maximum likelihood reconnection is selected. New trajectories are created as required and existing trajectories can expire if no localisations have been assigned to them for a set number of frames.
+This plugin implements dynamic multiple target tracing based on :ref:`Sergé <ref_serge_2008>` *et al* (2008). Details can be found in the paper's supplementary information appendix 2. Tracing uses a model to assign the probability that a localisation should join a current trajectory (or track). The matrix of all localisations paired with all current trajectories is considered and the maximum likelihood reconnection is selected. New trajectories are created as required and existing trajectories can expire if no localisations have been assigned to them for a set number of frames.
 
 The probability model consists of three parts: the probability for a match given the diffusion; the probability for a match given the intensity; and the probability the trajectory blinks or disappears.
 
@@ -747,7 +747,7 @@ This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`
      - Set to **true** to disable the intensity model. Can be used when the intensity of particles in a track is highly variable and intensity cannot be used to distinguish the track.
 
    * - Defaults
-     - Use this button to reset the values to the defaults as used in the original source paper (Sergé *et al*, 2008).
+     - Use this button to reset the values to the defaults as used in the original source paper (:ref:`Sergé <ref_serge_2008>` *et al*, 2008).
 
    * - Save derived datasets
      - Enable this to save derived datasets to memory such as the singles, multi, and centroids.
@@ -850,7 +850,7 @@ Note that an additional best fit line can be computed using a MSD correction fac
 Apparent Diffusion Coefficient
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Given that the localisations within each trace are subject to a fitting error, or precision (:math:`\sigma`), the apparent diffusion coefficient (:math:`D^{\star}`) can be calculated accounting for precision [Uphoff *et al*, 2013]:
+Given that the localisations within each trace are subject to a fitting error, or precision (:math:`\sigma`), the apparent diffusion coefficient (:math:`D^{\star}`) can be calculated accounting for precision [:ref:`Uphoff <ref_uphoff_2013>` *et al*, 2013]:
 
 .. math::
 
@@ -864,7 +864,7 @@ The plugin thus computes the average precision for the localisations included in
 Jump Distance Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The jump distance is how far a particle moves in a given time period. Analysis of a population of jump distances can be used to determine if the population contains molecules diffusing with one or more diffusion coefficients [Weimann *et al*, 2013]. For two dimensional Brownian motion the probability that a particle starting at the origin will be encountered within a shell of radius *r* and a width *dr* at time :math:`\Delta t` is given by:
+The jump distance is how far a particle moves in a given time period. Analysis of a population of jump distances can be used to determine if the population contains molecules diffusing with one or more diffusion coefficients [:ref:`Weimann <ref_weimann_2013>` *et al*, 2013]. For two dimensional Brownian motion the probability that a particle starting at the origin will be encountered within a shell of radius *r* and a width *dr* at time :math:`\Delta t` is given by:
 
 .. math::
 
@@ -890,7 +890,7 @@ integration holds for a mixed population of *m* species where each fraction (:ma
 
     P(r^{2},\Delta t)=1-\sum _{j=1}^{m}f_{j}e^{-{\frac{r^{2}}{4D_{j}\Delta t}}}
 
-Weimann *et al* (2013) show that fitting of the cumulative histogram of jump distances can
+:ref:`Weimann <ref_weimann_2013>` *et al* (2013) show that fitting of the cumulative histogram of jump distances can
 accurately reproduce the diffusion coefficient in single molecule simulations. The performance of the method uses an indicator :math:`\beta` expressed as the average distance a particle travels in the chosen time (*d*) divided by the average localisation precision (:math:`\sigma`):
 
 .. math::
@@ -978,7 +978,7 @@ Note: In each model the linear gradient is proportional to the diffusion coeffic
 Precision Correction
 ~~~~~~~~~~~~~~~~~~~~
 
-Given that the localisations within each trace are subject to a fitting error, or precision (σ), the apparent diffusion coefficient (:math:`D^{\star}`) can be calculated accounting for precision [Uphoff *et al* , 2013]:
+Given that the localisations within each trace are subject to a fitting error, or precision (σ), the apparent diffusion coefficient (:math:`D^{\star}`) can be calculated accounting for precision [:ref:`Uphoff <ref_uphoff_2013>` *et al* , 2013]:
 
 .. math::
 
@@ -1125,7 +1125,7 @@ Dynamic Multiple Target Tracing Parameters
      - Set to **true** to disable the intensity model. Can be used when the intensity of particles in a track is highly variable and intensity cannot be used to distinguish the track.
 
    * - Defaults
-     - Use this button to reset the values to the defaults as used in the original source paper (Sergé *et al*, 2008).
+     - Use this button to reset the values to the defaults as used in the original source paper (:ref:`Sergé <ref_serge_2008>` *et al*, 2008).
 
 
 When all the datasets have been traced the plugin presents a second dialog to configure the diffusion analysis. The following parameters can be configured:
@@ -1357,7 +1357,7 @@ The plugin shows a summary table of the analysis results. This allows the plugin
    * - Beta
      - The beta parameter which is the ratio between the mean distance and the localisation precision: :math:`\frac{d}{s}`.
 
-       A beta above 6 indicates that jump distance analysis will produce reliable results [Weimann *et al*, 2013].
+       A beta above 6 indicates that jump distance analysis will produce reliable results [:ref:`Weimann <ref_weimann_2013>` *et al*, 2013].
 
    * - Jump D
      - The diffusion coefficient(s) from jump analysis.
@@ -1437,7 +1437,7 @@ See also :ref:`analysis_plugins:Trace Molecules (Multi)` which performs tracing 
 Track Diffusion Analysis
 ------------------------
 
-The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the *Spot-On* paper by Hansen *et al* (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
+The ``Track Diffusion Analysis`` plugin extracts the diffusion distance of traced molecules over time and fits this to a diffusion model. The model accounts for diffusing molecules that exit the depth of field and are lost, avoiding underfitting of fast moving populations over time due to the lack of longer tracks for these populations. This plugin is based on the methods described in the *Spot-On* paper by :ref:`Hansen <ref_hansen_2018>` *et al* (2018). The probability of a diffusing molecule remaining in the depth of field is modelled in the :ref:`calibration_plugins:Diffusion Depth of Field` plugin.
 
 The plugin uses multiple input datasets that have been assigned to tracks using tracing. A traced dataset is identified using the ID field on the results from each dataset.
 
@@ -1788,7 +1788,7 @@ The anomalous exponent is obtained from fitting the mean squared distance (MSD) 
 
     \text{MSD}(n) = \left \langle \left( X(t_i + n\Delta t) - X(t_i) \right)^2 \right \rangle
 
-for :math:`n \in [1, \dots, w-1]` and :math:`i \in [0, \dots, w-n-1]`. The MSD is fit using various models. The case of standard diffusion is fit using a linear model for standard Brownian motion diffusion [Backlund, et al (2015), eq. 1]:
+for :math:`n \in [1, \dots, w-1]` and :math:`i \in [0, \dots, w-n-1]`. The MSD is fit using various models. The case of standard diffusion is fit using a linear model for standard Brownian motion diffusion [:ref:`Backlund <ref_backlund_2015>`, et al (2015), eq. 1]:
 
 .. math::
 
@@ -1796,7 +1796,7 @@ for :math:`n \in [1, \dots, w-1]` and :math:`i \in [0, \dots, w-n-1]`. The MSD i
 
 where :math:`D` is the diffusion coefficient and :math:`s` is the static localisation precision.
 
-The case of anomalous diffusion is fit using a fractional Brownian motion (FBM) diffusion function [Backlund, et al (2015), eq. 8]:
+The case of anomalous diffusion is fit using a fractional Brownian motion (FBM) diffusion function [:ref:`Backlund <ref_backlund_2015>`, et al (2015), eq. 8]:
 
 .. math::
 
@@ -1812,7 +1812,7 @@ Note: The fit assumes an increasing MSD with time. If a flat or negative slope o
 Effective diffusion coefficient
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The effective diffusion coefficient is computed using the empirical estimator [Hozé, 2017, eq 10]:
+The effective diffusion coefficient is computed using the empirical estimator [:ref:`Hozé <ref_hoze_2017>`, 2017, eq 10]:
 
 .. math::
 
@@ -1828,7 +1828,7 @@ The length of confinement is computed using the standard deviation of the positi
 Drift vector magnitude
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The drift vector is computed as the expected distance between successive points in each dimension, i.e. the average step size [Hozé, 2017, eq 9]. This analysis uses the Euclidean norm of the drift vector to characterise the magnitude of the displacement.
+The drift vector is computed as the expected distance between successive points in each dimension, i.e. the average step size [:ref:`Hozé <ref_hoze_2017>`, 2017, eq 9]. This analysis uses the Euclidean norm of the drift vector to characterise the magnitude of the displacement.
 
 Gaussian Mixture Model
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1940,7 +1940,7 @@ Display of the jump distances used to fit the anomalous exponent can be viewed u
 
 Thus this visualisation can be used to see if the data trend for the gradient is positive (:math:`\alpha > 1`), negative (:math:`\alpha < 1`), or no gradient (:math:`\alpha = 1`). Note that this is a simplification of the true MSD equations for visual reference only. The plotted lines represent the fitted MSD equations and a negative gradient line can be produced for :math:`\alpha = 1`. This is easy to see by toggling the plot from MSD vs t to MSD/t vs t.
 
-Display of the jump angles for each component can be viewed using ``Analysis > Jump angles`` menu in the track data table. This will compute the angle between consecutive jumps as the angle between the vectors p1 to p2 and p2 to p3. A minimum distance for the two vectors can be specified. This should be set above the localisation precision to exclude computing angles between jumps that are subject to localisation error. The number of angles excluded is reported to the ``ImageJ`` log window and may totally exclude components that are stationary or very slowly diffusing from analysis. Angles are computed in the range 0 to 360 where an angle of 0 is the exact same direction; an angle of 180 is a complete reversal of the direction. A histogram is presented of the jump angles using 15 degree bins and the asymmetry coefficient is computed using the ratio of forward (fwd) and backward (bwd) jumps computed using the angles within 30 degrees of the forward or backward directions [Izeddin *et al*, 2014]:
+Display of the jump angles for each component can be viewed using ``Analysis > Jump angles`` menu in the track data table. This will compute the angle between consecutive jumps as the angle between the vectors p1 to p2 and p2 to p3. A minimum distance for the two vectors can be specified. This should be set above the localisation precision to exclude computing angles between jumps that are subject to localisation error. The number of angles excluded is reported to the ``ImageJ`` log window and may totally exclude components that are stationary or very slowly diffusing from analysis. Angles are computed in the range 0 to 360 where an angle of 0 is the exact same direction; an angle of 180 is a complete reversal of the direction. A histogram is presented of the jump angles using 15 degree bins and the asymmetry coefficient is computed using the ratio of forward (fwd) and backward (bwd) jumps computed using the angles within 30 degrees of the forward or backward directions [:ref:`Izeddin <ref_izeddin_2014>` *et al*, 2014]:
 
 .. math::
 
@@ -2217,7 +2217,7 @@ After parameters are configured a dialog is presented that allows multiple datas
 OPTICS
 ------
 
-Runs the Ordering Points To Identify the Clustering Structure (`OPTICS <https://en.wikipedia.org/wiki/OPTICS_algorithm>`_) algorithm [Ankerst *et al*, 1999] to perform interactive density-based clustering of localisation data. Each point in the data is analysed to determine the number of neighbours within a specified ``radius``. A minimum number of points (``MinPoints``) is specified which describes the number of points required to form a cluster. If the ``MinPoints`` is achieved for the point neighbourhood the algorithm assigns each point the core distance which is the distance to the ``MinPoints``\ :sup:`th` closest point. The reachability-distance of another point :math:`p_2` from point :math:`p_1` is the maximum of the distance between them or the core distance. If point :math:`p_2` is above the maximum radius to consider then there is no reachability distance.
+Runs the Ordering Points To Identify the Clustering Structure (`OPTICS <https://en.wikipedia.org/wiki/OPTICS_algorithm>`_) algorithm [:ref:`Ankerst <ref_ankerst_1999>` *et al*, 1999] to perform interactive density-based clustering of localisation data. Each point in the data is analysed to determine the number of neighbours within a specified ``radius``. A minimum number of points (``MinPoints``) is specified which describes the number of points required to form a cluster. If the ``MinPoints`` is achieved for the point neighbourhood the algorithm assigns each point the core distance which is the distance to the ``MinPoints``\ :sup:`th` closest point. The reachability-distance of another point :math:`p_2` from point :math:`p_1` is the maximum of the distance between them or the core distance. If point :math:`p_2` is above the maximum radius to consider then there is no reachability distance.
 
 Processing starts from an arbitrary unprocessed point. The neighbours are computed as points within the ``radius``. If the neighbourhood satisfies ``MinPoints`` then a new cluster is created. The neighbours are added to a sorted queue to be processed. Processing occurs in order of their reachability-distance. During processing the reachability distance of points already in the queue may change (reduce in size) and the queue is reordered. When no more points are reachable from the cluster then a new unprocessed point is chosen.
 
@@ -2227,7 +2227,7 @@ FastOPTICS is a variant that is not parameterised using a neighbour radius. The 
 
 The OPTICS algorithm outputs the points in a particular ordering. A plot of the order against the reachability distance shows a dendrogram-like structure where the clusters show as wells in the reachability profile. OPTICS provides an algorithm that analyses the gradient of the profile in runs of up and down and uses this to assign a hierarchical level of clustering to the data based on a parameter ``Xi`` (the change in reachability to define a cluster). A second clustering algorithm uses a fixed distance threshold. All adjacent points in the profile that are reachable below this distance are assigned to the same cluster. The result is the same as if using the DBSCAN algorithm (see section :numref:`{number} <analysis_plugins:DBSCAN>`).
 
-A local outlier probability (LoOP [Kriegel *et al*, 2009]) analysis can be performed by the plugin. The local density is estimated by the typical distance at which a point can be "reached" from its neighbours specified using the ``MinPoints`` nearest neighbour. By comparing the local density of an object to the local densities of its neighbours, one can identify regions of similar density, and points that have a substantially lower density than their neighbours. These are considered to be outliers. LoOP analysis produces a score in the range of 0 to 1.
+A local outlier probability (LoOP [:ref:`Kriegel <ref_kriegel_2009>` *et al*, 2009]) analysis can be performed by the plugin. The local density is estimated by the typical distance at which a point can be "reached" from its neighbours specified using the ``MinPoints`` nearest neighbour. By comparing the local density of an object to the local densities of its neighbours, one can identify regions of similar density, and points that have a substantially lower density than their neighbours. These are considered to be outliers. LoOP analysis produces a score in the range of 0 to 1.
 
 The ``OPTICS`` plugin has a preview mode that allows the parameters to be changed and the results updated in real-time. There are various output options to control outlining of clusters on an image, viewing of the clustering structure on the reachability profile and tabulation of cluster results. The ``OPTICS`` dialog is non-blocking allowing the other ``ImageJ`` windows to be used when the preview is active.
 
@@ -2297,7 +2297,7 @@ The following options are available (extra options are activated by holding the 
 
        Outlines can be optionally saved to the ``ImageJ`` ROI manager.
 
-       The concave hull can use the K-nearest neighbour method of Moreira and Santos (2007), or the digging algorithm of Park and Oh (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
+       The concave hull can use the K-nearest neighbour method of :ref:`Moreira and Santos <ref_moreira_2007>` (2007), or the digging algorithm of :ref:`Park and Oh <ref_park_2012>` (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
 
    * - Spanning tree
      - Specify how links between localisations should be outlined on the image. Links represent the connections made between points as they were included in the cluster following the imposed OPTICS order. The links create a spanning tree and can be coloured by cluster ID; depth in the clustering hierarchy; OPTICS order; or the LoOP (local outlier probability) score.
@@ -2392,7 +2392,7 @@ Examples of the clusters and spanning tree overlaid on an image are shown in :nu
 DBSCAN
 ------
 
-Runs the Density-based spatial clustering of applications with noise (`DBSCAN <https://en.wikipedia.org/wiki/DBSCAN>`_) algorithm [Ester *et al*, 1996] to perform interactive density-based clustering of localisation data.
+Runs the Density-based spatial clustering of applications with noise (`DBSCAN <https://en.wikipedia.org/wiki/DBSCAN>`_) algorithm [:ref:`Ester <ref_ester_1996>` *et al*, 1996] to perform interactive density-based clustering of localisation data.
 
 This plugin is a modification of the ``OPTICS`` plugin. The DBSCAN algorithm predates the OPTICS algorithm. The difference is that localisations are processed in arbitrary order. In OPTICS the algorithm tracks how reachable points are from each other and links more reachable points first. DBSCAN does not make this distinction. As per OPTICS the DBSCAN algorithm analyses each point in the data to determine the number of neighbours within a specified ``radius``. A minimum number of points (``MinPoints``) is specified which describes the number of points required to form a cluster.
 
@@ -2486,7 +2486,7 @@ The following options are available:
 
        Outlines can be optionally saved to the ``ImageJ`` ROI manager.
 
-       The concave hull can use the K-nearest neighbour method of Moreira and Santos (2007), or the digging algorithm of Park and Oh (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
+       The concave hull can use the K-nearest neighbour method of :ref:`Moreira and Santos <ref_moreira_2007>` (2007), or the digging algorithm of :ref:`Park and Oh <ref_park_2012>` (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
 
    * - Preview
      - Enables the live preview of results. Settings changes will result in live update of the displayed results.
@@ -2856,7 +2856,7 @@ Estimate the blinking rate of fluorophores in a results set.
 
 The
 ``Blink Estimator``
-uses the method of Annibale *et al* (2011) to estimate the blinking rate of a fluorophore. The method is based on performing trace analysis of the localisations using different time thresholds. The distance threshold used for the trace analysis is set using a factor of the average precision of all the localisations in the sample. When the time threshold is 1 then the number of traces will be equal to the total number of fluorescent bursts in the sample. As the time threshold is increased the number of traces should asymptote at the number of molecules in the sample, assuming that no missed localisation counts occur. The curve of traces against time threshold can be fitted using the following formula:
+uses the method of :ref:`Annibale <ref_annibale_2011>` *et al* (2011) to estimate the blinking rate of a fluorophore. The method is based on performing trace analysis of the localisations using different time thresholds. The distance threshold used for the trace analysis is set using a factor of the average precision of all the localisations in the sample. When the time threshold is 1 then the number of traces will be equal to the total number of fluorescent bursts in the sample. As the time threshold is increased the number of traces should asymptote at the number of molecules in the sample, assuming that no missed localisation counts occur. The curve of traces against time threshold can be fitted using the following formula:
 
 .. math::
 
@@ -2925,7 +2925,7 @@ The following parameters can be set within the plugin to control the output:
 Time Correlated (TC-PALM) Analysis
 ----------------------------------
 
-Performs time correlated photo-activated localisation microscopy (TC-PALM) analysis (see Cisse *et al*, 2013). This plugin accepts a results set from memory. The plugin will use any assigned IDs to group localisations for analysis. All localisations with an ID of zero are assigned an ID. The support for grouped localisations allows the plugin to analyse groups of localisations together: an entire group can be selected even if the region of interest only contains some of the localisations; and groups can be selected and displayed together. It is suggested that the input data is a results set that has been clustered using a distance threshold that collects data within the range of interest.
+Performs time correlated photo-activated localisation microscopy (TC-PALM) analysis (see :ref:`Cisse <ref_cisse_2013>` *et al*, 2013). This plugin accepts a results set from memory. The plugin will use any assigned IDs to group localisations for analysis. All localisations with an ID of zero are assigned an ID. The support for grouped localisations allows the plugin to analyse groups of localisations together: an entire group can be selected even if the region of interest only contains some of the localisations; and groups can be selected and displayed together. It is suggested that the input data is a results set that has been clustered using a distance threshold that collects data within the range of interest.
 
 The analysis uses a cumulative histogram of the number of localisations against time. The profile of the activation against time chart can be used to identify clustering that occurs continuously over the imaging lifetime or during a short interval of the entire imaging lifetime (time correlated activation). If the experiment had constant activation of fluorophores over the lifetime then the chart will show an initial steep gradient that gradually falls off as the fluorophores photo-bleach. If there is selective clustering of fluorophores, for example in response to a stage of the cell life cycle, these bursts of activations will appear as a steep gradient on the activation chart.
 
@@ -3470,7 +3470,7 @@ Running the ``Spot Analysis`` plugin will bind the ``Spot Analysis (Add)`` plugi
 Crosstalk Activation Analysis
 -----------------------------
 
-Perform crosstalk activation analysis of photo-switchable probes under pulsed light activation. This plugin is based on the methods described in Bates *et al* (2007) and Bates *et al* (2012).
+Perform crosstalk activation analysis of photo-switchable probes under pulsed light activation. This plugin is based on the methods described in :ref:`Bates <ref_bates_2007>` *et al* (2007) and :ref:`Bates <ref_bates_2012>` *et al* (2012).
 
 Activation analysis is based on the activation of a fluorophore from the fluorescence transmission of a closely coupled second chromophore via fluorescence resonance energy transfer (more commonly referred to by the acronym `FRET <https://en.wikipedia.org/wiki/F%C3%B6rster_resonance_energy_transfer>`_). The second chromophore will be activated by a pulse of light and localisations from the primary fluorophore are only of interest if they begin immediately following a pulse activation.
 
@@ -3658,7 +3658,7 @@ After the simulation has finished the ``Crosstalk Activation Analysis`` plugin c
 Pulse Activation Analysis
 -------------------------
 
-Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation. This plugin is based on the methods described in Bates *et al* (2007) and Bates *et al* (2012). For multi-channel pulse imaging this plugin requires the crosstalk ratios computed using the ``Crosstalk Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Crosstalk Activation Analysis>`).
+Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation. This plugin is based on the methods described in :ref:`Bates <ref_bates_2007>` *et al* (2007) and :ref:`Bates <ref_bates_2012>` *et al* (2012). For multi-channel pulse imaging this plugin requires the crosstalk ratios computed using the ``Crosstalk Activation Analysis`` plugin (see :numref:`{number} <analysis_plugins:Crosstalk Activation Analysis>`).
 
 Pulse imaging is the use of pulsed activation light to activate fluorophores. Localisations that occur immediately after an activation pulse are extracted for analysis. Pulse imaging can use different fluorophores with different activation light to produce multi-channel imaging. This plugin supports up to 3 channels from 3 different activation pulses during a pulse life cycle. When performing multi-channel pulse imaging it is possible that a fluorophore is activated by the incorrect pulse and will be incorrectly labelled in the output results. This is known as crosstalk. The cross talk ratios for a fluorophore can be used to perform spectral unmixing of the raw results. During this process localisations may be reassigned a channel based on the crosstalk ratios and current channel assignments of their local neighbourhood.
 
@@ -3901,7 +3901,7 @@ Fourier Image Resolution
 
 Calculate the resolution of an image using Fourier Ring Correlation (FRC).
 
-This plugin is based on the FIRE (Fourier Image REsolution) plugin produced as part of the paper by Nieuwenhuizen, *et al* (2013). Changes to the original functionality include:
+This plugin is based on the FIRE (Fourier Image REsolution) plugin produced as part of the paper by :ref:`Nieuwenhuizen <ref_nieuwenhuizen_2013>`, *et al* (2013). Changes to the original functionality include:
 
 * Additional options for computation of the FRC curves
 * Improved determination of FRC line crossing points
@@ -3955,7 +3955,7 @@ The final resolution is dependent on the threshold used to assess when the corre
 Fixed
 ^^^^^
 
-Use the fixed value 1/7 = 0.142857. This is the threshold value preferred by Nieuwenhuizen, *et al* (2013) as it provides output that closely matches the apparent resolution of images under manual inspection.
+Use the fixed value 1/7 = 0.142857. This is the threshold value preferred by :ref:`Nieuwenhuizen <ref_nieuwenhuizen_2013>`, *et al* (2013) as it provides output that closely matches the apparent resolution of images under manual inspection.
 
 
 ..
@@ -3973,7 +3973,7 @@ The threshold is computed at each frequency (:math:`T_i`) for the predefined Fou
     T_{i} &= \frac{\mathit{SNR}_{T}/2+2/\sqrt{(N_{i})}\cdot\sqrt{(\mathit{SNR}_{T}/2)}+1/\sqrt{(N_{i})}} {\mathit{SNR}_{T}/2+2/\sqrt{(N_{i})}\cdot\sqrt{(\mathit{SNR}_{T}/2)}+1} \\
           &= \frac{\mathit{SNR}_{T}/2+(2\sqrt{(\mathit{SNR}_{T}/2)}+1)/\sqrt{(N_{i})}}{1+\mathit{SNR}_{T}/2+2\sqrt{(\mathit{SNR}_{T}/2)}/\sqrt{(N_{i})}}
 
-(see Heel & Schatz, (2005), equation 13). Note that the desired :math:`\mathit{SNR}_T` is divided by two since we need half the SNR from each of the half datasets (the two images). For a smoother curve the number of points (:math:`N_i`) is computed as :math:`2\pi r` and not the actual number of samples computed during the Fourier ring analysis.
+(see :ref:`van Heel & Schatz <ref_heel_2005>`, (2005), equation 13). Note that the desired :math:`\mathit{SNR}_T` is divided by two since we need half the SNR from each of the half datasets (the two images). For a smoother curve the number of points (:math:`N_i`) is computed as :math:`2\pi r` and not the actual number of samples computed during the Fourier ring analysis.
 
 The SNR threshold is set using the desired number of bits of information required per pixel using:
 
@@ -4000,7 +4000,7 @@ Compute the threshold at each frequency (:math:`T_i`) from the number of data po
 
     T_{i}=\frac{\sigma }{\sqrt{N_{i}/2}}
 
-with :math:`\sigma` the sigma-factor (see Heel & Schatz, (2005), equation 2). For example sigma can be 1, 2, 3, etc.
+with :math:`\sigma` the sigma-factor (see :ref:`van Heel & Schatz <ref_heel_2005>`, (2005), equation 2). For example sigma can be 1, 2, 3, etc.
 
 
 .. index:: Spurious Correlation Q Correction
@@ -4040,7 +4040,7 @@ and :math:`H(q)` is the factor in the correlation averages related to the locali
 
     H(q)=\frac{1}{\sqrt{1+8\pi ^{2}\Delta \sigma ^{2}q^{2}}}\exp(-{\frac{4\pi ^{2}\sigma _{m}^{2}q^{2}}{1+8\pi ^{2}\Delta \sigma^{2}q^{2}}})
 
-Note that the given equations have been updated from those provided in Nieuwenhuizen, *et al* (2013) to those used in the code provided by Bernd Rieger. If *Q=0* then no correction is applied. A plugin for estimating *Q* (the average number of activation cycles per emitter) is provided (see :ref:`analysis_plugins:FIRE Q Estimation`).
+Note that the given equations have been updated from those provided in :ref:`Nieuwenhuizen <ref_nieuwenhuizen_2013>`, *et al* (2013) to those used in the code provided by Bernd Rieger. If *Q=0* then no correction is applied. A plugin for estimating *Q* (the average number of activation cycles per emitter) is provided (see :ref:`analysis_plugins:FIRE Q Estimation`).
 
 The corrected FRC is thus:
 
@@ -4121,7 +4121,7 @@ A super resolution image is required for analysis. If the image is very large th
    * - Max per bin
      - Set above zero to limit the maximum number of localisations that are drawn in each super-resolution pixel.
 
-       Note: This is set to 5 in Nieuwenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
+       Note: This is set to 5 in :ref:`Nieuwenhuizen <ref_nieuwenhuizen_2013>`, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
 
 
 ..
@@ -4275,7 +4275,7 @@ FIRE Q Estimation
 
 Estimate the spurious correction factor *Q* for use in Fourier Image Resolution (FIRE) analysis. *Q* is the average number of activation cycles per emitter (i.e. repeat localisations).
 
-This plugin is based on the Matlab code kindly provided by Prof. Bernd Rieger (corresponding author of the FIRE paper [Nieuwenhuizen, *et al*, 2013]). The method described here is an update to the original method described in the online methods of the FIRE paper.
+This plugin is based on the Matlab code kindly provided by Prof. Bernd Rieger (corresponding author of the FIRE paper [:ref:`Nieuwenhuizen <ref_nieuwenhuizen_2013>`, *et al*, 2013]). The method described here is an update to the original method described in the online methods of the FIRE paper.
 
 Fourier Ring Correlation (FRC) computes the correlation between the features of two images at a certain spatial frequency. This correlation is high at low spatial frequencies and progressively reduces. When the correlation falls below a set threshold there is no meaningful similarity information at any further frequency. The spatial frequency at the correlation limit is the Fourier Image Resolution (FIRE).
 
@@ -4348,7 +4348,7 @@ This term varies widely in magnitude with q and so the following function is use
 
     f(q)=\log (|\frac{Q_{\mathit{norm}}\cdot v(q)}{H(q)\mathbb{sinc}(\pi \cdot q)^{2}}|)
 
-This function is described below equation (7) of the Online Methods of Nieuwenhuizen, *et al* (2013). The function *f(q)* typically is a function that initially decreases, then levels off to a constant plateau value and finally increases again. The function can be well fit using a quadratic (:math:`f(q)=a+bq^2`) if the fit is performed over a suitable range of *q* where the plateau occurs.
+This function is described below equation (7) of the Online Methods of :ref:`Nieuwenhuizen <ref_nieuwenhuizen_2013>`, *et al* (2013). The function *f(q)* typically is a function that initially decreases, then levels off to a constant plateau value and finally increases again. The function can be well fit using a quadratic (:math:`f(q)=a+bq^2`) if the fit is performed over a suitable range of *q* where the plateau occurs.
 
 To reduce noise the plugin allows smoothing using a median window before application of the absolute and logarithm functions or it can be smoothed afterwards using LOESS smoothing. The Y-intercept is used as an initial estimate of *Q*:
 
@@ -4427,7 +4427,7 @@ These are the same as the ``Fourier Image Resolution`` plugin for single dataset
    * - Max per bin
      - Set above zero to limit the maximum number of localisations that are drawn in each super-resolution pixel.
 
-       Note: This is set to 5 in Nieuwenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
+       Note: This is set to 5 in :ref:`Nieuwenhuizen <ref_nieuwenhuizen_2013>`, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
 
 
 ..
@@ -4462,7 +4462,7 @@ Estimation Options
 
        * ``Stored``: Use the precision value that is stored in the results, e.g. from loaded data. These are fit with a Gaussian to estimate :math:`\sigma_m` and :math:`\Delta\sigma`.
 
-       * ``Calculate``: Calculate the precision of each localisation using the formula of Mortensen. These are fit with a Gaussian to estimate :math:`\sigma_m` and :math:`\Delta\sigma`. This option requires that the localisations have a signal and width value and the results are calibrated with a gain and pixel size (in nm).
+       * ``Calculate``: Calculate the precision of each localisation using the formula of :ref:`Mortensen <ref_mortensen_2010>`. These are fit with a Gaussian to estimate :math:`\sigma_m` and :math:`\Delta\sigma`. This option requires that the localisations have a signal and width value and the results are calibrated with a gain and pixel size (in nm).
 
    * - Precision Mean
      - The mean of the localisation uncertainty (precision) for use in ``Fixed`` estimation (:math:`\sigma_m`).

@@ -647,7 +647,7 @@ with
 
 Note that the function is using a single point in the Gaussian 2D to represent the value of the area of a pixel.
 
-If :math:`\theta` is zero this reduces to an elliptical 2D Gaussian with no rotation (named ``Elliptical`` in the ``PSF`` options). This is modelled using an integral over the area of the pixel [Smith *et al*, 2010]:
+If :math:`\theta` is zero this reduces to an elliptical 2D Gaussian with no rotation (named ``Elliptical`` in the ``PSF`` options). This is modelled using an integral over the area of the pixel [:ref:`Smith <ref_smith_2010>` *et al*, 2010]:
 
 .. math::
 
@@ -685,7 +685,7 @@ Note that the error function of the Gaussian 2D function can be computed at inte
 
 The ``Circular`` Gaussian in the ``PSF`` options is computed by using :math:`\sigma_x = \sigma_y`.
 
-The ``Astigmatic`` Gaussian in the ``PSF`` options uses a z-dependent standard deviation from Smith, *et al* (2010) based on Holtzer *et al*, (2007):
+The ``Astigmatic`` Gaussian in the ``PSF`` options uses a z-dependent standard deviation from :ref:`Smith <ref_smith_2010>`, *et al* (2010) based on :ref:`Holtzer <ref_holtzer_2007>` *et al*, (2007):
 
 .. math::
 
@@ -792,7 +792,7 @@ The ``LVM LSE`` requires the following additional parameters:
        Note that the algorithm updates the lambda during fitting to refine the improvement to the fit. A value of 10 is a good initial value.
 
    * - Use clamping
-     - Attenuate the update :math:`U_k` to the parameter values :math:`a_k` at each step using the following formula to apply the update [Stetson, 1987]:
+     - Attenuate the update :math:`U_k` to the parameter values :math:`a_k` at each step using the following formula to apply the update [:ref:`Stetson <ref_stetson_1987>`, 1987]:
 
        :math:`a_k(new) = a_k(old) + \frac{U_k}{(1 + \frac{|U_k|}{C_k})}`
 
@@ -809,13 +809,13 @@ The ``LVM LSE`` requires the following additional parameters:
 LVM Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``LVM MLE`` solver applies the Levenberg-Marquardt (LVM) algorithm to the optimisation of a maximum likelihood equation for Poisson distributed data [Laurence and Chromy, 2010]. The maximum likelihood estimation optimises:
+The ``LVM MLE`` solver applies the Levenberg-Marquardt (LVM) algorithm to the optimisation of a maximum likelihood equation for Poisson distributed data [:ref:`Laurence and Chromy <ref_laurence_2010>`, 2010]. The maximum likelihood estimation optimises:
 
 .. math::
 
     \chi_{\text{mle}}^2 = 2 \sum_{i=1}^N (f_i - g_i) - 2 \sum_{i=1,g_i \neq 0}^N g_i \ln \left( \frac{f_i}{g_i} \right)
 
-where :math:`f_i` is the value of the PSF function at pixel *i* and :math:`g_i` is the actual image intensity at pixel *i* (in photons). Gaussian read noise for the pixel values may be incorporated into the model by adding the per-pixel variance (:math:`var`) to the observed and expected values [Lin *et al*, 2017]:
+where :math:`f_i` is the value of the PSF function at pixel *i* and :math:`g_i` is the actual image intensity at pixel *i* (in photons). Gaussian read noise for the pixel values may be incorporated into the model by adding the per-pixel variance (:math:`var`) to the observed and expected values [:ref:`Lin <ref_lin_2017>` *et al*, 2017]:
 
 .. math::
 
@@ -831,7 +831,7 @@ The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but
 Weighted Least Squares Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The weighted least-squares estimator uses the method of Lin, *et al* (2017) to compute a modified Chi-squared expression assuming a Poisson noise model with Gaussian noise component. The fit attempts to minimise the weighted sum of the squared difference:
+The weighted least-squares estimator uses the method of :ref:`Lin <ref_lin_2017>`, *et al* (2017) to compute a modified Chi-squared expression assuming a Poisson noise model with Gaussian noise component. The fit attempts to minimise the weighted sum of the squared difference:
 
 .. math::
 
@@ -933,7 +933,7 @@ The two noise distributions can be combined by convolution of a Poisson and a Ga
 with
 *k* equal to the pixel count,
 *λ* equal to the expected pixel count and
-*σ* equal to the standard deviation of the Gaussian read noise. This model is evaluated using a saddle-point approximation as described in Snyder *et al* (1995); the implementation is adapted from the authors' example source code.
+*σ* equal to the standard deviation of the Gaussian read noise. This model is evaluated using a saddle-point approximation as described in :ref:`Snyder <ref_snyder_1995>` *et al* (1995); the implementation is adapted from the authors' example source code.
 
 No gradient is available for the function and so non-derivative based methods must be used during fitting.
 
@@ -976,7 +976,7 @@ where:
     * - :math:`G_{p,m}(c)`
       - The probability of observing the pixel count *c*.
 
-This is taken from Ulbrich and Isacoff (2007). The output of this function is subsequently convolved with a Gaussian function with standard deviation equal to the camera read noise and mean zero. This must be done numerically since no algebraic solution exists. However Mortensen *et al* (2010) provide example code that computes an approximation to the full convolution using the Error function to model the cumulative Gaussian distribution applied to the Poisson-Gamma convolution at low pixel counts. This approximation closely matches the full convolution with a Gaussian but is faster to compute.
+This is taken from :ref:`Ulbrich and Isacoff <ref_ulbrich_2007>` (2007). The output of this function is subsequently convolved with a Gaussian function with standard deviation equal to the camera read noise and mean zero. This must be done numerically since no algebraic solution exists. However :ref:`Mortensen <ref_mortensen_2010>` *et al* (2010) provide example code that computes an approximation to the full convolution using the Error function to model the cumulative Gaussian distribution applied to the Poisson-Gamma convolution at low pixel counts. This approximation closely matches the full convolution with a Gaussian but is faster to compute.
 
 No gradient is available for the function and so non-derivative based methods must be used during fitting.
 
@@ -1105,7 +1105,7 @@ This method requires derivatives.
 Fast Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The fast maximum likelihood estimator uses the method of Smith, *et al* (2010) to compute a Newton-Raphson update step for each of the parameters :math:`\theta_i`. The fit attempts to perform Newton-Raphson root finding to locate the root (zero) of the log-likelihood gradient function:
+The fast maximum likelihood estimator uses the method of :ref:`Smith <ref_smith_2010>`, *et al* (2010) to compute a Newton-Raphson update step for each of the parameters :math:`\theta_i`. The fit attempts to perform Newton-Raphson root finding to locate the root (zero) of the log-likelihood gradient function:
 
 .. math::
 
@@ -1137,7 +1137,7 @@ The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but
    * - Fixed iterations
      - Set to **true** to perform a fixed number of iterations (specified with the ``Max iterations`` parameter). This eliminates the requirement to evaluate the log-likelihood function value increasing speed if the number of iterations is close to the number used during conventional convergence.
 
-       Fixed iterations was used by Smith, *et al* (2010) with a fit region of size :math:`2 \times 3 \sigma_{\text{PSF}} + 1` and ten iterations.
+       Fixed iterations was used by :ref:`Smith <ref_smith_2010>`, *et al* (2010) with a fit region of size :math:`2 \times 3 \sigma_{\text{PSF}} + 1` and ten iterations.
 
    * - Line search method
      - This option provides control over the update step. Given that the first order derivative is known for each parameter the recommended direction for the step is down the gradient. If the computed update is in the opposite direction then the search can:
@@ -1180,7 +1180,7 @@ Which Fit Solver to Choose
 
 The most general fit solver is the least-squares estimator (``LVM LSE``). It does not require any specific information about the camera to perform fitting. For this reason this is the default fitting engine. It is also the fastest method.
 
-Maximum likelihood estimation (MLE) should return a solution that is more precise than least-squares estimation, i.e. has less variation between the fitted result and the actual answer. MLE should be operating at the theoretical limit for fitting given how much information is actually present in the pixels. This limit is the Cramér-Rao lower bound which expresses a lower bound on the variance of estimators of a deterministic parameter. MLE has also been proven to be robust to the position of the localisation within the pixel whereas least-squares estimation is less precise the further the localisation is from the pixel centre [Abraham *et al*, 2009]. Therefore MLE should be used if you would like the best possible fitting. However it requires camera calibration parameters which if configured incorrectly will lead to fitting results that are not as precise as the least-squares estimator.
+Maximum likelihood estimation (MLE) should return a solution that is more precise than least-squares estimation, i.e. has less variation between the fitted result and the actual answer. MLE should be operating at the theoretical limit for fitting given how much information is actually present in the pixels. This limit is the Cramér-Rao lower bound which expresses a lower bound on the variance of estimators of a deterministic parameter. MLE has also been proven to be robust to the position of the localisation within the pixel whereas least-squares estimation is less precise the further the localisation is from the pixel centre [:ref:`Abraham <ref_abraham_2009>` *et al*, 2009]. Therefore MLE should be used if you would like the best possible fitting. However it requires camera calibration parameters which if configured incorrectly will lead to fitting results that are not as precise as the least-squares estimator.
 
 If you are fitting localisations with a high signal-to-noise ratio (SNR) then the Poisson model will work. At low SNR levels other sources of noise beyond shot noise become more significant and the fitting will produce better results if they are included in the model. The Poisson-Gaussian model will include the read noise in the likelihood function. For CCD-type cameras the Poisson-Gaussian model is enabled if the read noise is non-zero. For sCMOS cameras the Poisson-Gaussian model is always enabled. For either the Poisson model or Poisson-Gaussian model the recommended fitter is ``LVM MLE`` but other gradient-based methods are also available (``LVM WLSE``, ``Fast MLE``).
 
@@ -1304,7 +1304,7 @@ The following filtering parameters can be configured:
        The method for computing the precision can be configured using the ``...`` button.
 
 
-If a precision threshold is specified then the plugin can calculate the precision of the localisation using the Mortensen *et al* (2010) formula (see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>`). The appropriate formula for either the Maximum Likelihood or Least Squares Estimator is used.
+If a precision threshold is specified then the plugin can calculate the precision of the localisation using the :ref:`Mortensen <ref_mortensen_2010>` *et al* (2010) formula (see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>`). The appropriate formula for either the Maximum Likelihood or Least Squares Estimator is used.
 
 The precision calculation requires the expected background noise at each pixel. The noise can be estimated two ways. The first method is to use the noise estimate for the entire frame. This is computed automatically during fitting for each frame or can be provided using the additional options (see section below). The second is to use the local background level that is computed when fitting the localisation. This background level is the background number of photons at the localisation position that will contribute photon shot noise to the pixels. The global noise estimate will be a composite of the average photon shot noise over the entire frame and the read noise of the camera. The local background will provide more contextual information about the localisation precision and may be preferred if fitting localisations where the image background is highly variable. If using a local background then the camera bias must be provided so that the background photons can be correctly determined.
 
@@ -1317,21 +1317,21 @@ Precision can also be computed from the fitted function by creating the Fisher i
 
 This is the expected value of the combined partial derivatives of the log-likelihood function with respect to pairs of parameters :math:`\theta_a \: \theta_b`. The diagonal of the inverse of the matrix are the Cramér–Rao lower bounds (CRLB) on the variance of an unbiased estimator of :math:`\theta`. When both :math:`\theta_a` and :math:`\theta_b` refer to the coordinate parameter this is the CRLB for the localisation precision. To output a single precision value the two values are averaged.
 
-The Fisher information matrix can be computed for a Poisson process using [Smith *et al*, 2010]:
+The Fisher information matrix can be computed for a Poisson process using [:ref:`Smith <ref_smith_2010>` *et al*, 2010]:
 
 .. math::
 
     I(\theta)_{a,b} = \sum_i \left[ \frac {1}{f_i} \left( \frac{\delta f_i}{\delta \theta_a} \right) \
                                                    \left( \frac{\delta f_i}{\delta \theta_b} \right) \right]
 
-This was extended by Huang *et al* (2013) to account for per-observation Gaussian read noise by adding the variance to the function value:
+This was extended by :ref:`Huang <ref_huang_2013>` *et al* (2013) to account for per-observation Gaussian read noise by adding the variance to the function value:
 
 .. math::
 
     I(\theta)_{a,b} = \sum_i \left[ \frac {1}{f_i + var_i} \left( \frac{\delta f_i}{\delta \theta_a} \right) \
                                                            \left( \frac{\delta f_i}{\delta \theta_b} \right) \right]
 
-No full definition exists for the Fisher information for an EM-CCD camera. However Mortensen *et al* (2010) provide proof (see supplementary information) that the Fisher information for the localisation precision of a fitted Gaussian is doubled when modelling the likelihood of an EM-CCD camera rather than a CCD camera. Thus to compute the CRLB for an EM-CCD camera the above formula is used and the value multiplied by 2. This simplification produces values that correspond to those produced using the Mortensen formulas.
+No full definition exists for the Fisher information for an EM-CCD camera. However :ref:`Mortensen <ref_mortensen_2010>` *et al* (2010) provide proof (see supplementary information) that the Fisher information for the localisation precision of a fitted Gaussian is doubled when modelling the likelihood of an EM-CCD camera rather than a CCD camera. Thus to compute the CRLB for an EM-CCD camera the above formula is used and the value multiplied by 2. This simplification produces values that correspond to those produced using the Mortensen formulas.
 
 
 .. index:: Results Parameters
@@ -2104,7 +2104,7 @@ The following parameters are available:
      - Only fit the top :math:`N` identified maxima. Set to zero to disable and fit all maxima.
 
    * - Block find algorithm
-     - Use the block-find algorithm for non-maximal suppression [Neubeck and Van Gool, 2006].
+     - Use the block-find algorithm for non-maximal suppression [:ref:`Neubeck and Van Gool <ref_neubeck_2006>`, 2006].
 
        This is much faster than a standard search of each 2N+1 region around every pixel. The algorithm finds the maximum in each of the non-overlapping N+1 sized blocks in the image. Only the single maxima from each block is compared to the remaining pixels in the 2N+1 region.
 

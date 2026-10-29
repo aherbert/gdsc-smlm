@@ -134,7 +134,7 @@ When fitting the linear plot of MSD versus the number of frames we can account f
 
 The resulting equation is still a linear fit. The intercept has a new representation and allows the intercept to be negative. To ensure the intercept is correctly bounded it should be represented using the fit parameters and not fit using a single constant C.
 
-Note: The final fitted equation is the 2-dimension equivalent of the equation provided in Backlund, *et al* (2015), equation (1):
+Note: The final fitted equation is the 2-dimension equivalent of the equation provided in :ref:`Backlund <ref_backlund_2015>`, *et al* (2015), equation (1):
 
     "The effect of static and dynamic errors on the expected value of the estimated 1D MSD for the special case of pure Brownian motion is to produce a constant offset of the linear dependence according to:"
 

@@ -63,7 +63,7 @@ Localisation Fitting Method
 
 The single-molecule localisation method used in the GDSC Single Molecule Light Microscopy (SMLM) plugins is based on 2D Gaussian fitting.
 
-For each frame candidate spots are identified and then fit using a local region surrounding each candidate [Wolter *et al*, 2010]. An estimate of the PSF width is required which can be obtained from the wavelength and optical system used for acquisition, or estimated from the image.
+For each frame candidate spots are identified and then fit using a local region surrounding each candidate [:ref:`Wolter <ref_wolter_2010>` *et al*, 2010]. An estimate of the PSF width is required which can be obtained from the wavelength and optical system used for acquisition, or estimated from the image.
 
 Candidates are identified using a smoothing filter on the image followed by non-maximal suppression. Smoothing is done using a single filter, or a difference filter where the second smoothed image is subtracted from the first. Various filters are available such as mean, median or Gaussian. Local maxima are identified within a configured search region which is at least 3x3 pixels.
 

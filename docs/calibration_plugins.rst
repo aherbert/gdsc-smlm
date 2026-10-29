@@ -385,7 +385,7 @@ The results will be displayed in a table as described above. In addition the plu
 EM-Gain Analysis
 ----------------
 
-Analyses a white light image from an EM-CCD camera, constructs a histogram of pixel intensity and fits the histogram to obtain the bias, EM-gain, read noise and photons per pixel (see Ulbrich & Isacoff (2007) Supplementary Information).
+Analyses a white light image from an EM-CCD camera, constructs a histogram of pixel intensity and fits the histogram to obtain the bias, EM-gain, read noise and photons per pixel (see :ref:`Ulbrich & Isacoff <ref_ulbrich_2007>` (2007) Supplementary Information).
 
 
 .. index:: EM-CCD Probability Model
@@ -533,7 +533,7 @@ EM-Gain PMF
 
 Displays a plot of the probability mass function (PMF) of the expected value of a pixel on an EM-CCD camera given an average number of photons. The form of the PMF is a convolution of a Poisson, Gamma and Gaussian distribution. See section :numref:`{number}: {name} <calibration_plugins:EM-CCD Probability Model>` for more details.
 
-A fast approximation for the PMF is computed for comparison with the real PMF. This is created by analytically calculating the PMF of a Poisson-Gamma distribution and then approximating a convolution with a Gaussian distribution. The method for this approximation is taken from the supplementary Python software provided by Mortensen, *et al* (2010). They used this approximation when fitting the images of single fluorophores in TIRF (Total Internal Reflection Fluorescence) images taken with an EM-CCD camera. A second plot showing the difference between the real PMF and the approximation is displayed. This allows investigation of any situation where the approximation is not appropriate for modelling the PMF. It is rare for the approximation to differ by more than 1%.
+A fast approximation for the PMF is computed for comparison with the real PMF. This is created by analytically calculating the PMF of a Poisson-Gamma distribution and then approximating a convolution with a Gaussian distribution. The method for this approximation is taken from the supplementary Python software provided by :ref:`Mortensen <ref_mortensen_2010>`, *et al* (2010). They used this approximation when fitting the images of single fluorophores in TIRF (Total Internal Reflection Fluorescence) images taken with an EM-CCD camera. A second plot showing the difference between the real PMF and the approximation is displayed. This allows investigation of any situation where the approximation is not appropriate for modelling the PMF. It is rare for the approximation to differ by more than 1%.
 
 The plugin has the following parameters:
 
@@ -591,9 +591,9 @@ plugin and allows much faster fitting since the Poisson PMF (a) can be evaluated
 sCMOS Analysis
 --------------
 
-Analyse the per pixel offset, variance and gain from a sCMOS camera. This plugin is based on the paper by Huang *et al* (2013).
+Analyse the per pixel offset, variance and gain from a sCMOS camera. This plugin is based on the paper by :ref:`Huang <ref_huang_2013>` *et al* (2013).
 
-A sCMOS camera has read-out circuits for each pixel in the camera chip. Contrast this with a CCD based camera which has a single readout circuit for every pixel. To construct a probability model of the pixel output requires the variance and the amplification (gain) of the pixel. The model can be used for maximum likelihood estimation (MLE) based fitting of camera output. To apply MLE fitting of point spread functions to super-resolution data requires a per-pixel camera model. The ``sCMOS Analysis`` plugin allows a per-pixel model to be constructed using the protocol described by Huang *et al* (2013).
+A sCMOS camera has read-out circuits for each pixel in the camera chip. Contrast this with a CCD based camera which has a single readout circuit for every pixel. To construct a probability model of the pixel output requires the variance and the amplification (gain) of the pixel. The model can be used for maximum likelihood estimation (MLE) based fitting of camera output. To apply MLE fitting of point spread functions to super-resolution data requires a per-pixel camera model. The ``sCMOS Analysis`` plugin allows a per-pixel model to be constructed using the protocol described by :ref:`Huang <ref_huang_2013>` *et al* (2013).
 
 The first step is to take 60,000 frames of zero exposure from the sCMOS camera. These are used to compute the bias (offset from zero) and read-noise (variance) of each pixel. The bias is the mean pixel value and the variance is computed per-pixel. Note that a fixed value is added to the pixel output by the camera so that the noise can be correctly analysed using the unsigned output data. If no offset was added then any noise below zero could not be recorded.
 
@@ -669,7 +669,7 @@ When all the images have been processed the gain is computed for each pixel. The
 
 The plugin will then ask for a filename to save the per-pixel model. The model can be optionally cropped. The model is saved into the specified directory as a 3 frame stack of 32-bit float data representing the offset, variance and gain for each pixel. The slices are appropriately labelled. This model can be loaded by the ``Camera Model Manager`` plugin (see :numref:`%s <calibration_plugins:Camera Model Manager>`) for use in fitting of localisation data. It is recommended to set the model directory for all output models to the same directory and appropriately name the model after the camera.
 
-The ``sCMOS Analysis`` plugin will show summary histograms of the computed pixel offset, variance and gain. These histograms are equivalent to those shown in Huang *et al* (2013) supplementary figure 1.
+The ``sCMOS Analysis`` plugin will show summary histograms of the computed pixel offset, variance and gain. These histograms are equivalent to those shown in :ref:`Huang <ref_huang_2013>` *et al* (2013) supplementary figure 1.
 
 If the data was created using a simulation the plugin will load the simulation model from the file ``perPixelSimulation.tif``. Comparisons of the computed and known values of the offset, variance and gain are computed. A scatter plot is produced of the simulated against the measured values. The error for each pixel is computed as the measured value minus the simulated value and displayed in a histogram. The following analysis is performed:
 
@@ -706,7 +706,7 @@ The ``sCMOS Analysis`` plugin requires a large amount of data from a sCMOS camer
 
 The simulation can be run by holding the ``Shift`` key down when running the plugin. Note that the ``Shift`` must be pressed when the main ``ImageJ`` window is active. When run in simulation mode the plugin will create image data in a specified output directory. The plugin will prompt for the output directory.
 
-Each pixel is assigned a random offset, variance and gain. The offset is sampled from a Poisson distribution; the variance is sampled from an exponential distribution; and the gain is sampled from a Gaussian distribution. These distributions approximate the raw data shown in Huang *et al* (2013) supplementary figure 1. The defaults for the simulation are configured to approximately match that figure.
+Each pixel is assigned a random offset, variance and gain. The offset is sampled from a Poisson distribution; the variance is sampled from an exponential distribution; and the gain is sampled from a Gaussian distribution. These distributions approximate the raw data shown in :ref:`Huang <ref_huang_2013>` *et al* (2013) supplementary figure 1. The defaults for the simulation are configured to approximately match that figure.
 
 The simulation requires the following parameters:
 
@@ -780,7 +780,7 @@ The simulation for an EM-CCD camera adds an additional sample from a gamma distr
 
     PGG(x|g,\sigma^2) = \lfloor \mathcal{N}( \text{Gamma}(P(x), g), \sigma^2) \rceil
 
-The simulation requires sampling from multiple distributions. To increase the total number of samples the plugin will generate a given number of Poisson samples. For the EM-CCD simulation each Poisson sample is used to generate a number of gamma samples. For the CCD-simulation the amplification has no noise so no over-sampling is done. In either case amplification generates a real-valued sample from an integer-valued photo-electron count. Each amplified sample is combined with a configured number of noise samples. The final value is rounded and a histogram of counts generated. For reference a full convolution of the model probability mass/density functions (PMF/PDF) is performed and added to the histogram. The PG model is a convolution of the discrete Poisson PMF scaled by the gain and the continuous Gaussian PDF. The PGG model is a convolution of the Poisson-Gamma PDF and the Gaussian PDF. The Poisson-Gamma PDF can be expressed using a single analytical expression as per [Ulbrich & Isacoff, 2007] SI equation 3.
+The simulation requires sampling from multiple distributions. To increase the total number of samples the plugin will generate a given number of Poisson samples. For the EM-CCD simulation each Poisson sample is used to generate a number of gamma samples. For the CCD-simulation the amplification has no noise so no over-sampling is done. In either case amplification generates a real-valued sample from an integer-valued photo-electron count. Each amplified sample is combined with a configured number of noise samples. The final value is rounded and a histogram of counts generated. For reference a full convolution of the model probability mass/density functions (PMF/PDF) is performed and added to the histogram. The PG model is a convolution of the discrete Poisson PMF scaled by the gain and the continuous Gaussian PDF. The PGG model is a convolution of the Poisson-Gamma PDF and the Gaussian PDF. The Poisson-Gamma PDF can be expressed using a single analytical expression as per [:ref:`Ulbrich & Isacoff <ref_ulbrich_2007>`, 2007] SI equation 3.
 
 The cumulative distribution function (CDF) of the simulated data is easily computed by summing the simulation PMF. This is compared to the CDF of the selected camera model function. Since the camera model function is a continuous PDF the CDF must be computed. This is done using integration of the PDF over the range of each histogram bin. The two CDFs are plotted and the maximum and mean distance between the distributions is computed. A Kolmogorov Smirnov test provides a p-value for rejecting the null hypothesis that the two distributions can be considered equal.
 
@@ -872,7 +872,7 @@ The following table lists the camera model functions, their intended purpose and
 
    * - Poisson+Gaussian approximation
      - CCD/sCMOS
-     - Uses the saddle-point approximation of the Poisson-Gaussian convolution from [Snyder et al, 1995].
+     - Uses the saddle-point approximation of the Poisson-Gaussian convolution from [:ref:`Snyder <ref_snyder_1995>` et al, 1995].
 
        This model is used in the ``Peak Fit`` plugin for the ``MLE`` fit solver when not an EM-CCD camera.
 
@@ -888,7 +888,7 @@ The following table lists the camera model functions, their intended purpose and
 
    * - Poisson+Gamma+Gaussian approximation
      - EM-CCD
-     - Computes the Poisson-Gamma-Gaussian PDF. The convolution with the Gaussian is approximated using a partial convolution with a Gaussian at low photon counts where the Dirac function is significant. This method is provided as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7, 377-381.
+     - Computes the Poisson-Gamma-Gaussian PDF. The convolution with the Gaussian is approximated using a partial convolution with a Gaussian at low photon counts where the Dirac function is significant. This method is provided as Python source code within the supplementary information of the paper :ref:`Mortensen <ref_mortensen_2010>`, et al (2010) Nature Methods 7, 377-381.
 
        This model is used in the ``Peak Fit`` plugin for the ``MLE`` fit solver when an EM-CCD camera.
 
@@ -950,7 +950,7 @@ The cumulative distribution function (CDF) plot shows the CDF of the simulation 
 Camera Model Fisher Information Analysis
 ----------------------------------------
 
-Model the Fisher information from an EM-CCD camera, CCD or sCMOS camera. This plugin is based on the paper by [Chao *et al*, 2013].
+Model the Fisher information from an EM-CCD camera, CCD or sCMOS camera. This plugin is based on the paper by [:ref:`Chao <ref_chao_2013>` *et al*, 2013].
 
 The Fisher information is the amount of information an observable random variable :math:`X` carries about an unknown parameter :math:`\theta` of a distribution that models :math:`X`.
 
@@ -982,7 +982,7 @@ The noise coefficient is 1 for a hypothetical best scenario and :math:`0 \leq \a
 
 Chao *et al* provide the equation for a CCD detector as a convolution between a Poisson and a Gaussian with standard deviation :math:`\sigma` equal to the read noise of the CCD (SI equation 7). This is also applicable to single pixels on a sCMOS camera.
 
-Chao *et al* provide the equation for an EM-CCD detector as a convolution between a Poisson, a geometric branching distribution with mean gain :math:`m` and a Gaussian with standard deviation :math:`\sigma` equal to the read noise of the EM-CCD (SI equation 8; also [Chao *et al* (2012)] equation 13). For the purpose of this plugin the geometric branching distribution has been replaced by the Gamma distribution to use the Poisson-Gamma equation of [Ulbrich & Isacoff, 2007] SI equation 3. This models the EM process of a high number of multiplication stages as an exponential distribution instead of a branched chain geometric distribution. Note that unlike [Chao *et al* (2012)] equation 22 which models using a similar zero-modified exponential distribution (which prevents loss of electrons in the EM gain process) this is not an approximation for high gain only as the gain is not eliminated from the computation of :math:`\alpha`. Thus different gains can create different output Fisher information. However the model is only valid if the gain is significant compared to the read noise (which is to be expected for an EM-CCD) due to assumptions made during the computation for speed.
+Chao *et al* provide the equation for an EM-CCD detector as a convolution between a Poisson, a geometric branching distribution with mean gain :math:`m` and a Gaussian with standard deviation :math:`\sigma` equal to the read noise of the EM-CCD (SI equation 8; also [:ref:`Chao <ref_chao_2012>` *et al* (2012)] equation 13). For the purpose of this plugin the geometric branching distribution has been replaced by the Gamma distribution to use the Poisson-Gamma equation of [:ref:`Ulbrich & Isacoff <ref_ulbrich_2007>`, 2007] SI equation 3. This models the EM process of a high number of multiplication stages as an exponential distribution instead of a branched chain geometric distribution. Note that unlike [:ref:`Chao <ref_chao_2012>` *et al* (2012)] equation 22 which models using a similar zero-modified exponential distribution (which prevents loss of electrons in the EM gain process) this is not an approximation for high gain only as the gain is not eliminated from the computation of :math:`\alpha`. Thus different gains can create different output Fisher information. However the model is only valid if the gain is significant compared to the read noise (which is to be expected for an EM-CCD) due to assumptions made during the computation for speed.
 
 An additional model is provided for comparison purposes that models the Gaussian read noise as a Poisson distribution. The Poisson-Gaussian approximation is then a single Poisson distribution with mean equal to the sum of Poisson mean photon signal and the Gaussian read-noise variance. This model is used in the ``Peak Fit`` plugin for the ``LVM MLE`` and ``Fast MLE`` fit solver.
 
@@ -1034,7 +1034,7 @@ The plugin provides options to configure the range of photons :math:`v_{\theta}`
    * - Plot point
      - Choose the shape used to plot the evaluated points on the plot. An interpolated curve will be constructed between the computed points.
 
-The ``Camera Model Fisher Information Analysis`` plugin produces two output plots. The Fisher information plot shows the raw Fisher information for selected models (:numref:`Figure %s <fig_fisher_information_plot>`). The noise coefficient plot shows the noise coefficient for two selected models and demonstrates the relative performance of the noise model versus an uncorrupted Poisson signal. The example shown (:numref:`Figure %s <fig_noise_coefficient_plot>`) uses the same parameters as Chao *et al* (2013) figure S1. The CCD model noise coefficient drops to zero at low signal levels. In contrast the EM-CCD noise coefficient is close to 1 over a similar range of low signal levels. At high signal levels the CCD model is preferred and the EM-CCD model converges on the value of 0.5 which is the excess noise factor of 2 commonly referred to in the literature for an EM-CCD. This noise factor is used in the Mortensen formula for precision using an EM-CCD camera (see :numref:`localisation_precision:Localisation Precision`).
+The ``Camera Model Fisher Information Analysis`` plugin produces two output plots. The Fisher information plot shows the raw Fisher information for selected models (:numref:`Figure %s <fig_fisher_information_plot>`). The noise coefficient plot shows the noise coefficient for two selected models and demonstrates the relative performance of the noise model versus an uncorrupted Poisson signal. The example shown (:numref:`Figure %s <fig_noise_coefficient_plot>`) uses the same parameters as :ref:`Chao <ref_chao_2013>` *et al* (2013) figure S1. The CCD model noise coefficient drops to zero at low signal levels. In contrast the EM-CCD noise coefficient is close to 1 over a similar range of low signal levels. At high signal levels the CCD model is preferred and the EM-CCD model converges on the value of 0.5 which is the excess noise factor of 2 commonly referred to in the literature for an EM-CCD. This noise factor is used in the :ref:`Mortensen <ref_mortensen_2010>` formula for precision using an EM-CCD camera (see :numref:`localisation_precision:Localisation Precision`).
 
 .. _fig_fisher_information_plot:
 .. figure:: images/fisher_information_plot.jpg
@@ -1527,7 +1527,7 @@ The precision error has the effect of increasing the mean-squared displacement f
 Diffusion Depth of Field
 ------------------------
 
-The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF. This plugin is based on the methods described in the *Spot-On* paper by Hansen *et al* (2018).
+The ``Diffusion Depth of Field`` plugin will simulate molecule diffusion to generate a distribution of the probability of remaining within the DoF. This plugin is based on the methods described in the *Spot-On* paper by :ref:`Hansen <ref_hansen_2018>` *et al* (2018).
 
 
 Depth of Field Model

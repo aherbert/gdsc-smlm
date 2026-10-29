@@ -3,7 +3,7 @@
 PC PALM Plugins
 ===============
 
-The following plugins are used to analyse the auto-correlation of a set of localisations using Pair Correlation (PC) analysis. This can provide information on whether the localisations are randomly distributed or clustered ([Sengupta *et al*, 2011], [Sengupta *et al*, 2013], [Veatch *et al*, 2012], [Puchner, *et al*, 2013]).
+The following plugins are used to analyse the auto-correlation of a set of localisations using Pair Correlation (PC) analysis. This can provide information on whether the localisations are randomly distributed or clustered ([:ref:`Sengupta <ref_sengupta_2011>` *et al*, 2011], [:ref:`Sengupta <ref_sengupta_2013>` *et al*, 2013], [:ref:`Veatch <ref_veatch_2012>` *et al*, 2012], [:ref:`Puchner <ref_puchner_2013>`, *et al*, 2013]).
 
 The analysis uses a set of localisations assumed to represent single molecules or single fluorescent bursts. The data is compared to itself using auto-correlation and a curve is computed as a function of the distance from the centre of the localisation. A flat curve is indicative that the distribution of localisations is no different from a random distribution. Shaped curves can be fit using models that apply to various distributions of localisations (random; fluctuations; or an emulsion).
 
@@ -14,9 +14,9 @@ The plugins are described in the following sections using the order presented on
 
     The PC-PALM plugins should be considered experimental.
 
-    The analysis of localisations using PC-PALM is applicable to 2D data (Sengupta *et al*, 2011). The analysis methods do not accommodate structures that overlap in the z-dimension. The original papers performed analysis on 2D bound membrane proteins.
+    The analysis of localisations using PC-PALM is applicable to 2D data (:ref:`Sengupta <ref_sengupta_2011>` *et al*, 2011). The analysis methods do not accommodate structures that overlap in the z-dimension. The original papers performed analysis on 2D bound membrane proteins.
 
-    The analysis of colocated fluorescence by Puchner *et al* (2013) is not limited to 2D data but requires that clusters projected onto the 2D imaging plane are well separated.
+    The analysis of colocated fluorescence by :ref:`Puchner <ref_puchner_2013>` *et al* (2013) is not limited to 2D data but requires that clusters projected onto the 2D imaging plane are well separated.
 
     In either case the success of the method requires careful experimental setup, imaging conditions and localisation analysis. Development work on these plugins was halted when the methods were determined to be unsuitable for the imaging data of interest.
 
@@ -28,7 +28,7 @@ PC-PALM Molecules
 
 Prepare results held in memory for analysis using pair correlation methods. This plugin either simulates results or filters localisations from a results set to a set of coordinates with time and photon signal information. The molecules are drawn on an image to allow regions of the data to be selected for analysis.
 
-The pair correlation analysis assumes that the molecules are not moving. The input data should be localisation positions from a fixed sample. The use of fiducial markers to correct drift during image acquisition is recommended by Sengupta, *et al* (2013).
+The pair correlation analysis assumes that the molecules are not moving. The input data should be localisation positions from a fixed sample. The use of fiducial markers to correct drift during image acquisition is recommended by :ref:`Sengupta <ref_sengupta_2013>`, *et al* (2013).
 
 The output of the ``PC-PALM Molecules`` plugin is a set of molecule positions stored in memory. Each position should represent a single continuous on time of a fluorophore over one or more frames. Blinking events resulting in intervening dark frames should not be joined and must remain as separate molecules in the output molecule positions. This is because the model correlation functions used during analysis assume a blinking component for the same molecules.
 
@@ -111,9 +111,9 @@ The following parameters are available:
 Run Mode: PC-PALM
 ~~~~~~~~~~~~~~~~~
 
-This mode follows the PC-PALM protocol of Sengupta, *et al* (2013), steps 13 to 18. The localisation precision of each localisation is used to build a histogram of precision. The stored precision associated with the localisation is used if available or it is computed using the Mortensen formula ([Mortensen *et al*, 2010]). The histogram of the precision is fit using a skewed Gaussian function to determine the average positional uncertainty. The histogram and fitted function will be displayed.
+This mode follows the PC-PALM protocol of :ref:`Sengupta <ref_sengupta_2013>`, *et al* (2013), steps 13 to 18. The localisation precision of each localisation is used to build a histogram of precision. The stored precision associated with the localisation is used if available or it is computed using the Mortensen formula ([:ref:`Mortensen <ref_mortensen_2010>` *et al*, 2010]). The histogram of the precision is fit using a skewed Gaussian function to determine the average positional uncertainty. The histogram and fitted function will be displayed.
 
-The localisations are then traced using a distance of 2.5 times the average positional uncertainty with a time gap of successive frames. Joined localisations correspond to a single molecule that is active over multiple frames. The centroid of each molecule is computed using the intensity weighted coordinates of the localisations. The localisation precision of the molecule is computed using the weighted distance from the centroid and the weighted precision of each localisation (see formula 7b from Sengupta, *et al* (2013)).
+The localisations are then traced using a distance of 2.5 times the average positional uncertainty with a time gap of successive frames. Joined localisations correspond to a single molecule that is active over multiple frames. The centroid of each molecule is computed using the intensity weighted coordinates of the localisations. The localisation precision of the molecule is computed using the weighted distance from the centroid and the weighted precision of each localisation (see formula 7b from :ref:`Sengupta <ref_sengupta_2013>`, *et al* (2013)).
 
 The precision of each molecule is used to build a histogram of precision. Optionally this can include the localisations that are singles, i.e. they only occur in one frame and are not traced into a molecule. The precision histogram is again fit with a skewed Gaussian to determine the average positional uncertainty of each molecule and the results displayed. Note that the distribution of the precision of singles may be very different from the distribution of the precision of multi-frame molecules. This will be evident on the displayed histogram as a bimodal function. Thus including the singles may not create a good fit of the histogram using a skewed Gaussian.
 
@@ -241,7 +241,7 @@ The following parameters are available:
 PC-PALM Analysis
 ----------------
 
-Perform pair-correlation analysis in the frequency domain as per the paper by [Sengupta *et al*, 2011], [Sengupta, *et al*, 2013] to produce a *g(r)* auto-correlation curve. Analysis is based on the PC-PALM protocol of Sengupta, *et al* (2013), steps 19 to 20(A).
+Perform pair-correlation analysis in the frequency domain as per the paper by [:ref:`Sengupta <ref_sengupta_2011>` *et al*, 2011], [:ref:`Sengupta <ref_sengupta_2013>`, *et al*, 2013] to produce a *g(r)* auto-correlation curve. Analysis is based on the PC-PALM protocol of :ref:`Sengupta <ref_sengupta_2013>`, *et al* (2013), steps 19 to 20(A).
 
 Molecules representing distinct on bursts from a fluorophore over one or more frames must be prepared using ``PC-PALM Molecules``. That plugin will create an image of the molecule data. A rectangular region of interest (ROI) should be marked on the image. This is the region that will be extracted from the molecule dataset for analysis. When the plugin is run the image with the ROI must be selected otherwise the plugin will display an error.
 
@@ -356,7 +356,7 @@ The correlation curve is displayed (see :numref:`Figure %s <fig_pc_palm_gr_curve
 PC-PALM Spatial Analysis
 ------------------------
 
-Perform pair-correlation spatial analysis as per the paper by [Puchner, *et al*, 2013]. The method plots the molecule density around each localisation as a function of distance from the localisation.
+Perform pair-correlation spatial analysis as per the paper by [:ref:`Puchner <ref_puchner_2013>`, *et al*, 2013]. The method plots the molecule density around each localisation as a function of distance from the localisation.
 
 Molecules representing distinct on bursts from a fluorophore over one or more frames must be prepared using ``PC-PALM Molecules``. That plugin will create an image of the molecule data. A region of interest (ROI) can be marked on the image using any area ROI. This is the region that will be extracted from the molecule dataset for analysis. For example individual cells may be outlined using the freehand ROI tool. If no ROI is present then the plugin will analyse the entire dataset.
 
@@ -455,7 +455,7 @@ Once the combined curve has been loaded the plugin plots the combined correlatio
 Fitting the correlation curve
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The models available are described in [Sengupta *et al*, 2011] and [Veatch, *et al*, 2012]. The curve is modelled as:
+The models available are described in [:ref:`Sengupta <ref_sengupta_2011>` *et al*, 2011] and [:ref:`Veatch <ref_veatch_2012>`, *et al*, 2012]. The curve is modelled as:
 
 .. math::
 
@@ -477,7 +477,7 @@ In the event of no association between proteins the molecules are uniform and th
 
     g(r)^\text{peaks} = g(r)^\text{stoch} + 1
 
-If the proteins are distributed according to a micro-emulsion model the molecules will be randomly distributed within non-overlapping circles of a similar size (see Veatch *et al* (2012), figure 3). The micro-emulsion is modelled as:
+If the proteins are distributed according to a micro-emulsion model the molecules will be randomly distributed within non-overlapping circles of a similar size (see :ref:`Veatch <ref_veatch_2012>` *et al* (2012), figure 3). The micro-emulsion is modelled as:
 
 .. math::
 
@@ -623,7 +623,7 @@ PC-PALM Clusters
 
 Clusters localisations using a distance threshold and produces a histogram of cluster size. This can be fit using a zero-truncated binomial distribution (with parameters *n*, *p*) to calculate the size of the clusters (*n*) and the probability of seeing a fluorophore (*p*).
 
-The ``PC-PALM Clusters`` plugin is based on the paper by Puchner, *et al* (2013). The analysis aims to determine the stoichiometry of colocated molecules, i.e. are closer than the localisation precision. Note that this is in contrast to the ``PC-PALM Fitting`` plugin which models clusters of molecules over distances in excess of the localisation precision. The analysis is based on two assumptions:
+The ``PC-PALM Clusters`` plugin is based on the paper by :ref:`Puchner <ref_puchner_2013>`, *et al* (2013). The analysis aims to determine the stoichiometry of colocated molecules, i.e. are closer than the localisation precision. Note that this is in contrast to the ``PC-PALM Fitting`` plugin which models clusters of molecules over distances in excess of the localisation precision. The analysis is based on two assumptions:
 
 #. The activation, fluorescence and bleaching lifecycle for a fluorophore can be imaged without  interference from other fluorophores.
 #. The fluorophore activation probability is fixed.

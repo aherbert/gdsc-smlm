@@ -3,7 +3,7 @@
 Localisation Precision
 ======================
 
-The theoretical limit (precision) for fitting the signal (number of photons) and the XY coordinates (localisation) can be computed using the formulas of Thompson *et al* (2002) for the signal and Mortensen *et al* (2010) for the localisation.
+The theoretical limit (precision) for fitting the signal (number of photons) and the XY coordinates (localisation) can be computed using the formulas of :ref:`Thompson <ref_thompson_2002>` *et al* (2002) for the signal and :ref:`Mortensen <ref_mortensen_2010>` *et al* (2010) for the localisation.
 
 Note that these formulas are derived from modelling the point spread function (PSF) as a 2D Gaussian for both the simulation and the fitting. Given that the true data will have a PSF defined by the microscope parameters these formulas only approximate the precision that can be obtained on image data.
 
@@ -25,7 +25,7 @@ Note that the precision of the localisation is the square root of the variance.
 Signal Precision
 ----------------
 
-From Thompson *et al* (2002).
+From :ref:`Thompson <ref_thompson_2002>` *et al* (2002).
 
 .. math::
 
@@ -60,7 +60,7 @@ where
 Localisation Precision for Least Squares Fitting
 ------------------------------------------------
 
-From Mortensen *et al* (2010).
+From :ref:`Mortensen <ref_mortensen_2010>` *et al* (2010).
 
 .. math::
 
@@ -98,7 +98,7 @@ where
 Localisation Precision for Maximum Likelihood Fitting
 -----------------------------------------------------
 
-From Mortensen *et al* (2010).
+From :ref:`Mortensen <ref_mortensen_2010>` *et al* (2010).
 
 .. math::
 

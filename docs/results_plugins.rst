@@ -157,7 +157,7 @@ The following table settings can be configured:
    * - Table show precision
      - Show the localisation precision data associated with the results.
 
-       If the results do not have precision data it is computed using the Mortensen formula for least squares estimation (see :numref:`%s <localisation_precision:Localisation Precision for Least Squares Fitting>`). If this is not possible zero is shown.
+       If the results do not have precision data it is computed using the :ref:`Mortensen <ref_mortensen_2010>` formula for least squares estimation (see :numref:`%s <localisation_precision:Localisation Precision for Least Squares Fitting>`). If this is not possible zero is shown.
 
    * - Table precision
      - Configures the number of significant digits for display in the table. Set to zero to show the full precision of the data.
