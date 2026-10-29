@@ -109,7 +109,7 @@ public class KernelFilter extends BaseWeightedFilter {
   protected KernelFilter(KernelFilter source) {
     super(source);
     // Copy the kernel as it can be rotated in place
-    kernel = source.getKernal();
+    kernel = source.getKernel();
     // These are thread safe
     kw = source.kw;
     kh = source.kh;
@@ -293,38 +293,38 @@ public class KernelFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Gets the kernal.
+   * Gets the kernel.
    *
-   * @return the kernal
+   * @return the kernel
    */
-  public float[] getKernal() {
+  public float[] getKernel() {
     return kernel.clone();
   }
 
   /**
-   * Gets the kernal width.
+   * Gets the kernel width.
    *
-   * @return the kernal width
+   * @return the kernel width
    */
-  public int getKernalWidth() {
+  public int getKernelWidth() {
     return kw;
   }
 
   /**
-   * Gets the kernal height.
+   * Gets the kernel height.
    *
-   * @return the kernal height
+   * @return the kernel height
    */
-  public int getKernalHeight() {
+  public int getKernelHeight() {
     return kh;
   }
 
   /**
-   * Gets the kernal scale.
+   * Gets the kernel scale.
    *
-   * @return the kernal scale
+   * @return the kernel scale
    */
-  public double getKernalScale() {
+  public double getKernelScale() {
     return scale;
   }
 

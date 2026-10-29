@@ -390,7 +390,7 @@ public class FhtFilter {
    *
    * @return the kernel
    */
-  public float[] getKernal() {
+  public float[] getKernel() {
     return kernel.clone();
   }
 
@@ -399,7 +399,7 @@ public class FhtFilter {
    *
    * @return the kernel width
    */
-  public int getKernalWidth() {
+  public int getKernelWidth() {
     return kw;
   }
 
@@ -408,7 +408,7 @@ public class FhtFilter {
    *
    * @return the kernel height
    */
-  public int getKernalHeight() {
+  public int getKernelHeight() {
     return kh;
   }
 

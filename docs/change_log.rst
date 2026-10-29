@@ -31,6 +31,11 @@ Major release of GDSC SMLM.
   filter.
 * Update the :numref:`{name} <results_plugins:Trace Exporter>` plugin to allow combining all
   datasets to a combined export.
+* Rename the ``getKernal`` methods to ``getKernel`` in
+  ``uk.ac.sussex.gdsc.smlm.filters.KernelFilter`` (``getKernel``, ``getKernelWidth``,
+  ``getKernelHeight``, ``getKernelScale``) and ``uk.ac.sussex.gdsc.smlm.ij.filters.FhtFilter``
+  (``getKernel``, ``getKernelWidth``, ``getKernelHeight``). Code using the previous method names
+  must be updated.
 
 
 Version 2.0
