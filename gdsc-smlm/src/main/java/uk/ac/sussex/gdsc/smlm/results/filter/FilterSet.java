@@ -153,7 +153,7 @@ public class FilterSet {
   }
 
   private Filter createWeakest() {
-    if (!allSameType()) {
+    if (filters.isEmpty() || !allSameType()) {
       return null;
     }
 
