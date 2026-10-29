@@ -118,7 +118,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 /**
- * Use the PC-PALM protocol to prepare a set of localisations into molecules. This can be used for
+ * Use the PC-PALM protocol to prepare a set of localisations into molecules. This can be used
  * for clustering analysis.
  *
  * <p>See Sengupta, et al (2013). Quantifying spatial resolution in point-localisation

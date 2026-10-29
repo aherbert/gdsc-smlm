@@ -305,7 +305,7 @@ public class PsfDrift implements PlugIn {
       this.width = width;
       w2 = width * width;
       if (settings.useSampling) {
-        // TOOD: This could be updated to use an input RNG
+        // TODO: This could be updated to use an input RNG
         rng = UniformRandomProviders.create();
         poissonSampler = new PoissonSampler(rng, settings.photons);
       }

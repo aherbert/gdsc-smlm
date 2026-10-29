@@ -2074,7 +2074,7 @@ public class PeakFit implements PlugInFilter {
       helpKey = "peak-fit";
       gd.addMessage("Fit 2D Gaussian to identified maxima");
     }
-    // Note: Currently is is not useful to append "-series" when running for a series image
+    // Note: Currently it is not useful to append "-series" when running for a series image
     // source since the params in this dialog do not concern the image input.
     gd.addHelp(HelpUrls.getUrl(helpKey));
 
@@ -3401,7 +3401,7 @@ public class PeakFit implements PlugInFilter {
 
   /**
    * Adds the smart filter options. A single boolean field for the smart filter is added. A pop-up
-   * is added to allow the smart filter to to be configured.
+   * is added to allow the smart filter to be configured.
    *
    * @param gd the dialog
    * @param fitConfigurationProvider the fit configuration provider
@@ -3731,7 +3731,7 @@ public class PeakFit implements PlugInFilter {
       if (calibration.isScmos()) {
         msgs.add("The configuration file specifies a sCMOS camera. "
             + "This is only supported in the Peak Fit plugin.");
-        msgs.add("Continuing with the wizard will overwrite the current cofiguration.");
+        msgs.add("Continuing with the wizard will overwrite the current configuration.");
         msgs.add("Press Cancel to close the wizard. "
             + "You can then run Peak Fit with the current configuration.");
       } else {

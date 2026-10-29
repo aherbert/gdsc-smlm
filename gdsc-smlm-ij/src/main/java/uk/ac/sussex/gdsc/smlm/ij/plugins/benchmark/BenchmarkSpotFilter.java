@@ -369,7 +369,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     /** The fraction index where the recall achieves the fraction of the maximum.. */
     int fractionIndex;
 
-    /** The cumulutive histogram of the number of negatives preceding each positive. */
+    /** The cumulative histogram of the number of negatives preceding each positive. */
     double[][] cumul;
 
     /** The statistics of the number of negatives preceding each positive. */
@@ -612,7 +612,7 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @return the anti-score
      */
     double antiScore() {
-      // The use of partial scoring mimicks using multiple distance
+      // The use of partial scoring mimics using multiple distance
       // thresholds and taking an average of scores.
       // For a single experiment at a single distance threshold a spot can
       // match 0, 1 or more actual results. This would be:
@@ -2636,7 +2636,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    * Gets the prefix for the results table header. Contains all the standard header data about the
    * input results data.
    *
-   * @return the table prexix
+   * @return the table prefix
    */
   static String getTablePrefix() {
     return TABLE_PREFIX;

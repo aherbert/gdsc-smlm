@@ -210,7 +210,7 @@ public class TraceExporter implements PlugIn {
         + "Traces with larger gaps will be split. Set to zero to disable\n"
         + "(no splitting). Set to 1 to require continuous tracks.");
     gd.addNumericField("Max_jump", settings.maxJump, 0);
-    gd.addMessage("Specify localistion precision (wobble) to add");
+    gd.addMessage("Specify localisation precision (wobble) to add");
     gd.addNumericField("Wobble", settings.wobble, 0, 6, "nm");
     gd.addChoice("Format", Settings.FORMAT_NAMES, settings.format);
     gd.addCheckbox("Combined", settings.combined);

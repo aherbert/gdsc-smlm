@@ -3460,7 +3460,7 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private MultivariateGaussianMixtureExpectationMaximization
       fitGaussianMixture(final double[][] data, int sortDimension) {
-    // Get the unmixed multivariate Guassian.
+    // Get the unmixed multivariate Gaussian.
     MultivariateGaussianDistribution unmixed =
         MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
 
@@ -3488,7 +3488,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     ImageJUtils.log("1 component log-likelihood=%s. AIC=%s. BIC=%s", logLikelihood, aic, bic);
 
     // Fit a mixed component model.
-    // Increment the number of components up to a maximim or when the model does not improve.
+    // Increment the number of components up to a maximum or when the model does not improve.
     MultivariateGaussianMixtureExpectationMaximization mixed = null;
     for (int numComponents = 2; numComponents <= settings.maxComponents; numComponents++) {
       final MultivariateGaussianMixtureExpectationMaximization mixed2 =

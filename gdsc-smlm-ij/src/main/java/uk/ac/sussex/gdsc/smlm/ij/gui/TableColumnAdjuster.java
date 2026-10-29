@@ -228,7 +228,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
    * Get the preferred width for the specified cell
    */
   private int getCellDataWidth(int row, int column) {
-    // Inovke the renderer for the cell to calculate the preferred width
+    // Invoke the renderer for the cell to calculate the preferred width
 
     final TableCellRenderer cellRenderer = table.getCellRenderer(row, column);
     final Component c = table.prepareRenderer(cellRenderer, row, column);

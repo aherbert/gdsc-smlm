@@ -994,7 +994,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
   }
 
   // TODO - Extend the selection functionality so that selectionListeners can be added
-  // to receive notification whan items from the table are selected.
+  // to receive notification when items from the table are selected.
   // public void addSelectionListener()
   // {
   //

@@ -2816,13 +2816,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Gets the percentile.
    *
-   * @param histgram The cumulative histogram
+   * @param histogram The cumulative histogram
    * @param fraction The fraction
    * @return The value for the given fraction
    */
-  private static double getPercentile(double[][] histgram, double fraction) {
-    final double[] x = histgram[0];
-    final double[] y = histgram[1];
+  private static double getPercentile(double[][] histogram, double fraction) {
+    final double[] x = histogram[0];
+    final double[] y = histogram[1];
     return getXValue(x, y, fraction);
   }
 

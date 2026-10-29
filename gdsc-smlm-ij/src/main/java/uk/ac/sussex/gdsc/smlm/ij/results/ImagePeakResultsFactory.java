@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
  */
 public final class ImagePeakResultsFactory {
 
-  /** No insatnces. */
+  /** No instances. */
   private ImagePeakResultsFactory() {}
 
   /**

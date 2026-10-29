@@ -537,7 +537,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     }
 
     static int compare(DoubletResult r1, DoubletResult r2) {
-      // Makes the resutls easy to find in the table
+      // Makes the results easy to find in the table
       int result = r1.frame - r2.frame;
       if (result != 0) {
         return result;

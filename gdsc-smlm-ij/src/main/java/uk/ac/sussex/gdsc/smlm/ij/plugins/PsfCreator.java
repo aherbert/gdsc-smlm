@@ -3417,7 +3417,7 @@ public class PsfCreator implements PlugInFilter {
     }
 
     private int findIndex(double[] data, int start, double target) {
-      // Slide along looking for minimim to the target
+      // Slide along looking for minimum to the target
       int min = 0;
       int minD = data.length;
 
@@ -4477,11 +4477,11 @@ public class PsfCreator implements PlugInFilter {
   }
 
   /**
-   * Gets the constrast as the ratio between max and min value.
+   * Gets the contrast as the ratio between max and min value.
    *
    * @param min the min value
    * @param max the max value
-   * @return the constrast
+   * @return the contrast
    */
   @SuppressWarnings("unused")
   private static double[] getConstrast(float[] min, float[] max) {
@@ -4874,7 +4874,7 @@ public class PsfCreator implements PlugInFilter {
       // Note that this will only effect the interpolation in Z.
       // It will not effect how the function interpolates in XY.
       //
-      // If smoothing is off then the enlarged PSF has a much noiser signal
+      // If smoothing is off then the enlarged PSF has a much noisier signal
       if (settings.getSmoothStackSignal()) {
         // Smooth the intensity
         final double[] ssum = new Smoother().smooth(sum).getDSmooth();
@@ -4895,7 +4895,7 @@ public class PsfCreator implements PlugInFilter {
 
       final FloatStackTrivalueProvider value = new FloatStackTrivalueProvider(fval, rangex, rangey);
 
-      // The range x and y is controled to put the PSF in the middle of the slice
+      // The range x and y is controlled to put the PSF in the middle of the slice
       maxx = maxy = 2 * boxRadius * magnification + 1;
       // The output z-stack interpolates all points for each voxel so the middle may not be in the
       // centre of the stack

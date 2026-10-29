@@ -3868,7 +3868,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         IJ.error(TITLE,
             TextUtils.wrap(String.format(
                 "The results will generate data of %d values. " +
-                "This is amount of data is not supported (%.2fx capacity). " +
+                "This amount of data is not supported (%.2fx capacity). " +
                 "Please choose a different dataset with fewer points.",
                 arraySize, capacity), 80));
         //@formatter:on
@@ -3918,7 +3918,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       IJ.error(TITLE,
           TextUtils.wrap(String.format(
               "The results will generate data of %d values. " +
-              "This is amount of data is not supported (%.2fx capacity). " +
+              "This amount of data is not supported (%.2fx capacity). " +
               "Please choose a different rendering model with fewer vertices.",
               arraySize, capacity), 80));
       //@formatter:on

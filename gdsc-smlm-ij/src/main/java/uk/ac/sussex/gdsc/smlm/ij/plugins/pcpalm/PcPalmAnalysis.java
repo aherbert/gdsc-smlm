@@ -968,7 +968,7 @@ public class PcPalmAnalysis implements PlugIn {
    * Compute the radial average correlation function (gr).
    *
    * @param maxRadius the maximum radius to process (in pixels)
-   * @param nmPerPixel covert pixel distances to nm
+   * @param nmPerPixel convert pixel distances to nm
    * @param correlation auto-correlation
    * @return { distances[], gr[], gr_se[] }
    */

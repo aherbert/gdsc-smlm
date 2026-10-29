@@ -157,7 +157,7 @@ public class SaveLocalisations implements PlugIn {
   }
 
   /**
-   * Specify an int field that can be extracted from the results. No convertion is possible.
+   * Specify an int field that can be extracted from the results. No conversion is possible.
    */
   private static class IntField extends Field {
     final ToIntFunction<PeakResult> fun;

@@ -129,7 +129,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   private TextField textSearch;
   private TextField textBorder;
 
-  // For adjusting the selction sliders
+  // For adjusting the selection sliders
   private Scrollbar topNScrollBar;
   private Scrollbar selectScrollBar;
 

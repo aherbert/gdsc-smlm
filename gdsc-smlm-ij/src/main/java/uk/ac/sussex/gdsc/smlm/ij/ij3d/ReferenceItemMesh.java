@@ -177,7 +177,7 @@ public class ReferenceItemMesh extends ItemMesh {
     }
 
     // Reorder all things in the geometry: coordinates and colour.
-    // The normals, indices, strip counts are are unchanged.
+    // The normals, indices, strip counts are unchanged.
 
     int countPerObject = vertexCount * 3;
     final float[] oldCoords = ga.getCoordRefFloat();

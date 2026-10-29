@@ -116,7 +116,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
   private static final String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
 
-  /** Single instance holding log factorial values for resue. */
+  /** Single instance holding log factorial values for reuse. */
   private static final AtomicReference<SoftReference<LogFactorialCache>> LOG_FACTORIAL_CACHE =
       new AtomicReference<>(new SoftReference<>(null));
 
@@ -266,7 +266,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     gd = new NonBlockingExtendedGenericDialog(TITLE);
     gd.addHelp(HelpUrls.getUrl("camera-model-analysis"));
 
-    gd.addMessage("Simulate on-chip camera applification.");
+    gd.addMessage("Simulate on-chip camera amplification.");
 
     gd.addNumericField("Photons", settings.getPhotons(), 2);
     gd.addChoice("Mode", MODE, settings.getMode(), new OptionListener<Integer>() {
@@ -419,7 +419,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     // Create likelihood cumulative distribution
     final double[][] cdf2 = cumulativeDistribution(settings, cdf1, f);
 
-    // Compute Komolgorov distance
+    // Compute Kolmogorov distance
     final double[] distanceAndValue = getDistance(cdf1, cdf2);
     final double distance = distanceAndValue[0];
     final double value = distanceAndValue[1];
@@ -600,7 +600,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
         // added to the delta function at c=0 for the count at c=0.
         // This would fix the function.
 
-        // Should we use the Tubb's model which uses:
+        // Should we use the Tubbs' model which uses:
         // final double shape = count
         // final double scale = gain - 1 + 1 / shape
         // final double electrons = random.nextGamma(shape, scale) - 1

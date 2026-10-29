@@ -564,7 +564,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
     results.begin();
 
     // Perform the Gaussian fit
-    long ellapsed = 0;
+    long elapsed = 0;
 
     final FloatProcessor renderedImage =
         settings.showFit ? new FloatProcessor(ip.getWidth(), ip.getHeight()) : null;
@@ -603,7 +603,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
 
         final double[] peakParams = fitSingle(gf, region, regionBounds.width, regionBounds.height,
             newIndex, smoothData[maxIndices[n]]);
-        ellapsed += System.nanoTime() - time;
+        elapsed += System.nanoTime() - time;
 
         // Output fit result
         if (peakParams == null) {
@@ -672,7 +672,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
 
       final long time = System.nanoTime();
       final double[] params = fitMultiple(data, width, height, maxIndices, estimatedHeights);
-      ellapsed = System.nanoTime() - time;
+      elapsed = System.nanoTime() - time;
 
       if (params == null) {
         if (isLogProgress()) {
@@ -744,7 +744,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
     }
 
     if (isLogProgress()) {
-      IJ.log("Time = " + (ellapsed / 1000000.0) + "ms");
+      IJ.log("Time = " + (elapsed / 1000000.0) + "ms");
     }
   }
 

@@ -323,7 +323,7 @@ public final class Shape3DHelper {
       case HEXAGON:
         return 6;
       default:
-        throw new IllegalStateException("Unsupporterd rendering: " + rendering);
+        throw new IllegalStateException("Unsupported rendering: " + rendering);
     }
   }
 
@@ -338,7 +338,7 @@ public final class Shape3DHelper {
       case SUPER_HIGH_RES_SPHERE:
         return 3;
       default:
-        throw new IllegalStateException("Unsupporterd rendering: " + rendering);
+        throw new IllegalStateException("Unsupported rendering: " + rendering);
     }
   }
 

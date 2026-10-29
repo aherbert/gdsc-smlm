@@ -379,7 +379,7 @@ public class ClassificationMatchCalculator implements PlugIn {
 
     // Any integer is allowed as an index
     if ((long) stride * cats.size() > 1L << 32) {
-      IJ.error(TITLE, "Too many combinations of id and category to assigne unique labels");
+      IJ.error(TITLE, "Too many combinations of id and category to assign unique labels");
       return;
     }
 

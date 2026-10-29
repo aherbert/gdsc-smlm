@@ -1977,7 +1977,7 @@ public class Optics implements PlugIn {
             ImageJUtils.PRESERVE_X_MIN | ImageJUtils.PRESERVE_X_MAX | ImageJUtils.PRESERVE_Y_MAX,
             wo);
         // Attach listener if a new window or the lastCanvas is not set (i.e. first run)
-        // This allows attaching to windwos created by a previous run of OPTICS.
+        // This allows attaching to windows created by a previous run of OPTICS.
         final boolean firstRun = lastCanvas == null;
         if (wo.isNotEmpty() || firstRun) {
           // Detach this from a previous window

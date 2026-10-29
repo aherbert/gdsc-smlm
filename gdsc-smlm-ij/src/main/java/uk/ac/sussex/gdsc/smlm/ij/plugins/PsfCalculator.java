@@ -134,7 +134,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
     gd.addSlider("Numerical_Aperture (NA)", 1, 1.5, settings.getNumericalAperture());
     gd.addMessage(getAbbeLimitLabel());
     abbeLimitLabel = (Label) gd.getMessage();
-    gd.addMessage("*** Account for optical aberations and focus error ***");
+    gd.addMessage("*** Account for optical aberrations and focus error ***");
     gd.addSlider("Proportionality_factor", 1, 2.5, settings.getProportionalityFactor());
     gd.addCheckbox("Adjust_for_square_pixels", settings.getAdjustForSquarePixels());
 

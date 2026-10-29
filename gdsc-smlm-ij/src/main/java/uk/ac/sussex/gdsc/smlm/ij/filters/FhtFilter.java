@@ -386,27 +386,27 @@ public class FhtFilter {
   }
 
   /**
-   * Gets the kernal.
+   * Gets the kernel.
    *
-   * @return the kernal
+   * @return the kernel
    */
   public float[] getKernal() {
     return kernel.clone();
   }
 
   /**
-   * Gets the kernal width.
+   * Gets the kernel width.
    *
-   * @return the kernal width
+   * @return the kernel width
    */
   public int getKernalWidth() {
     return kw;
   }
 
   /**
-   * Gets the kernal height.
+   * Gets the kernel height.
    *
-   * @return the kernal height
+   * @return the kernel height
    */
   public int getKernalHeight() {
     return kh;

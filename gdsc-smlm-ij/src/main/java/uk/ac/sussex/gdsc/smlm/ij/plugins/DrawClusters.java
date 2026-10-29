@@ -423,7 +423,7 @@ public class DrawClusters implements PlugIn {
    * Get the maximum category in the trace.
    *
    * @param trace the trace
-   * @return the maximum catergory
+   * @return the maximum category
    */
   private static int maxCategory(Trace trace) {
     int max = 0;
@@ -515,7 +515,7 @@ public class DrawClusters implements PlugIn {
     gd.addSlider("Min_size", 1, 15, settings.minSize);
     gd.addSlider("Max_size", 0, 20, settings.maxSize);
     gd.addCheckbox("Traces (draw lines)", settings.drawLines);
-    gd.addMessage("Spline fit cannot be used when colouring per localisation (e.g. catagory)");
+    gd.addMessage("Spline fit cannot be used when colouring per localisation (e.g. category)");
     gd.addCheckbox("Spline_fit (traces only)", settings.splineFit);
     gd.addCheckbox("Use_stack_position", settings.useStackPosition);
     gd.addChoice("Colour", COLOURS, COLOURS[settings.colour]);

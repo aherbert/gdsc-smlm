@@ -143,7 +143,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  * same molecule being present in both super-resolution images due to splitting of repeat
  * localisations. The correction Q factor is the number of times a molecule is repeat localised
  * (i.e. average blinks per molecule). This code was developed using the Matlab examples provided by
- * Bernd Reiger.
+ * Bernd Rieger.
  */
 public class Fire implements PlugIn {
   private String pluginTitle = "Fourier Image REsolution (FIRE)";

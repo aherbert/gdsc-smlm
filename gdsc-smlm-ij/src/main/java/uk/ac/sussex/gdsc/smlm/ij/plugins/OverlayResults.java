@@ -184,7 +184,7 @@ public class OverlayResults implements PlugIn {
         } catch (final InterruptedException ex) {
           running = false;
           ImageJPluginLoggerHelper.getLogger(OverlayResults.class).log(Level.WARNING,
-              "Unexpected intteruption", ex);
+              "Unexpected interruption", ex);
           Thread.currentThread().interrupt();
         }
       }

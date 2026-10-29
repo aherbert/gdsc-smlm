@@ -1027,7 +1027,7 @@ public class TraceMolecules implements PlugIn {
   }
 
   /**
-   * Show the dialog, read with the provided predicate, load the results sepcified in the plugin
+   * Show the dialog, read with the provided predicate, load the results specified in the plugin
    * settings and add them to the list of all the results.
    *
    * @param gd the dialog

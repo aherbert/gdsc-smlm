@@ -950,11 +950,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   private static void plotFromCache() {
     // Build a list of curve stored in the cache
     final String[] names = new String[cache.size()];
-    final PoissonFisherInformationData[] datas = new PoissonFisherInformationData[cache.size()];
+    final PoissonFisherInformationData[] dataArray = new PoissonFisherInformationData[cache.size()];
     int count = 0;
     for (final Entry<FiKey, PoissonFisherInformationData> e : cache.entrySet()) {
       names[count] = e.getKey().toString();
-      datas[count] = e.getValue();
+      dataArray[count] = e.getValue();
       count++;
     }
 
@@ -969,7 +969,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     pointOption = gd.getNextChoiceIndex();
     cachePlot = names[index];
 
-    final PoissonFisherInformationData data = datas[index];
+    final PoissonFisherInformationData data = dataArray[index];
     final FiKey key = new FiKey(data);
 
     count = 0;

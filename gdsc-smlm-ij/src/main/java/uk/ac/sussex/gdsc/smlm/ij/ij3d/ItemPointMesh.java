@@ -151,7 +151,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
   }
 
   /**
-   * Check the indices contain a valid natural order of the specifed size.
+   * Check the indices contain a valid natural order of the specified size.
    *
    * @param indices the indices
    * @param size the size

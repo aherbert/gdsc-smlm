@@ -3147,7 +3147,7 @@ public class CreateData implements PlugIn {
           // System.out.printf("Noise = %g e-\n", totalNoiseInPhotons);
 
           // Ensure the new data is added before the intensity is updated. This avoids
-          // syncronisation clashes in the getIntensity(...) function.
+          // synchronisation clashes in the getIntensity(...) function.
           // Use the total photons rendered for signal filtering.
           // [0] = background (photons)
           // [1] = total noise (photons)
@@ -3456,11 +3456,11 @@ public class CreateData implements PlugIn {
    *
    * @param localisations the localisations
    * @param fromIndex start index
-   * @param timt time
+   * @param time time
    * @return the index (or -1)
    */
-  static int findIndexByTime(List<LocalisationModelSet> localisations, int fromIndex, int timt) {
-    while (fromIndex < localisations.size() && localisations.get(fromIndex).getTime() != timt) {
+  static int findIndexByTime(List<LocalisationModelSet> localisations, int fromIndex, int time) {
+    while (fromIndex < localisations.size() && localisations.get(fromIndex).getTime() != time) {
       fromIndex++;
     }
     return fromIndex >= localisations.size() ? -1 : fromIndex;

@@ -568,7 +568,7 @@ public class LoadLocalisations implements PlugIn {
           continue;
         }
         if (columns[i] == columns[j]) {
-          IJ.error(TITLE, "Duplicate indicies: " + columns[i]);
+          IJ.error(TITLE, "Duplicate indices: " + columns[i]);
           return false;
         }
       }

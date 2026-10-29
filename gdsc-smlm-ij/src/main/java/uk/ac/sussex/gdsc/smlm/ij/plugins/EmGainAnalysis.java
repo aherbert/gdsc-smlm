@@ -488,7 +488,7 @@ public class EmGainAnalysis implements PlugInFilter {
           for (int i = 0; i < point.length; i++) {
             if (point[i] < lower[i] || point[i] > upper[i]) {
               throw new ComputationException(
-                  String.format("Fit out of of estimated range: %s %f", paramNames[i], point[i]));
+                  String.format("Fit out of estimated range: %s %f", paramNames[i], point[i]));
             }
           }
           solution = optimum;

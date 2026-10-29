@@ -171,7 +171,7 @@ public class OverlayImage implements PlugIn {
       return;
     }
     if (imp2.getWidth() > imp.getWidth() && imp2.getHeight() > imp.getHeight()) {
-      IJ.error(TITLE, "Image to be added cannnot be larger than\n\"" + imp.getTitle() + "\".");
+      IJ.error(TITLE, "Image to be added cannot be larger than\n\"" + imp.getTitle() + "\".");
       return;
     }
 

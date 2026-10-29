@@ -773,7 +773,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     }
 
     // Reorder all things in the geometry: coordinates and colour.
-    // The normals, indices, strip counts are are unchanged.
+    // The normals, indices, strip counts are unchanged.
     // int objectSize = vertexCount;
 
     int countPerObject = vertexCount * 3;

@@ -624,16 +624,16 @@ public class Frc {
    */
   public FrcCurve calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2, double nmPerPixel) {
     // Allow a progress tracker to be input
-    final TrackProgress progess = getTrackProgress();
-    progess.incrementProgress(0);
-    progess.status("Calculating complex FFT images...");
+    final TrackProgress tracker = getTrackProgress();
+    tracker.incrementProgress(0);
+    tracker.status("Calculating complex FFT images...");
 
     // Pad images to the same size if different
     final int maxWidth = Math.max(ip1.getWidth(), ip2.getWidth());
     final int maxHeight = Math.max(ip1.getHeight(), ip2.getHeight());
     if (Math.max(maxWidth, maxHeight) > MAX_SIZE) {
-      progess.status("Error calculating FRC curve...");
-      progess.incrementProgress(1);
+      tracker.status("Error calculating FRC curve...");
+      tracker.incrementProgress(1);
       return null;
     }
     final int fieldOfView = Math.max(maxWidth, maxHeight);
@@ -673,7 +673,7 @@ public class Frc {
       }
       Fht.swapQuadrants(new FloatProcessor(size, size, re1));
       Fht.swapQuadrants(new FloatProcessor(size, size, im1));
-      progess.incrementProgress(THIRD);
+      tracker.incrementProgress(THIRD);
 
       ip2 = getSquareTaperedImage(ip2);
       mean2 = taperedImageMean;
@@ -694,7 +694,7 @@ public class Frc {
       }
       Fht.swapQuadrants(new FloatProcessor(size, size, re2));
       Fht.swapQuadrants(new FloatProcessor(size, size, im2));
-      progess.incrementProgress(THIRD);
+      tracker.incrementProgress(THIRD);
     } else {
       // Speed up by reusing the FHT object which performs pre-computation
 
@@ -704,7 +704,7 @@ public class Frc {
       FloatProcessor[] fft = fht1.getComplexTransformProcessors();
       re1 = (float[]) fft[0].getPixels();
       im1 = (float[]) fft[1].getPixels();
-      progess.incrementProgress(THIRD);
+      tracker.incrementProgress(THIRD);
 
       ip2 = getSquareTaperedImage(ip2);
       mean2 = taperedImageMean;
@@ -716,10 +716,10 @@ public class Frc {
       fft = fht2.getComplexTransformProcessors();
       re2 = (float[]) fft[0].getPixels();
       im2 = (float[]) fft[1].getPixels();
-      progess.incrementProgress(THIRD);
+      tracker.incrementProgress(THIRD);
     }
 
-    progess.status("Preparing FRC curve calculation...");
+    tracker.status("Preparing FRC curve calculation...");
 
     final int centre = size / 2;
 
@@ -744,7 +744,7 @@ public class Frc {
       computeMirroredFast(size, conjMult, absFft1, absFft2, re1, im1, re2, im2);
     }
 
-    progess.status("Calculating FRC curve...");
+    tracker.status("Calculating FRC curve...");
 
     final int max = centre - 1;
     final FrcCurveResult[] results = new FrcCurveResult[max];
@@ -797,8 +797,8 @@ public class Frc {
       }
     }
 
-    progess.incrementProgress(LAST_THIRD);
-    progess.status("Finished calculating FRC curve...");
+    tracker.incrementProgress(LAST_THIRD);
+    tracker.status("Finished calculating FRC curve...");
 
     return new FrcCurve(nmPerPixel, fieldOfView, mean1, mean2, results);
   }

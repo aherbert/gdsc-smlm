@@ -292,7 +292,7 @@ public class SmlmTools extends PlugInFrame {
   @SuppressWarnings("unused")
   private static int addPlugin(Map<String, String[]> plugins, boolean addSpacer, Panel mainPanel,
       GridBagLayout grid, String commandName, final String command, int col, int row) {
-    // Disect the ImageJ plugins.config string, e.g.:
+    // Dissect the ImageJ plugins.config string, e.g.:
     // Plugins>GDSC SMLM, "Peak Fit", uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit
 
     commandName = commandName.replaceAll("\"", "");
