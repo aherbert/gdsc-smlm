@@ -36,6 +36,12 @@ Major release of GDSC SMLM.
   ``getKernelHeight``, ``getKernelScale``) and ``uk.ac.sussex.gdsc.smlm.ij.filters.FhtFilter``
   (``getKernel``, ``getKernelWidth``, ``getKernelHeight``). Code using the previous method names
   must be updated.
+* Correct misspelt dialog labels in the :numref:`{name} <tools_plugins:Background Estimator>`
+  plugin (``Percentile``), the :numref:`{name} <analysis_plugins:Pulse Activation Analysis>`
+  plugin (``Molecules``) and the :numref:`{name} <results_plugins:3D Results Viewer>` plugin
+  (``Transparency``, and the ``Orthographic`` sort mode). Macros using the previous option keys
+  (``percential``, ``molcules_c1/2/3``, ``transparancy``) or the ``Othographic`` sort mode must be
+  updated.
 
 
 Version 2.0

@@ -2201,7 +2201,7 @@ public class PulseActivationAnalysis implements PlugIn {
     // Three channel
     for (int c = 0; c < 3; c++) {
       final String ch = "_C" + (c + 1);
-      gd.addNumericField("Molcules" + ch, settings.numberOfMolecules[c], 0);
+      gd.addNumericField("Molecules" + ch, settings.numberOfMolecules[c], 0);
       gd.addChoice("Distribution" + ch, distribution,
           distribution[settings.distribution[c].ordinal()]);
       gd.addNumericField("Precision_" + ch, settings.precision[c], 3);

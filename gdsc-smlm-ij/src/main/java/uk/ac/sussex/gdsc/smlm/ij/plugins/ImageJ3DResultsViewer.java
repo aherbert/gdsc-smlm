@@ -398,10 +398,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
             + "used first, e.g. 1,2,3 for zyx ascending, -3,-2,-1 for xyz descending.";
       }
     },
-    OTHOGRAPHIC {
+    ORTHOGRAPHIC {
       @Override
       public String getName() {
-        return "Othographic";
+        return "Orthographic";
       }
 
       @Override
@@ -1114,7 +1114,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // window then the settings will carried over from the last ImageJ session.
     final String window = (settings.getNewWindow()) ? "" : LAST_WINDOW.get();
     gd.addChoice("Window", titles, window);
-    gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency(), new OptionListener<Double>() {
+    gd.addSlider("Transparency", 0, 0.9, settings.getTransparency(), new OptionListener<Double>() {
       @Override
       public boolean collectOptions(Double value) {
         return collectOptions(false);
@@ -1126,7 +1126,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
 
       private boolean collectOptions(boolean silent) {
-        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Transparancy options", null);
+        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Transparency options", null);
         egd.addCheckbox("Support_dynamic_transparency", settings.getSupportDynamicTransparency());
         egd.addCheckbox("Enable_dynamic_transparency", settings.getEnableDynamicTransparency());
         egd.setSilent(silent);
@@ -1861,7 +1861,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       case PERSPECTIVE:
         sortPerspective(data);
         break;
-      case OTHOGRAPHIC:
+      case ORTHOGRAPHIC:
         sortOrthographic(data);
         break;
       case XYZ:

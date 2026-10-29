@@ -156,7 +156,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
       gd.addHelp(HelpUrls.getUrl("background-estimator"));
 
-      gd.addSlider("Percential", 0, 100, settings.percentile);
+      gd.addSlider("Percentile", 0, 100, settings.percentile);
 
       gd.addChoice("Noise_method", SettingsManager.getNoiseEstimatorMethodNames(),
           settings.noiseMethod.ordinal());
