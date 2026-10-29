@@ -4,10 +4,10 @@ Change Log
 .. contents::
    :local:
 
-Version 2.1
+Version 3.0
 -----------
 
-Minor release of GDSC SMLM.
+Major release of GDSC SMLM.
 
 * Update to GDSC IJ parent 4.0 based on pom-scijava 45.1.0 for compatibility with
   ImageJ/Fiji July 2026.
