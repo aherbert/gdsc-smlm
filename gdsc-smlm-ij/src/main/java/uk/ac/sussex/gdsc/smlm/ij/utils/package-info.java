@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides utility and adaptor classes for the <a href="https://imagej.nih.gov/ij/">ImageJ</a>
+ * Provides utility and adapter classes for the <a href="https://imagej.nih.gov/ij/">ImageJ</a>
  * library.
  *
  * @since 1.0
