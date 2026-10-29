@@ -1503,7 +1503,7 @@ Show an interactive 3D view of the localisations in a dataset using graphics car
     :align: center
     :figwidth: 80%
 
-    Main window of the 3D Results Viewer.
+    Example view of the 3D Results Viewer.
 
     The image shows fitting results for a simulated microtubule network. The image is sample dataset MT0.N1.LD from the Localisation Microscopy Challenge 2016. The image is coloured by z-depth using a red-yellow transition. The size of the localisations represents the localisation precision. Transparency is 30%. Selected localisations are outlined using a green 3D mesh.
 
