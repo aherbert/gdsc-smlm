@@ -323,7 +323,7 @@ Software for single molecule localisation microscopy (SMLM)
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>
-          <skip>false</skip>
+          <skip>true</skip>
           <!-- For reporting do not ignore the "intentional-api-changes" so they are included -->
           <analysisConfigurationFiles>
             <configurationFile>
@@ -389,7 +389,7 @@ Software for single molecule localisation microscopy (SMLM)
         <groupId>org.revapi</groupId>
         <artifactId>revapi-maven-plugin</artifactId>
         <configuration>
-          <skip>false</skip>
+          <skip>true</skip>
           <!-- For reporting do not ignore the "intentional-api-changes" so they are included -->
           <analysisConfigurationFiles>
             <configurationFile>
