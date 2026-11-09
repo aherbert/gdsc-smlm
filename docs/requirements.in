@@ -2,3 +2,4 @@
 # https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
 
 sphinx==9.2.0
+sphinx-rtd-theme==3.1.0
