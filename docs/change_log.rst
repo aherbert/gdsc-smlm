@@ -9,7 +9,7 @@ Version 3.0
 
 Major release of GDSC SMLM.
 
-* Update to GDSC IJ parent 4.0 based on pom-scijava 45.1.0 for compatibility with
+* Update to GDSC IJ parent 5.0 based on pom-scijava 45.1.0 for compatibility with
   ImageJ/Fiji July 2026.
 * Update to GDSC Core 2.3.
 * Update the tracing algorithm used by the :numref:`{name} <analysis_plugins:Trace Diffusion>`
