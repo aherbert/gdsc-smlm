@@ -45,6 +45,8 @@ Major release of GDSC SMLM.
 * Correct the misspelt ``Powell (adpator)`` search method name to ``Powell (adapter)`` (see
   :numref:`{name} <fitting_plugins:Powell (Adapter)>`). Macros using the previous search method
   name must be updated.
+* Fix ``uk.ac.sussex.gdsc.smlm.function.Factorial`` returning infinity for a fractional ``n``
+  above 140. The factorial is finite up to ``n`` = 170.624.
 
 
 Version 2.0

@@ -75,6 +75,8 @@ public final class Factorial {
       4.269068009004705E304, 7.257415615307999E306};
   /** Precomputed factor LANCZOS_G + 1.5. This has a value of 799 / 128. */
   private static final double LANCZOS_G_PLUS_1_5 = Gamma.LANCZOS_G + 1.5;
+  /** Threshold above which {@code (x + LANCZOS_G_PLUS_1_5)^(x + 1.5)} can overflow. */
+  private static final double LANCZOS_THRESHOLD = 140;
   /** sqrt(2 pi). */
   private static final double SQRT_TWO_PI = 2.506628274631000502415765284811;
 
@@ -173,6 +175,11 @@ public final class Factorial {
 
     final double xp1 = x + 1;
     final double y = x + LANCZOS_G_PLUS_1_5;
+    if (x > LANCZOS_THRESHOLD) {
+      // y^(x+1.5) overflows. Split the power so the result can be computed.
+      final double p = Math.pow(y, 0.5 * (x + 1.5));
+      return SQRT_TWO_PI / xp1 * p * (p * Math.exp(-y)) * Gamma.lanczos(xp1);
+    }
     return SQRT_TWO_PI / xp1 * Math.pow(y, x + 1.5) * Math.exp(-y) * Gamma.lanczos(xp1);
   }
 }

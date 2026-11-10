@@ -80,7 +80,8 @@ class FactorialTest {
   }
 
   /**
-   * Test the factorial of a fractional number against Commons Math gamma(1+n).
+   * Test the factorial of a fractional number against Commons Math gamma(1+n). Commons Math
+   * gamma(1+n) overflows for {@code n > 140}; Commons Numbers gamma(1+n) is used for these values.
    */
   @SeededTest
   void testFactorialDouble(RandomSeed seed) {
@@ -89,7 +90,14 @@ class FactorialTest {
         Predicates.doublesAreRelativelyClose(1e-14).or(Predicates.doublesAreEqual());
     for (int i = 0; i < 100; i++) {
       final double n = rng.nextDouble() * 180;
-      final double expected = n < 1.5 ? 1 / (1 + Gamma.invGamma1pm1(n)) : Gamma.gamma(1 + n);
+      final double expected;
+      if (n < 1.5) {
+        expected = 1 / (1 + Gamma.invGamma1pm1(n));
+      } else if (n <= 140) {
+        expected = Gamma.gamma(1 + n);
+      } else {
+        expected = org.apache.commons.numbers.gamma.Gamma.value(1 + n);
+      }
       TestAssertions.assertTest(expected, Factorial.value(n), tol, () -> Double.toString(n));
     }
   }
